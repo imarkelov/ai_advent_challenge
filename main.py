@@ -10,6 +10,7 @@ BASE_URL_ENV = "GPUSTACK_BASE_URL"  # endpoint kept out of source (public repo)
 MODEL = "qwen3.8-27b"  # exact id confirmed by Task 3 probe
 KEY_ENV = "GPUSTACK_API_KEY"
 TIMEOUT = 120
+SYSTEM_PROMPT = "You are a helpful assistant. Always respond in English."  # force answer language
 
 PAGE = """<!doctype html>
 <html lang="ru">
@@ -126,7 +127,7 @@ def run_cli():
             continue
         history.append({"role": "user", "content": raw})
         try:
-            reply = send_messages(history)
+            reply = send_messages([{"role": "system", "content": SYSTEM_PROMPT}] + history)
         except Exception as e:
             print("Ошибка: " + str(e), file=sys.stderr)
             continue
@@ -170,7 +171,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         HISTORY.append({"role": "user", "content": message})
         try:
-            reply = send_messages(HISTORY)
+            reply = send_messages([{"role": "system", "content": SYSTEM_PROMPT}] + HISTORY)
         except Exception as e:
             self._send_json(502, {"error": str(e)})
             return
