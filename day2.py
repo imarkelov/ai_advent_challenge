@@ -4,6 +4,12 @@ Level 0: raw question            - no control
 Level 1: + explicit format rule  - prompt engineering only
 Level 2: + length limit          - max_tokens API parameter
 Level 3: + stop sequence         - stop API parameter
+
+The model (qwen3.8-27b) is a REASONING model: the response message carries a
+separate `reasoning` field (chain of thought) alongside `content` (final
+answer, may be null). `max_tokens` and `stop` apply to the WHOLE generation
+including reasoning, so a small token budget can be spent entirely on the
+reasoning phase and leave `content` null (finish_reason="length").
 """
 import json
 import os
@@ -31,7 +37,9 @@ def get_base_url():
 
 
 def ask(messages, max_tokens=None, stop=None):
-    """Send one chat request and return (content, usage). Raises RuntimeError on any failure."""
+    """Send one chat request and return (content, usage, finish_reason, reasoning_preview).
+    content may be None (reasoning model spent the whole budget on reasoning).
+    Raises RuntimeError on any failure."""
     key = os.environ.get(KEY_ENV, "").strip()
     base = get_base_url()
     payload = {"model": MODEL, "messages": messages}
@@ -60,12 +68,13 @@ def ask(messages, max_tokens=None, stop=None):
 
     try:
         data = json.loads(raw)
-        content = data["choices"][0]["message"]["content"]
+        choice = data["choices"][0]
+        content = choice["message"]["content"]  # may be None for a reasoning model - valid
     except (json.JSONDecodeError, KeyError, IndexError, TypeError):
         raise RuntimeError(f"malformed response: {raw[:500]}") from None
-    if not content:
-        raise RuntimeError(f"malformed response: {raw[:500]}")
-    return content, data.get("usage")
+    finish_reason = choice.get("finish_reason")
+    reasoning_preview = (choice["message"].get("reasoning") or "")[:120]
+    return content, data.get("usage"), finish_reason, reasoning_preview
 
 
 LEVELS = [
@@ -80,9 +89,9 @@ LEVELS = [
         "params": {},
     },
     {
-        "name": "+ format + length limit",
+        "name": "+ format + length limit (max_tokens=300)",
         "messages": lambda: [{"role": "user", "content": QUESTION + "\n" + FORMAT_RULE + "\nДлина ответа: не более 30 слов."}],
-        "params": {"max_tokens": 40},
+        "params": {"max_tokens": 300},
     },
     {
         "name": "+ format + stop sequence",
@@ -98,12 +107,19 @@ def run_demo():
     for i, level in enumerate(LEVELS, 1):
         print(f"=== {i}. {level['name']} ===")
         try:
-            content, usage = ask(level["messages"](), **level["params"])
-            print(f"Длина: {len(content)} символов")
-            if usage:
-                print(f"Токенов: {usage.get('completion_tokens')}")
-            preview = content[:160].replace("\n", " ⏎ ")
-            print(f"Превью: {preview}")
+            content, usage, finish_reason, reasoning_preview = ask(level["messages"](), **level["params"])
+            if content is None:
+                print("Контент: null — бюджет генерации ушёл в фазу рассуждений (reasoning)")
+                if reasoning_preview:
+                    print(f"reasoning (фрагмент): {reasoning_preview}")
+                print(f"finish_reason: {finish_reason}")
+            else:
+                print(f"Длина: {len(content)} символов")
+                if usage:
+                    print(f"Токенов: {usage.get('completion_tokens')}")
+                print(f"finish_reason: {finish_reason}")
+                preview = content[:160].replace("\n", " ⏎ ")
+                print(f"Превью: {preview}")
         except Exception as e:
             print(f"Ошибка: {e}")
         if i < len(LEVELS):
