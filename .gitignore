@@ -1,0 +1,20 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OpenCode / агенты
+.omo/
+.opencode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary / misc
+*.tmp
+*.log
+
+# Python
+__pycache__/
+*.pyc
