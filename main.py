@@ -6,7 +6,7 @@ import sys
 import urllib.error
 import urllib.request
 
-BASE_URL = "**********"
+BASE_URL_ENV = "GPUSTACK_BASE_URL"  # endpoint kept out of source (public repo)
 MODEL = "qwen3.8-27b"  # exact id confirmed by Task 3 probe
 KEY_ENV = "GPUSTACK_API_KEY"
 TIMEOUT = 120
@@ -71,12 +71,17 @@ def fail(msg):
     sys.exit(1)
 
 
+def get_base_url():
+    return os.environ[BASE_URL_ENV].strip().rstrip("/")
+
+
 def send_messages(messages):
     """Send chat history to the LLM and return the reply text. Raises on any failure."""
     key = os.environ.get(KEY_ENV, "").strip()
+    base = get_base_url()
     body = json.dumps({"model": MODEL, "messages": messages}).encode("utf-8")
     req = urllib.request.Request(
-        f"{BASE_URL}/chat/completions",
+        f"{base}/chat/completions",
         data=body,
         headers={
             "Authorization": f"Bearer {key}",
@@ -91,7 +96,7 @@ def send_messages(messages):
         detail = e.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"HTTP {e.code}: {detail}") from e
     except urllib.error.URLError as e:
-        raise RuntimeError(f"Network error calling {BASE_URL}: {e.reason}") from e
+        raise RuntimeError(f"Network error calling {base}: {e.reason}") from e
 
     try:
         content = json.loads(raw)["choices"][0]["message"]["content"]
@@ -189,6 +194,8 @@ def main():
     key = os.environ.get(KEY_ENV, "").strip()
     if not key:
         fail(f"{KEY_ENV} is not set. Export it first, e.g. $env:{KEY_ENV}='...' (PowerShell)")
+    if not os.environ.get(BASE_URL_ENV, "").strip():
+        fail(f"{BASE_URL_ENV} is not set. Export it first, e.g. $env:{BASE_URL_ENV}='https://your-host/v1' (PowerShell)")
     if len(sys.argv) > 1 and sys.argv[1] == "web":
         run_web()
     else:
