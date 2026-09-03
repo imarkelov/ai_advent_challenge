@@ -26,7 +26,7 @@ import urllib.request
 BASE_URL_ENV = "GPUSTACK_BASE_URL"  # endpoint kept out of source (public repo)
 KEY_ENV = "GPUSTACK_API_KEY"
 MODEL = "qwen3.8-27b"  # exact id confirmed on Day 1
-TIMEOUT = 120
+TIMEOUT = 300  # uncontrolled generation (Level 1) can exceed 120s
 
 QUESTION = "Расскажи подробно об истории вычислительной техники: от абака до нейросетей."
 FORMAT_RULE = "Ответь строго в формате: Ответ: <твой ответ в одну строку>."
