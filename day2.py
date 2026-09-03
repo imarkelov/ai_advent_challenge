@@ -1,15 +1,20 @@
-"""Day2: the SAME question sent to the LLM at 4 progressive control levels.
+"""Day2: the SAME question sent to the LLM at 5 progressive control levels.
 
-Level 0: raw question            - no control
-Level 1: + explicit format rule  - prompt engineering only
-Level 2: + length limit          - max_tokens API parameter
-Level 3: + stop sequence         - stop API parameter
+Level 1: no control              - raw question, baseline
+Level 2: + explicit format rule  - prompt engineering only
+Level 3: + length limit          - prompt instruction; max_tokens=1000 is only a
+                                   generous backstop (reasoning tokens count
+                                   into the same budget)
+Level 4: + completion condition  - explicit instruction in the prompt
+Level 5: + API stop sequence     - stop=["[STOP]"] API parameter, a pitfall demo
 
 The model (qwen3.8-27b) is a REASONING model: the response message carries a
 separate `reasoning` field (chain of thought) alongside `content` (final
 answer, may be null). `max_tokens` and `stop` apply to the WHOLE generation
-including reasoning, so a small token budget can be spent entirely on the
-reasoning phase and leave `content` null (finish_reason="length").
+stream (reasoning + content): a small max_tokens can be consumed entirely by
+the reasoning phase and leave `content` null (finish_reason="length"), and
+since the model quotes the user prompt verbatim inside its reasoning, a
+prompt-quoted stop marker can fire early - that is the lesson of level 5.
 """
 import json
 import os
@@ -79,22 +84,27 @@ def ask(messages, max_tokens=None, stop=None):
 
 LEVELS = [
     {
-        "name": "no control",
+        "name": "no control (базовый запрос)",
         "messages": lambda: [{"role": "user", "content": QUESTION}],
         "params": {},
     },
     {
-        "name": "+ explicit format",
+        "name": "+ явный формат ответа",
         "messages": lambda: [{"role": "user", "content": QUESTION + "\n" + FORMAT_RULE}],
         "params": {},
     },
     {
-        "name": "+ format + length limit (max_tokens=300)",
+        "name": "+ формат + лимит длины (≤30 слов)",
         "messages": lambda: [{"role": "user", "content": QUESTION + "\n" + FORMAT_RULE + "\nДлина ответа: не более 30 слов."}],
-        "params": {"max_tokens": 300},
+        "params": {"max_tokens": 1000},
     },
     {
-        "name": "+ format + stop sequence",
+        "name": "+ условие завершения (явная инструкция)",
+        "messages": lambda: [{"role": "user", "content": QUESTION + "\nОтветь ровно одним предложением и сразу остановись."}],
+        "params": {},
+    },
+    {
+        "name": '+ API stop-последовательность (stop=["[STOP]"])',
         "messages": lambda: [{"role": "user", "content": QUESTION + "\n" + FORMAT_RULE + "\nЗаверши ответ маркером [STOP]."}],
         "params": {"stop": ["[STOP]"]},
     },
