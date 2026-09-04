@@ -82,7 +82,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self._send_json(404, {"error": "not found"})
 
     def do_POST(self):
-        if self.path != "/v1/chat/completions":
+        if self.path not in ("/v1/chat/completions", "/chat/completions"):
             self._send_json(404, {"error": "not found"})
             return
 
