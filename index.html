@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Киностудия — мульти-ролевые LLM-запросы</title>
+<title>AI платформа — мульти-ролевые LLM-запросы</title>
 <style>
   /* ============================================================
      Дизайн-система «Киностудия»: тёмная киноэкранная тема.
@@ -440,22 +440,9 @@
   .synth h3 { font-size: 16.5px; font-weight: 700; }
   .synth .answer { font-size: 14.5px; }
 
-  /* ---------- Подвал ---------- */
-  .foot {
-    margin-top: 26px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px 24px;
-    font-size: 12px;
-    color: var(--text-faint);
-  }
-
   /* ---------- Адаптив ---------- */
   @media (min-width: 720px) {
-    .settings-grid { grid-template-columns: repeat(3, 1fr); }
+    .settings-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (min-width: 700px) {
     .role-grid { grid-template-columns: repeat(3, 1fr); }
@@ -481,7 +468,7 @@
     <p class="overline">День 3 · AI Advent Challenge</p>
     <div class="masthead-row">
       <span class="mark" aria-hidden="true"></span>
-      <h1>Киностудия</h1>
+      <h1>AI платформа</h1>
     </div>
     <p class="lede">Одна киноидея уходит трём ролям — кинокритику, режиссёру и сценаристу — параллельно, а главный промт (оркестратор) сводит их ответы в единый синтез.</p>
     <div class="meta">
@@ -513,8 +500,12 @@
         <label for="model">Модель</label>
         <input id="model" type="text" spellcheck="false" autocomplete="off" placeholder="название модели">
       </div>
+      <div class="field">
+        <label for="proxy">CORS прокси (необязательно)</label>
+        <input id="proxy" type="text" spellcheck="false" autocomplete="off" placeholder="префикс: https://proxy.example.com/?url=">
+      </div>
     </div>
-    <p class="settings-note">Значения сохраняются в localStorage этого браузера и подставляются при следующем открытии страницы. Ключ никуда не отправляется, кроме запросов к вашему API.</p>
+    <p class="settings-note">Значения сохраняются в localStorage этого браузера и подставляются при следующем открытии страницы. Ключ никуда не отправляется, кроме запросов к вашему API. CORS-прокси нужен, если API не отдаёт заголовки CORS: запрос уйдёт как «прокси + URL запроса в кодировке URL».</p>
   </section>
 
   <section class="panel" aria-labelledby="h-idea">
@@ -577,11 +568,6 @@
       <div class="answer" id="synthBody"></div>
     </article>
   </section>
-
-  <footer class="foot">
-    <span>Без сервера и сборки: один HTML-файл, браузер сам ходит в OpenAI-совместимый API.</span>
-    <span>API-ключ хранится только в localStorage.</span>
-  </footer>
 
 </div>
 
@@ -664,12 +650,13 @@ const DEFAULTS = {
 const LS_KEYS = {
   apiUrl: 'kinostudiya.apiUrl',
   apiKey: 'kinostudiya.apiKey',
-  model: 'kinostudiya.model'
+  model: 'kinostudiya.model',
+  proxy: 'kinostudiya.proxy'
 };
 
 const TIMEOUT_MS = 120000;
 
-const NETWORK_HINT = 'Сетевая ошибка или CORS: сервер не разрешил запрос из браузера. Проверьте API URL/ключ или откройте страницу через http-хост.';
+const NETWORK_HINT = 'Сетевая ошибка или CORS: браузер заблокировал запрос (API не вернул заголовки CORS, preflight-запрос отклонён). Укажите CORS-прокси в настройках или используйте API, разрешающий запросы из браузера.';
 
 const $ = (id) => document.getElementById(id);
 
@@ -677,6 +664,7 @@ const els = {
   apiUrl: $('apiUrl'),
   apiKey: $('apiKey'),
   model: $('model'),
+  proxy: $('proxy'),
   idea: $('idea'),
   sendBtn: $('sendBtn'),
   formHint: $('formHint'),
@@ -699,7 +687,7 @@ let busy = false;
 /* ================= Настройки (localStorage) ================= */
 
 function loadSettings() {
-  ['apiUrl', 'apiKey', 'model'].forEach(function (k) {
+  ['apiUrl', 'apiKey', 'model', 'proxy'].forEach(function (k) {
     let v = DEFAULTS[k];
     try {
       const saved = localStorage.getItem(LS_KEYS[k]);
@@ -719,7 +707,7 @@ function saveSetting(k) {
   }
 }
 
-['apiUrl', 'apiKey', 'model'].forEach(function (k) {
+['apiUrl', 'apiKey', 'model', 'proxy'].forEach(function (k) {
   els[k].addEventListener('input', function () {
     saveSetting(k);
   });
@@ -756,13 +744,18 @@ function readSettings() {
   return {
     apiUrl: els.apiUrl.value.trim(),
     apiKey: els.apiKey.value.trim(),
-    model: els.model.value.trim()
+    model: els.model.value.trim(),
+    proxy: els.proxy.value.trim()
   };
 }
 
 /* ================= Запрос к API ================= */
 async function callLLM(settings, messages) {
   const base = settings.apiUrl.replace(/\/+$/, '');
+  const target = base + '/chat/completions';
+  const url = settings.proxy
+    ? settings.proxy.replace(/\/+$/, '') + encodeURIComponent(target)
+    : target;
   const controller = new AbortController();
   const timer = setTimeout(function () {
     controller.abort();
@@ -772,7 +765,7 @@ async function callLLM(settings, messages) {
   try {
     const headers = { 'Content-Type': 'application/json' };
     if (settings.apiKey) headers['Authorization'] = 'Bearer ' + settings.apiKey;
-    res = await fetch(base + '/chat/completions', {
+      res = await fetch(url, {
       method: 'POST',
       headers: headers,
       body: JSON.stringify({ model: settings.model, messages: messages }),
