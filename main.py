@@ -1,4 +1,4 @@
-"""Day3: локальный CORS-прокси.
+"""Day5: локальный CORS-прокси с роутингом model→API-key.
 
 Браузер (index.html) -> этот сервер (127.0.0.1:8000) -> GPustack (OpenAI-совместимый API).
 CORS блокирует прямой запрос браузера к GPustack (preflight 405), поэтому запросы
@@ -20,6 +20,12 @@ TIMEOUT = 300
 
 BASE_URL_ENV = "GPUSTACK_BASE_URL"  # endpoint kept out of source (public repo)
 KEY_ENV = "GPUSTACK_API_KEY"
+DEFAULT_KEY_ENV = "GPUSTACK_API_KEY"
+MODEL_KEY_ENV = {
+    "qwen3.8-27b": "GPUSTACK_API_KEY",
+    "deepseek-v4-flash": "GPUSTACK_KEY_DEEPSEEK",
+    "glm-5.3-flash": "GPUSTACK_KEY_GLM",
+}
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 INDEX_HTML = os.path.join(HERE, "index.html")
@@ -92,13 +98,24 @@ class Handler(http.server.BaseHTTPRequestHandler):
             )
             return
 
-        key = os.environ.get(KEY_ENV, "").strip()
         base = os.environ[BASE_URL_ENV].strip().rstrip("/")
         try:
             length = int(self.headers.get("Content-Length") or 0)
             body = self.rfile.read(length)
         except (ValueError, OSError):
             self._send_json(400, {"error": "invalid request body"})
+            return
+
+        # Ключ выбирается по модели из body (ключи на стороне GPustack scoped по модели).
+        # В upstream уходят ИСХОДНЫЕ байты body — без ре-сериализации.
+        try:
+            model = json.loads(body).get("model")
+        except (ValueError, AttributeError, TypeError):
+            model = None
+        env_var = MODEL_KEY_ENV.get(model, DEFAULT_KEY_ENV)
+        key = os.environ.get(env_var, "").strip()
+        if not key:
+            self._send_json(401, {"error": f"no API key for model '{model}' (env: {env_var})"})
             return
 
         req = urllib.request.Request(
