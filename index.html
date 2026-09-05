@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
-<title>Температура</title>
+<title>Версии моделей</title>
 <style>
   /* ============================================================
       Дизайн-система day3: тёмная тема, уголь + янтарный акцент.
@@ -254,7 +254,7 @@
     line-height: 1.5;
   }
 
-  /* ---------- Задача ---------- */
+  /* ---------- Промпт ---------- */
   textarea {
     width: 100%;
     min-height: 132px;
@@ -346,7 +346,7 @@
     border-color: var(--border);
   }
 
-  /* ---------- Карточки температур ---------- */
+  /* ---------- Карточки моделей ---------- */
   .strat-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -443,6 +443,42 @@
   }
   .answer.is-error { color: var(--err); }
 
+  /* ---------- Метрик-строка в карточке (day5) ---------- */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+  }
+  .metric { min-width: 0; }
+  .metric .m-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .metric .m-value {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  @media (max-width: 640px) {
+    .metrics-row { grid-template-columns: repeat(2, 1fr); }
+  }
+
   /* ---------- Судья (панель-вердикт) ---------- */
   .synth {
     margin-top: 14px;
@@ -461,9 +497,57 @@
     color: var(--text-faint);
   }
 
+  .legend {
+    margin: 12px 0 0;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .disclaimer {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--text-faint);
+    line-height: 1.5;
+  }
+
+  /* ---------- Таблица метрик (day5) ---------- */
+  .metrics-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 13px;
+  }
+  .metrics-table th, .metrics-table td {
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .metrics-table th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    background: var(--inset);
+  }
+  .metrics-table td {
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+  }
+  .metrics-table td.m-name {
+    font-family: var(--font-body);
+    color: var(--text);
+    font-weight: 600;
+  }
+  .metrics-table td.m-cost { color: var(--text-faint); }
+  .table-scroll { overflow-x: auto; }
+
   /* ---------- Адаптив ---------- */
   @media (min-width: 720px) {
-    .settings-grid { grid-template-columns: repeat(3, 1fr); }
+    .settings-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (min-width: 700px) {
     .strat-grid { grid-template-columns: repeat(3, 1fr); }
@@ -612,70 +696,24 @@
     justify-content: space-between;
     gap: 12px;
   }
-
-  /* ---------- Температура: чекбоксы ---------- */
-  .temp-block { margin-top: 16px; }
-  .temp-label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: .02em;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-  }
-  .temp-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .temp-check {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    font-family: var(--font-mono);
-    font-size: 12.5px;
-    color: var(--text-dim);
-    cursor: pointer;
-    white-space: nowrap;
-    user-select: none;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-s);
-    padding: 7px 12px;
-    background: var(--surface-2);
-    transition: border-color var(--dur) ease, color var(--dur) ease, background var(--dur) ease, box-shadow var(--dur) ease;
-  }
-  .temp-check:hover { border-color: var(--border-strong); color: var(--text); }
-  .temp-check input { margin: 0; cursor: pointer; accent-color: var(--accent); }
-  .temp-check.checked {
-    color: var(--accent-ink);
-    background: var(--accent);
-    border-color: rgba(0, 0, 0, .25);
-    box-shadow: 0 2px 12px rgba(224, 166, 60, .22);
-  }
-  .temp-check.checked input { accent-color: var(--accent-ink); }
-  .temp-note {
-    margin: 10px 0 0;
-    font-size: 12px;
-    color: var(--text-faint);
-  }
 </style>
 </head>
 <body>
 <div class="page">
   <header class="masthead">
-    <p class="overline">День 4 · AI Advent Challenge</p>
+    <p class="overline">День 5 · AI Advent Challenge</p>
     <div class="masthead-row">
       <span class="mark" aria-hidden="true"></span>
-      <h1>Температура</h1>
+      <h1>Версии моделей</h1>
       <button type="button" class="ghost" id="settingsBtn">Настройки</button>
     </div>
-    <p class="lede">Один и тот же запрос — при трёх температурах. Температура задаёт случайность: 0 — максимально детерминированно, 1.2 — максимально разнообразно. Запустите все три и сравните ответы.</p>
+    <p class="lede">Один и тот же промпт — на трёх моделях разного масштаба. Промпт вводишь сам; у всех T=0. Замеряем: время, TTFT, TPS, токены. Стоимость: N/A (self-hosted). Классификация слабая/средняя/сильная — авторская, не бенчмарк.</p>
     <div class="meta">
-      <span class="chip"><b>3</b> температуры</span>
-      <span class="chip"><b>1</b> запрос на температуру</span>
-      <span class="chip">LLM-судья</span>
-      <span class="chip">таймаут <b>300 с</b></span>
+      <span class="chip"><b>3</b> модели</span>
+      <span class="chip"><b>1</b> промпт на все</span>
+      <span class="chip">T=0</span>
+      <span class="chip">слепой LLM-судья</span>
+      <span class="chip">таймаут <b>300 с</b> / модель</span>
     </div>
   </header>
   <div class="proxy-status" id="proxyStatus" role="status"><i class="dot"></i><span id="proxyStatusText">проверка прокси…</span></div>
@@ -695,10 +733,6 @@
     </div>
     <div class="settings-grid">
       <div class="field">
-        <label for="model">Модель</label>
-        <input id="model" type="text" spellcheck="false" autocomplete="off" placeholder="qwen3.8-27b">
-      </div>
-      <div class="field">
         <label for="apiUrl">API URL</label>
         <input id="apiUrl" type="text" spellcheck="false" autocomplete="off" placeholder="http://127.0.0.1:8000/v1">
       </div>
@@ -707,24 +741,16 @@
         <input id="timeoutMs" type="text" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="300000">
       </div>
     </div>
-    <p class="settings-note">Значения сохраняются в localStorage (adv31.model / adv31.apiUrl / adv31.timeout) и подставляются при следующем открытии страницы. Запросы уходят на «API URL» + /chat/completions через локальный прокси: python main.py.</p>
+    <p class="settings-note">Значения сохраняются в localStorage (adv31.apiUrl / adv31.timeout) и подставляются при следующем открытии страницы. Запросы уходят на «API URL» + /chat/completions через локальный прокси: python main.py — прокси подставляет ключи по модели (model→key).</p>
   </section>
 
   <section class="panel" aria-labelledby="h-task">
     <div class="section-head">
-      <p class="overline">01 · Задача</p>
-      <h2 id="h-task">Условие задачи</h2>
+      <p class="overline">01 · Промпт</p>
+      <h2 id="h-task">Условие</h2>
     </div>
-    <textarea id="problem" placeholder="Введите запрос"></textarea>
-    <div class="temp-block">
-      <span class="temp-label" id="tempLabel">Температура</span>
-      <div class="temp-row" role="radiogroup" aria-labelledby="tempLabel">
-        <label class="temp-check"><input type="checkbox" id="temp-0" value="0">temperature 0</label>
-        <label class="temp-check"><input type="checkbox" id="temp-07" value="0.7">temperature 0.7</label>
-        <label class="temp-check"><input type="checkbox" id="temp-12" value="1.2">temperature 1.2</label>
-      </div>
-      <p class="temp-note">Можно выбрать несколько температур: запрос уйдёт с каждой. Выбор запоминается.</p>
-    </div>
+    <textarea id="problem" placeholder="Введи запрос — он уйдёт на все 3 модели"></textarea>
+    <p class="card-desc" style="margin: 10px 0 0;">Один промпт на все модели. T=0. По одному запуску на модель.</p>
     <div class="task-actions">
       <div class="action-left">
         <button type="button" class="send" id="runBtn" disabled>Запустить</button>
@@ -734,109 +760,171 @@
 
   <div class="section-head" style="margin: 6px 2px 12px;">
     <p class="overline">02 · Ответы</p>
-    <h2>Ответы при разной температуре</h2>
+    <h2>Ответы трёх моделей</h2>
   </div>
   <div class="strat-grid">
-    <article class="role-card" id="card-t0" style="--i:0">
+    <article class="role-card" id="card-weak" style="--i:0">
       <span class="bar" aria-hidden="true"></span>
       <header class="card-head">
-        <h3><span class="role-idx">T=0</span>Детерминированно</h3>
-        <span class="status st-idle" id="status-t0"><i class="dot"></i><span class="st-text">ожидает</span></span>
+        <h3><span class="role-idx">А</span>Слабая · deepseek-v4-flash</h3>
+        <span class="status st-idle" id="status-weak"><i class="dot"></i><span class="st-text">ожидает</span></span>
       </header>
-      <p class="card-desc">Тот же запрос возвращает тот же ответ — без случайности.</p>
       <div class="card-tools">
-        <span class="elapsed" id="elapsed-t0"></span>
-        <span class="fr-badge" id="fr-t0" hidden></span>
+        <span class="elapsed" id="elapsed-weak"></span>
+        <span class="fr-badge" id="fr-weak" hidden></span>
       </div>
-      <div class="answer" id="answer-t0"></div>
+      <div class="answer" id="answer-weak"></div>
+      <div class="metrics-row">
+        <span class="metric"><span class="m-label">Время, с</span><span class="m-value" id="m-weak-time">—</span></span>
+        <span class="metric"><span class="m-label">TTFT, мс</span><span class="m-value" id="m-weak-ttft">—</span></span>
+        <span class="metric"><span class="m-label">TPS</span><span class="m-value" id="m-weak-tps">—</span></span>
+        <span class="metric"><span class="m-label">Токены P/C/Σ</span><span class="m-value" id="m-weak-tok">—</span></span>
+        <span class="metric"><span class="m-label">Стоимость</span><span class="m-value">N/A (self-hosted)</span></span>
+      </div>
     </article>
 
-    <article class="role-card" id="card-t07" style="--i:1">
+    <article class="role-card" id="card-mid" style="--i:1">
       <span class="bar" aria-hidden="true"></span>
       <header class="card-head">
-        <h3><span class="role-idx">T=0.7</span>Сбалансированно</h3>
-        <span class="status st-idle" id="status-t07"><i class="dot"></i><span class="st-text">ожидает</span></span>
+        <h3><span class="role-idx">Б</span>Средняя · glm-5.3-flash</h3>
+        <span class="status st-idle" id="status-mid"><i class="dot"></i><span class="st-text">ожидает</span></span>
       </header>
-      <p class="card-desc">Сбалансированная случайность: вариативность при сохранении смысла. Дефолт.</p>
       <div class="card-tools">
-        <span class="elapsed" id="elapsed-t07"></span>
-        <span class="fr-badge" id="fr-t07" hidden></span>
+        <span class="elapsed" id="elapsed-mid"></span>
+        <span class="fr-badge" id="fr-mid" hidden></span>
       </div>
-      <div class="answer" id="answer-t07"></div>
+      <div class="answer" id="answer-mid"></div>
+      <div class="metrics-row">
+        <span class="metric"><span class="m-label">Время, с</span><span class="m-value" id="m-mid-time">—</span></span>
+        <span class="metric"><span class="m-label">TTFT, мс</span><span class="m-value" id="m-mid-ttft">—</span></span>
+        <span class="metric"><span class="m-label">TPS</span><span class="m-value" id="m-mid-tps">—</span></span>
+        <span class="metric"><span class="m-label">Токены P/C/Σ</span><span class="m-value" id="m-mid-tok">—</span></span>
+        <span class="metric"><span class="m-label">Стоимость</span><span class="m-value">N/A (self-hosted)</span></span>
+      </div>
     </article>
 
-    <article class="role-card" id="card-t12" style="--i:2">
+    <article class="role-card" id="card-strong" style="--i:2">
       <span class="bar" aria-hidden="true"></span>
       <header class="card-head">
-        <h3><span class="role-idx">T=1.2</span>Разнообразно</h3>
-        <span class="status st-idle" id="status-t12"><i class="dot"></i><span class="st-text">ожидает</span></span>
+        <h3><span class="role-idx">В</span>Сильная · qwen3.8-27b</h3>
+        <span class="status st-idle" id="status-strong"><i class="dot"></i><span class="st-text">ожидает</span></span>
       </header>
-      <p class="card-desc">Максимально разнообразно: заметно разные варианты на один и тот же запрос.</p>
       <div class="card-tools">
-        <span class="elapsed" id="elapsed-t12"></span>
-        <span class="fr-badge" id="fr-t12" hidden></span>
+        <span class="elapsed" id="elapsed-strong"></span>
+        <span class="fr-badge" id="fr-strong" hidden></span>
       </div>
-      <div class="answer" id="answer-t12"></div>
+      <div class="answer" id="answer-strong"></div>
+      <div class="metrics-row">
+        <span class="metric"><span class="m-label">Время, с</span><span class="m-value" id="m-strong-time">—</span></span>
+        <span class="metric"><span class="m-label">TTFT, мс</span><span class="m-value" id="m-strong-ttft">—</span></span>
+        <span class="metric"><span class="m-label">TPS</span><span class="m-value" id="m-strong-tps">—</span></span>
+        <span class="metric"><span class="m-label">Токены P/C/Σ</span><span class="m-value" id="m-strong-tok">—</span></span>
+        <span class="metric"><span class="m-label">Стоимость</span><span class="m-value">N/A (self-hosted)</span></span>
+      </div>
     </article>
   </div>
+
+  <section class="panel" aria-labelledby="h-metrics">
+    <div class="section-head">
+      <p class="overline">03 · Метрики</p>
+      <h2 id="h-metrics">Метрики моделей</h2>
+    </div>
+    <div class="table-scroll">
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>Модель</th>
+            <th>Тир</th>
+            <th>Время, с</th>
+            <th>TTFT, мс</th>
+            <th>TPS</th>
+            <th>Токены P/C/Σ</th>
+            <th>Стоимость</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="m-name">deepseek-v4-flash</td>
+            <td>Слабая</td>
+            <td id="mt-weak-time">—</td>
+            <td id="mt-weak-ttft">—</td>
+            <td id="mt-weak-tps">—</td>
+            <td id="mt-weak-tok">—</td>
+            <td class="m-cost">N/A (self-hosted)</td>
+          </tr>
+          <tr>
+            <td class="m-name">glm-5.3-flash</td>
+            <td>Средняя</td>
+            <td id="mt-mid-time">—</td>
+            <td id="mt-mid-ttft">—</td>
+            <td id="mt-mid-tps">—</td>
+            <td id="mt-mid-tok">—</td>
+            <td class="m-cost">N/A (self-hosted)</td>
+          </tr>
+          <tr>
+            <td class="m-name">qwen3.8-27b</td>
+            <td>Сильная</td>
+            <td id="mt-strong-time">—</td>
+            <td id="mt-strong-ttft">—</td>
+            <td id="mt-strong-tps">—</td>
+            <td id="mt-strong-tok">—</td>
+            <td class="m-cost">N/A (self-hosted)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
   <section class="panel" aria-labelledby="h-judge">
     <div class="section-head section-head-row">
       <div>
-        <p class="overline">03 · Сравнение</p>
-        <h2 id="h-judge">LLM-судья</h2>
+        <p class="overline">04 · Сравнение</p>
+        <h2 id="h-judge">Слепой LLM-судья</h2>
       </div>
       <button type="button" class="send" id="judgeBtn" disabled>Сравнить</button>
     </div>
-    <p class="card-desc" style="margin-top: 0;">Как только накопится два и более ответа, судья (температура 0) оценит точность, креативность и разнообразие и выдаст общий вывод.</p>
+    <p class="card-desc" style="margin-top: 12px;">Как только накопится два и более ответа, судья (T=0) оценит правильность, полноту и полезность каждого анонимного ответа и выберет лучший.</p>
     <article class="synth" id="judgePanel">
       <header class="card-head">
-        <h3>Сравнение ответов</h3>
+        <h3>Сравнение ответов (слепое)</h3>
         <span class="status st-wait" id="judgeStatus"><i class="dot"></i><span class="st-text">нужно минимум 2 ответа</span></span>
       </header>
       <div class="answer" id="judgeBody"></div>
     </article>
+    <p class="legend">А = Слабая · deepseek-v4-flash · Б = Средняя · glm-5.3-flash · В = Сильная · qwen3.8-27b</p>
+    <p class="disclaimer">Судья — qwen3.8-27b (одна из сравниваемых моделей); ответы к судье уходят анонимно</p>
   </section>
     </main>
   </div>
 <script>
 'use strict';
-
 /* ================= Константы ================= */
-const TEMPS = [
-  { id: 't0', label: '0', value: 0 },
-  { id: 't07', label: '0.7', value: 0.7 },
-  { id: 't12', label: '1.2', value: 1.2 }
+const MODELS = [
+  { id: 'weak', tier: 'Слабая', model: 'deepseek-v4-flash', letter: 'А' },
+  { id: 'mid', tier: 'Средняя', model: 'glm-5.3-flash', letter: 'Б' },
+  { id: 'strong', tier: 'Сильная', model: 'qwen3.8-27b', letter: 'В' }
 ];
 
+const JUDGE_MODEL = 'qwen3.8-27b';
+
 const DEFAULTS = {
-  model: 'qwen3.8-27b',
   apiUrl: 'http://127.0.0.1:8000/v1',
   timeout: '300000'
 };
 
 const LS_KEYS = {
-  model: 'adv31.model',
   apiUrl: 'adv31.apiUrl',
   timeout: 'adv31.timeout'
 };
 
-const LS_TEMP = 'adv4.temp';
-const LS_HISTORY = 'adv4.history';
+const LS_HISTORY = 'adv5.history';
 const HISTORY_MAX = 50;
 
-const JUDGE_SYSTEM = 'Ты — судья. Тебе дадут ОДНУ и ту же задачу и несколько ответов на неё, полученных с разной температурой. Оцени ответы по трём критериям. Секция «Точность»: насколько каждый ответ точен и корректен относительно задачи. Секция «Креативность»: насколько каждый ответ креативен и оригинален, содержит ли нестандартные ходы. Секция «Разнообразие»: насколько каждый ответ отличается от остальных (0–10) и одна общая строка про разнообразие набора в целом. Секция «Общий вывод»: краткий итог — какая температура дала лучший ответ для этой задачи и почему.';
+const JUDGE_SYSTEM = 'Ты — судья. Тебе дадут ОДНУ и ту же задачу и несколько анонимных ответов (А, Б, В), полученных разными языковыми моделями. Не угадывай, какая модель дала какой ответ. Оцени каждый ответ по трём критериям. Секция «Правильность»: насколько ответ корректен относительно задачи. Секция «Полнота»: насколько ответ полон и раскрывает задачу. Секция «Полезность»: насколько ответ полезен на практике. Секция «Общий вывод»: какой ответ (А/Б/В) лучший для этой задачи и почему.';
 
 const $ = (id) => document.getElementById(id);
 
-const tempBoxes = {
-  t0: $('temp-0'),
-  t07: $('temp-07'),
-  t12: $('temp-12')
-};
-
 const els = {
-  model: $('model'),
   apiUrl: $('apiUrl'),
   timeoutMs: $('timeoutMs'),
   settingsPanel: $('settingsPanel'),
@@ -854,40 +942,50 @@ const els = {
 };
 
 const cards = {};
-TEMPS.forEach(function (t) {
-  cards[t.id] = {
-    id: t.id,
-    label: t.label,
-    value: t.value,
-    root: $('card-' + t.id),
-    status: $('status-' + t.id),
-    elapsed: $('elapsed-' + t.id),
-    fr: $('fr-' + t.id),
-    answer: $('answer-' + t.id)
+MODELS.forEach(function (m) {
+  cards[m.id] = {
+    id: m.id,
+    tier: m.tier,
+    model: m.model,
+    letter: m.letter,
+    root: $('card-' + m.id),
+    status: $('status-' + m.id),
+    elapsed: $('elapsed-' + m.id),
+    fr: $('fr-' + m.id),
+    answer: $('answer-' + m.id),
+    mTime: $('m-' + m.id + '-time'),
+    mTtft: $('m-' + m.id + '-ttft'),
+    mTps: $('m-' + m.id + '-tps'),
+    mTok: $('m-' + m.id + '-tok'),
+    mtTime: $('mt-' + m.id + '-time'),
+    mtTtft: $('mt-' + m.id + '-ttft'),
+    mtTps: $('mt-' + m.id + '-tps'),
+    mtTok: $('mt-' + m.id + '-tok')
   };
 });
 
 let inFlight = false;
 let judgeRunning = false;
-let filled = { t0: null, t07: null, t12: null };
+let filled = { weak: null, mid: null, strong: null };
+let metrics = { weak: null, mid: null, strong: null };
 let history = [];
 
 /* ================= QA-лог вызовов (in-memory) ================= */
 window.__calls = [];
-function logCall(strategy, status, finishReason, elapsedMs, ts, temperature) {
+function logCall(strategy, status, finishReason, elapsedMs, ts, model) {
   window.__calls.push({
     strategy: strategy,
     status: status,
     finish_reason: finishReason,
     elapsedMs: elapsedMs,
     ts: ts,
-    temperature: temperature
+    model: model
   });
 }
 
 /* ================= Настройки (localStorage) ================= */
 function loadSettings() {
-  ['model', 'apiUrl', 'timeoutMs'].forEach(function (k) {
+  ['apiUrl', 'timeoutMs'].forEach(function (k) {
     const keyName = k === 'timeoutMs' ? 'timeout' : k;
     let v = DEFAULTS[keyName];
     try {
@@ -912,7 +1010,6 @@ function saveSetting(k) {
 function getSettings() {
   const t = parseInt(els.timeoutMs.value, 10);
   return {
-    model: els.model.value.trim(),
     apiUrl: els.apiUrl.value.trim().replace(/\/+$/, ''),
     timeout: (Number.isFinite(t) && t > 0) ? t : 300000
   };
@@ -957,29 +1054,26 @@ function setFrBadge(el, finishReason) {
   }
 }
 
-function getProblem() {
+function getPrompt() {
   return els.problem.value.trim();
 }
 
-function getSelectedTemps() {
-  const out = [];
-  for (let i = 0; i < TEMPS.length; i++) {
-    if (tempBoxes[TEMPS[i].id].checked) out.push(TEMPS[i]);
-  }
-  return out;
+function shortPrompt(text) {
+  const s = (text || '').replace(/\s+/g, ' ').trim();
+  return s.length > 70 ? s.slice(0, 70) + '…' : s;
 }
 
 function filledCount() {
-  return TEMPS.filter(function (t) { return filled[t.id] !== null; }).length;
+  return MODELS.filter(function (m) { return filled[m.id] !== null; }).length;
 }
 
 function syncButtons() {
-  els.runBtn.disabled = inFlight || judgeRunning || getProblem().length === 0 || getSelectedTemps().length === 0;
+  els.runBtn.disabled = inFlight || judgeRunning || getPrompt().length === 0;
   els.judgeBtn.disabled = judgeRunning || inFlight || filledCount() < 2;
 }
 
-function setCardRunning(k, on) {
-  const c = cards[k];
+function setCardRunning(id, on) {
+  const c = cards[id];
   c.root.classList.toggle('is-running', on);
   if (on) {
     c.root.classList.remove('is-done', 'is-error');
@@ -989,26 +1083,13 @@ function setCardRunning(k, on) {
     c.fr.hidden = true;
     c.elapsed.textContent = '';
   }
-  syncButtons();
-}
-
-function stopCardRunning(k) {
-  cards[k].root.classList.remove('is-running');
-  syncButtons();
 }
 
 /* ================= ЕДИНСТВЕННАЯ точка отправки ================= */
-async function callLLM(messages, controller, label, temperature, histTextOverride) {
+async function callLLM(messages, controller, label, model) {
   const settings = getSettings();
   if (!controller) controller = new AbortController();
-  const histEntry = {
-    t: Date.now(),
-    type: label || '?',
-    text: histTextOverride || historyTextFor(messages),
-    ok: false
-  };
-  history.unshift(histEntry);
-  history = history.slice(0, HISTORY_MAX);
+  const t0 = Date.now();
   const timer = setTimeout(function () {
     controller.abort();
   }, settings.timeout);
@@ -1018,22 +1099,20 @@ async function callLLM(messages, controller, label, temperature, histTextOverrid
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: settings.model,
+        model: model,
         messages: messages,
         chat_template_kwargs: { enable_thinking: false },
-        temperature: temperature
+        temperature: 0
       }),
       signal: controller.signal
     });
   } catch (err) {
-    histEntry.ok = false;
-    persistHistory();
+    clearTimeout(timer);
     if (err && err.name === 'AbortError') throw err; // таймаут — решит вызывающий
     checkProxy().catch(function () {}); // сетевая ошибка — обновить индикатор
     throw new Error('прокси недоступен: ' + (err && err.message ? err.message : String(err)));
-  } finally {
-    clearTimeout(timer);
   }
+  clearTimeout(timer);
 
   let raw = '';
   try {
@@ -1044,8 +1123,6 @@ async function callLLM(messages, controller, label, temperature, histTextOverrid
 
   if (!res.ok) {
     const detail = raw.replace(/\s+/g, ' ').trim().slice(0, 200);
-    histEntry.ok = false;
-    persistHistory();
     throw new Error('HTTP ' + res.status + (detail ? ': ' + detail : ''));
   }
 
@@ -1053,8 +1130,6 @@ async function callLLM(messages, controller, label, temperature, histTextOverrid
   try {
     data = JSON.parse(raw);
   } catch (e) {
-    histEntry.ok = false;
-    persistHistory();
     throw new Error('прокси вернул не-JSON: ' + (raw.slice(0, 200) || 'пустой ответ'));
   }
 
@@ -1062,24 +1137,97 @@ async function callLLM(messages, controller, label, temperature, histTextOverrid
   const msg = choice && choice.message;
   const content = msg ? msg.content : null;
   const finishReason = choice ? choice.finish_reason : null;
-  histEntry.ok = true;
-  persistHistory();
+  const u = data.usage || {};
   if (content === null || content === undefined || content === '') {
-    return { content: null, finish_reason: finishReason }; // null-content — НЕ ошибка
+    return { content: null, finish_reason: finishReason, elapsedMs: Date.now() - t0, ttftMs: u.time_to_first_token_ms ?? null, tps: u.tokens_per_second ?? null, tokens: { p: u.prompt_tokens ?? null, c: u.completion_tokens ?? null, t: u.total_tokens ?? null } }; // null-content — НЕ ошибка
   }
-  return { content: content, finish_reason: finishReason };
+  return { content: content, finish_reason: finishReason, elapsedMs: Date.now() - t0, ttftMs: u.time_to_first_token_ms ?? null, tps: u.tokens_per_second ?? null, tokens: { p: u.prompt_tokens ?? null, c: u.completion_tokens ?? null, t: u.total_tokens ?? null } };
 }
-/* ================= Запуск температуры ================= */
+
+/* ================= Формат метрик ================= */
+function fmtMs(v) {
+  return (v === null || v === undefined || v === 0) ? '—' : v + ' мс';
+}
+
+function fmtTps(v) {
+  return (v === null || v === undefined || v === 0) ? '—' : String(v);
+}
+
+function fmtTokens(tok) {
+  if (!tok) return '—';
+  if (tok.p === null && tok.c === null && tok.t === null) return '—';
+  return (tok.p ?? '—') + '/' + (tok.c ?? '—') + '/' + (tok.t ?? '—');
+}
+
+function fillMetricsRow(m) {
+  const c = cards[m.id];
+  const met = metrics[m.id];
+  if (!met) return;
+  c.mTime.textContent = fmtSeconds(met.elapsedMs);
+  c.mTtft.textContent = fmtMs(met.ttftMs);
+  c.mTps.textContent = fmtTps(met.tps);
+  c.mTok.textContent = fmtTokens(met.tokens);
+  c.mtTime.textContent = fmtSeconds(met.elapsedMs);
+  c.mtTtft.textContent = fmtMs(met.ttftMs);
+  c.mtTps.textContent = fmtTps(met.tps);
+  c.mtTok.textContent = fmtTokens(met.tokens);
+}
+
+/* ================= Запуск по моделям (последовательно) ================= */
 async function run() {
-  if (inFlight || judgeRunning || !getProblem()) return;
-  const selected = getSelectedTemps(); // фиксируем выбранный набор на момент клика
-  if (selected.length === 0) return;
-  const problem = getProblem();
+  if (inFlight || judgeRunning || !getPrompt()) return;
+  const problem = getPrompt();
   inFlight = true;
   syncButtons();
   try {
-    for (let i = 0; i < selected.length; i++) {
-      await runOne(selected[i], problem); // последовательно, в порядке 0 → 0.7 → 1.2
+    for (const m of MODELS) { // последовательно: weak → mid → strong
+      const c = cards[m.id];
+      setCardRunning(m.id, true);
+      const t0 = Date.now();
+      const controller = new AbortController();
+      let histOk = false;
+      try {
+        const r = await callLLM([{ role: 'user', content: problem }], controller, m.model, m.model);
+        c.elapsed.textContent = fmtSeconds(Date.now() - t0);
+        if (r.content === null) {
+          filled[m.id] = null;
+          metrics[m.id] = null;
+          c.answer.textContent = 'пустой ответ (finish_reason: ' + r.finish_reason + ')';
+          c.answer.classList.remove('is-error');
+          c.root.classList.remove('is-done', 'is-error');
+          setStatus(c.status, 'st-warn', 'пустой ответ');
+          setFrBadge(c.fr, r.finish_reason);
+          logCall(m.model, 'warn', r.finish_reason, Date.now() - t0, t0, m.model);
+        } else {
+          filled[m.id] = r.content;
+          metrics[m.id] = r;
+          c.answer.textContent = r.content;
+          c.answer.scrollTop = 0;
+          c.answer.classList.remove('is-error');
+          c.root.classList.add('is-done');
+          setStatus(c.status, 'st-ok', 'готово');
+          setFrBadge(c.fr, r.finish_reason);
+          fillMetricsRow(m);
+          logCall(m.model, 'ok', r.finish_reason, Date.now() - t0, t0, m.model);
+          histOk = true;
+        }
+      } catch (err) {
+        const msg = (err && err.name === 'AbortError')
+          ? 'Таймаут: ' + getSettings().timeout + ' мс'
+          : (err && err.message ? err.message : String(err));
+        filled[m.id] = null;
+        metrics[m.id] = null;
+        c.root.classList.add('is-error');
+        c.answer.textContent = msg;
+        c.answer.classList.add('is-error');
+        setStatus(c.status, 'st-err', 'ошибка');
+        setFrBadge(c.fr, null);
+        c.elapsed.textContent = fmtSeconds(Date.now() - t0);
+        logCall(m.model, 'err', null, Date.now() - t0, t0, m.model);
+      } finally {
+        c.root.classList.remove('is-running');
+        pushHistory(m.model, shortPrompt(problem), histOk);
+      }
     }
   } finally {
     inFlight = false;
@@ -1087,53 +1235,7 @@ async function run() {
   }
 }
 
-async function runOne(t, problem) {
-  const id = t.id;
-  const label = t.label;
-  const temp = t.value;
-  const c = cards[id];
-  setCardRunning(id, true);
-  const t0 = Date.now();
-  const controller = new AbortController();
-  try {
-    const r = await callLLM([{ role: 'user', content: problem }], controller, 'T=' + label, temp);
-    c.elapsed.textContent = fmtSeconds(Date.now() - t0);
-    if (r.content === null) {
-      filled[id] = null;
-      c.answer.textContent = 'пустой ответ (finish_reason: ' + r.finish_reason + ')';
-      c.answer.classList.remove('is-error');
-      c.root.classList.remove('is-done', 'is-error');
-      setStatus(c.status, 'st-warn', 'пустой ответ');
-      setFrBadge(c.fr, r.finish_reason);
-      logCall('T=' + label, 'warn', r.finish_reason, Date.now() - t0, t0, temp);
-    } else {
-      filled[id] = r.content;
-      c.answer.textContent = r.content;
-      c.answer.scrollTop = 0;
-      c.answer.classList.remove('is-error');
-      c.root.classList.add('is-done');
-      setStatus(c.status, 'st-ok', 'готово');
-      setFrBadge(c.fr, r.finish_reason);
-      logCall('T=' + label, 'ok', r.finish_reason, Date.now() - t0, t0, temp);
-    }
-  } catch (err) {
-    const msg = (err && err.name === 'AbortError')
-      ? 'Таймаут: ' + getSettings().timeout + ' мс'
-      : (err && err.message ? err.message : String(err));
-    filled[id] = null;
-    c.root.classList.add('is-error');
-    c.answer.textContent = msg;
-    c.answer.classList.add('is-error');
-    setStatus(c.status, 'st-err', 'ошибка');
-    setFrBadge(c.fr, null);
-    c.elapsed.textContent = fmtSeconds(Date.now() - t0);
-    logCall('T=' + label, 'err', null, Date.now() - t0, t0, temp);
-  } finally {
-    stopCardRunning(id);
-  }
-}
-
-/* ================= LLM-судья ================= */
+/* ================= LLM-судья (слепой) ================= */
 async function runJudge() {
   if (judgeRunning || inFlight || filledCount() < 2) return;
   judgeRunning = true;
@@ -1144,28 +1246,29 @@ async function runJudge() {
   setStatus(els.judgeStatus, 'st-run', 'сравнение…');
   const t0 = Date.now();
   const controller = new AbortController();
-  const n = filledCount();
   let blocks = '';
-  TEMPS.forEach(function (t) {
-    if (filled[t.id] !== null) {
-      blocks += '\n\n[T=' + t.label + '] ' + filled[t.id];
+  MODELS.forEach(function (m) {
+    if (filled[m.id] !== null) {
+      blocks += '\n\n[' + m.letter + '] ' + filled[m.id];
     }
   });
-  const userMsg = getProblem() + '\n\nОтветы (получены с разной температурой):' + blocks;
+  const userMsg = getPrompt() + '\n\nОтветы (получены разными моделями, анонимно):' + blocks;
+  let histOk = false;
   try {
     const r = await callLLM([
       { role: 'system', content: JUDGE_SYSTEM },
       { role: 'user', content: userMsg }
-    ], controller, 'Сравнение', 0, 'сравнение ' + n + ' ответов');
+    ], controller, 'Сравнение', JUDGE_MODEL);
     if (r.content === null) {
       els.judgeBody.textContent = 'пустой ответ (finish_reason: ' + r.finish_reason + ')';
       setStatus(els.judgeStatus, 'st-warn', 'пустой ответ');
-      logCall('Сравнение', 'warn', r.finish_reason, Date.now() - t0, t0, 0);
+      logCall('Сравнение', 'warn', r.finish_reason, Date.now() - t0, t0, JUDGE_MODEL);
     } else {
       els.judgeBody.textContent = r.content;
       els.judgeBody.scrollTop = 0;
       setStatus(els.judgeStatus, 'st-ok', 'готово');
-      logCall('Сравнение', 'ok', r.finish_reason, Date.now() - t0, t0, 0);
+      logCall('Сравнение', 'ok', r.finish_reason, Date.now() - t0, t0, JUDGE_MODEL);
+      histOk = true;
     }
   } catch (err) {
     const msg = (err && err.name === 'AbortError')
@@ -1175,10 +1278,11 @@ async function runJudge() {
     els.judgeBody.textContent = msg;
     els.judgeBody.classList.add('is-error');
     setStatus(els.judgeStatus, 'st-err', 'ошибка');
-    logCall('Сравнение', 'err', null, Date.now() - t0, t0, 0);
+    logCall('Сравнение', 'err', null, Date.now() - t0, t0, JUDGE_MODEL);
   } finally {
     judgeRunning = false;
     syncButtons();
+    pushHistory('Сравнение', shortPrompt(getPrompt()), histOk);
   }
 }
 
@@ -1208,17 +1312,12 @@ function persistHistory() {
   renderHistory();
 }
 
-function historyTextFor(messages) {
-  let text = '';
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const m = messages[i];
-    if (m && m.role === 'user' && typeof m.content === 'string') {
-      text = m.content;
-      break;
-    }
-  }
-  text = text.replace(/\s+/g, ' ').trim();
-  return text.length > 70 ? text.slice(0, 70) + '…' : text;
+function pushHistory(type, text, ok) {
+  const t = Date.now();
+  history.unshift({ t: t, type: type, text: text, ok: ok });
+  history = history.slice(0, HISTORY_MAX);
+  persistHistory();
+  return t;
 }
 
 function fmtClock(t) {
@@ -1236,7 +1335,7 @@ function renderHistory() {
     els.historyList.appendChild(li);
     return;
   }
-  history.forEach(function (h, idx) {
+  history.forEach(function (h) {
     const li = document.createElement('li');
     li.className = 'hist-item' + (h.ok ? ' ok' : ' err');
     const badge = document.createElement('span');
@@ -1248,21 +1347,9 @@ function renderHistory() {
     const text = document.createElement('span');
     text.className = 'hist-text';
     text.textContent = h.text || '';
-    const del = document.createElement('button');
-    del.type = 'button';
-    del.className = 'hist-del';
-    del.textContent = '×';
-    del.title = 'Удалить запись';
-    del.addEventListener('click', function (e) {
-      e.stopPropagation();
-      history.splice(idx, 1);
-      saveHistory();
-      renderHistory();
-    });
     li.appendChild(badge);
     li.appendChild(time);
     li.appendChild(text);
-    li.appendChild(del);
     li.addEventListener('click', function () {
       onHistoryClick(h);
     });
@@ -1272,10 +1359,11 @@ function renderHistory() {
 
 function onHistoryClick(h) {
   let id = null;
-  if (h.type === 'T=0') id = 'card-t0';
-  else if (h.type === 'T=0.7') id = 'card-t07';
-  else if (h.type === 'T=1.2') id = 'card-t12';
-  else if (h.type === 'Сравнение') id = 'judgePanel';
+  if (h.type === 'Сравнение') id = 'judgePanel';
+  else {
+    const m = MODELS.find(function (x) { return x.model === h.type; });
+    if (m) id = 'card-' + m.id;
+  }
   if (id) {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1289,56 +1377,12 @@ function clearHistory() {
   renderHistory();
 }
 
-/* ================= Выбор температуры (checkboxes) ================= */
-function paintTempChecks() {
-  TEMPS.forEach(function (t) {
-    const box = tempBoxes[t.id];
-    const labelEl = box.closest('label');
-    if (labelEl) labelEl.classList.toggle('checked', box.checked);
-  });
-}
-
-function onTempChange(changedId) {
-  paintTempChecks();
-  const labels = getSelectedTemps().map(function (t) { return t.label; });
-  try {
-    if (labels.length === 0) localStorage.removeItem(LS_TEMP);
-    else localStorage.setItem(LS_TEMP, JSON.stringify(labels));
-  } catch (e) {
-    /* localStorage недоступен — молча игнорируем */
-  }
-  syncButtons();
-}
-
-function restoreTemp() {
-  let labels = ['0.7'];
-  try {
-    const saved = localStorage.getItem(LS_TEMP);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      const arr = typeof parsed === 'string' ? [parsed] : (Array.isArray(parsed) ? parsed : null);
-      if (arr) {
-        const valid = arr.filter(function (l) {
-          return TEMPS.some(function (t) { return t.label === l; });
-        });
-        if (valid.length > 0) labels = valid;
-      }
-    }
-  } catch (e) {
-    /* localStorage недоступен / битое значение — дефолт */
-  }
-  TEMPS.forEach(function (t) {
-    tempBoxes[t.id].checked = labels.indexOf(t.label) !== -1;
-  });
-  paintTempChecks();
-}
-
 /* ================= События ================= */
 els.settingsBtn.addEventListener('click', function () {
   els.settingsPanel.hidden = !els.settingsPanel.hidden;
 });
 
-['model', 'apiUrl', 'timeoutMs'].forEach(function (k) {
+['apiUrl', 'timeoutMs'].forEach(function (k) {
   els[k].addEventListener('input', function () {
     saveSetting(k);
     if (k === 'apiUrl') checkProxy();
@@ -1346,12 +1390,6 @@ els.settingsBtn.addEventListener('click', function () {
 });
 
 els.problem.addEventListener('input', syncButtons);
-
-TEMPS.forEach(function (t) {
-  tempBoxes[t.id].addEventListener('change', function () {
-    onTempChange(t.id);
-  });
-});
 
 els.runBtn.addEventListener('click', run);
 els.judgeBtn.addEventListener('click', runJudge);
@@ -1361,10 +1399,8 @@ els.clearHistoryBtn.addEventListener('click', clearHistory);
 loadSettings();
 loadHistory();
 renderHistory();
-restoreTemp();
 syncButtons();
 checkProxy();
 </script>
-</div>
 </body>
 </html>
