@@ -8,4 +8,4 @@
 | ---- | ----- | ------- |
 | День 1 | [`day1`](https://github.com/imarkelov/ai_advent_challenge/tree/day1) | Запросы к LLM через API + чат-интерфейс (CLI и Web) |
 | День 2 | [`day2`](https://github.com/imarkelov/ai_advent_challenge/tree/day2) | Контроль ответа LLM: формат, лимит длины, условие завершения (stop) |
-| День 3 | [`day3`](https://github.com/imarkelov/ai_advent_challenge/tree/day3) | Мульти-ролевые LLM-запросы: статичный web-интерфейс + локальный CORS-прокси (3 роли + синтез главным промтом) |
+| День 3 | [`day3`](https://github.com/imarkelov/ai_advent_challenge/tree/day3) | Разные способы рассуждения: 4 стратегии (прямой, пошагово, мета-промт, настраиваемая группа экспертов + синтез) |

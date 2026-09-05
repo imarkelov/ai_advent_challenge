@@ -16,7 +16,7 @@ import urllib.request
 
 HOST = "127.0.0.1"  # только loopback: прокси не добавляет свою авторизацию
 PORT = 8000
-TIMEOUT = 120
+TIMEOUT = 300
 
 BASE_URL_ENV = "GPUSTACK_BASE_URL"  # endpoint kept out of source (public repo)
 KEY_ENV = "GPUSTACK_API_KEY"
@@ -79,11 +79,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return
             self._send(200, body, "text/html; charset=utf-8")
             return
-        self._send_json(404, {"error": "not found"})
+        self._send_json(404, {"error": "not found", "hint": "GET / serves the page"})
 
     def do_POST(self):
-        if self.path not in ("/v1/chat/completions", "/chat/completions"):
-            self._send_json(404, {"error": "not found"})
+        # Принимает любой путь, завершающийся /chat/completions
+        # (страница может слать /v1/chat/completions, /chat/completions и т.п.)
+        path = self.path.split("?", 1)[0].rstrip("/")
+        if not path.endswith("/chat/completions"):
+            self._send_json(
+                404,
+                {"error": "not found", "hint": f"expected POST /v1/chat/completions, got {path}"},
+            )
             return
 
         key = os.environ.get(KEY_ENV, "").strip()
