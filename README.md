@@ -9,3 +9,4 @@
 | День 1 | [`day1`](https://github.com/imarkelov/ai_advent_challenge/tree/day1) | Запросы к LLM через API + чат-интерфейс (CLI и Web) |
 | День 2 | [`day2`](https://github.com/imarkelov/ai_advent_challenge/tree/day2) | Контроль ответа LLM: формат, лимит длины, условие завершения (stop) |
 | День 3 | [`day3`](https://github.com/imarkelov/ai_advent_challenge/tree/day3) | Разные способы рассуждения: 4 стратегии (прямой, пошагово, мета-промт, настраиваемая группа экспертов + синтез) |
+| День 4 | [`day4`](https://github.com/imarkelov/ai_advent_challenge/tree/day4) | Температура: один и тот же запрос при T=0 / 0.7 / 1.2 (выбор чекбоксом) + LLM-сравнение ответов (точность, креативность, разнообразие) |
