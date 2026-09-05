@@ -723,7 +723,7 @@
         <label class="temp-check"><input type="checkbox" id="temp-07" value="0.7">temperature 0.7</label>
         <label class="temp-check"><input type="checkbox" id="temp-12" value="1.2">temperature 1.2</label>
       </div>
-      <p class="temp-note">Одна температура за запуск. Выбор запоминается.</p>
+      <p class="temp-note">Можно выбрать несколько температур: запрос уйдёт с каждой. Выбор запоминается.</p>
     </div>
     <div class="task-actions">
       <div class="action-left">
@@ -961,25 +961,12 @@ function getProblem() {
   return els.problem.value.trim();
 }
 
-function getTempValue() {
+function getSelectedTemps() {
+  const out = [];
   for (let i = 0; i < TEMPS.length; i++) {
-    if (tempBoxes[TEMPS[i].id].checked) return TEMPS[i].value;
+    if (tempBoxes[TEMPS[i].id].checked) out.push(TEMPS[i]);
   }
-  return null;
-}
-
-function getTempId() {
-  for (let i = 0; i < TEMPS.length; i++) {
-    if (tempBoxes[TEMPS[i].id].checked) return TEMPS[i].id;
-  }
-  return null;
-}
-
-function getTempLabel() {
-  for (let i = 0; i < TEMPS.length; i++) {
-    if (tempBoxes[TEMPS[i].id].checked) return TEMPS[i].label;
-  }
-  return null;
+  return out;
 }
 
 function filledCount() {
@@ -987,7 +974,7 @@ function filledCount() {
 }
 
 function syncButtons() {
-  els.runBtn.disabled = inFlight || judgeRunning || getProblem().length === 0 || getTempValue() === null;
+  els.runBtn.disabled = inFlight || judgeRunning || getProblem().length === 0 || getSelectedTemps().length === 0;
   els.judgeBtn.disabled = judgeRunning || inFlight || filledCount() < 2;
 }
 
@@ -1085,17 +1072,29 @@ async function callLLM(messages, controller, label, temperature, histTextOverrid
 /* ================= Запуск температуры ================= */
 async function run() {
   if (inFlight || judgeRunning || !getProblem()) return;
-  const temp = getTempValue();
-  if (temp === null) return;
-  const id = getTempId();
-  const label = getTempLabel();
+  const selected = getSelectedTemps(); // фиксируем выбранный набор на момент клика
+  if (selected.length === 0) return;
   const problem = getProblem();
   inFlight = true;
   syncButtons();
+  try {
+    for (let i = 0; i < selected.length; i++) {
+      await runOne(selected[i], problem); // последовательно, в порядке 0 → 0.7 → 1.2
+    }
+  } finally {
+    inFlight = false;
+    syncButtons();
+  }
+}
+
+async function runOne(t, problem) {
+  const id = t.id;
+  const label = t.label;
+  const temp = t.value;
+  const c = cards[id];
   setCardRunning(id, true);
   const t0 = Date.now();
   const controller = new AbortController();
-  const c = cards[id];
   try {
     const r = await callLLM([{ role: 'user', content: problem }], controller, 'T=' + label, temp);
     c.elapsed.textContent = fmtSeconds(Date.now() - t0);
@@ -1131,8 +1130,6 @@ async function run() {
     logCall('T=' + label, 'err', null, Date.now() - t0, t0, temp);
   } finally {
     stopCardRunning(id);
-    inFlight = false;
-    syncButtons();
   }
 }
 
@@ -1302,14 +1299,11 @@ function paintTempChecks() {
 }
 
 function onTempChange(changedId) {
-  TEMPS.forEach(function (t) {
-    if (t.id !== changedId) tempBoxes[t.id].checked = false;
-  });
   paintTempChecks();
-  const label = getTempLabel();
+  const labels = getSelectedTemps().map(function (t) { return t.label; });
   try {
-    if (label === null) localStorage.removeItem(LS_TEMP);
-    else localStorage.setItem(LS_TEMP, JSON.stringify(label));
+    if (labels.length === 0) localStorage.removeItem(LS_TEMP);
+    else localStorage.setItem(LS_TEMP, JSON.stringify(labels));
   } catch (e) {
     /* localStorage недоступен — молча игнорируем */
   }
@@ -1317,19 +1311,24 @@ function onTempChange(changedId) {
 }
 
 function restoreTemp() {
-  let val = '0.7';
+  let labels = ['0.7'];
   try {
     const saved = localStorage.getItem(LS_TEMP);
     if (saved) {
       const parsed = JSON.parse(saved);
-      const valid = TEMPS.some(function (t) { return t.label === parsed; });
-      if (valid) val = parsed;
+      const arr = typeof parsed === 'string' ? [parsed] : (Array.isArray(parsed) ? parsed : null);
+      if (arr) {
+        const valid = arr.filter(function (l) {
+          return TEMPS.some(function (t) { return t.label === l; });
+        });
+        if (valid.length > 0) labels = valid;
+      }
     }
   } catch (e) {
     /* localStorage недоступен / битое значение — дефолт */
   }
   TEMPS.forEach(function (t) {
-    tempBoxes[t.id].checked = (t.label === val);
+    tempBoxes[t.id].checked = labels.indexOf(t.label) !== -1;
   });
   paintTempChecks();
 }
