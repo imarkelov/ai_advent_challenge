@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
-<title>Разные способы рассуждения</title>
+<title>Температура</title>
 <style>
   /* ============================================================
-     Дизайн-система day3: тёмная тема, уголь + янтарный акцент.
-     ============================================================ */
+      Дизайн-система day3: тёмная тема, уголь + янтарный акцент.
+      ============================================================ */
   :root {
     --bg: #0e1013;
     --surface: #15181d;
@@ -276,12 +276,6 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
   }
-  textarea.reference {
-    min-height: 72px;
-    margin-top: 14px;
-    font-size: 13.5px;
-  }
-  textarea.reference::placeholder { color: var(--text-faint); }
 
   .task-actions {
     display: flex;
@@ -352,7 +346,7 @@
     border-color: var(--border);
   }
 
-  /* ---------- Карточки стратегий ---------- */
+  /* ---------- Карточки температур ---------- */
   .strat-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -449,128 +443,7 @@
   }
   .answer.is-error { color: var(--err); }
 
-  /* ---------- S3 ---------- */
-  .s3-meta {
-    background: var(--inset);
-    border: 1px dashed var(--border-strong);
-    border-radius: var(--radius-s);
-    padding: 10px 12px;
-    margin: 0 0 10px;
-    font-family: var(--font-mono);
-    font-size: 12.5px;
-    line-height: 1.55;
-    color: var(--text-dim);
-    overflow: auto;
-    max-height: 180px;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  .s3-meta:empty::before {
-    content: "мета-промт появится здесь после вызова №1";
-    color: var(--text-faint);
-  }
-
-  .s3-raw { margin-bottom: 10px; }
-  .s3-raw summary {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text-faint);
-    cursor: pointer;
-    user-select: none;
-  }
-  .s3-raw summary:hover { color: var(--text-dim); }
-  .s3-raw-body {
-    background: var(--inset);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-s);
-    padding: 10px 12px;
-    margin: 8px 0 0;
-    font-family: var(--font-mono);
-    font-size: 12px;
-    line-height: 1.5;
-    color: var(--text-dim);
-    overflow: auto;
-    max-height: 220px;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-
-  /* ---------- S4: эксперты ---------- */
-  .expert-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 10px;
-  }
-  .expert-row:first-child { margin-top: 2px; }
-  .expert-name {
-    flex: 1;
-    min-width: 0;
-    background: var(--inset);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-s);
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: 13.5px;
-    font-weight: 600;
-    padding: 7px 11px;
-    transition: border-color var(--dur) ease, box-shadow var(--dur) ease;
-  }
-  .expert-name:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-  }
-  .expert-del {
-    flex: none;
-    width: 30px;
-    height: 30px;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-s);
-    color: var(--text-faint);
-    font-size: 13px;
-    line-height: 1;
-    cursor: pointer;
-    transition: color var(--dur) ease, border-color var(--dur) ease;
-  }
-  .expert-del:hover { color: var(--err); border-color: rgba(224, 106, 80, .5); }
-
-  .expert-result {
-    padding: 8px 0 4px 2px;
-    border-left: 2px solid var(--border);
-    margin-left: 4px;
-    padding-left: 12px;
-  }
-  .expert-result .status { margin-bottom: 6px; }
-  .expert-answer { font-size: 13.5px; }
-
-  .expert-add {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 12px;
-  }
-  .expert-add input {
-    flex: 1;
-    min-width: 0;
-    background: var(--inset);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-s);
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: 13.5px;
-    padding: 8px 11px;
-    transition: border-color var(--dur) ease, box-shadow var(--dur) ease;
-  }
-  .expert-add input::placeholder { color: var(--text-faint); }
-  .expert-add input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-  }
-
-  /* ---------- Синтез ---------- */
+  /* ---------- Судья (панель-вердикт) ---------- */
   .synth {
     margin-top: 14px;
     background: linear-gradient(180deg, var(--accent-soft), rgba(224, 166, 60, .04) 55%), var(--surface);
@@ -579,16 +452,21 @@
     padding: 16px 18px;
     box-shadow: 0 0 0 1px rgba(224, 166, 60, .05), 0 12px 32px rgba(0, 0, 0, .3);
   }
+  .synth.is-error { border-color: rgba(224, 106, 80, .45); }
   .synth .card-head { margin-bottom: 10px; }
   .synth h3 { font-size: 15.5px; font-weight: 700; }
   .synth .answer { font-size: 14px; }
+  .synth .answer:empty::before {
+    content: "вердикт появится здесь после сравнения";
+    color: var(--text-faint);
+  }
 
   /* ---------- Адаптив ---------- */
   @media (min-width: 720px) {
     .settings-grid { grid-template-columns: repeat(3, 1fr); }
   }
   @media (min-width: 700px) {
-    .strat-grid { grid-template-columns: repeat(2, 1fr); }
+    .strat-grid { grid-template-columns: repeat(3, 1fr); }
   }
   @media (max-width: 520px) {
     .page { padding: 30px 14px 20px; }
@@ -735,34 +613,69 @@
     gap: 12px;
   }
 
-  .sel-run {
+  /* ---------- Температура: чекбоксы ---------- */
+  .temp-block { margin-top: 16px; }
+  .temp-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .temp-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .temp-check {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    color: var(--text-faint);
+    gap: 7px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-dim);
     cursor: pointer;
     white-space: nowrap;
     user-select: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 7px 12px;
+    background: var(--surface-2);
+    transition: border-color var(--dur) ease, color var(--dur) ease, background var(--dur) ease, box-shadow var(--dur) ease;
   }
-  .sel-run input { margin: 0; cursor: pointer; }
+  .temp-check:hover { border-color: var(--border-strong); color: var(--text); }
+  .temp-check input { margin: 0; cursor: pointer; accent-color: var(--accent); }
+  .temp-check.checked {
+    color: var(--accent-ink);
+    background: var(--accent);
+    border-color: rgba(0, 0, 0, .25);
+    box-shadow: 0 2px 12px rgba(224, 166, 60, .22);
+  }
+  .temp-check.checked input { accent-color: var(--accent-ink); }
+  .temp-note {
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: var(--text-faint);
+  }
 </style>
 </head>
 <body>
 <div class="page">
   <header class="masthead">
-    <p class="overline">День 3.1 · AI Advent Challenge</p>
+    <p class="overline">День 4 · AI Advent Challenge</p>
     <div class="masthead-row">
       <span class="mark" aria-hidden="true"></span>
-      <h1>Разные способы рассуждения</h1>
+      <h1>Температура</h1>
       <button type="button" class="ghost" id="settingsBtn">Настройки</button>
     </div>
-    <p class="lede">Одна и та же задача решается четырьмя стратегиями: прямой ответ, пошаговое рассуждение, мета-промт и группа экспертов с синтезом ведущим.</p>
+    <p class="lede">Один и тот же запрос — при трёх температурах. Температура задаёт случайность: 0 — максимально детерминированно, 1.2 — максимально разнообразно. Запустите все три и сравните ответы.</p>
     <div class="meta">
-      <span class="chip"><b>4</b> стратегии</span>
-      <span class="chip">S1 → S4 последовательно в «Запустить все»</span>
+      <span class="chip"><b>3</b> температуры</span>
+      <span class="chip"><b>1</b> запрос на температуру</span>
+      <span class="chip">LLM-судья</span>
       <span class="chip">таймаут <b>300 с</b></span>
-      <span class="chip">один файл, работает по <b>file://</b></span>
     </div>
   </header>
   <div class="proxy-status" id="proxyStatus" role="status"><i class="dot"></i><span id="proxyStatusText">проверка прокси…</span></div>
@@ -794,122 +707,108 @@
         <input id="timeoutMs" type="text" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="300000">
       </div>
     </div>
-    <p class="settings-note">Значения сохраняются в localStorage (adv31.model / adv31.apiUrl / adv31.timeout) и подставляются при следующем открытии страницы. Запросы уходят на «API URL» + /chat/completions через локальный прокси.</p>
+    <p class="settings-note">Значения сохраняются в localStorage (adv31.model / adv31.apiUrl / adv31.timeout) и подставляются при следующем открытии страницы. Запросы уходят на «API URL» + /chat/completions через локальный прокси: python main.py.</p>
   </section>
 
   <section class="panel" aria-labelledby="h-task">
-    <div class="section-head section-head-row">
-      <div>
-        <p class="overline">01 · Задача</p>
-        <h2 id="h-task">Условие задачи</h2>
-      </div>
-      <button type="button" class="ghost" id="clearProblemBtn">Очистить</button>
+    <div class="section-head">
+      <p class="overline">01 · Задача</p>
+      <h2 id="h-task">Условие задачи</h2>
     </div>
-    <textarea id="problem" placeholder="Введите задачу или сгенерируйте"></textarea>
+    <textarea id="problem" placeholder="Введите запрос"></textarea>
+    <div class="temp-block">
+      <span class="temp-label" id="tempLabel">Температура</span>
+      <div class="temp-row" role="radiogroup" aria-labelledby="tempLabel">
+        <label class="temp-check"><input type="checkbox" id="temp-0" value="0">temperature 0</label>
+        <label class="temp-check"><input type="checkbox" id="temp-07" value="0.7">temperature 0.7</label>
+        <label class="temp-check"><input type="checkbox" id="temp-12" value="1.2">temperature 1.2</label>
+      </div>
+      <p class="temp-note">Одна температура за запуск. Выбор запоминается.</p>
+    </div>
     <div class="task-actions">
       <div class="action-left">
-        <button type="button" class="ghost" id="genBtn">Сгенерировать задачу</button>
-        <span class="status st-idle" id="genStatus"><i class="dot"></i><span class="st-text">—</span></span>
-        <span class="elapsed" id="genElapsed"></span>
-      </div>
-      <div class="action-right">
-        <button type="button" class="send" id="runAllBtn" disabled>Запустить выбранные (4)</button>
+        <button type="button" class="send" id="runBtn" disabled>Запустить</button>
       </div>
     </div>
-    <textarea id="reference" class="reference" placeholder="Референсный ответ (авто)" spellcheck="false"></textarea>
   </section>
 
   <div class="section-head" style="margin: 6px 2px 12px;">
-    <p class="overline">02 · Стратегии</p>
-    <h2>Четыре способа рассуждения</h2>
+    <p class="overline">02 · Ответы</p>
+    <h2>Ответы при разной температуре</h2>
   </div>
   <div class="strat-grid">
-    <article class="role-card" id="card-s1" style="--i:0">
+    <article class="role-card" id="card-t0" style="--i:0">
       <span class="bar" aria-hidden="true"></span>
       <header class="card-head">
-        <h3><span class="role-idx">S1</span>Прямой ответ</h3>
-        <label class="sel-run"><input type="checkbox" id="sel-s1" checked>запускать</label>
-        <span class="status st-idle" id="status-s1"><i class="dot"></i><span class="st-text">ожидает</span></span>
+        <h3><span class="role-idx">T=0</span>Детерминированно</h3>
+        <span class="status st-idle" id="status-t0"><i class="dot"></i><span class="st-text">ожидает</span></span>
       </header>
-      <p class="card-desc">Только условие задачи в промте — без системной роли и дополнительных инструкций.</p>
+      <p class="card-desc">Тот же запрос возвращает тот же ответ — без случайности.</p>
       <div class="card-tools">
-        <button type="button" class="send" id="run-s1" disabled>Запустить</button>
-        <span class="elapsed" id="elapsed-s1"></span>
-        <span class="fr-badge" id="fr-s1" hidden></span>
+        <span class="elapsed" id="elapsed-t0"></span>
+        <span class="fr-badge" id="fr-t0" hidden></span>
       </div>
-      <div class="answer" id="answer-s1"></div>
+      <div class="answer" id="answer-t0"></div>
     </article>
 
-    <article class="role-card" id="card-s2" style="--i:1">
+    <article class="role-card" id="card-t07" style="--i:1">
       <span class="bar" aria-hidden="true"></span>
       <header class="card-head">
-        <h3><span class="role-idx">S2</span>Пошагово</h3>
-        <label class="sel-run"><input type="checkbox" id="sel-s2" checked>запускать</label>
-        <span class="status st-idle" id="status-s2"><i class="dot"></i><span class="st-text">ожидает</span></span>
+        <h3><span class="role-idx">T=0.7</span>Сбалансированно</h3>
+        <span class="status st-idle" id="status-t07"><i class="dot"></i><span class="st-text">ожидает</span></span>
       </header>
-      <p class="card-desc">Условие задачи плюс инструкция: анализ, разбивка на шаги, рассуждение и краткий финальный ответ.</p>
+      <p class="card-desc">Сбалансированная случайность: вариативность при сохранении смысла. Дефолт.</p>
       <div class="card-tools">
-        <button type="button" class="send" id="run-s2" disabled>Запустить</button>
-        <span class="elapsed" id="elapsed-s2"></span>
-        <span class="fr-badge" id="fr-s2" hidden></span>
+        <span class="elapsed" id="elapsed-t07"></span>
+        <span class="fr-badge" id="fr-t07" hidden></span>
       </div>
-      <div class="answer" id="answer-s2"></div>
+      <div class="answer" id="answer-t07"></div>
     </article>
 
-    <article class="role-card" id="card-s3" style="--i:2">
+    <article class="role-card" id="card-t12" style="--i:2">
       <span class="bar" aria-hidden="true"></span>
       <header class="card-head">
-        <h3><span class="role-idx">S3</span>Мета-промт</h3>
-        <label class="sel-run"><input type="checkbox" id="sel-s3" checked>запускать</label>
-        <span class="status st-idle" id="status-s3"><i class="dot"></i><span class="st-text">ожидает</span></span>
+        <h3><span class="role-idx">T=1.2</span>Разнообразно</h3>
+        <span class="status st-idle" id="status-t12"><i class="dot"></i><span class="st-text">ожидает</span></span>
       </header>
-      <p class="card-desc">Вызов №1: промпт-инженер составляет промт под задачу. Вызов №2: решение по составленному промту.</p>
+      <p class="card-desc">Максимально разнообразно: заметно разные варианты на один и тот же запрос.</p>
       <div class="card-tools">
-        <button type="button" class="send" id="run-s3" disabled>Запустить</button>
-        <span class="elapsed" id="elapsed-s3"></span>
-        <span class="fr-badge" id="fr-s3" hidden></span>
+        <span class="elapsed" id="elapsed-t12"></span>
+        <span class="fr-badge" id="fr-t12" hidden></span>
       </div>
-      <pre id="s3-meta" class="s3-meta"></pre>
-      <details class="s3-raw">
-        <summary>Сырой вывод вызова №1</summary>
-        <pre id="s3-raw" class="s3-raw-body"></pre>
-      </details>
-      <div class="answer" id="answer-s3"></div>
-    </article>
-    <article class="role-card" id="card-s4" style="--i:3">
-      <span class="bar" aria-hidden="true"></span>
-      <header class="card-head">
-        <h3><span class="role-idx">S4</span>Группа экспертов</h3>
-        <label class="sel-run"><input type="checkbox" id="sel-s4" checked>запускать</label>
-        <span class="status st-idle" id="status-s4"><i class="dot"></i><span class="st-text">ожидает</span></span>
-      </header>
-      <p class="card-desc">Роли-эксперты решают параллельно, затем ведущий сводит ответы в один итоговый синтез.</p>
-      <div class="card-tools">
-        <button type="button" class="send" id="run-s4" disabled>Запустить</button>
-        <span class="elapsed" id="elapsed-s4"></span>
-        <span class="fr-badge" id="fr-s4" hidden></span>
-      </div>
-      <div class="answer" id="answer-s4"></div>
-      <div id="expertList"></div>
-      <div class="expert-add">
-        <input id="expertInput" type="text" placeholder="Добавить эксперта" spellcheck="false" autocomplete="off">
-        <button type="button" class="ghost" id="expertAddBtn">Добавить</button>
-      </div>
-      <article class="synth" id="synthCard">
-        <header class="card-head">
-          <h3 id="synthTitle">Синтез</h3>
-          <span class="status st-wait" id="synthStatus"><i class="dot"></i><span class="st-text">ожидание ответов экспертов</span></span>
-        </header>
-        <div class="answer" id="synthBody"></div>
-      </article>
+      <div class="answer" id="answer-t12"></div>
     </article>
   </div>
+
+  <section class="panel" aria-labelledby="h-judge">
+    <div class="section-head section-head-row">
+      <div>
+        <p class="overline">03 · Сравнение</p>
+        <h2 id="h-judge">LLM-судья</h2>
+      </div>
+      <button type="button" class="send" id="judgeBtn" disabled>Сравнить</button>
+    </div>
+    <p class="card-desc" style="margin-top: 0;">Как только накопится два и более ответа, судья (температура 0) оценит точность, креативность и разнообразие и выдаст общий вывод.</p>
+    <article class="synth" id="judgePanel">
+      <header class="card-head">
+        <h3>Сравнение ответов</h3>
+        <span class="status st-wait" id="judgeStatus"><i class="dot"></i><span class="st-text">нужно минимум 2 ответа</span></span>
+      </header>
+      <div class="answer" id="judgeBody"></div>
+    </article>
+  </section>
     </main>
   </div>
 <script>
 'use strict';
 
-/* ================= Настройки ================= */
+/* ================= Константы ================= */
+const TEMPS = [
+  { id: 't0', label: '0', value: 0 },
+  { id: 't07', label: '0.7', value: 0.7 },
+  { id: 't12', label: '1.2', value: 1.2 }
+];
+
 const DEFAULTS = {
   model: 'qwen3.8-27b',
   apiUrl: 'http://127.0.0.1:8000/v1',
@@ -922,13 +821,18 @@ const LS_KEYS = {
   timeout: 'adv31.timeout'
 };
 
+const LS_TEMP = 'adv4.temp';
+const LS_HISTORY = 'adv4.history';
+const HISTORY_MAX = 50;
+
+const JUDGE_SYSTEM = 'Ты — судья. Тебе дадут ОДНУ и ту же задачу и несколько ответов на неё, полученных с разной температурой. Оцени ответы по трём критериям. Секция «Точность»: насколько каждый ответ точен и корректен относительно задачи. Секция «Креативность»: насколько каждый ответ креативен и оригинален, содержит ли нестандартные ходы. Секция «Разнообразие»: насколько каждый ответ отличается от остальных (0–10) и одна общая строка про разнообразие набора в целом. Секция «Общий вывод»: краткий итог — какая температура дала лучший ответ для этой задачи и почему.';
+
 const $ = (id) => document.getElementById(id);
 
-const selBoxes = {
-  s1: $('sel-s1'),
-  s2: $('sel-s2'),
-  s3: $('sel-s3'),
-  s4: $('sel-s4')
+const tempBoxes = {
+  t0: $('temp-0'),
+  t07: $('temp-07'),
+  t12: $('temp-12')
 };
 
 const els = {
@@ -938,55 +842,46 @@ const els = {
   settingsPanel: $('settingsPanel'),
   settingsBtn: $('settingsBtn'),
   problem: $('problem'),
-  reference: $('reference'),
-  genBtn: $('genBtn'),
-  genStatus: $('genStatus'),
-  genElapsed: $('genElapsed'),
-  runAllBtn: $('runAllBtn'),
-  s3Meta: $('s3-meta'),
-  s3Raw: $('s3-raw'),
-  expertList: $('expertList'),
-  expertInput: $('expertInput'),
-  expertAddBtn: $('expertAddBtn'),
-  synthTitle: $('synthTitle'),
-  synthStatus: $('synthStatus'),
-  synthBody: $('synthBody'),
+  runBtn: $('runBtn'),
+  judgeBtn: $('judgeBtn'),
+  judgePanel: $('judgePanel'),
+  judgeStatus: $('judgeStatus'),
+  judgeBody: $('judgeBody'),
   proxyStatus: $('proxyStatus'),
   proxyStatusText: $('proxyStatusText'),
   historyList: $('historyList'),
-  clearHistoryBtn: $('clearHistoryBtn'),
-  clearProblemBtn: $('clearProblemBtn')
+  clearHistoryBtn: $('clearHistoryBtn')
 };
 
 const cards = {};
-['s1', 's2', 's3', 's4'].forEach(function (k) {
-  cards[k] = {
-    key: k,
-    root: $('card-' + k),
-    status: $('status-' + k),
-    btn: $('run-' + k),
-    elapsed: $('elapsed-' + k),
-    fr: $('fr-' + k),
-    answer: $('answer-' + k),
-    sel: selBoxes[k],
-    running: false,
-    cancelled: false,
-    controller: null
+TEMPS.forEach(function (t) {
+  cards[t.id] = {
+    id: t.id,
+    label: t.label,
+    value: t.value,
+    root: $('card-' + t.id),
+    status: $('status-' + t.id),
+    elapsed: $('elapsed-' + t.id),
+    fr: $('fr-' + t.id),
+    answer: $('answer-' + t.id)
   };
 });
 
-let genRunning = false;
-let runAllActive = false;
+let inFlight = false;
+let judgeRunning = false;
+let filled = { t0: null, t07: null, t12: null };
+let history = [];
 
-/* ================= Call log для QA (in-memory) ================= */
+/* ================= QA-лог вызовов (in-memory) ================= */
 window.__calls = [];
-function logCall(strategy, status, finishReason, elapsedMs, ts) {
+function logCall(strategy, status, finishReason, elapsedMs, ts, temperature) {
   window.__calls.push({
     strategy: strategy,
     status: status,
     finish_reason: finishReason,
     elapsedMs: elapsedMs,
-    ts: ts
+    ts: ts,
+    temperature: temperature
   });
 }
 
@@ -1066,22 +961,41 @@ function getProblem() {
   return els.problem.value.trim();
 }
 
+function getTempValue() {
+  for (let i = 0; i < TEMPS.length; i++) {
+    if (tempBoxes[TEMPS[i].id].checked) return TEMPS[i].value;
+  }
+  return null;
+}
+
+function getTempId() {
+  for (let i = 0; i < TEMPS.length; i++) {
+    if (tempBoxes[TEMPS[i].id].checked) return TEMPS[i].id;
+  }
+  return null;
+}
+
+function getTempLabel() {
+  for (let i = 0; i < TEMPS.length; i++) {
+    if (tempBoxes[TEMPS[i].id].checked) return TEMPS[i].label;
+  }
+  return null;
+}
+
+function filledCount() {
+  return TEMPS.filter(function (t) { return filled[t.id] !== null; }).length;
+}
+
 function syncButtons() {
-  const hasProblem = getProblem().length > 0;
-  ['s1', 's2', 's3', 's4'].forEach(function (k) {
-    cards[k].btn.disabled = !hasProblem;
-  });
-  els.runAllBtn.disabled = runAllActive ? false : (!hasProblem || selCount() === 0);
-  els.genBtn.disabled = genRunning;
+  els.runBtn.disabled = inFlight || judgeRunning || getProblem().length === 0 || getTempValue() === null;
+  els.judgeBtn.disabled = judgeRunning || inFlight || filledCount() < 2;
 }
 
 function setCardRunning(k, on) {
   const c = cards[k];
-  c.running = on;
   c.root.classList.toggle('is-running', on);
   if (on) {
     c.root.classList.remove('is-done', 'is-error');
-    c.btn.textContent = 'Отменить';
     setStatus(c.status, 'st-run', 'выполняется…');
     c.answer.textContent = '';
     c.answer.classList.remove('is-error');
@@ -1092,27 +1006,20 @@ function setCardRunning(k, on) {
 }
 
 function stopCardRunning(k) {
-  const c = cards[k];
-  c.running = false;
-  c.controller = null;
-  c.root.classList.remove('is-running');
-  c.btn.textContent = 'Запустить';
+  cards[k].root.classList.remove('is-running');
   syncButtons();
 }
 
 /* ================= ЕДИНСТВЕННАЯ точка отправки ================= */
-async function callLLM(messages, controller, label) {
+async function callLLM(messages, controller, label, temperature, histTextOverride) {
   const settings = getSettings();
   if (!controller) controller = new AbortController();
   const histEntry = {
     t: Date.now(),
     type: label || '?',
-    text: historyTextFor(label, messages),
+    text: histTextOverride || historyTextFor(messages),
     ok: false
   };
-  if (label === 'Генерация') {
-    histEntry.full = { problem: els.problem.value, reference: els.reference.value };
-  }
   history.unshift(histEntry);
   history = history.slice(0, HISTORY_MAX);
   const timer = setTimeout(function () {
@@ -1126,14 +1033,16 @@ async function callLLM(messages, controller, label) {
       body: JSON.stringify({
         model: settings.model,
         messages: messages,
-        chat_template_kwargs: { enable_thinking: false }
+        chat_template_kwargs: { enable_thinking: false },
+        temperature: temperature
       }),
       signal: controller.signal
     });
   } catch (err) {
     histEntry.ok = false;
     persistHistory();
-    if (err && err.name === 'AbortError') throw err; // отмена или таймаут — решит вызывающий
+    if (err && err.name === 'AbortError') throw err; // таймаут — решит вызывающий
+    checkProxy().catch(function () {}); // сетевая ошибка — обновить индикатор
     throw new Error('прокси недоступен: ' + (err && err.message ? err.message : String(err)));
   } finally {
     clearTimeout(timer);
@@ -1166,89 +1075,117 @@ async function callLLM(messages, controller, label) {
   const msg = choice && choice.message;
   const content = msg ? msg.content : null;
   const finishReason = choice ? choice.finish_reason : null;
-  if (content === null || content === undefined || content === '') {
-    histEntry.ok = true;
-    persistHistory();
-    return { content: null, finish_reason: finishReason }; // null-content — НЕ ошибка
-  }
   histEntry.ok = true;
   persistHistory();
+  if (content === null || content === undefined || content === '') {
+    return { content: null, finish_reason: finishReason }; // null-content — НЕ ошибка
+  }
   return { content: content, finish_reason: finishReason };
 }
-
-/* ================= Результаты стратегии ================= */
-function finishOk(k, logStrategy, r, t0) {
-  const c = cards[k];
-  c.root.classList.add('is-done');
-  c.elapsed.textContent = fmtSeconds(Date.now() - t0);
-  if (r.content === null) {
-    c.answer.textContent = 'пустой ответ (finish_reason: ' + r.finish_reason + ')';
-    c.answer.classList.remove('is-error');
-    setStatus(c.status, 'st-warn', 'пустой ответ');
-    setFrBadge(c.fr, r.finish_reason);
-    logCall(logStrategy, 'warn', r.finish_reason, Date.now() - t0, t0);
-  } else {
-    c.answer.textContent = r.content;
-    c.answer.scrollTop = 0;
-    c.answer.classList.remove('is-error');
-    setStatus(c.status, 'st-ok', 'готово');
-    setFrBadge(c.fr, r.finish_reason);
-    logCall(logStrategy, 'ok', r.finish_reason, Date.now() - t0, t0);
-  }
-}
-
-function failCard(k, logStrategy, msg, t0, cancelled) {
-  const c = cards[k];
-  c.elapsed.textContent = fmtSeconds(Date.now() - t0);
-  setFrBadge(c.fr, null);
-  if (cancelled) {
-    c.root.classList.remove('is-done', 'is-error');
-    c.answer.textContent = 'отменено';
-    c.answer.classList.remove('is-error');
-    setStatus(c.status, 'st-idle', 'отменено');
-  } else {
+/* ================= Запуск температуры ================= */
+async function run() {
+  if (inFlight || judgeRunning || !getProblem()) return;
+  const temp = getTempValue();
+  if (temp === null) return;
+  const id = getTempId();
+  const label = getTempLabel();
+  const problem = getProblem();
+  inFlight = true;
+  syncButtons();
+  setCardRunning(id, true);
+  const t0 = Date.now();
+  const controller = new AbortController();
+  const c = cards[id];
+  try {
+    const r = await callLLM([{ role: 'user', content: problem }], controller, 'T=' + label, temp);
+    c.elapsed.textContent = fmtSeconds(Date.now() - t0);
+    if (r.content === null) {
+      filled[id] = null;
+      c.answer.textContent = 'пустой ответ (finish_reason: ' + r.finish_reason + ')';
+      c.answer.classList.remove('is-error');
+      c.root.classList.remove('is-done', 'is-error');
+      setStatus(c.status, 'st-warn', 'пустой ответ');
+      setFrBadge(c.fr, r.finish_reason);
+      logCall('T=' + label, 'warn', r.finish_reason, Date.now() - t0, t0, temp);
+    } else {
+      filled[id] = r.content;
+      c.answer.textContent = r.content;
+      c.answer.scrollTop = 0;
+      c.answer.classList.remove('is-error');
+      c.root.classList.add('is-done');
+      setStatus(c.status, 'st-ok', 'готово');
+      setFrBadge(c.fr, r.finish_reason);
+      logCall('T=' + label, 'ok', r.finish_reason, Date.now() - t0, t0, temp);
+    }
+  } catch (err) {
+    const msg = (err && err.name === 'AbortError')
+      ? 'Таймаут: ' + getSettings().timeout + ' мс'
+      : (err && err.message ? err.message : String(err));
+    filled[id] = null;
     c.root.classList.add('is-error');
     c.answer.textContent = msg;
     c.answer.classList.add('is-error');
     setStatus(c.status, 'st-err', 'ошибка');
+    setFrBadge(c.fr, null);
+    c.elapsed.textContent = fmtSeconds(Date.now() - t0);
+    logCall('T=' + label, 'err', null, Date.now() - t0, t0, temp);
+  } finally {
+    stopCardRunning(id);
+    inFlight = false;
+    syncButtons();
   }
-  if (logStrategy) logCall(logStrategy, 'err', null, Date.now() - t0, t0);
 }
 
-/* ================= Утилиты ================= */
-function stripFences(text) {
-  return text
-    .split('\n')
-    .filter(function (line) { return !/^\s*```/.test(line); })
-    .join('\n')
-    .trim();
+/* ================= LLM-судья ================= */
+async function runJudge() {
+  if (judgeRunning || inFlight || filledCount() < 2) return;
+  judgeRunning = true;
+  syncButtons();
+  els.judgePanel.classList.remove('is-error');
+  els.judgeBody.textContent = '';
+  els.judgeBody.classList.remove('is-error');
+  setStatus(els.judgeStatus, 'st-run', 'сравнение…');
+  const t0 = Date.now();
+  const controller = new AbortController();
+  const n = filledCount();
+  let blocks = '';
+  TEMPS.forEach(function (t) {
+    if (filled[t.id] !== null) {
+      blocks += '\n\n[T=' + t.label + '] ' + filled[t.id];
+    }
+  });
+  const userMsg = getProblem() + '\n\nОтветы (получены с разной температурой):' + blocks;
+  try {
+    const r = await callLLM([
+      { role: 'system', content: JUDGE_SYSTEM },
+      { role: 'user', content: userMsg }
+    ], controller, 'Сравнение', 0, 'сравнение ' + n + ' ответов');
+    if (r.content === null) {
+      els.judgeBody.textContent = 'пустой ответ (finish_reason: ' + r.finish_reason + ')';
+      setStatus(els.judgeStatus, 'st-warn', 'пустой ответ');
+      logCall('Сравнение', 'warn', r.finish_reason, Date.now() - t0, t0, 0);
+    } else {
+      els.judgeBody.textContent = r.content;
+      els.judgeBody.scrollTop = 0;
+      setStatus(els.judgeStatus, 'st-ok', 'готово');
+      logCall('Сравнение', 'ok', r.finish_reason, Date.now() - t0, t0, 0);
+    }
+  } catch (err) {
+    const msg = (err && err.name === 'AbortError')
+      ? 'Таймаут: ' + getSettings().timeout + ' мс'
+      : (err && err.message ? err.message : String(err));
+    els.judgePanel.classList.add('is-error');
+    els.judgeBody.textContent = msg;
+    els.judgeBody.classList.add('is-error');
+    setStatus(els.judgeStatus, 'st-err', 'ошибка');
+    logCall('Сравнение', 'err', null, Date.now() - t0, t0, 0);
+  } finally {
+    judgeRunning = false;
+    syncButtons();
+  }
 }
-/* ================= Константы (дословно из плана) ================= */
-const S3_META_SYSTEM = 'Ты — опытный промпт-инженер. Составь ОДИН самодостаточный промт, который при подаче его LLM-модели приведёт к правильному и полному решению задачи. Промт должен содержать: полное условие задачи, требование рассуждать пошагово и требование в конце дать краткий финальный ответ. Выведи ТОЛЬКО текст промта, без комментариев и без markdown-оформления.';
-
-const GEN_SYSTEM = 'Ты генератор задач. Придумай ОДНУ логическую, алгоритмическую или аналитическую задачу с точным условием и единственным правильным ответом, средней сложности, решаемую за несколько шагов рассуждений.';
-
-const GEN_USER = 'Ответь СТРОГО в формате JSON: {"problem": "<условие>", "reference_answer": "<краткий референсный ответ с решением>"}. Только JSON, без markdown.';
-
-const S4_SYNTH_SYSTEM = 'Ты — ведущий группы экспертов. По задаче и ответам экспертов составь ОДИН итоговый верный ответ: прими лучшее решение, отметь расхождения и поясни выбор.';
-
-const ADDED_EXPERT_DESC = 'Рассматривай задачу со своей профессиональной точки зрения.';
-
-const DEFAULT_EXPERTS = [
-  { name: 'Аналитик', description: 'Формализуй условие задачи, выдели все ограничения, граничные случаи и допущения, проведи строгий анализ и выведи решение.' },
-  { name: 'Инженер', description: 'Подходи к задаче алгоритмически, рассматривай варианты решений по сложности, обоснуй выбор и дай решение.' },
-  { name: 'Критик', description: 'Ищи ловушки, противоречия и типичные ошибки в решении задачи; проверь корректность каждого шага; дай окончательный верный ответ.' }
-];
-
-let experts = [];
-let genCtrl = null;
-let runAllAborted = false;
 
 /* ================= История запросов ================= */
-const LS_HISTORY = 'adv31.history';
-const HISTORY_MAX = 50;
-let history = [];
-
 function loadHistory() {
   try {
     const saved = localStorage.getItem(LS_HISTORY);
@@ -1274,8 +1211,7 @@ function persistHistory() {
   renderHistory();
 }
 
-function historyTextFor(label, messages) {
-  if (label === 'Генерация') return 'Задача: …';
+function historyTextFor(messages) {
   let text = '';
   for (let i = messages.length - 1; i >= 0; i--) {
     const m = messages[i];
@@ -1306,19 +1242,15 @@ function renderHistory() {
   history.forEach(function (h, idx) {
     const li = document.createElement('li');
     li.className = 'hist-item' + (h.ok ? ' ok' : ' err');
-
     const badge = document.createElement('span');
     badge.className = 'hist-badge';
     badge.textContent = h.type || '?';
-
     const time = document.createElement('span');
     time.className = 'hist-time';
     time.textContent = fmtClock(h.t);
-
     const text = document.createElement('span');
     text.className = 'hist-text';
     text.textContent = h.text || '';
-
     const del = document.createElement('button');
     del.type = 'button';
     del.className = 'hist-del';
@@ -1330,7 +1262,6 @@ function renderHistory() {
       saveHistory();
       renderHistory();
     });
-
     li.appendChild(badge);
     li.appendChild(time);
     li.appendChild(text);
@@ -1343,32 +1274,15 @@ function renderHistory() {
 }
 
 function onHistoryClick(h) {
-  if (h.type === 'Генерация' && h.full) {
-    if (typeof h.full.problem === 'string') els.problem.value = h.full.problem;
-    if (typeof h.full.reference === 'string') els.reference.value = h.full.reference;
-    els.problem.dispatchEvent(new Event('input'));
-    return;
-  }
   let id = null;
-  if (h.type === 'Прямой') id = 'card-s1';
-  else if (h.type === 'Пошагово') id = 'card-s2';
-  else if (h.type === 'Мета-промт') id = 'card-s3';
-  else if (String(h.type).indexOf('Эксперт') === 0 || h.type === 'Синтез') id = 'card-s4';
+  if (h.type === 'T=0') id = 'card-t0';
+  else if (h.type === 'T=0.7') id = 'card-t07';
+  else if (h.type === 'T=1.2') id = 'card-t12';
+  else if (h.type === 'Сравнение') id = 'judgePanel';
   if (id) {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
-}
-
-function updateGenHistoryFull() {
-  for (let i = 0; i < history.length; i++) {
-    if (history[i].type === 'Генерация') {
-      history[i].full = { problem: els.problem.value, reference: els.reference.value };
-      break;
-    }
-  }
-  saveHistory();
-  renderHistory();
 }
 
 function clearHistory() {
@@ -1378,408 +1292,46 @@ function clearHistory() {
   renderHistory();
 }
 
-/* ================= Выборка запуска (checkboxes) ================= */
-const LS_SEL = 'adv31.sel';
-let sel = { s1: true, s2: true, s3: true, s4: true };
-
-function loadSel() {
-  try {
-    const saved = localStorage.getItem(LS_SEL);
-    if (saved) {
-      const obj = JSON.parse(saved);
-      ['s1', 's2', 's3', 's4'].forEach(function (k) {
-        if (typeof obj[k] === 'boolean') sel[k] = obj[k];
-      });
-    }
-  } catch (e) {
-    /* localStorage недоступен — дефолты */
-  }
+/* ================= Выбор температуры (checkboxes) ================= */
+function paintTempChecks() {
+  TEMPS.forEach(function (t) {
+    const box = tempBoxes[t.id];
+    const labelEl = box.closest('label');
+    if (labelEl) labelEl.classList.toggle('checked', box.checked);
+  });
 }
 
-function saveSel() {
+function onTempChange(changedId) {
+  TEMPS.forEach(function (t) {
+    if (t.id !== changedId) tempBoxes[t.id].checked = false;
+  });
+  paintTempChecks();
+  const label = getTempLabel();
   try {
-    localStorage.setItem(LS_SEL, JSON.stringify(sel));
+    if (label === null) localStorage.removeItem(LS_TEMP);
+    else localStorage.setItem(LS_TEMP, JSON.stringify(label));
   } catch (e) {
     /* localStorage недоступен — молча игнорируем */
   }
-}
-
-function selCount() {
-  return ['s1', 's2', 's3', 's4'].filter(function (k) { return sel[k]; }).length;
-}
-
-function updateRunAllLabel() {
-  els.runAllBtn.textContent = runAllActive ? 'Отменить всё' : 'Запустить выбранные (' + selCount() + ')';
-}
-
-/* ================= S4: эксперты ================= */
-function makeExpertRow(expert) {
-  const wrap = document.createElement('div');
-  wrap.className = 'expert-item';
-
-  const row = document.createElement('div');
-  row.className = 'expert-row';
-  const input = document.createElement('input');
-  input.className = 'expert-name';
-  input.type = 'text';
-  input.spellcheck = false;
-  input.value = expert.name;
-  input.addEventListener('input', function () {
-    const nm = input.value.trim();
-    if (nm.length > 0) expert.name = nm; // переименование = только label
-  });
-  const del = document.createElement('button');
-  del.type = 'button';
-  del.className = 'expert-del';
-  del.textContent = '✕';
-  del.title = 'Удалить эксперта';
-  del.addEventListener('click', function () {
-    const i = experts.indexOf(expert);
-    if (i >= 0) experts.splice(i, 1);
-    wrap.remove();
-  });
-  row.appendChild(input);
-  row.appendChild(del);
-
-  const result = document.createElement('div');
-  result.className = 'expert-result';
-  const st = document.createElement('span');
-  st.className = 'status st-idle';
-  const dot = document.createElement('i');
-  dot.className = 'dot';
-  const stText = document.createElement('span');
-  stText.className = 'st-text';
-  stText.textContent = '—';
-  st.appendChild(dot);
-  st.appendChild(stText);
-  const ans = document.createElement('div');
-  ans.className = 'answer expert-answer';
-  result.appendChild(st);
-  result.appendChild(ans);
-
-  wrap.appendChild(row);
-  wrap.appendChild(result);
-  expert._st = st;
-  expert._ans = ans;
-  return wrap;
-}
-
-function renderExperts() {
-  els.expertList.textContent = '';
-  experts.forEach(function (ex) {
-    els.expertList.appendChild(makeExpertRow(ex));
-  });
-}
-
-function addExpert() {
-  const nm = els.expertInput.value.trim();
-  if (nm.length === 0) return;
-  const expert = { name: nm, description: ADDED_EXPERT_DESC };
-  experts.push(expert);
-  els.expertList.appendChild(makeExpertRow(expert));
-  els.expertInput.value = '';
-}
-
-/* ================= S1: Прямой ответ ================= */
-async function runS1() {
-  const c = cards.s1;
-  if (c.running || !getProblem()) return;
-  const problem = getProblem();
-  c.cancelled = false;
-  setCardRunning('s1', true);
-  const t0 = Date.now();
-  c.controller = new AbortController();
-  try {
-    const r = await callLLM([{ role: 'user', content: problem }], c.controller, 'Прямой');
-    finishOk('s1', 's1', r, t0);
-  } catch (err) {
-    if (c.cancelled) failCard('s1', 's1', 'отменено', t0, true);
-    else if (err && err.name === 'AbortError') failCard('s1', 's1', 'Таймаут: ' + getSettings().timeout + ' мс', t0, false);
-    else failCard('s1', 's1', err && err.message ? err.message : String(err), t0, false);
-  } finally {
-    stopCardRunning('s1');
-  }
-}
-
-/* ================= S2: Пошагово ================= */
-async function runS2() {
-  const c = cards.s2;
-  if (c.running || !getProblem()) return;
-  const problem = getProblem();
-  c.cancelled = false;
-  setCardRunning('s2', true);
-  const t0 = Date.now();
-  c.controller = new AbortController();
-  try {
-    const r = await callLLM([{
-      role: 'user',
-      content: problem + '\n\nИнструкция: решай пошагово. Сначала проанализируй условие и разбей задачу на шаги, рассуждай по каждому шагу, и только в самом конце дай краткий финальный ответ.'
-    }], c.controller, 'Пошагово');
-    finishOk('s2', 's2', r, t0);
-  } catch (err) {
-    if (c.cancelled) failCard('s2', 's2', 'отменено', t0, true);
-    else if (err && err.name === 'AbortError') failCard('s2', 's2', 'Таймаут: ' + getSettings().timeout + ' мс', t0, false);
-    else failCard('s2', 's2', err && err.message ? err.message : String(err), t0, false);
-  } finally {
-    stopCardRunning('s2');
-  }
-}
-/* ================= S3: Мета-промт ================= */
-async function runS3() {
-  const c = cards.s3;
-  if (c.running || !getProblem()) return;
-  const problem = getProblem();
-  c.cancelled = false;
-  setCardRunning('s3', true);
-  const t0 = Date.now();
-  c.controller = new AbortController();
-  let phase = 's3-meta';
-  try {
-    const r1 = await callLLM([
-      { role: 'system', content: S3_META_SYSTEM },
-      { role: 'user', content: problem }
-    ], c.controller, 'Мета-промт');
-    const raw1 = r1.content === null ? '' : r1.content;
-    els.s3Raw.textContent = raw1;
-    logCall('s3-meta', r1.content === null ? 'warn' : 'ok', r1.finish_reason, Date.now() - t0, t0);
-    const meta = stripFences(raw1);
-    if (meta.length < 30 || /не могу|извини/i.test(meta)) {
-      c.root.classList.add('is-error');
-      c.answer.textContent = 'не получен промпт';
-      c.answer.classList.add('is-error');
-      setStatus(c.status, 'st-err', 'ошибка');
-      c.elapsed.textContent = fmtSeconds(Date.now() - t0);
-      setFrBadge(c.fr, null);
-      return;
-    }
-    els.s3Meta.textContent = meta;
-    els.s3Meta.scrollTop = 0;
-    phase = 's3-solve';
-    const t1 = Date.now();
-    const r2 = await callLLM([{ role: 'user', content: meta }], c.controller, 'Мета-промт');
-    finishOk('s3', 's3-solve', r2, t1);
-  } catch (err) {
-    if (c.cancelled) failCard('s3', phase, 'отменено', t0, true);
-    else if (err && err.name === 'AbortError') failCard('s3', phase, 'Таймаут: ' + getSettings().timeout + ' мс', t0, false);
-    else failCard('s3', phase, err && err.message ? err.message : String(err), t0, false);
-  } finally {
-    stopCardRunning('s3');
-  }
-}
-
-/* ================= S4: Группа экспертов ================= */
-async function runS4() {
-  const c = cards.s4;
-  if (c.running || !getProblem() || experts.length === 0) return;
-  const problem = getProblem();
-  c.cancelled = false;
-  setCardRunning('s4', true);
-  const t0 = Date.now();
-  const group = new AbortController(); // один на всю группу S4
-  c.controller = group;
-  els.synthTitle.textContent = 'Синтез';
-  els.synthBody.textContent = '';
-  els.synthBody.classList.remove('is-error');
-  setStatus(els.synthStatus, 'st-wait', 'ожидание ответов экспертов');
-
-  experts.forEach(function (ex) {
-    setStatus(ex._st, 'st-run', 'рассуждает…');
-    ex._ans.textContent = '';
-    ex._ans.classList.remove('is-error');
-  });
-
-  const settled = await Promise.allSettled(experts.map(async function (ex) {
-    const te = Date.now();
-    try {
-      const r = await callLLM([
-        { role: 'system', content: 'Ты — ' + ex.name + '. ' + ex.description + ' Решай задачу и дай обоснованный ответ.' },
-        { role: 'user', content: problem }
-      ], group, 'Эксперт: ' + ex.name);
-      if (r.content === null) {
-        ex._ans.textContent = 'пустой ответ (finish_reason: ' + r.finish_reason + ')';
-        setStatus(ex._st, 'st-warn', 'пустой ответ');
-        logCall('s4:' + ex.name, 'warn', r.finish_reason, Date.now() - te, te);
-        return null;
-      }
-      ex._ans.textContent = r.content;
-      ex._ans.scrollTop = 0;
-      ex._ans.classList.remove('is-error');
-      setStatus(ex._st, 'st-ok', 'готово');
-      logCall('s4:' + ex.name, 'ok', r.finish_reason, Date.now() - te, te);
-      return { name: ex.name, answer: r.content };
-    } catch (err) {
-      if (c.cancelled) {
-        ex._ans.textContent = 'отменено';
-        ex._ans.classList.remove('is-error');
-        setStatus(ex._st, 'st-idle', 'отменено');
-      } else if (err && err.name === 'AbortError') {
-        ex._ans.textContent = 'Таймаут: ' + getSettings().timeout + ' мс';
-        ex._ans.classList.add('is-error');
-        setStatus(ex._st, 'st-err', 'ошибка');
-      } else {
-        ex._ans.textContent = err && err.message ? err.message : String(err);
-        ex._ans.classList.add('is-error');
-        setStatus(ex._st, 'st-err', 'ошибка');
-      }
-      logCall('s4:' + ex.name, 'err', null, Date.now() - te, te);
-      return null;
-    }
-  }));
-
-  const oks = settled
-    .filter(function (s) { return s.status === 'fulfilled' && s.value; })
-    .map(function (s) { return s.value; });
-
-  c.elapsed.textContent = fmtSeconds(Date.now() - t0);
-
-  if (c.cancelled) {
-    failCard('s4', 's4-synth', 'отменено', t0, true);
-    setStatus(els.synthStatus, 'st-idle', 'отменено');
-    els.synthBody.textContent = 'Синтез не выполнен: запуск отменён.';
-    stopCardRunning('s4');
-    return;
-  }
-
-  if (oks.length === 0) {
-    c.root.classList.add('is-error');
-    c.answer.textContent = 'ни один эксперт не ответил';
-    c.answer.classList.add('is-error');
-    setStatus(c.status, 'st-err', 'ошибка');
-    setStatus(els.synthStatus, 'st-idle', 'синтез не выполнен');
-    els.synthBody.textContent = 'Синтез не выполнен: ни один эксперт не вернул ответа. Проверьте прокси и повторите запуск.';
-    els.synthBody.classList.add('is-error');
-    stopCardRunning('s4');
-    return;
-  }
-
-  c.answer.textContent = 'Ответили ' + oks.length + ' из ' + experts.length + ' экспертов';
-  c.answer.classList.remove('is-error');
-
-  els.synthTitle.textContent = 'Синтез (' + oks.length + ' из ' + experts.length + ')';
-  setStatus(els.synthStatus, 'st-run', 'генерация…');
-  const ts = Date.now();
-  try {
-    const synthUser = problem + '\n\nОтветы экспертов:' + oks.map(function (o, i) {
-      return '\n\n[' + (i + 1) + '. ' + o.name + '] ' + o.answer;
-    }).join('');
-    const rs = await callLLM([
-      { role: 'system', content: S4_SYNTH_SYSTEM },
-      { role: 'user', content: synthUser }
-    ], group, 'Синтез');
-    if (rs.content === null) {
-      els.synthBody.textContent = 'пустой ответ (finish_reason: ' + rs.finish_reason + ')';
-      setStatus(els.synthStatus, 'st-warn', 'пустой ответ');
-      logCall('s4-synth', 'warn', rs.finish_reason, Date.now() - ts, ts);
-    } else {
-      els.synthBody.textContent = rs.content;
-      els.synthBody.scrollTop = 0;
-      setStatus(els.synthStatus, 'st-ok', 'готово');
-      logCall('s4-synth', 'ok', rs.finish_reason, Date.now() - ts, ts);
-    }
-    c.root.classList.add('is-done');
-    setStatus(c.status, 'st-ok', 'готово');
-    setFrBadge(c.fr, rs.finish_reason);
-  } catch (err) {
-    setStatus(els.synthStatus, 'st-err', 'ошибка');
-    logCall('s4-synth', 'err', null, Date.now() - ts, ts);
-    const msg = err && err.message ? err.message : String(err);
-    if (c.cancelled) {
-      failCard('s4', null, 'отменено', t0, true);
-      els.synthBody.textContent = 'Синтез не выполнен: запуск отменён.';
-    } else if (err && err.name === 'AbortError') {
-      failCard('s4', null, 'Таймаут: ' + getSettings().timeout + ' мс', t0, false);
-      els.synthBody.textContent = msg;
-      els.synthBody.classList.add('is-error');
-    } else {
-      failCard('s4', null, msg, t0, false);
-      els.synthBody.textContent = msg;
-      els.synthBody.classList.add('is-error');
-    }
-  }
-  stopCardRunning('s4');
-}
-
-/* ================= Генерация задачи ================= */
-async function generateProblem() {
-  if (genRunning) return;
-  genRunning = true;
-  els.genBtn.disabled = true;
-  setStatus(els.genStatus, 'st-run', 'генерация…');
-  els.genElapsed.textContent = '';
-  const t0 = Date.now();
-  genCtrl = new AbortController();
-  try {
-    const r = await callLLM([
-      { role: 'system', content: GEN_SYSTEM },
-      { role: 'user', content: GEN_USER }
-    ], genCtrl, 'Генерация');
-    if (r.content === null) {
-      setStatus(els.genStatus, 'st-warn', 'пустой ответ (finish_reason: ' + r.finish_reason + ')');
-      logCall('gen', 'warn', r.finish_reason, Date.now() - t0, t0);
-    } else {
-      const stripped = stripFences(r.content);
-      let parsed = null;
-      try {
-        parsed = JSON.parse(stripped);
-      } catch (e) {
-        parsed = null;
-      }
-      if (parsed && typeof parsed === 'object' && typeof parsed.problem === 'string' && parsed.problem.trim().length > 0) {
-        els.problem.value = parsed.problem.trim();
-        els.reference.value = (typeof parsed.reference_answer === 'string') ? parsed.reference_answer : '';
-        setStatus(els.genStatus, 'st-ok', 'готово');
-        logCall('gen', 'ok', r.finish_reason, Date.now() - t0, t0);
-      } else {
-        els.problem.value = stripped;
-        els.reference.value = '';
-        setStatus(els.genStatus, 'st-warn', 'не удалось разобрать JSON (подставлен сырой текст)');
-        logCall('gen', 'warn', r.finish_reason, Date.now() - t0, t0);
-      }
-      updateGenHistoryFull();
-    }
-  } catch (err) {
-    const msg = err && err.message ? err.message : String(err);
-    setStatus(els.genStatus, 'st-err', 'ошибка: ' + msg.slice(0, 60));
-    logCall('gen', 'err', null, Date.now() - t0, t0);
-  } finally {
-    els.genElapsed.textContent = fmtSeconds(Date.now() - t0);
-    genRunning = false;
-    genCtrl = null;
-    syncButtons();
-  }
-}
-
-/* ================= Запустить все ================= */
-async function runAll() {
-  if (runAllActive) return;
-  if (!getProblem()) return;
-  runAllActive = true;
-  runAllAborted = false;
-  els.runAllBtn.textContent = 'Отменить всё';
   syncButtons();
-  try {
-    const fns = { s1: runS1, s2: runS2, s3: runS3, s4: runS4 };
-    const order = ['s1', 's2', 's3', 's4'];
-    for (let i = 0; i < order.length && !runAllAborted; i++) {
-      if (sel[order[i]]) await fns[order[i]]();
-    }
-  } finally {
-    runAllActive = false;
-    runAllAborted = false;
-    updateRunAllLabel();
-    syncButtons();
-  }
 }
 
-function cancelRunAll() {
-  ['s1', 's2', 's3', 's4'].forEach(function (k) {
-    const c = cards[k];
-    if (c.running && c.controller) {
-      c.cancelled = true;
-      c.controller.abort();
+function restoreTemp() {
+  let val = '0.7';
+  try {
+    const saved = localStorage.getItem(LS_TEMP);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const valid = TEMPS.some(function (t) { return t.label === parsed; });
+      if (valid) val = parsed;
     }
+  } catch (e) {
+    /* localStorage недоступен / битое значение — дефолт */
+  }
+  TEMPS.forEach(function (t) {
+    tempBoxes[t.id].checked = (t.label === val);
   });
-  runAllAborted = true;
+  paintTempChecks();
 }
 
 /* ================= События ================= */
@@ -1796,70 +1348,21 @@ els.settingsBtn.addEventListener('click', function () {
 
 els.problem.addEventListener('input', syncButtons);
 
-els.clearProblemBtn.addEventListener('click', function () {
-  els.problem.value = '';
-  els.reference.value = '';
-  setStatus(els.genStatus, 'st-idle', 'ожидание');
-  els.genElapsed.textContent = '';
-  syncButtons();
+TEMPS.forEach(function (t) {
+  tempBoxes[t.id].addEventListener('change', function () {
+    onTempChange(t.id);
+  });
 });
 
+els.runBtn.addEventListener('click', run);
+els.judgeBtn.addEventListener('click', runJudge);
 els.clearHistoryBtn.addEventListener('click', clearHistory);
-
-['s1', 's2', 's3', 's4'].forEach(function (k) {
-  cards[k].sel.addEventListener('change', function () {
-    sel[k] = cards[k].sel.checked;
-    saveSel();
-    updateRunAllLabel();
-    syncButtons();
-  });
-});
-
-els.genBtn.addEventListener('click', function () {
-  generateProblem();
-});
-
-els.runAllBtn.addEventListener('click', function () {
-  if (runAllActive) cancelRunAll();
-  else runAll();
-});
-
-['s1', 's2', 's3', 's4'].forEach(function (k) {
-  cards[k].btn.addEventListener('click', function () {
-    const c = cards[k];
-    if (c.running && c.controller) {
-      c.cancelled = true;
-      c.controller.abort();
-    } else if (!c.running) {
-      if (k === 's1') runS1();
-      else if (k === 's2') runS2();
-      else if (k === 's3') runS3();
-      else runS4();
-    }
-  });
-});
-
-els.expertAddBtn.addEventListener('click', addExpert);
-els.expertInput.addEventListener('keydown', function (e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    addExpert();
-  }
-});
 
 /* ================= Инициализация ================= */
 loadSettings();
 loadHistory();
 renderHistory();
-loadSel();
-['s1', 's2', 's3', 's4'].forEach(function (k) {
-  cards[k].sel.checked = sel[k];
-});
-updateRunAllLabel();
-experts = DEFAULT_EXPERTS.map(function (e) {
-  return { name: e.name, description: e.description };
-});
-renderExperts();
+restoreTemp();
 syncButtons();
 checkProxy();
 </script>
