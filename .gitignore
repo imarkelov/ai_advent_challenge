@@ -24,3 +24,4 @@ __pycache__/
 
 # Данные агента
 history.json
+dialogues.json
