@@ -1935,18 +1935,26 @@ async function savePromptFromModal() {
   }
 }
 
-/* --- Модалка JSON последнего запроса --- */
+/* --- Модалка JSON последнего запроса ---
+   Всегда свежий fetch при каждом открытии: модалка показывает ровно
+   последний выполненный запрос на момент открытия. Счётчик поколения
+   защищает от выхода из порядка: устаревший fetch не перезапишет
+   результат более нового (быстрое закрытие/повторное открытие). */
+let requestFetchSeq = 0;
 async function openRequestModal() {
   openModal(els.requestModal, els.requestModalCloseBtn);
   els.requestJsonBody.textContent = 'Загрузка…';
+  const seq = ++requestFetchSeq;
   try {
     const res = await fetch('/agent/last-request');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
+    if (seq !== requestFetchSeq) return; /* пришёл устаревший fetch */
     els.requestJsonBody.textContent = (data && data.request)
       ? JSON.stringify(data.request, null, 2)
       : 'Запросов ещё не было';
   } catch (e) {
+    if (seq !== requestFetchSeq) return;
     els.requestJsonBody.textContent = 'Не удалось загрузить запрос';
   }
 }
