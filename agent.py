@@ -122,6 +122,14 @@ class SimpleAgent:
         (id, времена, message_count, last_message<=80, active_id).
         get_dialogue_messages(dialogue_id) -> list | None — копия сообщений
         диалога по id (активного или архивного); None, если такого нет.
+        activate_dialogue(dialogue_id) -> str | None — открыть диалог по id
+        для продолжения: он становится активным, предыдущий активный
+        закрывается (closed_at = now, даже если пуст); id == active → noop
+        (возврат того же id); None — такого диалога нет.
+
+        Инвариант: в любой момент ровно один диалог активен (closed_at=null);
+        при случайных двух closed_at=null в файле инвариант восстанавливается
+        при первой записи (activate_dialogue / new_dialogue / ask).
     """
 
     def __init__(self, system_prompt: str = DEFAULT_SYSTEM_PROMPT, model: str = "qwen3.8-27b",
@@ -341,6 +349,28 @@ class SimpleAgent:
                 if d["id"] == dialogue_id:
                     return [{"role": m["role"], "content": m["content"]} for m in d["messages"]]
             return None
+
+    def activate_dialogue(self, dialogue_id: str) -> str | None:
+        """Открыть диалог по id для продолжения: он становится активным.
+
+        Предыдущий активный закрывается (closed_at = now), даже если пуст
+        (в списке появится как архивный с 0 сообщ.). Возвращает новый
+        active_id; None — такого диалога нет. id == active → noop (возврат
+        того же id).
+        """
+        with self._lock:
+            target = next((d for d in self._dialogues["dialogues"] if d["id"] == dialogue_id), None)
+            if target is None:
+                return None
+            if dialogue_id == self._active["id"]:
+                return dialogue_id
+            self._active["closed_at"] = datetime.now().isoformat(timespec="seconds")
+            target["closed_at"] = None
+            self._active = target
+            self._dialogues["active_id"] = dialogue_id
+            self.history = self._active["messages"]  # алиас (тот же объект-список)
+            self._save_dialogues()
+            return dialogue_id
 
     def ask(self, user_input: str) -> dict:
         """Отправить вопрос модели с учётом истории; вернуть результат ответа.
