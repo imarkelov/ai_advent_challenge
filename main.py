@@ -10,8 +10,9 @@
   POST   /agent/config     — применить настройки (включая reasoning: bool)
    GET    /agent/history    — история активного диалога (переживает перезапуск)
    DELETE /agent/history    — сброс активного диалога
-   POST   /agent/dialogues  — закрыть текущий (архив) и открыть новый -> {"id"}
-   GET    /agent/dialogues  — список диалогов (active_id + сводка)
+    POST   /agent/dialogues  — закрыть текущий (архив) и открыть новый -> {"id"}
+    GET    /agent/dialogues  — список диалогов (active_id + сводка)
+    GET    /agent/dialogues/{id} — сообщения диалога (для просмотра)
   GET    /agent/last-request — JSON последнего запроса к LLM ({"request": ...|null})
 
 Запуск:  python main.py
@@ -101,6 +102,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         if self.path == "/agent/history":
             self._send_json(200, {"messages": AGENT.get_history()})
+            return
+        if self.path.startswith("/agent/dialogues/"):
+            # prefix-ветка (id) ставится ПЕРЕД точным "== /agent/dialogues":
+            # точный путь без id не начинается с "/agent/dialogues/"
+            dialogue_id = self.path[len("/agent/dialogues/"):].split("?", 1)[0].strip("/")
+            messages = AGENT.get_dialogue_messages(dialogue_id)
+            if messages is None:
+                self._send_json(404, {"error": f"unknown dialogue {dialogue_id!r}"})
+                return
+            self._send_json(200, {"id": dialogue_id, "messages": messages})
             return
         if self.path == "/agent/dialogues":
             self._send_json(200, AGENT.get_dialogues())
