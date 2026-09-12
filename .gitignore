@@ -21,3 +21,6 @@ __pycache__/
 
 # Secrets
 .env
+
+# Данные агента
+history.json
