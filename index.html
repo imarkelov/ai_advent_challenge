@@ -339,6 +339,22 @@
   }
   /* закрытый (архив) — тусклый, маркер — */
   .dlg-item.closed .dlg-mark { color: var(--text-dim); }
+  /* бейдж непрочитанных: оранжевый (ит.4 акцент), скошенный, glow */
+  .dlg-badge {
+    flex: none;
+    font-family: var(--font-head);
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1;
+    color: #171207;
+    background: var(--orange);
+    padding: 3px 6px 2px;
+    clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+    filter: drop-shadow(0 0 6px rgba(255, 159, 26, .55));
+    font-variant-numeric: tabular-nums;
+  }
+  /* диалог с непрочитанными — оранжевая левая кромка */
+  .dlg-item.has-unread { border-left: 2px solid var(--orange); }
   .dlg-empty {
     font-size: 13px;
     color: var(--text-faint);
@@ -1177,6 +1193,18 @@ let inFlight = false;
 let settingsInFlight = false;
 /* активный диалог (id) — из GET /agent/dialogues (data.active_id) */
 let activeDialogueId = null;
+/* диалог, чьё содержимое сейчас в #chatLog в ЭТОЙ вкладке (потоковое
+   подавление бейджа: открытый диалог в этой вкладке не получает бейдж;
+   другие вкладки могут показывать его бейдж — кросс-таб семантика) */
+let displayedDialogueId = null;
+/* последняя валидная сводка GET /agent/dialogues (кэш для пере-рендера
+   списка: сбой опроса не должен затирать список на «Пока пусто») */
+let dialoguesData = null;
+/* «последний раз открыт» указатели (localStorage, общие для вкладок):
+   {dialogueId: messageCount}. Обновляются только открытием диалога,
+   baseline для неизвестных id и «Новым диалогом» (авто-baseline 0). */
+const LS_READ = 'adv7.readCounts';
+let readCounts = {};
 
 const tempChips = Array.prototype.slice.call(document.querySelectorAll('.temp-row input[type="radio"]'));
 
@@ -1573,7 +1601,14 @@ async function renderActiveChat() {
 /* При загрузке страницы: активный диалог + список диалогов */
 async function loadConversation() {
   await renderActiveChat();
-  loadDialogues();
+  await loadDialogues();
+  /* активный диалог отображается — read-указатель = текущий count */
+  displayedDialogueId = activeDialogueId;
+  if (activeDialogueId != null) {
+    readCounts[activeDialogueId] = historyCount;
+    saveReadCounts();
+    renderDialogueList(dialoguesData); /* бейдж активного гаснет */
+  }
 }
 
 /* Конструктор пустого состояния чата (после сброса диалога) */
@@ -1593,6 +1628,36 @@ function restoreEmptyState() {
 }
 
 /* ================= Диалоги в сайдбаре (GET /agent/dialogues) ================= */
+/* read-указатели (localStorage): загрузка/сохранение {dialogueId: count} */
+function loadReadCounts() {
+  try {
+    const saved = localStorage.getItem(LS_READ);
+    if (saved) {
+      const obj = JSON.parse(saved);
+      if (obj && typeof obj === 'object' && !Array.isArray(obj)) readCounts = obj;
+    }
+  } catch (e) {
+    readCounts = {};
+  }
+}
+
+function saveReadCounts() {
+  try {
+    localStorage.setItem(LS_READ, JSON.stringify(readCounts));
+  } catch (e) {
+    /* localStorage недоступен — молча игнорируем */
+  }
+}
+
+/* непрочитанных в диалоге: максимум(0, count - указатель); указатель
+   неизвестен → baseline текущий count (0 непрочитанных) */
+function unreadCount(d) {
+  if (!d || typeof d.message_count !== 'number') return 0;
+  const known = Object.prototype.hasOwnProperty.call(readCounts, d.id)
+    ? readCounts[d.id] : d.message_count;
+  return Math.max(0, d.message_count - known);
+}
+
 /* created_at (ISO) → «ЧЧ:ММ» */
 function fmtHHMM(iso) {
   const d = new Date(iso);
@@ -1602,6 +1667,9 @@ function fmtHHMM(iso) {
 }
 
 async function loadDialogues() {
+  /* read-указатели общие для вкладок: перечитываем из localStorage
+     (другая вкладка могла открыть диалог и сдвинуть указатель) */
+  loadReadCounts();
   let data = null;
   try {
     const res = await fetch('/agent/dialogues');
@@ -1611,7 +1679,23 @@ async function loadDialogues() {
   } catch (e) {
     data = null;
   }
-  renderDialogueList(data);
+  if (data && data.active_id) activeDialogueId = data.active_id;
+  if (data && Array.isArray(data.dialogues)) {
+    dialoguesData = data;
+    /* baseline: диалога нет в readCounts — базовым считается текущий
+       count (ретро-бейджей не появляется) */
+    let dirty = false;
+    data.dialogues.forEach(function (d) {
+      if (d && typeof d.id === 'string'
+          && !Object.prototype.hasOwnProperty.call(readCounts, d.id)) {
+        readCounts[d.id] = (typeof d.message_count === 'number') ? d.message_count : 0;
+        dirty = true;
+      }
+    });
+    if (dirty) saveReadCounts();
+  }
+  /* рендерим ТОЛЬКО список (кэш при сбое) — #chatLog и ввод не трогаем */
+  renderDialogueList(dialoguesData);
 }
 
 /* список: сортировка по created_at desc (последний = активный — сверху) */
@@ -1630,8 +1714,11 @@ function renderDialogueList(data) {
   });
   items.forEach(function (d) {
     const isActive = d.id === data.active_id;
+    /* бейдж: непрочитанные есть и диалог НЕ отображается в этой вкладке */
+    const hasUnread = unreadCount(d) > 0 && d.id !== displayedDialogueId;
     const li = document.createElement('li');
-    li.className = 'dlg-item ' + (isActive ? 'active' : 'closed');
+    li.className = 'dlg-item ' + (isActive ? 'active' : 'closed')
+      + (hasUnread ? ' has-unread' : '');
     li.dataset.id = d.id;
     li.title = d.id + (d.last_message ? ' — ' + d.last_message : '');
     const time = document.createElement('span');
@@ -1646,6 +1733,12 @@ function renderDialogueList(data) {
     li.appendChild(time);
     li.appendChild(count);
     li.appendChild(mark);
+    if (hasUnread) {
+      const badge = document.createElement('span');
+      badge.className = 'dlg-badge';
+      badge.textContent = String(unreadCount(d));
+      li.appendChild(badge);
+    }
     els.dialogueList.appendChild(li);
   });
 }
@@ -1653,7 +1746,11 @@ function renderDialogueList(data) {
 /* клик по диалогу = продолжить его: POST activate (выбранный становится
    активным, предыдущий — в архив) → чат показывает его историю, ввод включён */
 async function openDialogue(id) {
-  if (id === activeDialogueId) return; /* уже активен — noop */
+  /* noop, только если диалог И отображается в этой вкладке, И активен на
+     сервере: опрос 5 с может сдвинуть activeDialogueId (чужое
+     переключение) — клик обязан пере-рендерить чат, подтянуть сервер
+     под отображение и снять бейдж */
+  if (id === displayedDialogueId && id === activeDialogueId) return;
   try {
     const res = await fetch('/agent/dialogues/' + encodeURIComponent(id) + '/activate', { method: 'POST' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -1664,7 +1761,12 @@ async function openDialogue(id) {
   hideError();
   activeDialogueId = id;
   await renderActiveChat();
-  loadDialogues(); /* ● переехал на выбранный */
+  /* диалог открыт и отображается: read-указатель = текущий count
+     (historyCount после рендера = message_count активного) */
+  displayedDialogueId = id;
+  readCounts[id] = historyCount;
+  saveReadCounts();
+  loadDialogues(); /* ● переехал на выбранный, бейдж гаснет */
   els.input.focus();
 }
 
@@ -1899,7 +2001,8 @@ els.newDialogueBtn.addEventListener('click', async function () {
   restoreEmptyState();
   historyCount = 0;
   updateStatusLine();
-  loadDialogues();
+  await loadDialogues(); /* новый пустой активный → авто-baseline 0 */
+  displayedDialogueId = activeDialogueId;
 });
 
 els.resetBtn.addEventListener('click', async function () {
@@ -1915,18 +2018,24 @@ els.resetBtn.addEventListener('click', async function () {
   restoreEmptyState();
   historyCount = 0;
   updateStatusLine();
-  loadDialogues(); /* message_count активного меняется */
+  await loadDialogues(); /* message_count активного меняется */
+  displayedDialogueId = activeDialogueId;
 });
 
 /* ================= Инициализация ================= */
 syncSend();
 syncReasoningState();
 paintTemp();
+loadReadCounts();
 loadSettings();
 loadModels();
 loadConversation(); /* renderActiveChat + loadDialogues */
 loadHistory();
 renderHistory();
+/* опрос списка диалогов раз в 5 с: лёгкий GET, пере-рендер ТОЛЬКО
+   #dialogueList (бейджи при активности в другой вкладке); при inFlight
+   безопасно — чат и ввод не трогаются */
+setInterval(loadDialogues, 5000);
 </script>
 </body>
 </html>
