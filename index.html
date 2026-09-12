@@ -345,36 +345,6 @@
     padding: 6px 8px;
   }
 
-  /* ---------- Баннер «Архив» (просмотр закрытого диалога) ---------- */
-  .archive-banner {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin: 14px 0;
-    padding: 10px 14px;
-    border: 1px solid var(--orange-border);
-    background: var(--orange-soft);
-    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-  }
-  .archive-banner[hidden] { display: none; margin: 0; }
-  .archive-banner .ab-icon {
-    font-family: var(--font-head);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--orange);
-    white-space: nowrap;
-  }
-  .archive-banner .ab-text {
-    flex: 1;
-    min-width: 0;
-    font-size: 13px;
-    color: var(--text-dim);
-    overflow-wrap: break-word;
-  }
-
   /* ---------- Лента сообщений ---------- */
   #chatLog {
     display: flex;
@@ -1022,12 +992,6 @@
         <h2>Чат</h2>
       </div>
 
-      <div class="archive-banner" id="archiveBanner" hidden>
-        <span class="ab-icon">Архив</span>
-        <span class="ab-text" id="archiveBannerText">Диалог — только чтение</span>
-        <button type="button" class="ghost" id="archiveBackBtn">← К активному</button>
-      </div>
-
       <div id="chatLog" role="log" aria-live="polite" aria-label="Сообщения">
         <div class="chat-empty" id="chatEmpty">
           <p class="overline">Станция готова</p>
@@ -1044,7 +1008,7 @@
         <input type="text" id="chatInput" placeholder="Введите сообщение…" autocomplete="off" autofocus aria-label="Сообщение">
         <button type="button" class="send" id="sendBtn" disabled>Отправить</button>
       </div>
-      <p class="hint">Enter — отправить. История диалога на сервере (dialogues.json), переживает перезапуск. «Сбросить диалог» очищает её. «Новый диалог» закрывает текущий (архив на сервере) и открывает пустой.</p>
+       <p class="hint">Enter — отправить. История диалога на сервере (dialogues.json), переживает перезапуск. «Сбросить диалог» очищает её. «Новый диалог» закрывает текущий (архив на сервере) и открывает пустой. Клик по диалогу в списке — продолжить его (он становится активным).</p>
     </main>
 
     <div class="right-col">
@@ -1182,9 +1146,6 @@ const els = {
   resetBtn: $('resetBtn'),
   statusLine: $('statusLine'),
   dialogueList: $('dialogueList'),
-  archiveBanner: $('archiveBanner'),
-  archiveBannerText: $('archiveBannerText'),
-  archiveBackBtn: $('archiveBackBtn'),
   historyList: $('historyList'),
   clearHistoryBtn: $('clearHistoryBtn'),
   agentModel: $('agentModel'),
@@ -1214,8 +1175,8 @@ const els = {
 
 let inFlight = false;
 let settingsInFlight = false;
-/* архив-режим: null — активный чат; иначе {id, count} просмотренного диалога */
-let viewingArchive = null;
+/* активный диалог (id) — из GET /agent/dialogues (data.active_id) */
+let activeDialogueId = null;
 
 const tempChips = Array.prototype.slice.call(document.querySelectorAll('.temp-row input[type="radio"]'));
 
@@ -1230,9 +1191,8 @@ let historyCount = 0;
 const HISTORY_CAP = 20; // зеркало серверного cap, для отображения
 
 /* ================= Утилиты ================= */
-/* в архив-режиме кнопка отправки не оживает (ввод disabled) */
 function syncSend() {
-  els.send.disabled = inFlight || els.input.value.trim().length === 0 || viewingArchive !== null;
+  els.send.disabled = inFlight || els.input.value.trim().length === 0;
 }
 
 function scrollBottom() {
@@ -1418,7 +1378,7 @@ function addAssistantBubble(text, reasoning, usage) {
 
 async function send() {
   const text = els.input.value.trim();
-  if (!text || inFlight || viewingArchive !== null) return;
+  if (!text || inFlight) return;
 
   inFlight = true;
   hideError();
@@ -1581,23 +1541,39 @@ async function applySettings() {
   settingsInFlight = false;
   els.applySettings.disabled = false;
 }
-/* ================= Восстановление диалога с сервера ================= */
-async function loadConversation() {
+/* ================= Активный диалог (GET /agent/history → #chatLog) ================= */
+/* Перерендер активного диалога: чистим ленту, показываем сообщения
+   активного (или пустое состояние), синхронизируем статус и ввод. */
+async function renderActiveChat() {
+  let data = null;
   try {
     const res = await fetch('/agent/history');
-    if (!res.ok) return;
-    const data = await res.json();
-    if (!data || !Array.isArray(data.messages)) return;
-    if (data.messages.length > 0) hideEmpty();
+    if (res.ok) {
+      try { data = await res.json(); } catch (e) { data = null; }
+    }
+  } catch (e) {
+    data = null;
+  }
+  els.log.textContent = '';
+  els.empty = null;
+  if (data && Array.isArray(data.messages) && data.messages.length > 0) {
     data.messages.forEach(function (m) {
       addBubble(m.role === 'user' ? 'user' : 'assistant', m.content);
     });
     historyCount = Math.min(HISTORY_CAP, data.messages.length);
-    updateStatusLine();
-    scrollBottom();
-  } catch (e) {
-    /* сервер недоступен — остаёмся с пустым чатом */
+  } else {
+    restoreEmptyState();
+    historyCount = 0;
   }
+  updateStatusLine();
+  syncSend();
+  scrollBottom();
+}
+
+/* При загрузке страницы: активный диалог + список диалогов */
+async function loadConversation() {
+  await renderActiveChat();
+  loadDialogues();
 }
 
 /* Конструктор пустого состояния чата (после сброса диалога) */
@@ -1638,12 +1614,9 @@ async function loadDialogues() {
   renderDialogueList(data);
 }
 
-/* кэш последней сводки — клик по списку определяет активный без повторного GET */
-let loadDialoguesCache = null;
-
 /* список: сортировка по created_at desc (последний = активный — сверху) */
 function renderDialogueList(data) {
-  loadDialoguesCache = (data && Array.isArray(data.dialogues)) ? data : null;
+  if (data && data.active_id) activeDialogueId = data.active_id;
   els.dialogueList.textContent = '';
   if (!data || !Array.isArray(data.dialogues) || data.dialogues.length === 0) {
     const li = document.createElement('li');
@@ -1677,86 +1650,29 @@ function renderDialogueList(data) {
   });
 }
 
-/* клик: активный → возврат в активный; закрытый → просмотр (только чтение) */
-els.dialogueList.addEventListener('click', function (e) {
-  const li = e.target.closest('.dlg-item');
-  if (!li || !li.dataset.id) return;
-  const id = li.dataset.id;
-  const data = loadDialoguesCache;
-  const isActive = data && data.active_id === id;
-  if (isActive) returnToActiveView();
-  else viewDialogue(id);
-});
-
-/* просмотр закрытого диалога: GET /agent/dialogues/{id} → bubbles + баннер */
-async function viewDialogue(id) {
-  let data = null;
+/* клик по диалогу = продолжить его: POST activate (выбранный становится
+   активным, предыдущий — в архив) → чат показывает его историю, ввод включён */
+async function openDialogue(id) {
+  if (id === activeDialogueId) return; /* уже активен — noop */
   try {
-    const res = await fetch('/agent/dialogues/' + encodeURIComponent(id));
-    if (res.ok) {
-      try { data = await res.json(); } catch (e) { data = null; }
-    }
+    const res = await fetch('/agent/dialogues/' + encodeURIComponent(id) + '/activate', { method: 'POST' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
   } catch (e) {
-    data = null;
-  }
-  if (!data || !Array.isArray(data.messages)) {
-    showError('Не удалось загрузить диалог');
+    showError('Не удалось открыть диалог');
     return;
   }
   hideError();
-  els.log.textContent = '';
-  els.empty = null;
-  if (data.messages.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'chat-empty';
-    const p = document.createElement('p');
-    p.textContent = 'Диалог пуст';
-    empty.appendChild(p);
-    els.log.appendChild(empty);
-  } else {
-    data.messages.forEach(function (m) {
-      addBubble(m.role === 'user' ? 'user' : 'assistant', m.content);
-    });
-  }
-  viewingArchive = { id: data.id, count: data.messages.length };
-  els.archiveBannerText.textContent =
-    'Диалог ' + data.id + ' · ' + data.messages.length + ' сообщ. — только чтение';
-  els.archiveBanner.hidden = false;
-  els.input.disabled = true;
-  syncSend();
-  scrollBottom();
+  activeDialogueId = id;
+  await renderActiveChat();
+  loadDialogues(); /* ● переехал на выбранный */
+  els.input.focus();
 }
 
-/* возврат к активному: перерендер из GET /agent/history, баннер скрыт */
-async function returnToActiveView() {
-  if (viewingArchive === null) return; /* уже в активном — noop */
-  viewingArchive = null;
-  els.archiveBanner.hidden = true;
-  els.input.disabled = false;
-  let data = null;
-  try {
-    const res = await fetch('/agent/history');
-    if (res.ok) {
-      try { data = await res.json(); } catch (e) { data = null; }
-    }
-  } catch (e) {
-    data = null;
-  }
-  els.log.textContent = '';
-  if (data && Array.isArray(data.messages) && data.messages.length > 0) {
-    data.messages.forEach(function (m) {
-      addBubble(m.role === 'user' ? 'user' : 'assistant', m.content);
-    });
-    historyCount = Math.min(HISTORY_CAP, data.messages.length);
-  } else {
-    restoreEmptyState();
-    historyCount = 0;
-  }
-  updateStatusLine();
-  syncSend();
-  els.input.focus();
-  scrollBottom();
-}
+els.dialogueList.addEventListener('click', function (e) {
+  const li = e.target.closest('.dlg-item');
+  if (!li || !li.dataset.id) return;
+  openDialogue(li.dataset.id);
+});
 
 /* ================= История запросов (localStorage, паттерн day6) ================= */
 const LS_HISTORY = 'adv7.history';
@@ -1969,7 +1885,7 @@ els.agentModel.addEventListener('change', function () {
 
 /* «Новый диалог»: POST /agent/dialogues — текущий закрывается (архив на
    сервере), в UI открывается пустое окно; история запросов (sidebar) остаётся.
-   Из архив-режима — сначала возврат к активному (он уже пустой/новый). */
+   Список обновляется — активным может стать бывший архивный (клик). */
 els.newDialogueBtn.addEventListener('click', async function () {
   try {
     const res = await fetch('/agent/dialogues', { method: 'POST' });
@@ -1979,14 +1895,10 @@ els.newDialogueBtn.addEventListener('click', async function () {
     return;
   }
   hideError();
-  if (viewingArchive !== null) {
-    await returnToActiveView(); /* перерендерит новый пустой активный */
-  } else {
-    els.log.textContent = '';
-    restoreEmptyState();
-    historyCount = 0;
-    updateStatusLine();
-  }
+  els.log.textContent = '';
+  restoreEmptyState();
+  historyCount = 0;
+  updateStatusLine();
   loadDialogues();
 });
 
@@ -2006,17 +1918,13 @@ els.resetBtn.addEventListener('click', async function () {
   loadDialogues(); /* message_count активного меняется */
 });
 
-/* «← К активному» (баннер архива) */
-els.archiveBackBtn.addEventListener('click', function () { returnToActiveView(); });
-
 /* ================= Инициализация ================= */
 syncSend();
 syncReasoningState();
 paintTemp();
 loadSettings();
 loadModels();
-loadConversation();
-loadDialogues();
+loadConversation(); /* renderActiveChat + loadDialogues */
 loadHistory();
 renderHistory();
 </script>
