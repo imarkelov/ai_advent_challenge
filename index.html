@@ -185,6 +185,232 @@
   }
   .section-head .overline { margin-bottom: 7px; }
 
+  /* ---------- Кнопка-призрак (day4) ---------- */
+  button.ghost {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: color var(--dur) ease, border-color var(--dur) ease, background var(--dur) ease, opacity var(--dur) ease;
+  }
+  button.ghost:hover:not(:disabled) {
+    color: var(--text);
+    border-color: var(--border-strong);
+    background: var(--surface);
+  }
+  button.ghost:disabled { opacity: .55; cursor: not-allowed; }
+
+  /* ---------- Настройки ---------- */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 16px;
+  }
+  .field-wide { grid-column: 1 / -1; }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .field input {
+    width: 100%;
+    background: var(--inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    padding: 9px 12px;
+    transition: border-color var(--dur) ease, box-shadow var(--dur) ease;
+  }
+  .field input::placeholder { color: var(--text-faint); font-family: var(--font-body); }
+  .field input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .field textarea {
+    width: 100%;
+    resize: vertical;
+    background: var(--inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    line-height: 1.6;
+    padding: 9px 12px;
+    transition: border-color var(--dur) ease, box-shadow var(--dur) ease;
+  }
+  .field textarea::placeholder { color: var(--text-faint); }
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .settings-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .settings-note {
+    margin: 14px 0 0;
+    font-size: 12px;
+    color: var(--text-faint);
+    line-height: 1.5;
+  }
+  .settings-error {
+    margin: 14px 0 0;
+    font-size: 12.5px;
+    color: var(--err);
+    line-height: 1.5;
+    overflow-wrap: break-word;
+  }
+  .settings-error[hidden] { display: none; }
+
+  /* ---------- Температура: чипы (day4) ---------- */
+  .temp-block { margin-top: 16px; }
+  .temp-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .temp-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .temp-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-dim);
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 7px 12px;
+    background: var(--surface-2);
+    transition: border-color var(--dur) ease, color var(--dur) ease, background var(--dur) ease, box-shadow var(--dur) ease;
+  }
+  .temp-check:hover { border-color: var(--border-strong); color: var(--text); }
+  .temp-check input { margin: 0; cursor: pointer; accent-color: var(--accent); }
+  .temp-check.checked {
+    color: var(--accent-ink);
+    background: var(--accent);
+    border-color: rgba(0, 0, 0, .25);
+    box-shadow: 0 2px 12px rgba(224, 166, 60, .22);
+  }
+  .temp-check.checked input { accent-color: var(--accent-ink); }
+  .temp-note {
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+
+  /* ---------- Layout: сайдбар истории + основной контент (day4) ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .layout-main { min-width: 0; }
+
+  #sidebar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .side-title {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 650;
+  }
+  #historyList {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    max-height: 56vh;
+    overflow-y: auto;
+  }
+  .hist-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-s);
+  }
+  .hist-item:hover {
+    background: var(--surface-2);
+    border-color: var(--border);
+  }
+  .hist-time {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--text-faint);
+  }
+  .hist-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .hist-del {
+    flex: none;
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 5px;
+  }
+  .hist-del:hover { color: var(--err); }
+  .hist-empty {
+    font-size: 12.5px;
+    color: var(--text-faint);
+    padding: 6px 8px;
+  }
+
+  @media (min-width: 720px) {
+    .settings-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 900px) {
+    .layout { grid-template-columns: 280px 1fr; }
+    #sidebar { position: sticky; top: 20px; }
+  }
+
   /* ---------- Лента сообщений ---------- */
   #chatLog {
     display: flex;
@@ -365,6 +591,7 @@
     <div class="masthead-row">
       <span class="mark" aria-hidden="true"></span>
       <h1>Простой AI-агент</h1>
+      <button type="button" class="ghost" id="settingsBtn">Настройки</button>
     </div>
     <p class="lede">Свободный диалог с агентом: он помнит ходы беседы (последние 20) и отвечает на каждый запрос. Все детали модели, промпта и сети инкапсулированы в агента — страница знает только один локальный маршрут.</p>
     <div class="meta">
@@ -374,6 +601,50 @@
       <span class="chip">RU</span>
     </div>
   </header>
+
+  <section class="panel" id="settingsPanel" hidden>
+    <div class="section-head">
+      <p class="overline">Настройки</p>
+      <h2>Настройки агента</h2>
+    </div>
+    <div class="settings-grid">
+      <div class="field field-wide">
+        <label for="sysPrompt">Системный промпт</label>
+        <textarea id="sysPrompt" rows="3" spellcheck="false"></textarea>
+      </div>
+      <div class="field">
+        <label for="agentModel">Модель</label>
+        <input id="agentModel" type="text" spellcheck="false" autocomplete="off" placeholder="qwen3.8-27b">
+      </div>
+      <div class="field">
+        <label for="maxTokens">Max tokens</label>
+        <input id="maxTokens" type="text" inputmode="numeric" spellcheck="false" autocomplete="off" placeholder="не задано">
+      </div>
+    </div>
+    <div class="temp-block">
+      <span class="temp-label" id="tempLabel">Температура</span>
+      <div class="temp-row" role="radiogroup" aria-labelledby="tempLabel">
+        <label class="temp-check"><input type="radio" name="temp" data-t="" checked>по умолчанию</label>
+        <label class="temp-check"><input type="radio" name="temp" data-t="0">0</label>
+        <label class="temp-check"><input type="radio" name="temp" data-t="0.7">0.7</label>
+        <label class="temp-check"><input type="radio" name="temp" data-t="1.2">1.2</label>
+      </div>
+      <p class="temp-note">Одна температура на запрос агента. «По умолчанию» — параметр не передаётся.</p>
+    </div>
+    <div class="settings-actions">
+      <button type="button" class="send" id="applySettings">Применить</button>
+    </div>
+    <p class="settings-error" id="settingsError" hidden></p>
+    <p class="settings-note">Настройки хранятся в агенте (серверная сторона) и сбрасываются при рестарте сервера. Браузер их не хранит.</p>
+  </section>
+
+  <div class="layout">
+    <aside id="sidebar" aria-label="История запросов">
+      <h2 class="side-title">История запросов</h2>
+      <ul id="historyList"></ul>
+      <button type="button" class="ghost" id="clearHistoryBtn">Очистить всё</button>
+    </aside>
+    <main class="layout-main">
 
   <section class="panel" aria-labelledby="h-chat">
     <div class="section-head">
@@ -400,6 +671,8 @@
     </div>
     <p class="hint">Enter — отправить. История диалога хранится в памяти сервера (последние 20 сообщений) и сбрасывается при его перезапуске.</p>
   </section>
+    </main>
+  </div>
 </div>
 <script>
 'use strict';
@@ -412,10 +685,22 @@ const els = {
   input: $('chatInput'),
   send: $('sendBtn'),
   error: $('chatError'),
-  errorText: $('chatErrorText')
+  errorText: $('chatErrorText'),
+  settingsBtn: $('settingsBtn'),
+  settingsPanel: $('settingsPanel'),
+  sysPrompt: $('sysPrompt'),
+  agentModel: $('agentModel'),
+  maxTokens: $('maxTokens'),
+  applySettings: $('applySettings'),
+  settingsError: $('settingsError'),
+  historyList: $('historyList'),
+  clearHistoryBtn: $('clearHistoryBtn')
 };
 
 let inFlight = false;
+let settingsInFlight = false;
+
+const tempChips = Array.prototype.slice.call(document.querySelectorAll('.temp-row input[type="radio"]'));
 
 /* ================= Утилиты ================= */
 function syncSend() {
@@ -526,15 +811,197 @@ async function send() {
     addBubble('user', text);
     addBubble('assistant', reply);
     els.input.value = '';
+    addHistoryEntry(text, reply, true);
   } else {
     /* ошибка: текст ввода сохраняем, поле остаётся доступным */
     showError(errMsg);
+    addHistoryEntry(text, errMsg, false);
   }
 
   inFlight = false;
   syncSend();
   scrollBottom();
   els.input.focus();
+}
+
+/* ================= Настройки агента (/agent/config) ================= */
+function paintTemp() {
+  tempChips.forEach(function (chip) {
+    const label = chip.closest('label');
+    if (label) label.classList.toggle('checked', chip.checked);
+  });
+}
+
+function selectedTemp() {
+  const chip = tempChips.filter(function (c) { return c.checked; })[0];
+  if (!chip) return null;
+  const raw = chip.getAttribute('data-t');
+  if (raw === '') return null; /* «по умолчанию» — параметр не передаётся */
+  const v = parseFloat(raw);
+  return Number.isFinite(v) ? v : null;
+}
+
+function parsedMaxTokens() {
+  const raw = els.maxTokens.value.trim();
+  if (!raw) return null;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+
+/* GET /agent/config → заполнить форму. Ошибка — молча оставить дефолты. */
+async function loadSettings() {
+  let data = null;
+  try {
+    const res = await fetch('/agent/config');
+    if (res.ok) {
+      try { data = await res.json(); } catch (e) { data = null; }
+    }
+  } catch (e) {
+    data = null;
+  }
+  if (!data || typeof data !== 'object') return;
+  if (typeof data.system_prompt === 'string') els.sysPrompt.value = data.system_prompt;
+  if (typeof data.model === 'string' && data.model !== '') els.agentModel.value = data.model;
+  if (data.max_tokens != null) els.maxTokens.value = String(data.max_tokens);
+  let target = null;
+  if (data.temperature != null) {
+    const t = String(data.temperature);
+    target = tempChips.filter(function (c) { return c.getAttribute('data-t') === t; })[0] || null;
+  }
+  if (target) target.checked = true;
+  else tempChips[0].checked = true;
+  paintTemp();
+}
+
+async function applySettings() {
+  if (settingsInFlight) return;
+  settingsInFlight = true;
+  els.applySettings.disabled = true;
+  els.settingsError.hidden = true;
+
+  const body = {
+    system_prompt: els.sysPrompt.value.trim(),
+    model: els.agentModel.value.trim(),
+    temperature: selectedTemp(),
+    max_tokens: parsedMaxTokens()
+  };
+
+  try {
+    const res = await fetch('/agent/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) {
+      els.applySettings.textContent = 'Применено ✓';
+      setTimeout(function () { els.applySettings.textContent = 'Применить'; }, 1200);
+    } else {
+      let msg = 'Не удалось применить настройки';
+      try {
+        const data = await res.json();
+        if (data && typeof data.error === 'string') msg = data.error;
+      } catch (e) {
+        /* тело не-JSON — общий текст ошибки */
+      }
+      els.settingsError.textContent = msg;
+      els.settingsError.hidden = false;
+    }
+  } catch (err) {
+    els.settingsError.textContent = 'Сервер недоступен: ' + (err && err.message ? err.message : String(err));
+    els.settingsError.hidden = false;
+  }
+  settingsInFlight = false;
+  els.applySettings.disabled = false;
+}
+
+/* ================= История запросов (localStorage) ================= */
+const LS_HISTORY = 'adv6.history';
+const HISTORY_MAX = 50;
+let history = [];
+
+function loadHistory() {
+  try {
+    const saved = localStorage.getItem(LS_HISTORY);
+    if (saved) {
+      const arr = JSON.parse(saved);
+      if (Array.isArray(arr)) history = arr.slice(0, HISTORY_MAX);
+    }
+  } catch (e) {
+    history = [];
+  }
+}
+
+function saveHistory() {
+  try {
+    localStorage.setItem(LS_HISTORY, JSON.stringify(history));
+  } catch (e) {
+    /* localStorage недоступен — молча игнорируем */
+  }
+}
+
+function shortText(s, max) {
+  const str = typeof s === 'string' ? s : (s == null ? '' : String(s));
+  return str.length > max ? str.slice(0, max) + '…' : str;
+}
+
+function addHistoryEntry(text, reply, ok) {
+  history.unshift({
+    t: Date.now(),
+    text: shortText(text, 60),
+    reply: shortText(reply, 120),
+    ok: ok
+  });
+  if (history.length > HISTORY_MAX) history.length = HISTORY_MAX;
+  saveHistory();
+  renderHistory();
+}
+
+function fmtTime(t) {
+  const d = new Date(t);
+  return isNaN(d.getTime()) ? '' : d.toLocaleTimeString('ru-RU');
+}
+
+function renderHistory() {
+  els.historyList.textContent = '';
+  if (history.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'hist-empty';
+    li.textContent = 'Пока пусто';
+    els.historyList.appendChild(li);
+    return;
+  }
+  history.forEach(function (h, idx) {
+    const li = document.createElement('li');
+    li.className = 'hist-item';
+    const time = document.createElement('span');
+    time.className = 'hist-time';
+    time.textContent = fmtTime(h.t);
+    const text = document.createElement('span');
+    text.className = 'hist-text';
+    text.textContent = h.text || '';
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'hist-del';
+    del.textContent = '×';
+    del.title = 'Удалить запись';
+    del.setAttribute('aria-label', 'Удалить');
+    del.addEventListener('click', function (e) {
+      e.stopPropagation();
+      history.splice(idx, 1);
+      saveHistory();
+      renderHistory();
+    });
+    li.appendChild(time);
+    li.appendChild(text);
+    li.appendChild(del);
+    els.historyList.appendChild(li);
+  });
+}
+
+function clearHistory() {
+  history = [];
+  saveHistory();
+  renderHistory();
 }
 
 /* ================= События ================= */
@@ -547,8 +1014,21 @@ els.input.addEventListener('keydown', function (e) {
   }
 });
 
+els.settingsBtn.addEventListener('click', function () {
+  els.settingsPanel.hidden = !els.settingsPanel.hidden;
+});
+els.applySettings.addEventListener('click', applySettings);
+els.clearHistoryBtn.addEventListener('click', clearHistory);
+tempChips.forEach(function (chip) {
+  chip.addEventListener('change', paintTemp);
+});
+
 /* ================= Инициализация ================= */
 syncSend();
+paintTemp();
+loadSettings();
+loadHistory();
+renderHistory();
 </script>
 </body>
 </html>
