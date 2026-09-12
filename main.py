@@ -81,6 +81,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return
             self._send(200, body, "text/html; charset=utf-8")
             return
+        if self.path == "/agent/config":
+            self._send_json(200, AGENT.get_config())
+            return
         self._send_json(404, {"error": "not found", "hint": "GET / serves the page"})
 
     def do_POST(self):
@@ -113,6 +116,57 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send_json(502, {"error": str(e)})
                 return
             self._send_json(200, {"reply": reply})
+            return
+
+        if path == "/agent/config":
+            # Разбор и типизация body, как в /agent/ask; значения применяются
+            # атомарно через agent.configure (валидация — RuntimeError -> 400).
+            try:
+                length = int(self.headers.get("Content-Length") or 0)
+                raw = self.rfile.read(length)
+            except (ValueError, OSError):
+                self._send_json(400, {"error": "invalid request body"})
+                return
+            try:
+                data = json.loads(raw)
+            except ValueError:
+                self._send_json(400, {"error": "invalid JSON"})
+                return
+            if not isinstance(data, dict):
+                self._send_json(400, {"error": "body must be a JSON object"})
+                return
+            known = {}
+            if "system_prompt" in data:
+                if not isinstance(data["system_prompt"], str):
+                    self._send_json(400, {"error": "system_prompt must be a string"})
+                    return
+                known["system_prompt"] = data["system_prompt"]
+            if "model" in data:
+                if not isinstance(data["model"], str):
+                    self._send_json(400, {"error": "model must be a string"})
+                    return
+                known["model"] = data["model"]
+            # null для temperature/max_tokens = «сбросить в None» (UI шлёт все 4
+            # ключа, пустое поле → null); absent = «не менять».
+            if "temperature" in data:
+                t = data["temperature"]
+                if t is not None and (isinstance(t, bool) or not isinstance(t, (int, float))):
+                    self._send_json(400, {"error": "temperature must be a number"})
+                    return
+                known["temperature"] = t
+            if "max_tokens" in data:
+                mt = data["max_tokens"]
+                if mt is not None and (isinstance(mt, bool) or not isinstance(mt, int)):
+                    self._send_json(400, {"error": "max_tokens must be an integer"})
+                    return
+                known["max_tokens"] = mt
+            # Неизвестные ключи в body игнорируются.
+            try:
+                AGENT.configure(**known)
+            except RuntimeError as e:
+                self._send_json(400, {"error": str(e)})
+                return
+            self._send_json(200, {"ok": True})
             return
 
         # Прочие POST-пути — 404 (поведение day5)
