@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
-<title>Простой AI-агент</title>
+<title>AI-агент</title>
 <style>
   /* ============================================================
       Дизайн-система day3–day6: тёмная тема, уголь + янтарный акцент.
@@ -121,23 +121,7 @@
     color: var(--text-dim);
   }
 
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 18px;
-  }
-  .chip {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: .04em;
-    color: var(--text-faint);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 4px 11px;
-    background: rgba(255, 255, 255, .012);
-  }
-  .chip b { color: var(--text-dim); font-weight: 600; }
+  .head-actions { margin-left: auto; display: flex; gap: 8px; }
 
   /* ---------- Кнопки ---------- */
   button { font-family: var(--font-body); }
@@ -330,85 +314,8 @@
     color: var(--text-faint);
   }
 
-  /* ---------- Layout: сайдбар истории + основной контент (day4) ---------- */
-  .layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    align-items: start;
-  }
-  .layout-main { min-width: 0; }
-
-  #sidebar {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    box-shadow: var(--shadow-card);
-  }
-  .side-title {
-    margin: 0 0 10px;
-    font-size: 14px;
-    font-weight: 650;
-  }
-  #historyList {
-    list-style: none;
-    margin: 0 0 12px;
-    padding: 0;
-    max-height: 56vh;
-    overflow-y: auto;
-  }
-  .hist-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border: 1px solid transparent;
-    border-radius: var(--radius-s);
-  }
-  .hist-item:hover {
-    background: var(--surface-2);
-    border-color: var(--border);
-  }
-  .hist-time {
-    flex: none;
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    color: var(--text-faint);
-  }
-  .hist-text {
-    flex: 1;
-    min-width: 0;
-    font-size: 12.5px;
-    color: var(--text-dim);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .hist-del {
-    flex: none;
-    background: none;
-    border: none;
-    color: var(--text-faint);
-    font-size: 14px;
-    line-height: 1;
-    cursor: pointer;
-    padding: 2px 5px;
-    border-radius: 5px;
-  }
-  .hist-del:hover { color: var(--err); }
-  .hist-empty {
-    font-size: 12.5px;
-    color: var(--text-faint);
-    padding: 6px 8px;
-  }
-
   @media (min-width: 720px) {
     .settings-grid { grid-template-columns: 1fr 1fr; }
-  }
-  @media (min-width: 900px) {
-    .layout { grid-template-columns: 280px 1fr; }
-    #sidebar { position: sticky; top: 20px; }
   }
 
   /* ---------- Лента сообщений ---------- */
@@ -587,19 +494,16 @@
 <body>
 <div class="page">
   <header class="masthead">
-    <p class="overline">День 6 · AI Advent Challenge</p>
+    <p class="overline">День 7 · AI Advent Challenge</p>
     <div class="masthead-row">
       <span class="mark" aria-hidden="true"></span>
-      <h1>Простой AI-агент</h1>
-      <button type="button" class="ghost" id="settingsBtn">Настройки</button>
+      <h1>AI-агент</h1>
+      <span class="head-actions">
+        <button type="button" class="ghost" id="resetBtn">Сбросить диалог</button>
+        <button type="button" class="ghost" id="settingsBtn">Настройки</button>
+      </span>
     </div>
-    <p class="lede">Свободный диалог с агентом: он помнит ходы беседы (последние 20) и отвечает на каждый запрос. Все детали модели, промпта и сети инкапсулированы в агента — страница знает только один локальный маршрут.</p>
-    <div class="meta">
-      <span class="chip">мульти-турн чат</span>
-      <span class="chip">память · <b>20</b> сообщений</span>
-      <span class="chip">один локальный маршрут</span>
-      <span class="chip">RU</span>
-    </div>
+    <p class="lede">Диалог сохраняется на сервере (history.json) и переживает перезапуск.</p>
   </header>
 
   <section class="panel" id="settingsPanel" hidden>
@@ -635,28 +539,19 @@
       <button type="button" class="send" id="applySettings">Применить</button>
     </div>
     <p class="settings-error" id="settingsError" hidden></p>
-    <p class="settings-note">Настройки хранятся в агенте (серверная сторона) и сбрасываются при рестарте сервера. Браузер их не хранит.</p>
+    <p class="settings-note">Настройки хранятся в агенте (серверная сторона) и сбрасываются при рестарте сервера. История диалога — нет: она в history.json.</p>
   </section>
 
-  <div class="layout">
-    <aside id="sidebar" aria-label="История запросов">
-      <h2 class="side-title">История запросов</h2>
-      <ul id="historyList"></ul>
-      <button type="button" class="ghost" id="clearHistoryBtn">Очистить всё</button>
-    </aside>
-    <main class="layout-main">
-
-  <section class="panel" aria-labelledby="h-chat">
+  <section class="panel">
     <div class="section-head">
       <p class="overline">Диалог</p>
-      <h2 id="h-chat">Чат с агентом</h2>
+      <h2>Чат</h2>
     </div>
 
     <div id="chatLog" role="log" aria-live="polite" aria-label="Сообщения">
       <div class="chat-empty" id="chatEmpty">
-        <p class="overline">Начало беседы</p>
-        <p>Напишите первое сообщение — агент ответит.</p>
-        <p>Он запоминает контекст: попробуйте спросить о чём-то, что вы упомянули ранее.</p>
+        <p class="overline">Диалог</p>
+        <p>Напишите сообщение — агент ответит и запомнит контекст.</p>
       </div>
     </div>
 
@@ -669,10 +564,8 @@
       <input type="text" id="chatInput" placeholder="Напишите сообщение агенту…" autocomplete="off" autofocus aria-label="Сообщение">
       <button type="button" class="send" id="sendBtn" disabled>Отправить</button>
     </div>
-    <p class="hint">Enter — отправить. История диалога хранится в памяти сервера (последние 20 сообщений) и сбрасывается при его перезапуске.</p>
+    <p class="hint">Enter — отправить. История диалога в history.json и переживает перезапуск сервера; «Сбросить диалог» очищает её.</p>
   </section>
-    </main>
-  </div>
 </div>
 <script>
 'use strict';
@@ -693,8 +586,7 @@ const els = {
   maxTokens: $('maxTokens'),
   applySettings: $('applySettings'),
   settingsError: $('settingsError'),
-  historyList: $('historyList'),
-  clearHistoryBtn: $('clearHistoryBtn')
+  resetBtn: $('resetBtn')
 };
 
 let inFlight = false;
@@ -811,11 +703,9 @@ async function send() {
     addBubble('user', text);
     addBubble('assistant', reply);
     els.input.value = '';
-    addHistoryEntry(text, reply, true);
   } else {
     /* ошибка: текст ввода сохраняем, поле остаётся доступным */
     showError(errMsg);
-    addHistoryEntry(text, errMsg, false);
   }
 
   inFlight = false;
@@ -914,94 +804,39 @@ async function applySettings() {
   els.applySettings.disabled = false;
 }
 
-/* ================= История запросов (localStorage) ================= */
-const LS_HISTORY = 'adv6.history';
-const HISTORY_MAX = 50;
-let history = [];
+/* ================= Восстановление диалога с сервера ================= */
 
-function loadHistory() {
+/* Восстановление диалога с сервера (история переживает перезапуск) */
+async function loadConversation() {
   try {
-    const saved = localStorage.getItem(LS_HISTORY);
-    if (saved) {
-      const arr = JSON.parse(saved);
-      if (Array.isArray(arr)) history = arr.slice(0, HISTORY_MAX);
-    }
-  } catch (e) {
-    history = [];
-  }
-}
-
-function saveHistory() {
-  try {
-    localStorage.setItem(LS_HISTORY, JSON.stringify(history));
-  } catch (e) {
-    /* localStorage недоступен — молча игнорируем */
-  }
-}
-
-function shortText(s, max) {
-  const str = typeof s === 'string' ? s : (s == null ? '' : String(s));
-  return str.length > max ? str.slice(0, max) + '…' : str;
-}
-
-function addHistoryEntry(text, reply, ok) {
-  history.unshift({
-    t: Date.now(),
-    text: shortText(text, 60),
-    reply: shortText(reply, 120),
-    ok: ok
-  });
-  if (history.length > HISTORY_MAX) history.length = HISTORY_MAX;
-  saveHistory();
-  renderHistory();
-}
-
-function fmtTime(t) {
-  const d = new Date(t);
-  return isNaN(d.getTime()) ? '' : d.toLocaleTimeString('ru-RU');
-}
-
-function renderHistory() {
-  els.historyList.textContent = '';
-  if (history.length === 0) {
-    const li = document.createElement('li');
-    li.className = 'hist-empty';
-    li.textContent = 'Пока пусто';
-    els.historyList.appendChild(li);
-    return;
-  }
-  history.forEach(function (h, idx) {
-    const li = document.createElement('li');
-    li.className = 'hist-item';
-    const time = document.createElement('span');
-    time.className = 'hist-time';
-    time.textContent = fmtTime(h.t);
-    const text = document.createElement('span');
-    text.className = 'hist-text';
-    text.textContent = h.text || '';
-    const del = document.createElement('button');
-    del.type = 'button';
-    del.className = 'hist-del';
-    del.textContent = '×';
-    del.title = 'Удалить запись';
-    del.setAttribute('aria-label', 'Удалить');
-    del.addEventListener('click', function (e) {
-      e.stopPropagation();
-      history.splice(idx, 1);
-      saveHistory();
-      renderHistory();
+    const res = await fetch('/agent/history');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data || !Array.isArray(data.messages)) return;
+    if (data.messages.length > 0) hideEmpty();
+    data.messages.forEach(function (m) {
+      addBubble(m.role === 'user' ? 'user' : 'assistant', m.content);
     });
-    li.appendChild(time);
-    li.appendChild(text);
-    li.appendChild(del);
-    els.historyList.appendChild(li);
-  });
+    scrollBottom();
+  } catch (e) {
+    /* сервер недоступен — остаёмся с пустым чатом */
+  }
 }
 
-function clearHistory() {
-  history = [];
-  saveHistory();
-  renderHistory();
+/* Конструктор пустого состояния чата (после сброса диалога) */
+function restoreEmptyState() {
+  const empty = document.createElement('div');
+  empty.className = 'chat-empty';
+  empty.id = 'chatEmpty';
+  const o = document.createElement('p');
+  o.className = 'overline';
+  o.textContent = 'Диалог';
+  const p = document.createElement('p');
+  p.textContent = 'Напишите сообщение — агент ответит и запомнит контекст.';
+  empty.appendChild(o);
+  empty.appendChild(p);
+  els.log.appendChild(empty);
+  els.empty = empty;
 }
 
 /* ================= События ================= */
@@ -1018,7 +853,18 @@ els.settingsBtn.addEventListener('click', function () {
   els.settingsPanel.hidden = !els.settingsPanel.hidden;
 });
 els.applySettings.addEventListener('click', applySettings);
-els.clearHistoryBtn.addEventListener('click', clearHistory);
+els.resetBtn.addEventListener('click', async function () {
+  try {
+    const res = await fetch('/agent/history', { method: 'DELETE' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+  } catch (e) {
+    showError('Не удалось сбросить диалог');
+    return;
+  }
+  hideError();
+  els.log.textContent = '';
+  restoreEmptyState();
+});
 tempChips.forEach(function (chip) {
   chip.addEventListener('change', paintTemp);
 });
@@ -1027,8 +873,7 @@ tempChips.forEach(function (chip) {
 syncSend();
 paintTemp();
 loadSettings();
-loadHistory();
-renderHistory();
+loadConversation();
 </script>
 </body>
 </html>
