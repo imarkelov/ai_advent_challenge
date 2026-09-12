@@ -8,8 +8,10 @@
   GET    /agent/models     — список доступных моделей + лимит контекста
   POST   /agent/ask        — {"message": "..."} -> {"reply", "reasoning", "usage"}
   POST   /agent/config     — применить настройки (включая reasoning: bool)
-  GET    /agent/history    — история диалога (переживает перезапуск)
-  DELETE /agent/history    — сброс истории
+   GET    /agent/history    — история активного диалога (переживает перезапуск)
+   DELETE /agent/history    — сброс активного диалога
+   POST   /agent/dialogues  — закрыть текущий (архив) и открыть новый -> {"id"}
+   GET    /agent/dialogues  — список диалогов (active_id + сводка)
   GET    /agent/last-request — JSON последнего запроса к LLM ({"request": ...|null})
 
 Запуск:  python main.py
@@ -99,6 +101,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         if self.path == "/agent/history":
             self._send_json(200, {"messages": AGENT.get_history()})
+            return
+        if self.path == "/agent/dialogues":
+            self._send_json(200, AGENT.get_dialogues())
             return
         if self.path == "/agent/last-request":
             # request может быть null (ask ещё не было)
@@ -199,6 +204,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send_json(400, {"error": str(e)})
                 return
             self._send_json(200, {"ok": True})
+            return
+
+        if path == "/agent/dialogues":
+            # Пустой body — не читаем (Content-Length может быть 0).
+            self._send_json(200, {"id": AGENT.new_dialogue()})
             return
 
         # Прочие POST-пути — 404 (поведение day5)
