@@ -1,8 +1,7 @@
-"""Day5: локальный CORS-прокси с роутингом model→API-key.
+"""Day6: локальный веб-сервер с SimpleAgent.
 
-Браузер (index.html) -> этот сервер (127.0.0.1:8000) -> GPustack (OpenAI-совместимый API).
-CORS блокирует прямой запрос браузера к GPustack (preflight 405), поэтому запросы
-идут через прокси: сервер-к-серверу CORS не существует.
+Браузер (index.html) -> этот сервер (127.0.0.1:8000) -> SimpleAgent -> GPustack.
+POST /agent/ask принимает {"message": "..."} и возвращает {"reply": "..."}.
 
 Запуск:  python main.py
 Открыть: http://127.0.0.1:8000
@@ -11,25 +10,22 @@ import http.server
 import json
 import os
 import sys
-import urllib.error
-import urllib.request
 
-HOST = "127.0.0.1"  # только loopback: прокси не добавляет свою авторизацию
+from agent import SimpleAgent
+
+HOST = "127.0.0.1"  # только loopback: сервер не добавляет свою авторизацию
 PORT = 8000
-TIMEOUT = 300
+MAX_MESSAGE_LEN = 4000
 
 BASE_URL_ENV = "GPUSTACK_BASE_URL"  # endpoint kept out of source (public repo)
 KEY_ENV = "GPUSTACK_API_KEY"
-DEFAULT_KEY_ENV = "GPUSTACK_API_KEY"
-MODEL_KEY_ENV = {
-    "qwen3.8-27b": "GPUSTACK_API_KEY",
-    "deepseek-v4-flash": "GPUSTACK_KEY_DEEPSEEK",
-    "glm-5.3-flash": "GPUSTACK_KEY_GLM",
-}
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 INDEX_HTML = os.path.join(HERE, "index.html")
 DOT_ENV = os.path.join(HERE, ".env")
+
+# Агент создаётся в main() после load_dotenv() и fail-fast проверки env.
+AGENT = None
 
 
 def fail(msg):
@@ -51,7 +47,7 @@ def load_dotenv():
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
-    server_version = "Day3Proxy/1.0"
+    server_version = "Day6Agent/1.0"
 
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -88,67 +84,57 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self._send_json(404, {"error": "not found", "hint": "GET / serves the page"})
 
     def do_POST(self):
-        # Принимает любой путь, завершающийся /chat/completions
-        # (страница может слать /v1/chat/completions, /chat/completions и т.п.)
         path = self.path.split("?", 1)[0].rstrip("/")
-        if not path.endswith("/chat/completions"):
-            self._send_json(
-                404,
-                {"error": "not found", "hint": f"expected POST /v1/chat/completions, got {path}"},
-            )
+
+        if path == "/agent/ask":
+            # Читает body и валидирует {"message": "<str>"} до обращения к агенту.
+            try:
+                length = int(self.headers.get("Content-Length") or 0)
+                raw = self.rfile.read(length)
+            except (ValueError, OSError):
+                self._send_json(400, {"error": "invalid request body"})
+                return
+            try:
+                data = json.loads(raw)
+            except ValueError:
+                self._send_json(400, {"error": "invalid JSON"})
+                return
+            message = data.get("message") if isinstance(data, dict) else None
+            if not isinstance(message, str) or not message.strip():
+                self._send_json(400, {"error": "message required"})
+                return
+            if len(message) > MAX_MESSAGE_LEN:
+                self._send_json(400, {"error": "message too long"})
+                return
+            # RuntimeError — любой сбой LLM/сети в SimpleAgent (контракт agent.py).
+            try:
+                reply = AGENT.ask(message)
+            except RuntimeError as e:
+                self._send_json(502, {"error": str(e)})
+                return
+            self._send_json(200, {"reply": reply})
             return
 
-        base = os.environ[BASE_URL_ENV].strip().rstrip("/")
-        try:
-            length = int(self.headers.get("Content-Length") or 0)
-            body = self.rfile.read(length)
-        except (ValueError, OSError):
-            self._send_json(400, {"error": "invalid request body"})
-            return
-
-        # Ключ выбирается по модели из body (ключи на стороне GPustack scoped по модели).
-        # В upstream уходят ИСХОДНЫЕ байты body — без ре-сериализации.
-        try:
-            model = json.loads(body).get("model")
-        except (ValueError, AttributeError, TypeError):
-            model = None
-        env_var = MODEL_KEY_ENV.get(model, DEFAULT_KEY_ENV)
-        key = os.environ.get(env_var, "").strip()
-        if not key:
-            self._send_json(401, {"error": f"no API key for model '{model}' (env: {env_var})"})
-            return
-
-        req = urllib.request.Request(
-            f"{base}/chat/completions",
-            data=body,
-            headers={
-                "Authorization": f"Bearer {key}",
-                "Content-Type": "application/json",
-            },
-            method="POST",
+        # Прочие POST-пути — 404 (поведение day5)
+        self._send_json(
+            404,
+            {"error": "not found", "hint": f"expected POST /agent/ask, got {path}"},
         )
-        try:
-            with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
-                upstream = resp.read()
-                upstream_type = resp.headers.get("Content-Type", "application/json")
-                self._send(resp.status, upstream, upstream_type)
-        except urllib.error.HTTPError as e:
-            detail = e.read().decode("utf-8", errors="replace")
-            self._send(e.code, detail.encode("utf-8"))
-        except urllib.error.URLError as e:
-            self._send_json(502, {"error": f"network error calling {base}: {e.reason}"})
 
 
 def main():
+    global AGENT
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     load_dotenv()
     if not os.environ.get(KEY_ENV, "").strip():
         fail(f"{KEY_ENV} is not set in environment or .env")
     if not os.environ.get(BASE_URL_ENV, "").strip():
         fail(f"{BASE_URL_ENV} is not set in environment or .env")
+    # Агент создаётся только после успешной fail-fast проверки env.
+    AGENT = SimpleAgent()
 
     server = http.server.ThreadingHTTPServer((HOST, PORT), Handler)
-    print(f"CORS-прокси: http://{HOST}:{PORT}  ->  {os.environ[BASE_URL_ENV].strip()}")
+    print(f"SimpleAgent server: http://{HOST}:{PORT}")
     print(f"Откройте в браузере: http://{HOST}:{PORT}")
     try:
         server.serve_forever()
