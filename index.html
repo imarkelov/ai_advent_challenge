@@ -288,6 +288,93 @@
     padding: 6px 8px;
   }
 
+  /* Диалоги (сайдбар): разделитель + список (клик = просмотр/возврат) */
+  .side-sep {
+    border: none;
+    border-top: 1px solid rgba(25, 240, 255, .18);
+    margin: 12px 0;
+  }
+  #dialogueList {
+    list-style: none;
+    margin: 0 0 4px;
+    padding: 0;
+    max-height: 40vh;
+    overflow-y: auto;
+  }
+  .dlg-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background var(--dur) ease, border-color var(--dur) ease;
+  }
+  .dlg-item:hover { background: var(--inset); border-color: var(--cyan-border); }
+  .dlg-time {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-faint);
+  }
+  .dlg-count {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dlg-mark {
+    flex: none;
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  /* активный диалог — cyan-текст + cyan-маркер ● */
+  .dlg-item.active .dlg-count { color: var(--cyan); }
+  .dlg-item.active .dlg-mark {
+    color: var(--cyan);
+    text-shadow: 0 0 8px var(--cyan-glow);
+  }
+  /* закрытый (архив) — тусклый, маркер — */
+  .dlg-item.closed .dlg-mark { color: var(--text-dim); }
+  .dlg-empty {
+    font-size: 13px;
+    color: var(--text-faint);
+    padding: 6px 8px;
+  }
+
+  /* ---------- Баннер «Архив» (просмотр закрытого диалога) ---------- */
+  .archive-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 14px 0;
+    padding: 10px 14px;
+    border: 1px solid var(--orange-border);
+    background: var(--orange-soft);
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  }
+  .archive-banner[hidden] { display: none; margin: 0; }
+  .archive-banner .ab-icon {
+    font-family: var(--font-head);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--orange);
+    white-space: nowrap;
+  }
+  .archive-banner .ab-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    color: var(--text-dim);
+    overflow-wrap: break-word;
+  }
+
   /* ---------- Лента сообщений ---------- */
   #chatLog {
     display: flex;
@@ -920,7 +1007,10 @@
   </header>
 
   <div class="layout">
-    <aside class="panel" id="sidebar" aria-label="История запросов">
+    <aside class="panel" id="sidebar" aria-label="Диалоги и история запросов">
+      <h2 class="side-title">Диалоги</h2>
+      <ul id="dialogueList"></ul>
+      <hr class="side-sep">
       <h2 class="side-title">История запросов</h2>
       <ul id="historyList"></ul>
       <button type="button" class="ghost" id="clearHistoryBtn">Очистить всё</button>
@@ -930,6 +1020,12 @@
       <div class="section-head">
         <p class="overline">Диалог</p>
         <h2>Чат</h2>
+      </div>
+
+      <div class="archive-banner" id="archiveBanner" hidden>
+        <span class="ab-icon">Архив</span>
+        <span class="ab-text" id="archiveBannerText">Диалог — только чтение</span>
+        <button type="button" class="ghost" id="archiveBackBtn">← К активному</button>
       </div>
 
       <div id="chatLog" role="log" aria-live="polite" aria-label="Сообщения">
@@ -1085,6 +1181,10 @@ const els = {
   newDialogueBtn: $('newDialogueBtn'),
   resetBtn: $('resetBtn'),
   statusLine: $('statusLine'),
+  dialogueList: $('dialogueList'),
+  archiveBanner: $('archiveBanner'),
+  archiveBannerText: $('archiveBannerText'),
+  archiveBackBtn: $('archiveBackBtn'),
   historyList: $('historyList'),
   clearHistoryBtn: $('clearHistoryBtn'),
   agentModel: $('agentModel'),
@@ -1114,6 +1214,8 @@ const els = {
 
 let inFlight = false;
 let settingsInFlight = false;
+/* архив-режим: null — активный чат; иначе {id, count} просмотренного диалога */
+let viewingArchive = null;
 
 const tempChips = Array.prototype.slice.call(document.querySelectorAll('.temp-row input[type="radio"]'));
 
@@ -1128,8 +1230,9 @@ let historyCount = 0;
 const HISTORY_CAP = 20; // зеркало серверного cap, для отображения
 
 /* ================= Утилиты ================= */
+/* в архив-режиме кнопка отправки не оживает (ввод disabled) */
 function syncSend() {
-  els.send.disabled = inFlight || els.input.value.trim().length === 0;
+  els.send.disabled = inFlight || els.input.value.trim().length === 0 || viewingArchive !== null;
 }
 
 function scrollBottom() {
@@ -1315,7 +1418,7 @@ function addAssistantBubble(text, reasoning, usage) {
 
 async function send() {
   const text = els.input.value.trim();
-  if (!text || inFlight) return;
+  if (!text || inFlight || viewingArchive !== null) return;
 
   inFlight = true;
   hideError();
@@ -1360,6 +1463,7 @@ async function send() {
     updateStatusLine();
     els.input.value = '';
     addHistoryEntry(text, reply, true);
+    loadDialogues(); /* message_count активного растёт */
   } else {
     /* ошибка: текст ввода сохраняем, поле остаётся доступным */
     showError(errMsg);
@@ -1510,6 +1614,148 @@ function restoreEmptyState() {
   empty.appendChild(p);
   els.log.appendChild(empty);
   els.empty = empty;
+}
+
+/* ================= Диалоги в сайдбаре (GET /agent/dialogues) ================= */
+/* created_at (ISO) → «ЧЧ:ММ» */
+function fmtHHMM(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const p = function (n) { return String(n).length < 2 ? '0' + n : String(n); };
+  return p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+async function loadDialogues() {
+  let data = null;
+  try {
+    const res = await fetch('/agent/dialogues');
+    if (res.ok) {
+      try { data = await res.json(); } catch (e) { data = null; }
+    }
+  } catch (e) {
+    data = null;
+  }
+  renderDialogueList(data);
+}
+
+/* кэш последней сводки — клик по списку определяет активный без повторного GET */
+let loadDialoguesCache = null;
+
+/* список: сортировка по created_at desc (последний = активный — сверху) */
+function renderDialogueList(data) {
+  loadDialoguesCache = (data && Array.isArray(data.dialogues)) ? data : null;
+  els.dialogueList.textContent = '';
+  if (!data || !Array.isArray(data.dialogues) || data.dialogues.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'dlg-empty';
+    li.textContent = 'Пока пусто';
+    els.dialogueList.appendChild(li);
+    return;
+  }
+  const items = data.dialogues.slice().sort(function (a, b) {
+    return String(b.created_at || '').localeCompare(String(a.created_at || ''));
+  });
+  items.forEach(function (d) {
+    const isActive = d.id === data.active_id;
+    const li = document.createElement('li');
+    li.className = 'dlg-item ' + (isActive ? 'active' : 'closed');
+    li.dataset.id = d.id;
+    li.title = d.id + (d.last_message ? ' — ' + d.last_message : '');
+    const time = document.createElement('span');
+    time.className = 'dlg-time';
+    time.textContent = fmtHHMM(d.created_at);
+    const count = document.createElement('span');
+    count.className = 'dlg-count';
+    count.textContent = d.message_count + ' сообщ.';
+    const mark = document.createElement('span');
+    mark.className = 'dlg-mark';
+    mark.textContent = isActive ? '●' : '—';
+    li.appendChild(time);
+    li.appendChild(count);
+    li.appendChild(mark);
+    els.dialogueList.appendChild(li);
+  });
+}
+
+/* клик: активный → возврат в активный; закрытый → просмотр (только чтение) */
+els.dialogueList.addEventListener('click', function (e) {
+  const li = e.target.closest('.dlg-item');
+  if (!li || !li.dataset.id) return;
+  const id = li.dataset.id;
+  const data = loadDialoguesCache;
+  const isActive = data && data.active_id === id;
+  if (isActive) returnToActiveView();
+  else viewDialogue(id);
+});
+
+/* просмотр закрытого диалога: GET /agent/dialogues/{id} → bubbles + баннер */
+async function viewDialogue(id) {
+  let data = null;
+  try {
+    const res = await fetch('/agent/dialogues/' + encodeURIComponent(id));
+    if (res.ok) {
+      try { data = await res.json(); } catch (e) { data = null; }
+    }
+  } catch (e) {
+    data = null;
+  }
+  if (!data || !Array.isArray(data.messages)) {
+    showError('Не удалось загрузить диалог');
+    return;
+  }
+  hideError();
+  els.log.textContent = '';
+  els.empty = null;
+  if (data.messages.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'chat-empty';
+    const p = document.createElement('p');
+    p.textContent = 'Диалог пуст';
+    empty.appendChild(p);
+    els.log.appendChild(empty);
+  } else {
+    data.messages.forEach(function (m) {
+      addBubble(m.role === 'user' ? 'user' : 'assistant', m.content);
+    });
+  }
+  viewingArchive = { id: data.id, count: data.messages.length };
+  els.archiveBannerText.textContent =
+    'Диалог ' + data.id + ' · ' + data.messages.length + ' сообщ. — только чтение';
+  els.archiveBanner.hidden = false;
+  els.input.disabled = true;
+  syncSend();
+  scrollBottom();
+}
+
+/* возврат к активному: перерендер из GET /agent/history, баннер скрыт */
+async function returnToActiveView() {
+  if (viewingArchive === null) return; /* уже в активном — noop */
+  viewingArchive = null;
+  els.archiveBanner.hidden = true;
+  els.input.disabled = false;
+  let data = null;
+  try {
+    const res = await fetch('/agent/history');
+    if (res.ok) {
+      try { data = await res.json(); } catch (e) { data = null; }
+    }
+  } catch (e) {
+    data = null;
+  }
+  els.log.textContent = '';
+  if (data && Array.isArray(data.messages) && data.messages.length > 0) {
+    data.messages.forEach(function (m) {
+      addBubble(m.role === 'user' ? 'user' : 'assistant', m.content);
+    });
+    historyCount = Math.min(HISTORY_CAP, data.messages.length);
+  } else {
+    restoreEmptyState();
+    historyCount = 0;
+  }
+  updateStatusLine();
+  syncSend();
+  els.input.focus();
+  scrollBottom();
 }
 
 /* ================= История запросов (localStorage, паттерн day6) ================= */
@@ -1722,7 +1968,8 @@ els.agentModel.addEventListener('change', function () {
 });
 
 /* «Новый диалог»: POST /agent/dialogues — текущий закрывается (архив на
-   сервере), в UI открывается пустое окно; история запросов (sidebar) остаётся */
+   сервере), в UI открывается пустое окно; история запросов (sidebar) остаётся.
+   Из архив-режима — сначала возврат к активному (он уже пустой/новый). */
 els.newDialogueBtn.addEventListener('click', async function () {
   try {
     const res = await fetch('/agent/dialogues', { method: 'POST' });
@@ -1732,10 +1979,15 @@ els.newDialogueBtn.addEventListener('click', async function () {
     return;
   }
   hideError();
-  els.log.textContent = '';
-  restoreEmptyState();
-  historyCount = 0;
-  updateStatusLine();
+  if (viewingArchive !== null) {
+    await returnToActiveView(); /* перерендерит новый пустой активный */
+  } else {
+    els.log.textContent = '';
+    restoreEmptyState();
+    historyCount = 0;
+    updateStatusLine();
+  }
+  loadDialogues();
 });
 
 els.resetBtn.addEventListener('click', async function () {
@@ -1751,7 +2003,11 @@ els.resetBtn.addEventListener('click', async function () {
   restoreEmptyState();
   historyCount = 0;
   updateStatusLine();
+  loadDialogues(); /* message_count активного меняется */
 });
+
+/* «← К активному» (баннер архива) */
+els.archiveBackBtn.addEventListener('click', function () { returnToActiveView(); });
 
 /* ================= Инициализация ================= */
 syncSend();
@@ -1760,6 +2016,7 @@ paintTemp();
 loadSettings();
 loadModels();
 loadConversation();
+loadDialogues();
 loadHistory();
 renderHistory();
 </script>
