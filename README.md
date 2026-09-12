@@ -11,3 +11,4 @@
 | День 3 | [`day3`](https://github.com/imarkelov/ai_advent_challenge/tree/day3) | Разные способы рассуждения: 4 стратегии (прямой, пошагово, мета-промт, настраиваемая группа экспертов + синтез) |
 | День 4 | [`day4`](https://github.com/imarkelov/ai_advent_challenge/tree/day4) | Температура: один и тот же запрос при T=0 / 0.7 / 1.2 (выбор чекбоксом) + LLM-сравнение ответов (точность, креативность, разнообразие) |
 | День 5 | [`day5`](https://github.com/imarkelov/ai_advent_challenge/tree/day5) | Версии моделей: один и тот же промпт (ввод в UI) на слабой/средней/сильной модели — время, TTFT, TPS, токены, стоимость N/A + слепое LLM-сравнение |
+| День 6 | [`day6`](https://github.com/imarkelov/ai_advent_challenge/tree/day6) | Простой AI-агент: класс SimpleAgent (system prompt + история + API) + чат-страница |
