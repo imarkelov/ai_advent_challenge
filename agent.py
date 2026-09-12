@@ -71,9 +71,11 @@ class SimpleAgent:
       configure(...) — атомарно меняет настройки (system_prompt, model,
       temperature, max_tokens, reasoning); аргумент по умолчанию (UNSET) =
       «не менять», None для temperature/max_tokens = сброс в None;
-      валидация — RuntimeError, при неудаче настройки не меняются.
-      get_config() -> dict — текущие настройки.
-      get_history() -> list — копия текущей истории
+       валидация — RuntimeError, при неудаче настройки не меняются.
+       get_config() -> dict — текущие настройки.
+       get_last_request() -> dict | None — копия последнего JSON-запроса
+       к LLM (payload /chat/completions) или None, если ask ещё не было.
+       get_history() -> list — копия текущей истории
       [{"role": ..., "content": ...}, ...].
       reset_history() — очистить историю и файл (новый диалог).
     """
@@ -87,6 +89,7 @@ class SimpleAgent:
         self.reasoning = reasoning  # включено ли рассуждение (thinking) модели
         self.history_file = history_file or HISTORY_FILE
         self._lock = threading.Lock()
+        self._last_request = None  # копия последнего payload ask() (под self._lock)
         self.history = self._load_history()  # [{"role": ..., "content": ...}, ...]
 
     def configure(self, system_prompt=UNSET, model=UNSET, temperature=UNSET, max_tokens=UNSET,
@@ -145,6 +148,16 @@ class SimpleAgent:
                 "max_tokens": self.max_tokens,
                 "reasoning": self.reasoning,
             }
+
+    def get_last_request(self) -> dict | None:
+        """Копия последнего JSON-запроса к LLM (payload /chat/completions) или None.
+
+        Без авторизационных данных (Authorization не входит в payload).
+        """
+        with self._lock:
+            if self._last_request is None:
+                return None
+            return json.loads(json.dumps(self._last_request))
 
     def _load_history(self) -> list:
         """Загрузить историю из файла. Файла нет / битый JSON / чужой формат — пустая."""
@@ -226,6 +239,8 @@ class SimpleAgent:
                 payload["max_tokens"] = self.max_tokens
             # оба состояния отправляются всегда: поведение проверено на 3 моделях
             payload["chat_template_kwargs"] = {"enable_thinking": bool(self.reasoning)}
+            # копия последнего запроса для инспекции (GET /agent/last-request)
+            self._last_request = json.loads(json.dumps(payload))
             body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
             req = urllib.request.Request(
                 f"{base}/chat/completions",
