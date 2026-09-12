@@ -116,10 +116,12 @@ class SimpleAgent:
        [{"role": ..., "content": ...}, ...].
        reset_history() — очистить активный диалог и файл (closed не
        помечается).
-       new_dialogue() -> str — закрыть текущий (архив на диск) и открыть
-       новый пустой; пустой активный не дублируется (возвращает его id).
-       get_dialogues() -> dict — сводка по диалогам для UI
-       (id, времена, message_count, last_message<=80, active_id).
+        new_dialogue() -> str — закрыть текущий (архив на диск) и открыть
+        новый пустой; пустой активный не дублируется (возвращает его id).
+        get_dialogues() -> dict — сводка по диалогам для UI
+        (id, времена, message_count, last_message<=80, active_id).
+        get_dialogue_messages(dialogue_id) -> list | None — копия сообщений
+        диалога по id (активного или архивного); None, если такого нет.
     """
 
     def __init__(self, system_prompt: str = DEFAULT_SYSTEM_PROMPT, model: str = "qwen3.8-27b",
@@ -331,6 +333,14 @@ class SimpleAgent:
                     "last_message": (last[:80] if isinstance(last, str) else None),
                 })
             return {"active_id": self._dialogues["active_id"], "dialogues": out}
+
+    def get_dialogue_messages(self, dialogue_id: str) -> list | None:
+        """Копия сообщений диалога по id (активного или архивного); None — такого нет."""
+        with self._lock:
+            for d in self._dialogues["dialogues"]:
+                if d["id"] == dialogue_id:
+                    return [{"role": m["role"], "content": m["content"]} for m in d["messages"]]
+            return None
 
     def ask(self, user_input: str) -> dict:
         """Отправить вопрос модели с учётом истории; вернуть результат ответа.
