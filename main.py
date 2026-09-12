@@ -1,7 +1,14 @@
-"""Day6: локальный веб-сервер с SimpleAgent.
+"""Day7: локальный веб-сервер с SimpleAgent.
 
 Браузер (index.html) -> этот сервер (127.0.0.1:8000) -> SimpleAgent -> GPustack.
-POST /agent/ask принимает {"message": "..."} и возвращает {"reply": "..."}.
+
+Маршруты:
+  GET    /                 — страница
+  GET    /agent/config     — текущие настройки агента
+  POST   /agent/ask        — {"message": "..."} -> {"reply": "..."}
+  POST   /agent/config     — применить настройки
+  GET    /agent/history    — история диалога (переживает перезапуск)
+  DELETE /agent/history    — сброс истории
 
 Запуск:  python main.py
 Открыть: http://127.0.0.1:8000
@@ -47,11 +54,11 @@ def load_dotenv():
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
-    server_version = "Day6Agent/1.0"
+    server_version = "Day7Agent/1.0"
 
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
 
     def _send(self, code, body, content_type="application/json; charset=utf-8"):
@@ -83,6 +90,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         if self.path == "/agent/config":
             self._send_json(200, AGENT.get_config())
+            return
+        if self.path == "/agent/history":
+            self._send_json(200, {"messages": AGENT.get_history()})
             return
         self._send_json(404, {"error": "not found", "hint": "GET / serves the page"})
 
@@ -174,6 +184,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
             404,
             {"error": "not found", "hint": f"expected POST /agent/ask, got {path}"},
         )
+
+    def do_DELETE(self):
+        path = self.path.split("?", 1)[0].rstrip("/")
+        if path == "/agent/history":
+            AGENT.reset_history()
+            self._send_json(200, {"ok": True})
+            return
+        self._send_json(404, {"error": "not found"})
 
 
 def main():
