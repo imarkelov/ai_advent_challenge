@@ -45,6 +45,7 @@
     background-color: var(--bg);
     background-image:
       radial-gradient(1200px 480px at 50% -10%, rgba(25, 240, 255, .07), transparent 62%),
+      radial-gradient(700px 400px at 92% -8%, rgba(255, 159, 26, .06), transparent 60%),
       repeating-linear-gradient(0deg, rgba(25, 240, 255, .05) 0 1px, transparent 1px 44px),
       repeating-linear-gradient(90deg, rgba(25, 240, 255, .05) 0 1px, transparent 1px 44px);
     color: var(--text);
@@ -87,6 +88,12 @@
 
   .masthead { margin-bottom: 8px; }
 
+  /* оранжевый overline только в шапке (остальные панели — cyan) */
+  .masthead .overline {
+    color: var(--orange);
+    text-shadow: 0 0 10px rgba(255, 159, 26, .35);
+  }
+
   .masthead-row {
     display: flex;
     align-items: flex-end;
@@ -115,6 +122,12 @@
     color: var(--cyan-dim);
     font-variant-numeric: tabular-nums;
   }
+  /* THINKING-сегмент статус-строки: ON — оранжевый с glow, OFF — тусклый */
+  .status-line .thinking-on {
+    color: var(--orange);
+    text-shadow: 0 0 10px rgba(255, 159, 26, .5);
+  }
+  .status-line .thinking-off { color: var(--text-faint); }
 
   /* ---------- Кнопки ---------- */
   button { font-family: var(--font-body); }
@@ -533,39 +546,40 @@
   .temp-check:hover { color: var(--text); border-color: var(--cyan-dim); }
   .temp-check input { margin: 0; cursor: pointer; accent-color: var(--cyan); }
   .temp-check.checked {
-    color: #04121a;
-    background: var(--cyan);
-    border-color: transparent;
+    color: #171207;
+    background: var(--orange);
+    border-color: rgba(0, 0, 0, .25);
     font-weight: 600;
+    box-shadow: 0 0 10px rgba(255, 159, 26, .45);
   }
   .temp-check.checked input { accent-color: #04121a; }
   .temp-note { margin: 8px 0 0; font-size: 12px; color: var(--text-faint); }
 
-  /* REASONING — neon toggle (checkbox switch) */
+  /* REASONING — неоновый чекбокс */
   .reasoning-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
     margin-top: 14px;
   }
   .reasoning-row .row-label {
     font-family: var(--font-head);
-    font-size: 9.5px;
+    font-size: 10.5px;
     font-weight: 700;
-    letter-spacing: .14em;
+    letter-spacing: .12em;
     text-transform: uppercase;
-    color: var(--text-dim);
+    color: var(--text);   /* не тусклый — явный лейбл */
   }
-  .switch {
+  .neon-check {
     position: relative;
     display: inline-block;
-    width: 46px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     flex: none;
     cursor: pointer;
+    margin-left: auto;
   }
-  .switch input {
+  .neon-check input {
     position: absolute;
     opacity: 0;
     width: 100%;
@@ -573,34 +587,48 @@
     margin: 0;
     cursor: pointer;
   }
-  .switch .track {
+  .neon-check .box {
     position: absolute;
     inset: 0;
-    border: 1px solid var(--cyan-border);
+    border: 1.5px solid var(--cyan);
     background: var(--inset);
-    clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
-    transition: background var(--dur) ease, box-shadow var(--dur) ease;
+    clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+    box-shadow: inset 0 0 6px rgba(25, 240, 255, .12);
+    transition: border-color var(--dur) ease, box-shadow var(--dur) ease, background var(--dur) ease;
   }
-  .switch .thumb {
+  .neon-check .tick {
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 18px;
-    height: 16px;
-    background: var(--text-faint);
-    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
-    transition: left var(--dur) ease, background var(--dur) ease, box-shadow var(--dur) ease;
+    top: 5px;
+    left: 9px;
+    width: 8px;
+    height: 14px;
+    border: solid #04121a;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg) scale(0);
+    transform-origin: center;
+    opacity: 0;
+    transition: transform var(--dur) ease, opacity var(--dur) ease;
   }
-  .switch input:checked + .track {
-    background: var(--cyan-soft);
-    box-shadow: 0 0 10px var(--cyan-glow);
+  .neon-check input:checked + .box {
+    border-color: var(--orange);
+    background: var(--orange-soft);
+    box-shadow: 0 0 12px rgba(255, 159, 26, .55), inset 0 0 8px rgba(255, 159, 26, .25);
   }
-  .switch input:checked + .track .thumb {
-    left: 23px;
-    background: var(--cyan);
-    box-shadow: 0 0 8px var(--cyan);
+  .neon-check input:checked + .box .tick {
+    transform: rotate(45deg) scale(1);
+    opacity: 1;
   }
-  .switch input:focus-visible + .track { outline: 1px solid var(--cyan); outline-offset: 2px; }
+  .neon-check input:focus-visible + .box { outline: 1px solid var(--orange); outline-offset: 2px; }
+  .reasoning-state {
+    font-family: var(--font-head);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    min-width: 44px;
+    text-align: right;
+  }
+  .reasoning-state.on  { color: var(--orange); text-shadow: 0 0 8px rgba(255, 159, 26, .6); }
+  .reasoning-state.off { color: var(--text-faint); }
 
   .settings-actions {
     display: flex;
@@ -661,6 +689,19 @@
   @keyframes hudPulse {
     0% { text-shadow: 0 0 20px rgba(25, 240, 255, .95); }
     100% { text-shadow: 0 0 8px rgba(25, 240, 255, .4); }
+  }
+
+  /* HUD-ячейка Reasoning tokens — оранжевый акцент */
+  .hud-cell.hud-reasoning { border-color: rgba(255, 159, 26, .3); }
+  .hud-cell.hud-reasoning .hud-label { color: var(--orange); }
+  .hud-cell.hud-reasoning .hud-value {
+    color: var(--orange);
+    text-shadow: 0 0 10px rgba(255, 159, 26, .5);
+  }
+  .hud-cell.hud-reasoning .hud-value.hud-pulse { animation-name: hudPulseOrange; }
+  @keyframes hudPulseOrange {
+    0% { text-shadow: 0 0 20px rgba(255, 159, 26, .95); }
+    100% { text-shadow: 0 0 10px rgba(255, 159, 26, .5); }
   }
 
   /* ---------- Модалки (системный промпт + JSON запроса) ---------- */
@@ -940,10 +981,11 @@
 
         <div class="reasoning-row">
           <span class="row-label" id="reasoningLabel">Рассуждения (thinking)</span>
-          <label class="switch">
+          <label class="neon-check" title="Включить/выключить рассуждения модели">
             <input type="checkbox" id="reasoningToggle" checked aria-labelledby="reasoningLabel">
-            <span class="track"><span class="thumb"></span></span>
+            <span class="box"><span class="tick"></span></span>
           </label>
+          <span class="reasoning-state" id="reasoningState">ВКЛ</span>
         </div>
 
         <div class="settings-actions">
@@ -967,7 +1009,7 @@
             <span class="hud-label">Input tokens</span>
             <span class="hud-value" id="hudInput">—</span>
           </div>
-          <div class="hud-cell">
+          <div class="hud-cell hud-reasoning">
             <span class="hud-label">Reasoning tokens</span>
             <span class="hud-value" id="hudReasoning">—</span>
           </div>
@@ -1052,6 +1094,7 @@ const els = {
   jsonRequestBtn: $('jsonRequestBtn'),
   maxTokens: $('maxTokens'),
   reasoningToggle: $('reasoningToggle'),
+  reasoningState: $('reasoningState'),
   applySettings: $('applySettings'),
   settingsError: $('settingsError'),
   hudContext: $('hudContext'),
@@ -1171,11 +1214,28 @@ function updateContextLimit() {
   els.hudContext.textContent = (typeof lim === 'number') ? String(lim) : '—';
 }
 
+/* Чекбокс рассуждений — синхронизация статуса ВКЛ/ВЫКЛ */
+function syncReasoningState() {
+  const on = els.reasoningToggle.checked;
+  els.reasoningState.textContent = on ? 'ВКЛ' : 'ВЫКЛ';
+  els.reasoningState.className = 'reasoning-state ' + (on ? 'on' : 'off');
+}
+
 function updateStatusLine() {
   const model = serverModel || els.agentModel.value || '—';
   const thinking = els.reasoningToggle.checked ? 'ON' : 'OFF';
-  els.statusLine.textContent =
-    'MODEL: ' + model + ' // THINKING: ' + thinking + ' // HISTORY: ' + historyCount;
+  /* MODEL и HISTORY — cyan-dim (от .status-line), THINKING — отдельный span */
+  els.statusLine.textContent = '';
+  const modelSpan = document.createElement('span');
+  modelSpan.textContent = 'MODEL: ' + model + ' // ';
+  const thinkingSpan = document.createElement('span');
+  thinkingSpan.className = thinking === 'ON' ? 'thinking-on' : 'thinking-off';
+  thinkingSpan.textContent = 'THINKING: ' + thinking;
+  const histSpan = document.createElement('span');
+  histSpan.textContent = ' // HISTORY: ' + historyCount;
+  els.statusLine.appendChild(modelSpan);
+  els.statusLine.appendChild(thinkingSpan);
+  els.statusLine.appendChild(histSpan);
 }
 
 /* ================= Модели (GET /agent/models) ================= */
@@ -1352,6 +1412,7 @@ async function loadSettings() {
   }
   if (data.max_tokens != null) els.maxTokens.value = String(data.max_tokens);
   if (typeof data.reasoning === 'boolean') els.reasoningToggle.checked = data.reasoning;
+  syncReasoningState();
   let target = null;
   if (data.temperature != null) {
     const t = String(data.temperature);
@@ -1640,6 +1701,12 @@ tempChips.forEach(function (chip) {
   chip.addEventListener('change', paintTemp);
 });
 
+/* чекбокс рассуждений — статус ВКЛ/ВЫКЛ + THINKING-сегмент статус-строки */
+els.reasoningToggle.addEventListener('change', function () {
+  syncReasoningState();
+  updateStatusLine();
+});
+
 /* смена модели в select — сразу обновляем CONTEXT LIMIT (данные уже на клиенте) */
 els.agentModel.addEventListener('change', function () {
   updateContextLimit();
@@ -1662,6 +1729,7 @@ els.resetBtn.addEventListener('click', async function () {
 
 /* ================= Инициализация ================= */
 syncSend();
+syncReasoningState();
 paintTemp();
 loadSettings();
 loadModels();
