@@ -3,6 +3,9 @@
 История диалога хранится в памяти (self.history, cap 20 сообщений) —
 теряется при рестарте сервера. Персистентности нет.
 
+Настройки (system_prompt/model/temperature/max_tokens) тоже хранятся в
+памяти агента и сбрасываются к значениям по умолчанию при рестарте сервера.
+
 Клиентские настройки (базовый URL и ключи) читаются из переменных окружения
 лениво, в момент каждого запроса:
   GPUSTACK_BASE_URL — базовый URL API (обязательна);
@@ -32,21 +35,79 @@ HISTORY_CAP = 20  # держим последние N сообщений ист�
 # content может быть None (reasoning-модель): бюджет ушёл в рассуждения
 NO_TEXT_PLACEHOLDER = "(модель не дала текста — бюджет ушёл в рассуждения)"
 
+# маркер "не менять" для configure()
+UNSET = object()
+
 
 class SimpleAgent:
     """Агент с одной LLM-моделью и историей диалога в памяти.
 
-    Публичный метод один — ask(user_input): собирает messages из
-    system-промпта + истории + нового вопроса, шлёт POST
-    {base}/chat/completions и возвращает текст ответа модели (str).
-    При неудаче — RuntimeError; история в этом случае не меняется.
+    Публичный API:
+      ask(user_input) -> str — собирает messages из system-промпта + истории
+      + нового вопроса, шлёт POST {base}/chat/completions и возвращает текст
+      ответа модели (str). При неудаче — RuntimeError; история не меняется.
+      configure(...) — атомарно меняет настройки (system_prompt, model,
+      temperature, max_tokens); аргумент по умолчанию (UNSET) = «не менять»,
+      None для temperature/max_tokens = сброс в None;
+      валидация — RuntimeError, при неудаче настройки не меняются.
+      get_config() -> dict — текущие настройки.
     """
 
-    def __init__(self, system_prompt: str = DEFAULT_SYSTEM_PROMPT, model: str = "qwen3.8-27b"):
+    def __init__(self, system_prompt: str = DEFAULT_SYSTEM_PROMPT, model: str = "qwen3.8-27b",
+                 temperature=None, max_tokens=None):
         self.system_prompt = system_prompt
         self.model = model
+        self.temperature = temperature
+        self.max_tokens = max_tokens
         self.history = []  # [{"role": ..., "content": ...}, ...]
         self._lock = threading.Lock()
+
+    def configure(self, system_prompt=UNSET, model=UNSET, temperature=UNSET, max_tokens=UNSET):
+        """Атомарно изменить настройки: сначала валидация всех переданных
+        (не-UNSET) значений, потом применение (все или ничего).
+
+        Семантика аргументов:
+          UNSET (значение по умолчанию) — параметр не менять;
+          temperature / max_tokens: None — сбросить в None; иначе — валидное
+          число (0 <= t <= 2) / положительный int;
+          system_prompt / model: None — ошибка (агент обязан иметь промпт
+          и известную модель).
+
+        Ошибки валидации — RuntimeError; при неудаче настройки не меняются.
+        """
+        with self._lock:
+            if system_prompt is not UNSET:
+                if not isinstance(system_prompt, str) or not system_prompt.strip():
+                    raise RuntimeError("system_prompt must be a non-empty string")
+            if model is not UNSET:
+                if not isinstance(model, str) or model not in MODEL_KEY_ENV:
+                    raise RuntimeError(f"unknown model {model!r} (доступные: {', '.join(MODEL_KEY_ENV)})")
+            if temperature is not UNSET and temperature is not None:
+                if isinstance(temperature, bool) or not isinstance(temperature, (int, float)) \
+                        or not (0 <= temperature <= 2):
+                    raise RuntimeError("temperature must be a number between 0 and 2")
+            if max_tokens is not UNSET and max_tokens is not None:
+                if isinstance(max_tokens, bool) or not isinstance(max_tokens, int) or max_tokens <= 0:
+                    raise RuntimeError("max_tokens must be a positive integer")
+
+            if system_prompt is not UNSET:
+                self.system_prompt = system_prompt
+            if model is not UNSET:
+                self.model = model
+            if temperature is not UNSET:
+                self.temperature = temperature
+            if max_tokens is not UNSET:
+                self.max_tokens = max_tokens
+
+    def get_config(self) -> dict:
+        """Текущие настройки: system_prompt, model, temperature, max_tokens."""
+        with self._lock:
+            return {
+                "system_prompt": self.system_prompt,
+                "model": self.model,
+                "temperature": self.temperature,
+                "max_tokens": self.max_tokens,
+            }
 
     def ask(self, user_input: str) -> str:
         """Отправить вопрос модели с учётом истории; вернуть текст ответа.
@@ -69,6 +130,10 @@ class SimpleAgent:
                 raise RuntimeError(f"API key not set: env {key_env} required for model {self.model!r}")
 
             payload = {"model": self.model, "messages": messages}
+            if self.temperature is not None:
+                payload["temperature"] = self.temperature
+            if self.max_tokens is not None:
+                payload["max_tokens"] = self.max_tokens
             body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
             req = urllib.request.Request(
                 f"{base}/chat/completions",
