@@ -5,8 +5,9 @@
 Маршруты:
   GET    /                 — страница
   GET    /agent/config     — текущие настройки агента
-  POST   /agent/ask        — {"message": "..."} -> {"reply": "..."}
-  POST   /agent/config     — применить настройки
+  GET    /agent/models     — список доступных моделей + лимит контекста
+  POST   /agent/ask        — {"message": "..."} -> {"reply", "reasoning", "usage"}
+  POST   /agent/config     — применить настройки (включая reasoning: bool)
   GET    /agent/history    — история диалога (переживает перезапуск)
   DELETE /agent/history    — сброс истории
 
@@ -18,7 +19,7 @@ import json
 import os
 import sys
 
-from agent import SimpleAgent
+from agent import SimpleAgent, list_models
 
 HOST = "127.0.0.1"  # только loopback: сервер не добавляет свою авторизацию
 PORT = 8000
@@ -91,6 +92,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if self.path == "/agent/config":
             self._send_json(200, AGENT.get_config())
             return
+        if self.path == "/agent/models":
+            # Список моделей статичен (MODEL_KEY_ENV) — агент не нужен.
+            self._send_json(200, {"models": list_models()})
+            return
         if self.path == "/agent/history":
             self._send_json(200, {"messages": AGENT.get_history()})
             return
@@ -121,11 +126,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return
             # RuntimeError — любой сбой LLM/сети в SimpleAgent (контракт agent.py).
             try:
-                reply = AGENT.ask(message)
+                result = AGENT.ask(message)
             except RuntimeError as e:
                 self._send_json(502, {"error": str(e)})
                 return
-            self._send_json(200, {"reply": reply})
+            # ask() возвращает dict: reply (str) + reasoning (str|None) + usage (dict).
+            self._send_json(200, {
+                "reply": result["reply"],
+                "reasoning": result["reasoning"],
+                "usage": result["usage"],
+            })
             return
 
         if path == "/agent/config":
@@ -170,6 +180,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     self._send_json(400, {"error": "max_tokens must be an integer"})
                     return
                 known["max_tokens"] = mt
+            # reasoning: строго bool (true/false) — иначе 400; absent = «не менять».
+            if "reasoning" in data:
+                r = data["reasoning"]
+                if not isinstance(r, bool):
+                    self._send_json(400, {"error": "reasoning must be a boolean"})
+                    return
+                known["reasoning"] = r
             # Неизвестные ключи в body игнорируются.
             try:
                 AGENT.configure(**known)
