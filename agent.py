@@ -1,7 +1,9 @@
-"""Простой агент с LLM-клиентом: одна модель, история в памяти.
+"""Простой агент с LLM-клиентом: одна модель, история на диске.
 
-История диалога хранится в памяти (self.history, cap 20 сообщений) —
-теряется при рестарте сервера. Персистентности нет.
+История диалога (cap 20 сообщений) хранится в JSON-файле (по умолчанию
+history.json рядом со скриптом), загружается при создании агента и
+атомарно записывается после каждого успешного ответа — после перезапуска
+сервера диалог продолжается.
 
 Настройки (system_prompt/model/temperature/max_tokens) тоже хранятся в
 памяти агента и сбрасываются к значениям по умолчанию при рестарте сервера.
@@ -32,6 +34,9 @@ MODEL_KEY_ENV = {
 TIMEOUT = 300  # неконтролируемая генерация может занимать >120 с
 HISTORY_CAP = 20  # держим последние N сообщений истории
 
+# история на диске: по умолчанию рядом со скриптом
+HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "history.json")
+
 # content может быть None (reasoning-модель): бюджет ушёл в рассуждения
 NO_TEXT_PLACEHOLDER = "(модель не дала текста — бюджет ушёл в рассуждения)"
 
@@ -40,7 +45,7 @@ UNSET = object()
 
 
 class SimpleAgent:
-    """Агент с одной LLM-моделью и историей диалога в памяти.
+    """Агент с одной LLM-моделью и историей диалога на диске (JSON-файл).
 
     Публичный API:
       ask(user_input) -> str — собирает messages из system-промпта + истории
@@ -51,16 +56,20 @@ class SimpleAgent:
       None для temperature/max_tokens = сброс в None;
       валидация — RuntimeError, при неудаче настройки не меняются.
       get_config() -> dict — текущие настройки.
+      get_history() -> list — копия текущей истории
+      [{"role": ..., "content": ...}, ...].
+      reset_history() — очистить историю и файл (новый диалог).
     """
 
     def __init__(self, system_prompt: str = DEFAULT_SYSTEM_PROMPT, model: str = "qwen3.8-27b",
-                 temperature=None, max_tokens=None):
+                 temperature=None, max_tokens=None, history_file=None):
         self.system_prompt = system_prompt
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
-        self.history = []  # [{"role": ..., "content": ...}, ...]
+        self.history_file = history_file or HISTORY_FILE
         self._lock = threading.Lock()
+        self.history = self._load_history()  # [{"role": ..., "content": ...}, ...]
 
     def configure(self, system_prompt=UNSET, model=UNSET, temperature=UNSET, max_tokens=UNSET):
         """Атомарно изменить настройки: сначала валидация всех переданных
@@ -108,6 +117,44 @@ class SimpleAgent:
                 "temperature": self.temperature,
                 "max_tokens": self.max_tokens,
             }
+
+    def _load_history(self) -> list:
+        """Загрузить историю из файла. Файла нет / битый JSON / чужой формат — пустая."""
+        try:
+            with open(self.history_file, encoding="utf-8") as f:
+                data = json.load(f)
+        except (OSError, ValueError):
+            return []
+        if not isinstance(data, list):
+            return []
+        clean = [
+            {"role": m["role"], "content": m["content"]}
+            for m in data
+            if isinstance(m, dict) and m.get("role") in ("user", "assistant")
+            and isinstance(m.get("content"), str)
+        ]
+        return clean[-HISTORY_CAP:]
+
+    def _save_history(self) -> None:
+        """Атомарная запись истории: tmp-файл + os.replace (нет полубитого файла).
+
+        Вызывать ТОЛЬКО под self._lock (в ask / reset_history).
+        """
+        tmp = self.history_file + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(self.history, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, self.history_file)
+
+    def get_history(self) -> list:
+        """Копия текущей истории: [{"role": ..., "content": ...}, ...]."""
+        with self._lock:
+            return [dict(m) for m in self.history]
+
+    def reset_history(self) -> None:
+        """Очистить историю (и файл) — новый диалог."""
+        with self._lock:
+            self.history = []
+            self._save_history()
 
     def ask(self, user_input: str) -> str:
         """Отправить вопрос модели с учётом истории; вернуть текст ответа.
@@ -167,4 +214,5 @@ class SimpleAgent:
             self.history.append({"role": "user", "content": user_input})
             self.history.append({"role": "assistant", "content": content})
             self.history = self.history[-HISTORY_CAP:]
+            self._save_history()
             return content
