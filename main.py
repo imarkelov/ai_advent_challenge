@@ -10,9 +10,12 @@
   POST   /agent/config     — применить настройки (включая reasoning: bool)
    GET    /agent/history    — история активного диалога (переживает перезапуск)
    DELETE /agent/history    — сброс активного диалога
-    POST   /agent/dialogues  — закрыть текущий (архив) и открыть новый -> {"id"}
-    GET    /agent/dialogues  — список диалогов (active_id + сводка)
-    GET    /agent/dialogues/{id} — сообщения диалога (для просмотра)
+     POST   /agent/dialogues  — закрыть текущий (архив) и открыть новый -> {"id"}
+     GET    /agent/dialogues  — список диалогов (active_id + сводка)
+     GET    /agent/dialogues/{id} — сообщения диалога (для просмотра)
+     POST   /agent/dialogues/{id}/activate — открыть диалог для продолжения
+              (он становится активным, предыдущий закрывается) -> {"id"};
+              неизвестный id -> 404, повторный activate -> 200 (idempotent)
   GET    /agent/last-request — JSON последнего запроса к LLM ({"request": ...|null})
 
 Запуск:  python main.py
@@ -215,6 +218,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self._send_json(400, {"error": str(e)})
                 return
             self._send_json(200, {"ok": True})
+            return
+
+        # prefix-ветка ДО точной "/agent/dialogues" (без id она не попадает
+        # в startswith+endswith, порядок безопасен в любом случае).
+        if path.startswith("/agent/dialogues/") and path.endswith("/activate"):
+            dialogue_id = path[len("/agent/dialogues/"):-len("/activate")].strip("/")
+            result = AGENT.activate_dialogue(dialogue_id)
+            if result is None:
+                self._send_json(404, {"error": f"unknown dialogue {dialogue_id!r}"})
+                return
+            self._send_json(200, {"id": result})
             return
 
         if path == "/agent/dialogues":
