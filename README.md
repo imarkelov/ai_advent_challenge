@@ -12,4 +12,4 @@
 | День 4 | [`day4`](https://github.com/imarkelov/ai_advent_challenge/tree/day4) | Температура: один и тот же запрос при T=0 / 0.7 / 1.2 (выбор чекбоксом) + LLM-сравнение ответов (точность, креативность, разнообразие) |
 | День 5 | [`day5`](https://github.com/imarkelov/ai_advent_challenge/tree/day5) | Версии моделей: один и тот же промпт (ввод в UI) на слабой/средней/сильной модели — время, TTFT, TPS, токены, стоимость N/A + слепое LLM-сравнение |
 | День 6 | [`day6`](https://github.com/imarkelov/ai_advent_challenge/tree/day6) | Простой AI-агент: класс SimpleAgent (system prompt + история + API) + чат-страница |
-| День 7 | [day7](https://github.com/imarkelov/ai_advent_challenge/tree/day7) | Сохранение контекста: история диалога в history.json, восстановление после перезапуска, лаконичный UI |
+| День 7 | [day7](https://github.com/imarkelov/ai_advent_challenge/tree/day7) | Сохранение контекста: история в history.json, восстановление после перезапуска; TRON-HUD: токены (вход/рассуждения/всего), лимит контекста, toggle рассуждений, выбор модели, история запросов |
