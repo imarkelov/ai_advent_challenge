@@ -10,6 +10,7 @@
   POST   /agent/config     — применить настройки (включая reasoning: bool)
   GET    /agent/history    — история диалога (переживает перезапуск)
   DELETE /agent/history    — сброс истории
+  GET    /agent/last-request — JSON последнего запроса к LLM ({"request": ...|null})
 
 Запуск:  python main.py
 Открыть: http://127.0.0.1:8000
@@ -98,6 +99,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         if self.path == "/agent/history":
             self._send_json(200, {"messages": AGENT.get_history()})
+            return
+        if self.path == "/agent/last-request":
+            # request может быть null (ask ещё не было)
+            self._send_json(200, {"request": AGENT.get_last_request()})
             return
         self._send_json(404, {"error": "not found", "hint": "GET / serves the page"})
 
