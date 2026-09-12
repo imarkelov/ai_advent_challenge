@@ -1,9 +1,17 @@
-"""Простой агент с LLM-клиентом: одна модель, история на диске.
+"""Простой агент с LLM-клиентом: одна модель, диалоги на диске.
 
-История диалога (cap 20 сообщений) хранится в JSON-файле (по умолчанию
-history.json рядом со скриптом), загружается при создании агента и
-атомарно записывается после каждого успешного ответа — после перезапуска
-сервера диалог продолжается.
+Диалоги хранятся в JSON-файле (по умолчанию dialogues.json рядом со
+скриптом): {"active_id": str, "dialogues": [ {id, created_at, closed_at,
+messages}, ... ]}. Один диалог активен (closed_at=null), остальные
+закрыты (архив). Активный диалог: последние 20 сообщений уходят в LLM
+(cap HISTORY_CAP), на диск записывается список целиком. Файл
+загружается при создании агента и атомарно записывается после каждого
+успешного ответа, сброса и «Нового диалога» — после перезапуска
+сервера активный диалог продолжается, архив сохраняется.
+
+Миграция: если dialogues.json отсутствует, а legacy-файл history.json
+содержит непустой список сообщений — он становится единственным
+(активным) диалогом; дальше history.json не используется.
 
 Настройки (system_prompt/model/temperature/max_tokens/reasoning) тоже хранятся
 в памяти агента и сбрасываются к значениям по умолчанию при рестарте сервера.
@@ -16,6 +24,7 @@ history.json рядом со скриптом), загружается при с
 
 Ошибки — только исключения RuntimeError (в production-коде нет print).
 """
+from datetime import datetime
 import json
 import os
 import threading
@@ -34,7 +43,10 @@ MODEL_KEY_ENV = {
 TIMEOUT = 300  # неконтролируемая генерация может занимать >120 с
 HISTORY_CAP = 20  # держим последние N сообщений истории
 
-# история на диске: по умолчанию рядом со скриптом
+# диалоги на диске: по умолчанию рядом со скриптом
+DIALOGUES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dialogues.json")
+
+# legacy-файл истории (ит.1): используется только для миграции в dialogues.json
 HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "history.json")
 
 # content может быть None (reasoning-модель): бюджет ушёл в рассуждения
@@ -52,6 +64,24 @@ CONTEXT_LIMITS = {
 }
 
 
+def _new_dialogue_id() -> str:
+    """Новый id диалога: d-<YYYYMMDDTHHMMSS>-<4 hex> (уникальный за счёт uuid)."""
+    import uuid
+    return "d-" + datetime.now().strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:4]
+
+
+def _clean_messages(data) -> list:
+    """Отфильтровать список сообщений: только user/assistant со str-контентом."""
+    if not isinstance(data, list):
+        return []
+    return [
+        {"role": m["role"], "content": m["content"]}
+        for m in data
+        if isinstance(m, dict) and m.get("role") in ("user", "assistant")
+        and isinstance(m.get("content"), str)
+    ]
+
+
 def list_models() -> list:
     """Доступные чат-модели + лимит контекста: [{"id": ..., "context_limit": N|null}, ...]."""
     return [
@@ -61,36 +91,56 @@ def list_models() -> list:
 
 
 class SimpleAgent:
-    """Агент с одной LLM-моделью и историей диалога на диске (JSON-файл).
+    """Агент с одной LLM-моделью и диалогами на диске (dialogues.json).
+
+    Модель данных: {"active_id": str, "dialogues": [{id, created_at,
+    closed_at, messages}, ...]} — один активный диалог (closed_at=null),
+    остальные — архив. self.history — тот же объект-список
+    self._active["messages"] (алиас, без копий): ask() делает in-place
+    append/trim, переключение диалога — переприсваивание.
 
     Публичный API:
-      ask(user_input) -> dict — собирает messages из system-промпта + истории
-      + нового вопроса, шлёт POST {base}/chat/completions и возвращает
+      ask(user_input) -> dict — собирает messages из system-промпта +
+      истории активного диалога + нового вопроса, шлёт POST
+      {base}/chat/completions и возвращает
       {"reply": str, "reasoning": str|None, "usage": {...}} (см. ask()).
       При неудаче — RuntimeError; история не меняется.
       configure(...) — атомарно меняет настройки (system_prompt, model,
       temperature, max_tokens, reasoning); аргумент по умолчанию (UNSET) =
       «не менять», None для temperature/max_tokens = сброс в None;
        валидация — RuntimeError, при неудаче настройки не меняются.
-       get_config() -> dict — текущие настройки.
-       get_last_request() -> dict | None — копия последнего JSON-запроса
-       к LLM (payload /chat/completions) или None, если ask ещё не было.
-       get_history() -> list — копия текущей истории
-      [{"role": ..., "content": ...}, ...].
-      reset_history() — очистить историю и файл (новый диалог).
+        get_config() -> dict — текущие настройки.
+        get_last_request() -> dict | None — копия последнего JSON-запроса
+        к LLM (payload /chat/completions) или None, если ask ещё не было.
+        get_history() -> list — копия истории активного диалога
+       [{"role": ..., "content": ...}, ...].
+       reset_history() — очистить активный диалог и файл (closed не
+       помечается).
+       new_dialogue() -> str — закрыть текущий (архив на диск) и открыть
+       новый пустой; пустой активный не дублируется (возвращает его id).
+       get_dialogues() -> dict — сводка по диалогам для UI
+       (id, времена, message_count, last_message<=80, active_id).
     """
 
     def __init__(self, system_prompt: str = DEFAULT_SYSTEM_PROMPT, model: str = "qwen3.8-27b",
-                 temperature=None, max_tokens=None, history_file=None, reasoning: bool = True):
+                 temperature=None, max_tokens=None, history_file=None, reasoning: bool = True,
+                 dialogues_file=None):
         self.system_prompt = system_prompt
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.reasoning = reasoning  # включено ли рассуждение (thinking) модели
-        self.history_file = history_file or HISTORY_FILE
+        self.history_file = history_file or HISTORY_FILE  # только для миграции
+        self.dialogues_file = dialogues_file or DIALOGUES_FILE
         self._lock = threading.Lock()
         self._last_request = None  # копия последнего payload ask() (под self._lock)
-        self.history = self._load_history()  # [{"role": ..., "content": ...}, ...]
+        self._dialogues = self._load_dialogues()  # {"active_id", "dialogues"}
+        # активный — по active_id (порядок в списке не гарантирует:
+        # закрытые диалоги стоят раньше активного)
+        active = next((d for d in self._dialogues["dialogues"]
+                       if d["id"] == self._dialogues["active_id"]), None)
+        self._active = active if active is not None else self._dialogues["dialogues"][0]
+        self.history = self._active["messages"]  # алиас (тот же объект-список)
 
     def configure(self, system_prompt=UNSET, model=UNSET, temperature=UNSET, max_tokens=UNSET,
                   reasoning=UNSET):
@@ -159,43 +209,128 @@ class SimpleAgent:
                 return None
             return json.loads(json.dumps(self._last_request))
 
-    def _load_history(self) -> list:
-        """Загрузить историю из файла. Файла нет / битый JSON / чужой формат — пустая."""
+    def _migrate_legacy_history(self) -> dict:
+        """Миграция из legacy history.json (ит.1) в структуру диалогов.
+
+        Только если history.json существует и содержит непустой список —
+        он становится единственным активным диалогом. Иначе — новый пустой.
+        """
+        legacy = _clean_messages(None)
         try:
             with open(self.history_file, encoding="utf-8") as f:
+                legacy = _clean_messages(json.load(f))
+        except (OSError, ValueError):
+            legacy = []
+        now = datetime.now().isoformat(timespec="seconds")
+        active_id = _new_dialogue_id()
+        return {
+            "active_id": active_id,
+            "dialogues": [
+                {"id": active_id, "created_at": now, "closed_at": None,
+                 "messages": legacy[-HISTORY_CAP:]}
+            ],
+        }
+
+    def _load_dialogues(self) -> dict:
+        """Загрузить {"active_id", "dialogues"} из dialogues.json.
+
+        Файл валиден — использовать его (сообщения санитизируются, активный
+        = по active_id, иначе единственный closed_at=null, иначе — новый
+        пустой диалог). Файла нет / битый — миграция из history.json или
+        новый пустой диалог (в обоих случаях — один активный).
+        """
+        data = None
+        try:
+            with open(self.dialogues_file, encoding="utf-8") as f:
                 data = json.load(f)
         except (OSError, ValueError):
-            return []
-        if not isinstance(data, list):
-            return []
-        clean = [
-            {"role": m["role"], "content": m["content"]}
-            for m in data
-            if isinstance(m, dict) and m.get("role") in ("user", "assistant")
-            and isinstance(m.get("content"), str)
-        ]
-        return clean[-HISTORY_CAP:]
+            data = None
+        if isinstance(data, dict) and isinstance(data.get("dialogues"), list) \
+                and data["dialogues"]:
+            dialogues = []
+            for d in data["dialogues"]:
+                if not isinstance(d, dict) or not isinstance(d.get("id"), str):
+                    continue
+                dialogues.append({
+                    "id": d["id"],
+                    "created_at": d.get("created_at") if isinstance(d.get("created_at"), str)
+                    else datetime.now().isoformat(timespec="seconds"),
+                    "closed_at": d.get("closed_at") if isinstance(d.get("closed_at"), str) else None,
+                    "messages": _clean_messages(d.get("messages"))[-HISTORY_CAP:],
+                })
+            if dialogues:
+                active_id = data.get("active_id")
+                active = next((d for d in dialogues if d["id"] == active_id), None)
+                if active is None:
+                    active = next((d for d in dialogues if d["closed_at"] is None), None)
+                if active is None:
+                    active = dialogues[-1]
+                    active["closed_at"] = None
+                return {"active_id": active["id"], "dialogues": dialogues}
+        # миграция из legacy history.json (или новый пустой диалог)
+        structure = self._migrate_legacy_history()
+        if structure["dialogues"][0]["messages"]:
+            # миграцию зафиксировать на диске сразу (legacy-история не теряется)
+            self._save_dialogues_data(structure)
+        return structure
 
-    def _save_history(self) -> None:
-        """Атомарная запись истории: tmp-файл + os.replace (нет полубитого файла).
+    def _save_dialogues(self) -> None:
+        """Атомарная запись диалогов: tmp-файл + os.replace (нет полубитого файла).
 
-        Вызывать ТОЛЬКО под self._lock (в ask / reset_history).
+        Вызывать ТОЛЬКО под self._lock (в ask / reset_history / new_dialogue).
         """
-        tmp = self.history_file + ".tmp"
+        self._save_dialogues_data(self._dialogues)
+
+    def _save_dialogues_data(self, data) -> None:
+        """Атомарная запись структуры {"active_id", "dialogues"} в self.dialogues_file."""
+        tmp = self.dialogues_file + ".tmp"
         with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(self.history, f, ensure_ascii=False, indent=2)
-        os.replace(tmp, self.history_file)
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, self.dialogues_file)
 
     def get_history(self) -> list:
-        """Копия текущей истории: [{"role": ..., "content": ...}, ...]."""
+        """Копия истории активного диалога: [{"role": ..., "content": ...}, ...]."""
         with self._lock:
             return [dict(m) for m in self.history]
 
     def reset_history(self) -> None:
-        """Очистить историю (и файл) — новый диалог."""
+        """Очистить активный диалог (и файл) — closed не помечается."""
         with self._lock:
-            self.history = []
-            self._save_history()
+            self.history.clear()  # in-place: алиас на self._active["messages"]
+            self._save_dialogues()
+
+    def new_dialogue(self) -> str:
+        """Закрыть текущий диалог (архив на диск) и открыть новый пустой.
+
+        Если активный диалог пуст — новый не создаётся (возвращается его id).
+        """
+        with self._lock:
+            if not self.history:
+                return self._active["id"]
+            self._active["closed_at"] = datetime.now().isoformat(timespec="seconds")
+            new_id = _new_dialogue_id()
+            now = datetime.now().isoformat(timespec="seconds")
+            self._active = {"id": new_id, "created_at": now, "closed_at": None, "messages": []}
+            self._dialogues["dialogues"].append(self._active)
+            self._dialogues["active_id"] = new_id
+            self.history = self._active["messages"]
+            self._save_dialogues()
+            return new_id
+
+    def get_dialogues(self) -> dict:
+        """Список диалогов для UI: id, времена, число сообщений, последнее сообщение."""
+        with self._lock:
+            out = []
+            for d in self._dialogues["dialogues"]:
+                last = d["messages"][-1]["content"] if d["messages"] else None
+                out.append({
+                    "id": d["id"],
+                    "created_at": d["created_at"],
+                    "closed_at": d["closed_at"],
+                    "message_count": len(d["messages"]),
+                    "last_message": (last[:80] if isinstance(last, str) else None),
+                })
+            return {"active_id": self._dialogues["active_id"], "dialogues": out}
 
     def ask(self, user_input: str) -> dict:
         """Отправить вопрос модели с учётом истории; вернуть результат ответа.
@@ -276,11 +411,14 @@ class SimpleAgent:
             # completion_tokens_details может отсутствовать целиком (GLM)
             reasoning_tokens = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens")
 
-            # история растёт только после успешного ответа (только content)
+            # история активного диалога растёт только после успешного
+            # ответа (только content); append/trim — in-place (алиас на
+            # self._active["messages"] не рвётся)
             self.history.append({"role": "user", "content": user_input})
             self.history.append({"role": "assistant", "content": content})
-            self.history = self.history[-HISTORY_CAP:]
-            self._save_history()
+            if len(self.history) > HISTORY_CAP:
+                del self.history[:len(self.history) - HISTORY_CAP]
+            self._save_dialogues()
             return {
                 "reply": content,
                 "reasoning": reasoning,
