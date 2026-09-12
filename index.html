@@ -177,6 +177,13 @@
   }
   button.ghost:disabled { opacity: .55; cursor: not-allowed; }
 
+  /* «Новый диалог» — оранжевый hover (отличается от cyan-ghost'ов) */
+  button.ghost.new-dialogue:hover:not(:disabled) {
+    color: var(--orange);
+    border-color: var(--orange);
+    filter: drop-shadow(0 0 8px rgba(255, 159, 26, .45));
+  }
+
   /* ---------- Панели ---------- */
   .panel {
     background: var(--panel);
@@ -904,6 +911,7 @@
     <div class="masthead-row">
       <h1>AI-агент</h1>
       <span class="head-actions">
+        <button type="button" class="ghost new-dialogue" id="newDialogueBtn">Новый диалог</button>
         <button type="button" class="ghost" id="resetBtn">Сбросить диалог</button>
         <button type="button" class="ghost" id="jsonRequestBtn">JSON запроса</button>
       </span>
@@ -940,7 +948,7 @@
         <input type="text" id="chatInput" placeholder="Введите сообщение…" autocomplete="off" autofocus aria-label="Сообщение">
         <button type="button" class="send" id="sendBtn" disabled>Отправить</button>
       </div>
-      <p class="hint">Enter — отправить. История диалога в history.json, переживает перезапуск. «Сбросить диалог» очищает её.</p>
+      <p class="hint">Enter — отправить. История диалога на сервере (dialogues.json), переживает перезапуск. «Сбросить диалог» очищает её. «Новый диалог» закрывает текущий (архив на сервере) и открывает пустой.</p>
     </main>
 
     <div class="right-col">
@@ -992,7 +1000,7 @@
           <button type="button" class="send" id="applySettings">Применить</button>
         </div>
         <p class="settings-error" id="settingsError" hidden></p>
-        <p class="settings-note">Настройки — в памяти агента (серверная сторона), сбрасываются при рестарте. История диалога — в history.json.</p>
+        <p class="settings-note">Настройки — в памяти агента (серверная сторона), сбрасываются при рестарте. Диалоги (включая архив закрытых) — на сервере в dialogues.json.</p>
       </section>
 
       <section class="panel" aria-labelledby="h-hud">
@@ -1074,6 +1082,7 @@ const els = {
   send: $('sendBtn'),
   error: $('chatError'),
   errorText: $('chatErrorText'),
+  newDialogueBtn: $('newDialogueBtn'),
   resetBtn: $('resetBtn'),
   statusLine: $('statusLine'),
   historyList: $('historyList'),
@@ -1710,6 +1719,23 @@ els.reasoningToggle.addEventListener('change', function () {
 /* смена модели в select — сразу обновляем CONTEXT LIMIT (данные уже на клиенте) */
 els.agentModel.addEventListener('change', function () {
   updateContextLimit();
+});
+
+/* «Новый диалог»: POST /agent/dialogues — текущий закрывается (архив на
+   сервере), в UI открывается пустое окно; история запросов (sidebar) остаётся */
+els.newDialogueBtn.addEventListener('click', async function () {
+  try {
+    const res = await fetch('/agent/dialogues', { method: 'POST' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+  } catch (e) {
+    showError('Не удалось создать новый диалог');
+    return;
+  }
+  hideError();
+  els.log.textContent = '';
+  restoreEmptyState();
+  historyCount = 0;
+  updateStatusLine();
 });
 
 els.resetBtn.addEventListener('click', async function () {
