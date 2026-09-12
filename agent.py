@@ -26,6 +26,7 @@ messages}, ... ]}. Один диалог активен (closed_at=null), ост
 """
 from datetime import datetime
 import json
+import math
 import os
 import threading
 import urllib.error
@@ -64,6 +65,51 @@ CONTEXT_LIMITS = {
 }
 
 
+# Каллиброванные нормы токенизации (токенов на символ).
+# Измерено по реальному API GPustack (пробные запросы max_tokens=1), 12.09.2026:
+#   rate = (prompt_tokens(текст) - prompt_tokens("")) / len(текст)
+#   "other" — 142-символьный русский тест (кириллица/латиница/цифры/пунктуация);
+#   "cjk"   — 17-символьная CJK-строка.
+# rate считается от чистого контента (шаблон-оверхед p0 вычтен), поэтому
+# подсчёт — это токены ТЕКСТА сообщений, без служебных токенов chat-шаблона.
+TOKEN_RATES = {
+    "qwen3.8-27b":     {"other": 0.4366, "cjk": 0.588},
+    "deepseek-v4-flash": {"other": 0.3803, "cjk": 0.588},
+    "glm-5.3-flash":   {"other": 0.4085, "cjk": 0.588},
+}
+# запасная норма для неизвестной модели (средняя по замерам)
+DEFAULT_TOKEN_RATE = {"other": 0.408, "cjk": 0.588}
+
+
+def count_tokens(text: str, model: str | None = None) -> int:
+    """Оценка числа токенов ТЕКСТА (без BPE-токенайзера в stdlib).
+
+    Символы делятся на две группы, каждая умножается на каллиброванную
+    норму модели (см. TOKEN_RATES) и округляется вверх:
+      - CJK (Han/Kana/Hangul) — rates["cjk"] токенов на символ;
+      - остальное (кириллица, латиница, цифры, пунктуация, пробелы) —
+        rates["other"] токенов на символ.
+    Точность ±10% по замерам — для HUD достаточно.
+    Клиентское зеркало — countTokens() в index.html (нормы приходят из
+    GET /agent/models: token_rate); при изменении менять оба места.
+    """
+    if not isinstance(text, str) or not text:
+        return 0
+    rates = TOKEN_RATES.get(model, DEFAULT_TOKEN_RATE)
+    cjk = 0
+    other = 0
+    for ch in text:
+        o = ord(ch)
+        if (0x4E00 <= o <= 0x9FFF      # CJK Unified
+                or 0x3400 <= o <= 0x4DBF   # CJK Extension A
+                or 0x3040 <= o <= 0x30FF   # Kana
+                or 0xAC00 <= o <= 0xD7A3):  # Hangul
+            cjk += 1
+        else:
+            other += 1
+    return max(1, math.ceil(cjk * rates["cjk"] + other * rates["other"]))
+
+
 def _new_dialogue_id() -> str:
     """Новый id диалога: d-<YYYYMMDDTHHMMSS>-<4 hex> (уникальный за счёт uuid)."""
     import uuid
@@ -83,9 +129,15 @@ def _clean_messages(data) -> list:
 
 
 def list_models() -> list:
-    """Доступные чат-модели + лимит контекста: [{"id": ..., "context_limit": N|null}, ...]."""
+    """Доступные чат-модели: [{"id", "context_limit", "token_rate"}, ...].
+
+    token_rate — каллиброванные нормы (TOKEN_RATES) для клиентского live-
+    подсчёта «текущего запроса» (норма модели, unknown → null, клиент
+    подставит DEFAULT).
+    """
     return [
-        {"id": m, "context_limit": CONTEXT_LIMITS.get(m)}
+        {"id": m, "context_limit": CONTEXT_LIMITS.get(m),
+         "token_rate": TOKEN_RATES.get(m)}
         for m in MODEL_KEY_ENV
     ]
 
@@ -112,8 +164,11 @@ class SimpleAgent:
         get_config() -> dict — текущие настройки.
         get_last_request() -> dict | None — копия последнего JSON-запроса
         к LLM (payload /chat/completions) или None, если ask ещё не было.
-        get_history() -> list — копия истории активного диалога
-       [{"role": ..., "content": ...}, ...].
+         get_history() -> list — копия истории активного диалога
+        [{"role": ..., "content": ...}, ...].
+         get_token_stats() -> dict — токены для HUD: вся история
+        активного диалога (каллиброванный count_tokens по нормам модели)
+        + последний ответ модели (точные completion_tokens из usage).
        reset_history() — очистить активный диалог и файл (closed не
        помечается).
         new_dialogue() -> str — закрыть текущий (архив на диск) и открыть
@@ -144,6 +199,7 @@ class SimpleAgent:
         self.dialogues_file = dialogues_file or DIALOGUES_FILE
         self._lock = threading.Lock()
         self._last_request = None  # копия последнего payload ask() (под self._lock)
+        self._last_usage = None  # usage последнего ask(): точные токены API
         self._dialogues = self._load_dialogues()  # {"active_id", "dialogues"}
         # активный — по active_id (порядок в списке не гарантирует:
         # закрытые диалоги стоят раньше активного)
@@ -303,6 +359,33 @@ class SimpleAgent:
         with self._lock:
             return [dict(m) for m in self.history]
 
+    def get_token_stats(self) -> dict:
+        """Токены активного диалога для HUD.
+
+        {"history_tokens": int,  # вся история: каллиброванный подсчёт
+                                 #  (count_tokens) по нормам модели
+         "reply_tokens": int}    # ответ модели: точные completion_tokens
+                                 #  из usage последнего API-ответа; если usage
+                                 #  ещё нет (после рестарта) — оценка по тексту
+        """
+        with self._lock:
+            history_tokens = sum(
+                count_tokens(m.get("content") or "", self.model)
+                for m in self.history
+            )
+            reply_tokens = 0
+            usage = self._last_usage or {}
+            ct = usage.get("completion_tokens")
+            if isinstance(ct, int):
+                reply_tokens = ct
+            else:
+                for m in reversed(self.history):
+                    if m.get("role") == "assistant":
+                        reply_tokens = count_tokens(
+                            m.get("content") or "", self.model)
+                        break
+            return {"history_tokens": history_tokens, "reply_tokens": reply_tokens}
+
     def reset_history(self) -> None:
         """Очистить активный диалог (и файл) — closed не помечается."""
         with self._lock:
@@ -450,6 +533,14 @@ class SimpleAgent:
 
             # completion_tokens_details может отсутствовать целиком (GLM)
             reasoning_tokens = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens")
+
+            # точные токены последнего ответа (для get_token_stats / HUD)
+            self._last_usage = {
+                "prompt_tokens": usage.get("prompt_tokens"),
+                "completion_tokens": usage.get("completion_tokens"),
+                "total_tokens": usage.get("total_tokens"),
+                "reasoning_tokens": reasoning_tokens,
+            }
 
             # история активного диалога растёт только после успешного
             # ответа (только content); append/trim — in-place (алиас на

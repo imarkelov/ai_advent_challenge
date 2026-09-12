@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
-      День 7 · Tron: Legacy HUD.
+      День 8 · Tron: Legacy HUD.
       Глубокий тёмно-синий фон + неоновая сетка, cyan-рамки с glow,
       срезанные углы (clip-path), Orbitron для заголовков/цифр,
       Rajdhani для текста. Без интернета — фолбэк-шрифты.
@@ -771,14 +771,14 @@
     100% { text-shadow: 0 0 8px rgba(25, 240, 255, .4); }
   }
 
-  /* HUD-ячейка Reasoning tokens — оранжевый акцент */
-  .hud-cell.hud-reasoning { border-color: rgba(255, 159, 26, .3); }
-  .hud-cell.hud-reasoning .hud-label { color: var(--orange); }
-  .hud-cell.hud-reasoning .hud-value {
+  /* HUD-ячейка «Текущий запрос» — оранжевый акцент (сторона пользователя) */
+  .hud-cell.hud-current { border-color: rgba(255, 159, 26, .3); }
+  .hud-cell.hud-current .hud-label { color: var(--orange); }
+  .hud-cell.hud-current .hud-value {
     color: var(--orange);
     text-shadow: 0 0 10px rgba(255, 159, 26, .5);
   }
-  .hud-cell.hud-reasoning .hud-value.hud-pulse { animation-name: hudPulseOrange; }
+  .hud-cell.hud-current .hud-value.hud-pulse { animation-name: hudPulseOrange; }
   @keyframes hudPulseOrange {
     0% { text-shadow: 0 0 20px rgba(255, 159, 26, .95); }
     100% { text-shadow: 0 0 10px rgba(255, 159, 26, .5); }
@@ -944,6 +944,34 @@
     clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
   }
 
+  /* Модалка JSON-запроса: пересуваемая. Нижний правый угол — квадратный
+     (без среза), под drag-grip; content скроллится по двум осям. */
+  #requestModal .modal {
+    position: relative;
+    overflow: auto;
+    clip-path: polygon(
+      0 0, calc(100% - 12px) 0, 100% 12px,
+      100% 100%,
+      12px 100%, 0 calc(100% - 12px)
+    );
+  }
+  .modal-resize {
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
+    touch-action: none;
+    background: linear-gradient(135deg,
+      transparent 0 5px, var(--cyan-dim) 5px 7px,
+      transparent 7px 9px, var(--cyan-dim) 9px 11px,
+      transparent 11px 100%);
+    opacity: .75;
+    transition: opacity var(--dur) ease;
+  }
+  .modal-resize:hover { opacity: 1; }
+
   /* системный промпт в панели настроек: preview одной строкой + «Изменить» */
   .prompt-row {
     display: flex;
@@ -980,7 +1008,7 @@
 <body>
 <div class="page">
   <header class="masthead">
-    <p class="overline">День 7 · AI Advent Challenge</p>
+    <p class="overline">День 8 · AI Advent Challenge</p>
     <div class="masthead-row">
       <h1>AI-агент</h1>
       <span class="head-actions">
@@ -1086,20 +1114,20 @@
         </div>
         <div class="hud-grid">
           <div class="hud-cell">
-            <span class="hud-label">Context limit</span>
-            <span class="hud-value" id="hudContext">—</span>
+            <span class="hud-label">Лимит токенов (Token limit)</span>
+            <span class="hud-value" id="hudLimit">—</span>
+          </div>
+          <div class="hud-cell hud-current">
+            <span class="hud-label">Текущий запрос (Current request)</span>
+            <span class="hud-value" id="hudCurrent">0</span>
           </div>
           <div class="hud-cell">
-            <span class="hud-label">Input tokens</span>
-            <span class="hud-value" id="hudInput">—</span>
-          </div>
-          <div class="hud-cell hud-reasoning">
-            <span class="hud-label">Reasoning tokens</span>
-            <span class="hud-value" id="hudReasoning">—</span>
+            <span class="hud-label">История диалога (Conversation history)</span>
+            <span class="hud-value" id="hudHistoryTokens">0</span>
           </div>
           <div class="hud-cell">
-            <span class="hud-label">Total tokens</span>
-            <span class="hud-value" id="hudTotal">—</span>
+            <span class="hud-label">Ответ модели (Model response)</span>
+            <span class="hud-value" id="hudReply">0</span>
           </div>
         </div>
       </section>
@@ -1138,11 +1166,13 @@
         <h3 id="requestModalTitle">JSON API-запроса к LLM</h3>
         <button type="button" class="modal-close" id="requestModalClose" aria-label="Закрыть">×</button>
       </div>
-      <p class="modal-desc">Последний запрос, отправленный на <code>{base}/chat/completions</code> (Authorization-ключ в JSON не входит).</p>
+      <p class="modal-desc">Последний запрос, отправленный на <code>{base}/chat/completions</code> (Authorization-ключ в JSON не входит). Маркер в правом нижнем углу — потяните, чтобы изменить размер окна.</p>
       <pre class="request-json" id="requestJsonBody">—</pre>
       <div class="modal-actions">
+        <button type="button" class="ghost" id="requestModalCopyBtn" disabled>Скопировать</button>
         <button type="button" class="ghost" id="requestModalCloseBtn">Закрыть</button>
       </div>
+      <div class="modal-resize" id="requestModalResize" title="Изменить размер" aria-hidden="true"></div>
     </div>
   </div>
 </div>
@@ -1176,6 +1206,8 @@ const els = {
   requestModal: $('requestModal'),
   requestModalClose: $('requestModalClose'),
   requestModalCloseBtn: $('requestModalCloseBtn'),
+  requestModalCopy: $('requestModalCopyBtn'),
+  requestModalResize: $('requestModalResize'),
   requestJsonBody: $('requestJsonBody'),
   jsonRequestBtn: $('jsonRequestBtn'),
   maxTokens: $('maxTokens'),
@@ -1183,10 +1215,10 @@ const els = {
   reasoningState: $('reasoningState'),
   applySettings: $('applySettings'),
   settingsError: $('settingsError'),
-  hudContext: $('hudContext'),
-  hudInput: $('hudInput'),
-  hudReasoning: $('hudReasoning'),
-  hudTotal: $('hudTotal')
+  hudLimit: $('hudLimit'),
+  hudCurrent: $('hudCurrent'),
+  hudHistoryTokens: $('hudHistoryTokens'),
+  hudReply: $('hudReply')
 };
 
 let inFlight = false;
@@ -1214,6 +1246,8 @@ let serverModel = null;
 let currentSystemPrompt = null;
 /* id -> context_limit (number|null), данные из GET /agent/models */
 const contextLimits = {};
+/* id -> token_rate ({other, cjk} | null) — нормы подсчёта токенов модели */
+const tokenRates = {};
 /* текущее число сообщений в истории сервера (для статус-строки) */
 let historyCount = 0;
 const HISTORY_CAP = 20; // зеркало серверного cap, для отображения
@@ -1300,18 +1334,61 @@ function setHudCell(el, value) {
   el.classList.add('hud-pulse');
 }
 
-function updateUsage(usage) {
-  const u = usage && typeof usage === 'object' ? usage : {};
-  setHudCell(els.hudInput, u.prompt_tokens);
-  setHudCell(els.hudReasoning, u.reasoning_tokens);
-  setHudCell(els.hudTotal, u.total_tokens);
+/* Подсчёт токенов — зеркало agent.count_tokens (Python). Нормы
+   (токенов/символ, каллиброваны по API) приходят из GET /agent/models
+   (token_rate) для выбранной модели; unknown → fallback-норма.
+   При изменении алгоритма менять ОБА места (agent.py + здесь). */
+let currentTokenRate = { other: 0.408, cjk: 0.588 }; /* fallback */
+function countTokens(text) {
+  if (typeof text !== 'string' || text.length === 0) return 0;
+  let cjk = 0, other = 0;
+  for (let i = 0; i < text.length; i++) {
+    const o = text.codePointAt(i);
+    if ((o >= 0x4E00 && o <= 0x9FFF) || (o >= 0x3400 && o <= 0x4DBF)
+        || (o >= 0x3040 && o <= 0x30FF) || (o >= 0xAC00 && o <= 0xD7A3)) {
+      cjk++;
+    } else {
+      other++;
+    }
+    if (o > 0xFFFF) i++; /* суррогатная пара уже посчитана */
+  }
+  return Math.max(1, Math.ceil(cjk * currentTokenRate.cjk + other * currentTokenRate.other));
 }
 
-/* CONTEXT LIMIT — из context_limit выбранной в select модели (null → «—») */
+/* Текущий запрос — текст поля ввода, live при каждом нажатии клавиши */
+function updateCurrentTokens() {
+  setHudCell(els.hudCurrent, countTokens(els.input.value));
+}
+
+/* История диалога + ответ модели — со стороны сервера (GET /agent/tokens):
+   история — каллиброванный count_tokens, ответ — точные completion_tokens
+   из usage последнего API-ответа */
+async function loadTokenStats() {
+  let data = null;
+  try {
+    const res = await fetch('/agent/tokens');
+    if (res.ok) {
+      try { data = await res.json(); } catch (e) { data = null; }
+    }
+  } catch (e) {
+    data = null;
+  }
+  if (data && typeof data === 'object') {
+    setHudCell(els.hudHistoryTokens, typeof data.history_tokens === 'number' ? data.history_tokens : 0);
+    setHudCell(els.hudReply, typeof data.reply_tokens === 'number' ? data.reply_tokens : 0);
+  }
+}
+
+/* Лимит токенов + норма подсчёта (token_rate) выбранной в select модели */
 function updateContextLimit() {
   const id = els.agentModel.value;
   const lim = Object.prototype.hasOwnProperty.call(contextLimits, id) ? contextLimits[id] : null;
-  els.hudContext.textContent = (typeof lim === 'number') ? String(lim) : '—';
+  els.hudLimit.textContent = (typeof lim === 'number') ? String(lim) : '—';
+  const rate = tokenRates[id];
+  if (rate && Number.isFinite(rate.other) && Number.isFinite(rate.cjk)) {
+    currentTokenRate = rate;
+  }
+  updateCurrentTokens(); /* live-счёт пересчитать по новой норме */
 }
 
 /* Чекбокс рассуждений — синхронизация статуса ВКЛ/ВЫКЛ */
@@ -1359,6 +1436,7 @@ async function loadModels() {
     opt.textContent = m.id;
     els.agentModel.appendChild(opt);
     contextLimits[m.id] = (typeof m.context_limit === 'number') ? m.context_limit : null;
+    tokenRates[m.id] = (m.token_rate && typeof m.token_rate === 'object') ? m.token_rate : null;
   });
   /* восстанавливаем выбор: серверная модель, иначе то, что было в select */
   const want = (serverModel && contextLimits[serverModel] !== undefined) ? serverModel
@@ -1446,10 +1524,11 @@ async function send() {
   if (reply !== null) {
     addBubble('user', text);
     addAssistantBubble(reply, reasoning, usage);
-    if (usage) updateUsage(usage);
+    loadTokenStats(); /* история и ответ модели выросли */
     historyCount = Math.min(HISTORY_CAP, historyCount + 2);
     updateStatusLine();
     els.input.value = '';
+    updateCurrentTokens();
     addHistoryEntry(text, reply, true);
     loadDialogues(); /* message_count активного растёт */
   } else {
@@ -1761,6 +1840,7 @@ async function openDialogue(id) {
   hideError();
   activeDialogueId = id;
   await renderActiveChat();
+  loadTokenStats(); /* история другого диалога — другой подсчёт */
   /* диалог открыт и отображается: read-указатель = текущий count
      (historyCount после рендера = message_count активного) */
   displayedDialogueId = id;
@@ -1941,26 +2021,107 @@ async function savePromptFromModal() {
    защищает от выхода из порядка: устаревший fetch не перезапишет
    результат более нового (быстрое закрытие/повторное открытие). */
 let requestFetchSeq = 0;
+/* pretty-JSON последнего запроса — для кнопки «Скопировать» */
+let lastRequestJson = null;
 async function openRequestModal() {
   openModal(els.requestModal, els.requestModalCloseBtn);
   els.requestJsonBody.textContent = 'Загрузка…';
+  lastRequestJson = null;
+  els.requestModalCopy.disabled = true;
   const seq = ++requestFetchSeq;
   try {
     const res = await fetch('/agent/last-request');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (seq !== requestFetchSeq) return; /* пришёл устаревший fetch */
-    els.requestJsonBody.textContent = (data && data.request)
-      ? JSON.stringify(data.request, null, 2)
-      : 'Запросов ещё не было';
+    if (data && data.request) {
+      lastRequestJson = JSON.stringify(data.request, null, 2);
+      els.requestJsonBody.textContent = lastRequestJson;
+      els.requestModalCopy.disabled = false;
+    } else {
+      els.requestJsonBody.textContent = 'Запросов ещё не было';
+    }
   } catch (e) {
     if (seq !== requestFetchSeq) return;
     els.requestJsonBody.textContent = 'Не удалось загрузить запрос';
   }
 }
 
+/* «Скопировать» — pretty-JSON в буфер обмена; фолбэк — execCommand */
+async function copyRequestJson() {
+  if (!lastRequestJson) return;
+  let ok = false;
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+    try {
+      await navigator.clipboard.writeText(lastRequestJson);
+      ok = true;
+    } catch (e) {
+      ok = false;
+    }
+  }
+  if (!ok) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = lastRequestJson;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand('copy');
+      ta.remove();
+    } catch (e) {
+      ok = false;
+    }
+  }
+  const btn = els.requestModalCopy;
+  btn.textContent = ok ? 'Скопировано ✓' : 'Не удалось';
+  setTimeout(function () { btn.textContent = 'Скопировать'; }, 1200);
+}
+
+/* Пересуваемая модалка: drag за угловой grip (pointer events).
+   Размер задаётся инлайн width/height + max-оверрайды; при повторном
+   открытии размер сохраняется. Ограничения: min 320×200, max — окно
+   браузера минус отступы overlay. */
+function makeResizable(modal, grip) {
+  let dragging = false;
+  let startX = 0, startY = 0, startW = 0, startH = 0;
+  grip.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    dragging = true;
+    grip.setPointerCapture(e.pointerId);
+    const rect = modal.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    startW = rect.width;
+    startH = rect.height;
+    document.body.style.userSelect = 'none';
+  });
+  grip.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    const minW = 320, minH = 200;
+    const maxW = Math.max(minW, window.innerWidth - 40);
+    const maxH = Math.max(minH, window.innerHeight - 40);
+    const w = Math.max(minW, Math.min(maxW, startW + (e.clientX - startX)));
+    const h = Math.max(minH, Math.min(maxH, startH + (e.clientY - startY)));
+    modal.style.width = w + 'px';
+    modal.style.height = h + 'px';
+    modal.style.maxWidth = w + 'px';
+    modal.style.maxHeight = h + 'px';
+  });
+  function stop() {
+    if (!dragging) return;
+    dragging = false;
+    document.body.style.userSelect = '';
+  }
+  grip.addEventListener('pointerup', stop);
+  grip.addEventListener('pointercancel', stop);
+}
+
 /* ================= События ================= */
-els.input.addEventListener('input', syncSend);
+els.input.addEventListener('input', function () {
+  syncSend();
+  updateCurrentTokens();
+});
 els.send.addEventListener('click', send);
 els.input.addEventListener('keydown', function (e) {
   if (e.key === 'Enter') {
@@ -1978,6 +2139,8 @@ els.promptModalSave.addEventListener('click', savePromptFromModal);
 els.jsonRequestBtn.addEventListener('click', openRequestModal);
 els.requestModalClose.addEventListener('click', function () { closeModal(els.requestModal); });
 els.requestModalCloseBtn.addEventListener('click', function () { closeModal(els.requestModal); });
+els.requestModalCopy.addEventListener('click', copyRequestJson);
+makeResizable(document.querySelector('#requestModal .modal'), els.requestModalResize);
 tempChips.forEach(function (chip) {
   chip.addEventListener('change', paintTemp);
 });
@@ -2009,6 +2172,7 @@ els.newDialogueBtn.addEventListener('click', async function () {
   restoreEmptyState();
   historyCount = 0;
   updateStatusLine();
+  loadTokenStats(); /* история пуста → 0 */
   await loadDialogues(); /* новый пустой активный → авто-baseline 0 */
   displayedDialogueId = activeDialogueId;
 });
@@ -2026,6 +2190,7 @@ els.resetBtn.addEventListener('click', async function () {
   restoreEmptyState();
   historyCount = 0;
   updateStatusLine();
+  loadTokenStats(); /* история пуста → 0 */
   await loadDialogues(); /* message_count активного меняется */
   displayedDialogueId = activeDialogueId;
 });
@@ -2034,10 +2199,12 @@ els.resetBtn.addEventListener('click', async function () {
 syncSend();
 syncReasoningState();
 paintTemp();
+updateCurrentTokens();
 loadReadCounts();
 loadSettings();
 loadModels();
 loadConversation(); /* renderActiveChat + loadDialogues */
+loadTokenStats();
 loadHistory();
 renderHistory();
 /* опрос списка диалогов раз в 5 с: лёгкий GET, пере-рендер ТОЛЬКО

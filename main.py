@@ -1,4 +1,4 @@
-"""Day7: локальный веб-сервер с SimpleAgent.
+"""Day8: локальный веб-сервер с SimpleAgent.
 
 Браузер (index.html) -> этот сервер (127.0.0.1:8000) -> SimpleAgent -> GPustack.
 
@@ -16,7 +16,8 @@
      POST   /agent/dialogues/{id}/activate — открыть диалог для продолжения
               (он становится активным, предыдущий закрывается) -> {"id"};
               неизвестный id -> 404, повторный activate -> 200 (idempotent)
-  GET    /agent/last-request — JSON последнего запроса к LLM ({"request": ...|null})
+   GET    /agent/last-request — JSON последнего запроса к LLM ({"request": ...|null})
+   GET    /agent/tokens       — подсчёт токенов (вся история + последний ответ)
 
 Запуск:  python main.py
 Открыть: http://127.0.0.1:8000
@@ -62,7 +63,7 @@ def load_dotenv():
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
-    server_version = "Day7Agent/1.0"
+    server_version = "Day8Agent/1.0"
 
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -122,6 +123,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if self.path == "/agent/last-request":
             # request может быть null (ask ещё не было)
             self._send_json(200, {"request": AGENT.get_last_request()})
+            return
+        if self.path == "/agent/tokens":
+            # Эвристический подсчёт токенов (agent.count_tokens):
+            # вся история активного диалога + последний ответ модели.
+            self._send_json(200, AGENT.get_token_stats())
             return
         self._send_json(404, {"error": "not found", "hint": "GET / serves the page"})
 
