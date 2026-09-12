@@ -663,6 +663,183 @@
     100% { text-shadow: 0 0 8px rgba(25, 240, 255, .4); }
   }
 
+  /* ---------- Модалки (системный промпт + JSON запроса) ---------- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(4, 7, 13, .8);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay[hidden] { display: none; }
+
+  .modal {
+    width: 100%;
+    max-width: 560px;
+    max-height: 86vh;
+    overflow-y: auto;
+    background: var(--panel);
+    border: 1px solid var(--cyan-border);
+    padding: 18px 20px 20px;
+    clip-path: polygon(
+      0 0, calc(100% - 12px) 0, 100% 12px,
+      100% calc(100% - 12px), calc(100% - 12px) 100%,
+      12px 100%, 0 calc(100% - 12px)
+    );
+    filter: drop-shadow(0 0 12px var(--cyan-glow));
+  }
+
+  .modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .modal-head h3 {
+    margin: 0;
+    font-family: var(--font-head);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--text);
+    text-shadow: 0 0 10px rgba(25, 240, 255, .5);
+  }
+  .modal-close {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    background: none;
+    border: 1px solid var(--cyan-border);
+    color: var(--text-dim);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    transition: color var(--dur) ease, border-color var(--dur) ease, filter var(--dur) ease;
+  }
+  .modal-close:hover {
+    color: var(--cyan);
+    border-color: var(--cyan);
+    filter: drop-shadow(0 0 8px var(--cyan-glow));
+  }
+
+  .modal-desc {
+    margin: 12px 0 10px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.55;
+  }
+  .modal-desc code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--cyan-dim);
+  }
+
+  .param-list {
+    margin: 0 0 14px;
+    display: grid;
+    gap: 6px;
+  }
+  .param {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .param dt {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--cyan);
+  }
+  .param dd {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .modal-field-label {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .modal textarea {
+    width: 100%;
+    background: var(--inset);
+    border: 1px solid var(--cyan-border);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    line-height: 1.55;
+    padding: 9px 11px;
+    resize: vertical;
+  }
+  .modal textarea:focus {
+    outline: none;
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 1px rgba(25, 240, 255, .45), 0 0 12px var(--cyan-glow);
+  }
+
+  .modal-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .modal-error {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    color: var(--orange);
+    line-height: 1.5;
+    overflow-wrap: break-word;
+  }
+  .modal-error[hidden] { display: none; }
+
+  /* JSON последнего запроса: mono, inset, срезанный угол как у HUD-ячеек */
+  .request-json {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--cyan-dim);
+    background: var(--inset);
+    border: 1px solid rgba(25, 240, 255, .2);
+    padding: 12px 14px;
+    max-height: 50vh;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
+  }
+
+  /* системный промпт в панели настроек: preview одной строкой + «Изменить» */
+  .prompt-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .prompt-preview {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   /* ---------- Адаптив ---------- */
   @media (max-width: 520px) {
     .page { padding: 26px 14px 20px; }
@@ -687,6 +864,7 @@
       <h1>AI-агент</h1>
       <span class="head-actions">
         <button type="button" class="ghost" id="resetBtn">Сбросить диалог</button>
+        <button type="button" class="ghost" id="jsonRequestBtn">JSON запроса</button>
       </span>
     </div>
     <p class="status-line" id="statusLine">MODEL: — // THINKING: — // HISTORY: 0</p>
@@ -737,8 +915,11 @@
         </div>
 
         <div class="field">
-          <label for="sysPrompt">Системный промпт</label>
-          <textarea id="sysPrompt" rows="3" spellcheck="false"></textarea>
+          <label>Системный промпт</label>
+          <div class="prompt-row">
+            <span class="prompt-preview" id="sysPromptPreview"></span>
+            <button type="button" class="ghost" id="editPromptBtn">Изменить</button>
+          </div>
         </div>
 
         <div class="temp-block">
@@ -798,6 +979,46 @@
       </section>
     </div>
   </div>
+
+  <!-- Модалка: системный промпт -->
+  <div class="modal-overlay" id="promptModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="promptModalTitle">
+      <div class="modal-head">
+        <h3 id="promptModalTitle">Системный промпт</h3>
+        <button type="button" class="modal-close" id="promptModalClose" aria-label="Закрыть">×</button>
+      </div>
+      <p class="modal-desc">Системный промпт — первое сообщение (role: system) в каждом запросе: задаёт роль и правила ответов агента. Остальные параметры, применяемые к каждому запросу:</p>
+      <dl class="param-list">
+        <div class="param"><dt>model</dt><dd>модель, обрабатывающая запрос (выбирается в настройках);</dd></div>
+        <div class="param"><dt>temperature</dt><dd>случайность: 0 — детерминированный ответ, выше — разнообразнее; «не задано» — значение модели по умолчанию;</dd></div>
+        <div class="param"><dt>max_tokens</dt><dd>лимит длины генерации в токенах; «не задано» — без лимита;</dd></div>
+        <div class="param"><dt>chat_template_kwargs.enable_thinking</dt><dd>рассуждения (thinking): true/false — включает/выключает reasoning-токены модели;</dd></div>
+        <div class="param"><dt>messages</dt><dd>system-промпт + история диалога (последние 20 сообщений) + ваш вопрос.</dd></div>
+      </dl>
+      <label class="modal-field-label" for="promptModalText">Текст промпта</label>
+      <textarea id="promptModalText" rows="5" spellcheck="false"></textarea>
+      <div class="modal-actions">
+        <span class="modal-error" id="promptModalError" hidden></span>
+        <button type="button" class="ghost" id="promptModalCancel">Отмена</button>
+        <button type="button" class="send" id="promptModalSave">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка: JSON последнего API-запроса -->
+  <div class="modal-overlay" id="requestModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="requestModalTitle">
+      <div class="modal-head">
+        <h3 id="requestModalTitle">JSON API-запроса к LLM</h3>
+        <button type="button" class="modal-close" id="requestModalClose" aria-label="Закрыть">×</button>
+      </div>
+      <p class="modal-desc">Последний запрос, отправленный на <code>{base}/chat/completions</code> (Authorization-ключ в JSON не входит).</p>
+      <pre class="request-json" id="requestJsonBody">—</pre>
+      <div class="modal-actions">
+        <button type="button" class="ghost" id="requestModalCloseBtn">Закрыть</button>
+      </div>
+    </div>
+  </div>
 </div>
 <script>
 'use strict';
@@ -816,7 +1037,19 @@ const els = {
   historyList: $('historyList'),
   clearHistoryBtn: $('clearHistoryBtn'),
   agentModel: $('agentModel'),
-  sysPrompt: $('sysPrompt'),
+  sysPromptPreview: $('sysPromptPreview'),
+  editPromptBtn: $('editPromptBtn'),
+  promptModal: $('promptModal'),
+  promptModalText: $('promptModalText'),
+  promptModalClose: $('promptModalClose'),
+  promptModalCancel: $('promptModalCancel'),
+  promptModalSave: $('promptModalSave'),
+  promptModalError: $('promptModalError'),
+  requestModal: $('requestModal'),
+  requestModalClose: $('requestModalClose'),
+  requestModalCloseBtn: $('requestModalCloseBtn'),
+  requestJsonBody: $('requestJsonBody'),
+  jsonRequestBtn: $('jsonRequestBtn'),
   maxTokens: $('maxTokens'),
   reasoningToggle: $('reasoningToggle'),
   applySettings: $('applySettings'),
@@ -834,6 +1067,8 @@ const tempChips = Array.prototype.slice.call(document.querySelectorAll('.temp-ro
 
 /* модель, известная серверу (из GET /agent/config) — для select и статус-строки */
 let serverModel = null;
+/* текущий системный промпт (из GET /agent/config) — для preview и модалки */
+let currentSystemPrompt = null;
 /* id -> context_limit (number|null), данные из GET /agent/models */
 const contextLimits = {};
 /* текущее число сообщений в истории сервера (для статус-строки) */
@@ -1104,7 +1339,10 @@ async function loadSettings() {
     data = null;
   }
   if (!data || typeof data !== 'object') return;
-  if (typeof data.system_prompt === 'string') els.sysPrompt.value = data.system_prompt;
+  if (typeof data.system_prompt === 'string') {
+    currentSystemPrompt = data.system_prompt;
+    updatePromptPreview();
+  }
   if (typeof data.model === 'string' && data.model !== '') {
     serverModel = data.model;
     /* если select ещё не заполнен — loadModels() восстановит выбор */
@@ -1133,7 +1371,6 @@ async function applySettings() {
   els.settingsError.hidden = true;
 
   const body = {
-    system_prompt: els.sysPrompt.value.trim(),
     model: els.agentModel.value,
     temperature: selectedTemp(),
     max_tokens: parsedMaxTokens(),
@@ -1295,6 +1532,91 @@ function clearHistory() {
   renderHistory();
 }
 
+/* ================= Модалки (системный промпт + JSON запроса) ================= */
+/* Общий механизм: openModal/closeModal через hidden + фокус;
+   Escape закрывает верхнюю открытую модалку; клик по overlay
+   (вне .modal) — закрыть без сохранения. */
+function openModal(overlay, focusEl) {
+  overlay.hidden = false;
+  if (focusEl && typeof focusEl.focus === 'function') focusEl.focus();
+}
+
+function closeModal(overlay) {
+  overlay.hidden = true;
+}
+
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Escape') return;
+  const open = [els.promptModal, els.requestModal].filter(function (o) { return !o.hidden; });
+  if (open.length > 0) closeModal(open[open.length - 1]);
+});
+
+[els.promptModal, els.requestModal].forEach(function (overlay) {
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeModal(overlay);
+  });
+});
+
+/* --- Модалка системного промпта --- */
+/* preview: текущий промпт одной строкой (ellipsis), title = полный текст */
+function updatePromptPreview() {
+  const text = (typeof currentSystemPrompt === 'string') ? currentSystemPrompt : '';
+  els.sysPromptPreview.textContent = text;
+  els.sysPromptPreview.title = text;
+}
+
+function openPromptModal() {
+  els.promptModalError.hidden = true;
+  els.promptModalText.value = (typeof currentSystemPrompt === 'string') ? currentSystemPrompt : '';
+  openModal(els.promptModal, els.promptModalText);
+}
+
+async function savePromptFromModal() {
+  /* шлём только этот ключ: system_prompt (остальные настройки не трогаем) */
+  const value = els.promptModalText.value.trim();
+  try {
+    const res = await fetch('/agent/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system_prompt: value })
+    });
+    if (res.ok) {
+      currentSystemPrompt = value;
+      updatePromptPreview();
+      closeModal(els.promptModal);
+      return;
+    }
+    let msg = 'Не удалось сохранить промпт';
+    try {
+      const data = await res.json();
+      if (data && typeof data.error === 'string') msg = data.error;
+    } catch (e) {
+      /* тело не-JSON — общий текст ошибки */
+    }
+    els.promptModalError.textContent = msg;
+    els.promptModalError.hidden = false;
+  } catch (err) {
+    els.promptModalError.textContent = 'Сервер недоступен: ' + (err && err.message ? err.message : String(err));
+    els.promptModalError.hidden = false;
+  }
+}
+
+/* --- Модалка JSON последнего запроса --- */
+async function openRequestModal() {
+  openModal(els.requestModal, els.requestModalCloseBtn);
+  els.requestJsonBody.textContent = 'Загрузка…';
+  try {
+    const res = await fetch('/agent/last-request');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    els.requestJsonBody.textContent = (data && data.request)
+      ? JSON.stringify(data.request, null, 2)
+      : 'Запросов ещё не было';
+  } catch (e) {
+    els.requestJsonBody.textContent = 'Не удалось загрузить запрос';
+  }
+}
+
 /* ================= События ================= */
 els.input.addEventListener('input', syncSend);
 els.send.addEventListener('click', send);
@@ -1307,6 +1629,13 @@ els.input.addEventListener('keydown', function (e) {
 
 els.applySettings.addEventListener('click', applySettings);
 els.clearHistoryBtn.addEventListener('click', clearHistory);
+els.editPromptBtn.addEventListener('click', openPromptModal);
+els.promptModalClose.addEventListener('click', function () { closeModal(els.promptModal); });
+els.promptModalCancel.addEventListener('click', function () { closeModal(els.promptModal); });
+els.promptModalSave.addEventListener('click', savePromptFromModal);
+els.jsonRequestBtn.addEventListener('click', openRequestModal);
+els.requestModalClose.addEventListener('click', function () { closeModal(els.requestModal); });
+els.requestModalCloseBtn.addEventListener('click', function () { closeModal(els.requestModal); });
 tempChips.forEach(function (chip) {
   chip.addEventListener('change', paintTemp);
 });
