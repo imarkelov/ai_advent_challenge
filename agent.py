@@ -16,6 +16,9 @@ messages}, ... ]}. Один диалог активен (closed_at=null), ост
 Настройки (system_prompt/model/temperature/max_tokens/reasoning) тоже хранятся
 в памяти агента и сбрасываются к значениям по умолчанию при рестарте сервера.
 
+Сжатие контекста (day9): в LLM уходят последние DEFAULT_WINDOW_SIZE сообщений
+диалога (скользящее окно) + LLM-сводка старых сообщений (шаг DEFAULT_SUMMARY_GAP).
+
 Клиентские настройки (базовый URL и ключи) читаются из переменных окружения
 лениво, в момент каждого запроса:
   GPUSTACK_BASE_URL — базовый URL API (обязательна);
@@ -43,6 +46,10 @@ MODEL_KEY_ENV = {
 
 TIMEOUT = 300  # неконтролируемая генерация может занимать >120 с
 HISTORY_CAP = 20  # держим последние N сообщений истории
+
+# day9 (сжатие контекста): скользящее окно + LLM-сводка
+DEFAULT_WINDOW_SIZE = 6  # в LLM уходят последние N сообщений диалога
+DEFAULT_SUMMARY_GAP = 4  # каждые N сообщений сверх окна — новая LLM-сводка
 
 # диалоги на диске: по умолчанию рядом со скриптом
 DIALOGUES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dialogues.json")
@@ -195,6 +202,10 @@ class SimpleAgent:
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.reasoning = reasoning  # включено ли рассуждение (thinking) модели
+        # day9 (сжатие контекста): параметры скользящего окна и LLM-сводки
+        self._window_size = DEFAULT_WINDOW_SIZE
+        self._summary_gap = DEFAULT_SUMMARY_GAP
+        self._compression_enabled = True
         self.history_file = history_file or HISTORY_FILE  # только для миграции
         self.dialogues_file = dialogues_file or DIALOGUES_FILE
         self._lock = threading.Lock()
@@ -209,7 +220,8 @@ class SimpleAgent:
         self.history = self._active["messages"]  # алиас (тот же объект-список)
 
     def configure(self, system_prompt=UNSET, model=UNSET, temperature=UNSET, max_tokens=UNSET,
-                  reasoning=UNSET):
+                  reasoning=UNSET, window_size=UNSET, summary_gap=UNSET,
+                  compression_enabled=UNSET):
         """Атомарно изменить настройки: сначала валидация всех переданных
         (не-UNSET) значений, потом применение (все или ничего).
 
@@ -220,7 +232,10 @@ class SimpleAgent:
           system_prompt / model: None — ошибка (агент обязан иметь промпт
           и известную модель);
           reasoning: строго bool (int не проходит) — включать/выключать
-          рассуждение (thinking) модели.
+          рассуждение (thinking) модели;
+          window_size / summary_gap (day9): int (>=2 / >=1, bool не проходит) —
+          размер скользящего окна сообщений и шаг LLM-сводки;
+          compression_enabled (day9): строго bool — сжатие контекста вкл/выкл.
 
         Ошибки валидации — RuntimeError; при неудаче настройки не меняются.
         """
@@ -242,6 +257,16 @@ class SimpleAgent:
                 # bool — подтип int, но здесь нужен именно bool (1/0 не проходят)
                 if not isinstance(reasoning, bool):
                     raise RuntimeError("reasoning must be a boolean")
+            if window_size is not UNSET:
+                # bool — подтип int: 1/0 не проходят, нужен именно int
+                if isinstance(window_size, bool) or not isinstance(window_size, int) or window_size < 2:
+                    raise RuntimeError("window_size must be an integer >= 2")
+            if summary_gap is not UNSET:
+                if isinstance(summary_gap, bool) or not isinstance(summary_gap, int) or summary_gap < 1:
+                    raise RuntimeError("summary_gap must be an integer >= 1")
+            if compression_enabled is not UNSET:
+                if not isinstance(compression_enabled, bool):
+                    raise RuntimeError("compression_enabled must be a boolean")
 
             if system_prompt is not UNSET:
                 self.system_prompt = system_prompt
@@ -253,9 +278,16 @@ class SimpleAgent:
                 self.max_tokens = max_tokens
             if reasoning is not UNSET:
                 self.reasoning = reasoning
+            if window_size is not UNSET:
+                self._window_size = window_size
+            if summary_gap is not UNSET:
+                self._summary_gap = summary_gap
+            if compression_enabled is not UNSET:
+                self._compression_enabled = compression_enabled
 
     def get_config(self) -> dict:
-        """Текущие настройки: system_prompt, model, temperature, max_tokens, reasoning."""
+        """Текущие настройки: system_prompt, model, temperature, max_tokens,
+        reasoning, window_size, summary_gap, compression_enabled."""
         with self._lock:
             return {
                 "system_prompt": self.system_prompt,
@@ -263,6 +295,9 @@ class SimpleAgent:
                 "temperature": self.temperature,
                 "max_tokens": self.max_tokens,
                 "reasoning": self.reasoning,
+                "window_size": self._window_size,
+                "summary_gap": self._summary_gap,
+                "compression_enabled": self._compression_enabled,
             }
 
     def get_last_request(self) -> dict | None:

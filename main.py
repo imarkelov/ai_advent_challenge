@@ -217,6 +217,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     self._send_json(400, {"error": "reasoning must be a boolean"})
                     return
                 known["reasoning"] = r
+            # day9 (сжатие контекста): передаются как есть, absent = «не менять»;
+            # валидация (типы/границы) — в agent.configure, ошибки -> 400.
+            for key in ("window_size", "summary_gap", "compression_enabled"):
+                if key in data:
+                    known[key] = data[key]
             # Неизвестные ключи в body игнорируются.
             try:
                 AGENT.configure(**known)
