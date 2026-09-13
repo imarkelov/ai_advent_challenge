@@ -401,10 +401,12 @@ class SimpleAgent:
         """Токены активного диалога для HUD.
 
         {"history_tokens": int,  # вся история: каллиброванный подсчёт
-                                 #  (count_tokens) по нормам модели
-         "reply_tokens": int}    # ответ модели: точные completion_tokens
-                                 #  из usage последнего API-ответа; если usage
-                                 #  ещё нет (после рестарта) — оценка по тексту
+                                  #  (count_tokens) по нормам модели
+          "reply_tokens": int,   # ответ модели: точные completion_tokens
+                                  #  из usage последнего API-ответа; если usage
+                                  #  ещё нет (после рестарта) — оценка по тексту
+          "summary_tokens": int} # сводка диалога: каллиброванный подсчёт
+                                  #  (count_tokens); пустая сводка — 0
         """
         with self._lock:
             history_tokens = sum(
@@ -422,7 +424,13 @@ class SimpleAgent:
                         reply_tokens = count_tokens(
                             m.get("content") or "", self.model)
                         break
-            return {"history_tokens": history_tokens, "reply_tokens": reply_tokens}
+            summary_tokens = count_tokens(
+                self._active.get("summary", "") or "", self.model)
+            return {
+                "history_tokens": history_tokens,
+                "reply_tokens": reply_tokens,
+                "summary_tokens": summary_tokens,
+            }
 
     def reset_history(self) -> None:
         """Очистить активный диалог (и файл) — closed не помечается."""
