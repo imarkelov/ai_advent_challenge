@@ -293,7 +293,8 @@ class SimpleAgent:
             "active_id": active_id,
             "dialogues": [
                 {"id": active_id, "created_at": now, "closed_at": None,
-                 "messages": legacy[-HISTORY_CAP:]}
+                 "messages": legacy[-HISTORY_CAP:],
+                 "summary": ""}  # legacy-диалоги без сводки
             ],
         }
 
@@ -323,6 +324,8 @@ class SimpleAgent:
                     else datetime.now().isoformat(timespec="seconds"),
                     "closed_at": d.get("closed_at") if isinstance(d.get("closed_at"), str) else None,
                     "messages": _clean_messages(d.get("messages"))[-HISTORY_CAP:],
+                    # whitelist day9: сводка диалога; не-str (None/число) -> ""
+                    "summary": d.get("summary") if isinstance(d.get("summary"), str) else "",
                 })
             if dialogues:
                 active_id = data.get("active_id")
