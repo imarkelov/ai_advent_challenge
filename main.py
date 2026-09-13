@@ -63,7 +63,7 @@ def load_dotenv():
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
-    server_version = "Day8Agent/1.0"
+    server_version = "Day9Agent/1.0"
 
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
