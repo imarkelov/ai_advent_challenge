@@ -1451,6 +1451,9 @@ async function loadTokenStats() {
   if (data && typeof data === 'object') {
     setHudCell(els.hudHistoryTokens, typeof data.history_tokens === 'number' ? data.history_tokens : 0);
     setHudCell(els.hudReply, typeof data.reply_tokens === 'number' ? data.reply_tokens : 0);
+    /* Task 9 (аддитивно): токены сводки. Ключа нет (Task 8 параллельно)
+       → дефолтный «--» из разметки сохраняем, на ноль не сбрасываем */
+    if (typeof data.summary_tokens === 'number') setHudCell(els.hudSummaryTokens, data.summary_tokens);
   }
 }
 
@@ -1600,6 +1603,7 @@ async function send() {
     addBubble('user', text);
     addAssistantBubble(reply, reasoning, usage);
     loadTokenStats(); /* история и ответ модели выросли */
+    loadSummary(); /* сводка могла появиться/обновиться (сжатие, Task 8+) */
     historyCount = Math.min(HISTORY_CAP, historyCount + 2);
     updateStatusLine();
     els.input.value = '';
@@ -1668,6 +1672,16 @@ async function loadSettings() {
   if (data.max_tokens != null) els.maxTokens.value = String(data.max_tokens);
   if (typeof data.reasoning === 'boolean') els.reasoningToggle.checked = data.reasoning;
   syncReasoningState();
+  /* Task 9: сжатие — сначала серверные значения (источник истины), потом
+     localStorage (удобство отображения: последние применённые в этой
+     вкладке значения могут переписать; авто-POST при загрузке НЕТ) */
+  if (typeof data.compression_enabled === 'boolean') {
+    els.cfgCompression.checked = data.compression_enabled;
+    setCompressionHud(data.compression_enabled);
+  }
+  if (typeof data.window_size === 'number') els.cfgWindowSize.value = String(data.window_size);
+  if (typeof data.summary_gap === 'number') els.cfgSummaryGap.value = String(data.summary_gap);
+  restoreCompressionForm();
   let target = null;
   if (data.temperature != null) {
     const t = String(data.temperature);
@@ -1723,6 +1737,118 @@ async function applySettings() {
   settingsInFlight = false;
   els.applySettings.disabled = false;
 }
+
+/* ================= Task 9: сжатие истории (только отображение + POST) =================
+   Никакой логики сжатия в JS: валидацию делает сервер (agent.configure,
+   400 при ошибках); HUD показывает состояние, сводку берём из
+   GET /agent/dialogues/{id} (ключ "summary" добавлен аддитивно в main.py). */
+
+/* localStorage — ТОЛЬКО удобство отображения: remembers последние
+   применённые значения формы между перезагрузками. Конфиг агента живёт
+   в памяти сервера — при загрузке страницы form только prefill,
+   auto-POST не делается. */
+const LS_COMPRESSION = 'adv9.compression';
+let compressionInFlight = false;
+
+/* Индикатор HUD: «сжатие: ВКЛ/ВЫКЛ» + тот же glow-пульс, что setHudCell */
+function setCompressionHud(on) {
+  els.hudCompression.textContent = on ? 'сжатие: ВКЛ' : 'сжатие: ВЫКЛ';
+  els.hudCompression.classList.remove('hud-pulse');
+  void els.hudCompression.offsetWidth;
+  els.hudCompression.classList.add('hud-pulse');
+}
+
+function saveCompressionForm() {
+  try {
+    localStorage.setItem(LS_COMPRESSION, JSON.stringify({
+      compression: els.cfgCompression.checked,
+      windowSize: Number(els.cfgWindowSize.value),
+      summaryGap: Number(els.cfgSummaryGap.value)
+    }));
+  } catch (e) {
+    /* localStorage недоступен (private mode) — только отображение, не критично */
+  }
+}
+
+function restoreCompressionForm() {
+  let saved = null;
+  try {
+    saved = JSON.parse(localStorage.getItem(LS_COMPRESSION) || 'null');
+  } catch (e) {
+    saved = null;
+  }
+  if (!saved || typeof saved !== 'object') return;
+  if (typeof saved.compression === 'boolean') els.cfgCompression.checked = saved.compression;
+  if (Number.isInteger(saved.windowSize) && saved.windowSize >= 1) els.cfgWindowSize.value = String(saved.windowSize);
+  if (Number.isInteger(saved.summaryGap) && saved.summaryGap >= 1) els.cfgSummaryGap.value = String(saved.summaryGap);
+}
+
+async function applyCompression() {
+  if (compressionInFlight) return;
+  compressionInFlight = true;
+  els.cfgApply.disabled = true;
+  els.settingsError.hidden = true;
+
+  const windowSize = Number(els.cfgWindowSize.value);
+  const summaryGap = Number(els.cfgSummaryGap.value);
+  const body = {
+    compression_enabled: els.cfgCompression.checked,
+    /* пустое/не-число → 1: сервер вернёт 400 (window_size >= 2), ошибка
+       уйдёт в строку ошибок; HUD и localStorage НЕ трогаем */
+    window_size: Number.isInteger(windowSize) ? windowSize : 1,
+    summary_gap: Number.isInteger(summaryGap) ? summaryGap : 1
+  };
+
+  try {
+    const res = await fetch('/agent/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* тело не-JSON */ }
+    if (res.ok && data && data.ok === true) {
+      setCompressionHud(body.compression_enabled);
+      saveCompressionForm();
+      els.cfgApply.textContent = 'Применено ✓';
+      setTimeout(function () { els.cfgApply.textContent = 'Применить сжатие'; }, 1200);
+      loadTokenStats(); /* summary_tokens могли измениться */
+      loadSummary();
+    } else {
+      /* 400/!ok: RU-ошибка; HUD-значения и localStorage не меняем */
+      let msg = 'ошибка: не удалось применить настройки сжатия';
+      if (data && typeof data.error === 'string') msg = 'ошибка: ' + data.error;
+      els.settingsError.textContent = msg;
+      els.settingsError.hidden = false;
+    }
+  } catch (err) {
+    els.settingsError.textContent = 'ошибка: сервер недоступен: ' + (err && err.message ? err.message : String(err));
+    els.settingsError.hidden = false;
+  }
+  compressionInFlight = false;
+  els.cfgApply.disabled = false;
+}
+
+/* Текст сводки активного диалога для HUD: GET /agent/dialogues/{id}
+   аддитивно отдаёт "summary" (main.py); нет диалога или сводки пусто → «—» */
+async function loadSummary() {
+  let summary = '';
+  if (activeDialogueId != null) {
+    try {
+      const res = await fetch('/agent/dialogues/' + encodeURIComponent(activeDialogueId));
+      if (res.ok) {
+        try {
+          const data = await res.json();
+          if (data && typeof data.summary === 'string') summary = data.summary;
+        } catch (e) { /* тело не-JSON */ }
+      }
+    } catch (e) {
+      /* сервер недоступен — текущее значение оставляем */
+    }
+  }
+  els.hudSummaryText.textContent = summary ? summary : '—';
+}
+
 /* ================= Активный диалог (GET /agent/history → #chatLog) ================= */
 /* Перерендер активного диалога: чистим ленту, показываем сообщения
    активного (или пустое состояние), синхронизируем статус и ввод. */
@@ -1763,6 +1889,7 @@ async function loadConversation() {
     saveReadCounts();
     renderDialogueList(dialoguesData); /* бейдж активного гаснет */
   }
+  loadSummary(); /* сводка активного диалога в HUD */
 }
 
 /* Конструктор пустого состояния чата (после сброса диалога) */
@@ -1916,6 +2043,7 @@ async function openDialogue(id) {
   activeDialogueId = id;
   await renderActiveChat();
   loadTokenStats(); /* история другого диалога — другой подсчёт */
+  loadSummary(); /* сводка другого диалога */
   /* диалог открыт и отображается: read-указатель = текущий count
      (historyCount после рендера = message_count активного) */
   displayedDialogueId = id;
@@ -2207,12 +2335,9 @@ els.input.addEventListener('keydown', function (e) {
 
 els.applySettings.addEventListener('click', applySettings);
 
-/* Скелет: применение настроек сжатия. Плейсхолдер в статус-строке,
-   реальный POST/логика — в Task 9. */
-els.cfgApply.addEventListener('click', function () {
-  // wiring: Task 9
-  els.statusLine.textContent = 'сохранение… (wiring: Task 9)';
-});
+/* Task 9: применение настроек сжатия — POST /agent/config; детали в
+   applyCompression (HUD-индикатор, localStorage, RU-ошибки) */
+els.cfgApply.addEventListener('click', applyCompression);
 els.clearHistoryBtn.addEventListener('click', clearHistory);
 els.editPromptBtn.addEventListener('click', openPromptModal);
 els.promptModalClose.addEventListener('click', function () { closeModal(els.promptModal); });
@@ -2257,6 +2382,8 @@ els.newDialogueBtn.addEventListener('click', async function () {
   loadTokenStats(); /* история пуста → 0 */
   await loadDialogues(); /* новый пустой активный → авто-baseline 0 */
   displayedDialogueId = activeDialogueId;
+  loadSummary(); /* новый диалог — сводки ещё нет (после loadDialogues:
+                     activeDialogueId уже новый) */
 });
 
 els.resetBtn.addEventListener('click', async function () {
@@ -2275,6 +2402,7 @@ els.resetBtn.addEventListener('click', async function () {
   loadTokenStats(); /* история пуста → 0 */
   await loadDialogues(); /* message_count активного меняется */
   displayedDialogueId = activeDialogueId;
+  loadSummary(); /* история очищена — переспрашиваем (сводка может сохраниться) */
 });
 
 /* ================= Инициализация ================= */

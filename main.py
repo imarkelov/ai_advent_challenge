@@ -115,7 +115,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if messages is None:
                 self._send_json(404, {"error": f"unknown dialogue {dialogue_id!r}"})
                 return
-            self._send_json(200, {"id": dialogue_id, "messages": messages})
+            # day9 (Task 9): аддитивный "summary" для HUD — чистый
+            # passthrough, без логики. Публичного агентовского метода,
+            # отдающего dict диалога, нет (список get_dialogues summary не
+            # несёт), поэтому читаем in-memory хранилище напрямую.
+            summary = ""
+            for d in AGENT._dialogues.get("dialogues", []):
+                if d.get("id") == dialogue_id:
+                    s = d.get("summary")
+                    summary = s if isinstance(s, str) else ""
+                    break
+            self._send_json(200, {"id": dialogue_id, "messages": messages, "summary": summary})
             return
         if self.path == "/agent/dialogues":
             self._send_json(200, AGENT.get_dialogues())
