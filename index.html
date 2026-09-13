@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
-      День 7 · Tron: Legacy HUD.
+      День 8 · Tron: Legacy HUD.
       Глубокий тёмно-синий фон + неоновая сетка, cyan-рамки с glow,
       срезанные углы (clip-path), Orbitron для заголовков/цифр,
       Rajdhani для текста. Без интернета — фолбэк-шрифты.
@@ -771,18 +771,55 @@
     100% { text-shadow: 0 0 8px rgba(25, 240, 255, .4); }
   }
 
-  /* HUD-ячейка Reasoning tokens — оранжевый акцент */
-  .hud-cell.hud-reasoning { border-color: rgba(255, 159, 26, .3); }
-  .hud-cell.hud-reasoning .hud-label { color: var(--orange); }
-  .hud-cell.hud-reasoning .hud-value {
+  /* HUD-ячейка «Текущий запрос» — оранжевый акцент (сторона пользователя) */
+  .hud-cell.hud-current { border-color: rgba(255, 159, 26, .3); }
+  .hud-cell.hud-current .hud-label { color: var(--orange); }
+  .hud-cell.hud-current .hud-value {
     color: var(--orange);
     text-shadow: 0 0 10px rgba(255, 159, 26, .5);
   }
-  .hud-cell.hud-reasoning .hud-value.hud-pulse { animation-name: hudPulseOrange; }
+  .hud-cell.hud-current .hud-value.hud-pulse { animation-name: hudPulseOrange; }
   @keyframes hudPulseOrange {
     0% { text-shadow: 0 0 20px rgba(255, 159, 26, .95); }
     100% { text-shadow: 0 0 10px rgba(255, 159, 26, .5); }
   }
+
+  /* HUD: «Сводка диалога» — раскрывающаяся ячейка (свёрнута по умолчанию) */
+  .hud-summary { padding: 0; }
+  .hud-summary summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 10px 12px 12px;
+    user-select: none;
+  }
+  .hud-summary summary::-webkit-details-marker { display: none; }
+  .hud-summary summary .hud-label { margin-bottom: 0; }
+  .hud-summary summary::after {
+    content: "▸";
+    float: right;
+    color: var(--cyan-dim);
+  }
+  .hud-summary[open] summary { padding-bottom: 6px; }
+  .hud-summary[open] summary::after { content: "▾"; }
+  .hud-summary[open] .hud-value {
+    padding: 0 12px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text);
+    text-shadow: none;
+    white-space: pre-wrap;
+  }
+
+  /* ---------- Настройки: сжатие истории ---------- */
+  .comp-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .comp-row .field { margin-top: 0; }
 
   /* ---------- Модалки (системный промпт + JSON запроса) ---------- */
   .modal-overlay {
@@ -944,6 +981,34 @@
     clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
   }
 
+  /* Модалка JSON-запроса: пересуваемая. Нижний правый угол — квадратный
+     (без среза), под drag-grip; content скроллится по двум осям. */
+  #requestModal .modal {
+    position: relative;
+    overflow: auto;
+    clip-path: polygon(
+      0 0, calc(100% - 12px) 0, 100% 12px,
+      100% 100%,
+      12px 100%, 0 calc(100% - 12px)
+    );
+  }
+  .modal-resize {
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
+    touch-action: none;
+    background: linear-gradient(135deg,
+      transparent 0 5px, var(--cyan-dim) 5px 7px,
+      transparent 7px 9px, var(--cyan-dim) 9px 11px,
+      transparent 11px 100%);
+    opacity: .75;
+    transition: opacity var(--dur) ease;
+  }
+  .modal-resize:hover { opacity: 1; }
+
   /* системный промпт в панели настроек: preview одной строкой + «Изменить» */
   .prompt-row {
     display: flex;
@@ -980,7 +1045,7 @@
 <body>
 <div class="page">
   <header class="masthead">
-    <p class="overline">День 7 · AI Advent Challenge</p>
+    <p class="overline">День 8 · AI Advent Challenge</p>
     <div class="masthead-row">
       <h1>AI-агент</h1>
       <span class="head-actions">
@@ -1072,7 +1137,25 @@
           <span class="reasoning-state" id="reasoningState">ВКЛ</span>
         </div>
 
+        <div class="reasoning-row">
+          <span class="row-label" id="compressionLabel">Сжатие истории</span>
+          <label class="neon-check" title="Включить/выключить сжатие истории диалога">
+            <input type="checkbox" id="cfg-compression" aria-labelledby="compressionLabel">
+            <span class="box"><span class="tick"></span></span>
+          </label>
+        </div>
+        <div class="comp-row">
+          <div class="field">
+            <label for="cfg-window-size">Окно (N)</label>
+            <input id="cfg-window-size" type="number" min="1" step="1" value="20" spellcheck="false" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="cfg-summary-gap">Порог (gap)</label>
+            <input id="cfg-summary-gap" type="number" min="1" step="1" value="5" spellcheck="false" autocomplete="off">
+          </div>
+        </div>
         <div class="settings-actions">
+          <button type="button" class="send" id="cfg-apply">Применить сжатие</button>
           <button type="button" class="send" id="applySettings">Применить</button>
         </div>
         <p class="settings-error" id="settingsError" hidden></p>
@@ -1086,20 +1169,32 @@
         </div>
         <div class="hud-grid">
           <div class="hud-cell">
-            <span class="hud-label">Context limit</span>
-            <span class="hud-value" id="hudContext">—</span>
+            <span class="hud-label">Лимит токенов (Token limit)</span>
+            <span class="hud-value" id="hudLimit">—</span>
+          </div>
+          <div class="hud-cell hud-current">
+            <span class="hud-label">Текущий запрос (Current request)</span>
+            <span class="hud-value" id="hudCurrent">0</span>
           </div>
           <div class="hud-cell">
-            <span class="hud-label">Input tokens</span>
-            <span class="hud-value" id="hudInput">—</span>
-          </div>
-          <div class="hud-cell hud-reasoning">
-            <span class="hud-label">Reasoning tokens</span>
-            <span class="hud-value" id="hudReasoning">—</span>
+            <span class="hud-label">История диалога (Conversation history)</span>
+            <span class="hud-value" id="hudHistoryTokens">0</span>
           </div>
           <div class="hud-cell">
-            <span class="hud-label">Total tokens</span>
-            <span class="hud-value" id="hudTotal">—</span>
+            <span class="hud-label">Ответ модели (Model response)</span>
+            <span class="hud-value" id="hudReply">0</span>
+          </div>
+          <details class="hud-cell hud-summary" id="hud-summary">
+            <summary><span class="hud-label">Сводка диалога (Summary)</span></summary>
+            <span class="hud-value" id="hudSummaryText">—</span>
+          </details>
+          <div class="hud-cell">
+            <span class="hud-label">Сжатие (Compression)</span>
+            <span class="hud-value" id="hud-compression">сжатие: —</span>
+          </div>
+          <div class="hud-cell">
+            <span class="hud-label">Сводка: токены (Summary tokens)</span>
+            <span class="hud-value" id="hud-summary-tokens">--</span>
           </div>
         </div>
       </section>
@@ -1138,11 +1233,13 @@
         <h3 id="requestModalTitle">JSON API-запроса к LLM</h3>
         <button type="button" class="modal-close" id="requestModalClose" aria-label="Закрыть">×</button>
       </div>
-      <p class="modal-desc">Последний запрос, отправленный на <code>{base}/chat/completions</code> (Authorization-ключ в JSON не входит).</p>
+      <p class="modal-desc">Последний запрос, отправленный на <code>{base}/chat/completions</code> (Authorization-ключ в JSON не входит). Маркер в правом нижнем углу — потяните, чтобы изменить размер окна.</p>
       <pre class="request-json" id="requestJsonBody">—</pre>
       <div class="modal-actions">
+        <button type="button" class="ghost" id="requestModalCopyBtn" disabled>Скопировать</button>
         <button type="button" class="ghost" id="requestModalCloseBtn">Закрыть</button>
       </div>
+      <div class="modal-resize" id="requestModalResize" title="Изменить размер" aria-hidden="true"></div>
     </div>
   </div>
 </div>
@@ -1176,6 +1273,8 @@ const els = {
   requestModal: $('requestModal'),
   requestModalClose: $('requestModalClose'),
   requestModalCloseBtn: $('requestModalCloseBtn'),
+  requestModalCopy: $('requestModalCopyBtn'),
+  requestModalResize: $('requestModalResize'),
   requestJsonBody: $('requestJsonBody'),
   jsonRequestBtn: $('jsonRequestBtn'),
   maxTokens: $('maxTokens'),
@@ -1183,10 +1282,18 @@ const els = {
   reasoningState: $('reasoningState'),
   applySettings: $('applySettings'),
   settingsError: $('settingsError'),
-  hudContext: $('hudContext'),
-  hudInput: $('hudInput'),
-  hudReasoning: $('hudReasoning'),
-  hudTotal: $('hudTotal')
+  hudLimit: $('hudLimit'),
+  hudCurrent: $('hudCurrent'),
+  hudHistoryTokens: $('hudHistoryTokens'),
+  hudReply: $('hudReply'),
+  hudSummary: $('hud-summary'),
+  hudSummaryText: $('hudSummaryText'),
+  hudCompression: $('hud-compression'),
+  hudSummaryTokens: $('hud-summary-tokens'),
+  cfgCompression: $('cfg-compression'),
+  cfgWindowSize: $('cfg-window-size'),
+  cfgSummaryGap: $('cfg-summary-gap'),
+  cfgApply: $('cfg-apply')
 };
 
 let inFlight = false;
@@ -1214,6 +1321,8 @@ let serverModel = null;
 let currentSystemPrompt = null;
 /* id -> context_limit (number|null), данные из GET /agent/models */
 const contextLimits = {};
+/* id -> token_rate ({other, cjk} | null) — нормы подсчёта токенов модели */
+const tokenRates = {};
 /* текущее число сообщений в истории сервера (для статус-строки) */
 let historyCount = 0;
 const HISTORY_CAP = 20; // зеркало серверного cap, для отображения
@@ -1300,18 +1409,64 @@ function setHudCell(el, value) {
   el.classList.add('hud-pulse');
 }
 
-function updateUsage(usage) {
-  const u = usage && typeof usage === 'object' ? usage : {};
-  setHudCell(els.hudInput, u.prompt_tokens);
-  setHudCell(els.hudReasoning, u.reasoning_tokens);
-  setHudCell(els.hudTotal, u.total_tokens);
+/* Подсчёт токенов — зеркало agent.count_tokens (Python). Нормы
+   (токенов/символ, каллиброваны по API) приходят из GET /agent/models
+   (token_rate) для выбранной модели; unknown → fallback-норма.
+   При изменении алгоритма менять ОБА места (agent.py + здесь). */
+let currentTokenRate = { other: 0.408, cjk: 0.588 }; /* fallback */
+function countTokens(text) {
+  if (typeof text !== 'string' || text.length === 0) return 0;
+  let cjk = 0, other = 0;
+  for (let i = 0; i < text.length; i++) {
+    const o = text.codePointAt(i);
+    if ((o >= 0x4E00 && o <= 0x9FFF) || (o >= 0x3400 && o <= 0x4DBF)
+        || (o >= 0x3040 && o <= 0x30FF) || (o >= 0xAC00 && o <= 0xD7A3)) {
+      cjk++;
+    } else {
+      other++;
+    }
+    if (o > 0xFFFF) i++; /* суррогатная пара уже посчитана */
+  }
+  return Math.max(1, Math.ceil(cjk * currentTokenRate.cjk + other * currentTokenRate.other));
 }
 
-/* CONTEXT LIMIT — из context_limit выбранной в select модели (null → «—») */
+/* Текущий запрос — текст поля ввода, live при каждом нажатии клавиши */
+function updateCurrentTokens() {
+  setHudCell(els.hudCurrent, countTokens(els.input.value));
+}
+
+/* История диалога + ответ модели — со стороны сервера (GET /agent/tokens):
+   история — каллиброванный count_tokens, ответ — точные completion_tokens
+   из usage последнего API-ответа */
+async function loadTokenStats() {
+  let data = null;
+  try {
+    const res = await fetch('/agent/tokens');
+    if (res.ok) {
+      try { data = await res.json(); } catch (e) { data = null; }
+    }
+  } catch (e) {
+    data = null;
+  }
+  if (data && typeof data === 'object') {
+    setHudCell(els.hudHistoryTokens, typeof data.history_tokens === 'number' ? data.history_tokens : 0);
+    setHudCell(els.hudReply, typeof data.reply_tokens === 'number' ? data.reply_tokens : 0);
+    /* Task 9 (аддитивно): токены сводки. Ключа нет (Task 8 параллельно)
+       → дефолтный «--» из разметки сохраняем, на ноль не сбрасываем */
+    if (typeof data.summary_tokens === 'number') setHudCell(els.hudSummaryTokens, data.summary_tokens);
+  }
+}
+
+/* Лимит токенов + норма подсчёта (token_rate) выбранной в select модели */
 function updateContextLimit() {
   const id = els.agentModel.value;
   const lim = Object.prototype.hasOwnProperty.call(contextLimits, id) ? contextLimits[id] : null;
-  els.hudContext.textContent = (typeof lim === 'number') ? String(lim) : '—';
+  els.hudLimit.textContent = (typeof lim === 'number') ? String(lim) : '—';
+  const rate = tokenRates[id];
+  if (rate && Number.isFinite(rate.other) && Number.isFinite(rate.cjk)) {
+    currentTokenRate = rate;
+  }
+  updateCurrentTokens(); /* live-счёт пересчитать по новой норме */
 }
 
 /* Чекбокс рассуждений — синхронизация статуса ВКЛ/ВЫКЛ */
@@ -1359,6 +1514,7 @@ async function loadModels() {
     opt.textContent = m.id;
     els.agentModel.appendChild(opt);
     contextLimits[m.id] = (typeof m.context_limit === 'number') ? m.context_limit : null;
+    tokenRates[m.id] = (m.token_rate && typeof m.token_rate === 'object') ? m.token_rate : null;
   });
   /* восстанавливаем выбор: серверная модель, иначе то, что было в select */
   const want = (serverModel && contextLimits[serverModel] !== undefined) ? serverModel
@@ -1446,10 +1602,12 @@ async function send() {
   if (reply !== null) {
     addBubble('user', text);
     addAssistantBubble(reply, reasoning, usage);
-    if (usage) updateUsage(usage);
+    loadTokenStats(); /* история и ответ модели выросли */
+    loadSummary(); /* сводка могла появиться/обновиться (сжатие, Task 8+) */
     historyCount = Math.min(HISTORY_CAP, historyCount + 2);
     updateStatusLine();
     els.input.value = '';
+    updateCurrentTokens();
     addHistoryEntry(text, reply, true);
     loadDialogues(); /* message_count активного растёт */
   } else {
@@ -1514,6 +1672,16 @@ async function loadSettings() {
   if (data.max_tokens != null) els.maxTokens.value = String(data.max_tokens);
   if (typeof data.reasoning === 'boolean') els.reasoningToggle.checked = data.reasoning;
   syncReasoningState();
+  /* Task 9: сжатие — сначала серверные значения (источник истины), потом
+     localStorage (удобство отображения: последние применённые в этой
+     вкладке значения могут переписать; авто-POST при загрузке НЕТ) */
+  if (typeof data.compression_enabled === 'boolean') {
+    els.cfgCompression.checked = data.compression_enabled;
+    setCompressionHud(data.compression_enabled);
+  }
+  if (typeof data.window_size === 'number') els.cfgWindowSize.value = String(data.window_size);
+  if (typeof data.summary_gap === 'number') els.cfgSummaryGap.value = String(data.summary_gap);
+  restoreCompressionForm();
   let target = null;
   if (data.temperature != null) {
     const t = String(data.temperature);
@@ -1569,6 +1737,120 @@ async function applySettings() {
   settingsInFlight = false;
   els.applySettings.disabled = false;
 }
+
+/* ================= Task 9: сжатие истории (только отображение + POST) =================
+   Никакой логики сжатия в JS: валидацию делает сервер (agent.configure,
+   400 при ошибках); HUD показывает состояние, сводку берём из
+   GET /agent/dialogues/{id} (ключ "summary" добавлен аддитивно в main.py). */
+
+/* localStorage — ТОЛЬКО удобство отображения: remembers последние
+   применённые значения формы между перезагрузками. Конфиг агента живёт
+   в памяти сервера — при загрузке страницы form только prefill,
+   auto-POST не делается. */
+const LS_COMPRESSION = 'adv9.compression';
+let compressionInFlight = false;
+
+/* Индикатор HUD: «сжатие: ВКЛ/ВЫКЛ» + тот же glow-пульс, что setHudCell */
+function setCompressionHud(on) {
+  els.hudCompression.textContent = on ? 'сжатие: ВКЛ' : 'сжатие: ВЫКЛ';
+  els.hudCompression.classList.remove('hud-pulse');
+  void els.hudCompression.offsetWidth;
+  els.hudCompression.classList.add('hud-pulse');
+}
+
+function saveCompressionForm() {
+  try {
+    localStorage.setItem(LS_COMPRESSION, JSON.stringify({
+      compression: els.cfgCompression.checked,
+      windowSize: Number(els.cfgWindowSize.value),
+      summaryGap: Number(els.cfgSummaryGap.value)
+    }));
+  } catch (e) {
+    /* localStorage недоступен (private mode) — только отображение, не критично */
+  }
+}
+
+function restoreCompressionForm() {
+  let saved = null;
+  try {
+    saved = JSON.parse(localStorage.getItem(LS_COMPRESSION) || 'null');
+  } catch (e) {
+    saved = null;
+  }
+  if (!saved || typeof saved !== 'object') return;
+  if (typeof saved.compression === 'boolean') els.cfgCompression.checked = saved.compression;
+  if (Number.isInteger(saved.windowSize) && saved.windowSize >= 1) els.cfgWindowSize.value = String(saved.windowSize);
+  if (Number.isInteger(saved.summaryGap) && saved.summaryGap >= 1) els.cfgSummaryGap.value = String(saved.summaryGap);
+}
+
+async function applyCompression() {
+  if (compressionInFlight) return;
+  compressionInFlight = true;
+  els.cfgApply.disabled = true;
+  els.settingsError.hidden = true;
+
+  const windowSize = Number(els.cfgWindowSize.value);
+  const summaryGap = Number(els.cfgSummaryGap.value);
+  const body = {
+    compression_enabled: els.cfgCompression.checked,
+    /* пустое/не-число → 1: сервер вернёт 400 (window_size >= 2), ошибка
+       уйдёт в строку ошибок; HUD и localStorage НЕ трогаем */
+    window_size: Number.isInteger(windowSize) ? windowSize : 1,
+    summary_gap: Number.isInteger(summaryGap) ? summaryGap : 1
+  };
+
+  try {
+    const res = await fetch('/agent/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* тело не-JSON */ }
+    if (res.ok && data && data.ok === true) {
+      setCompressionHud(body.compression_enabled);
+      saveCompressionForm();
+      els.cfgApply.textContent = 'Применено ✓';
+      setTimeout(function () { els.cfgApply.textContent = 'Применить сжатие'; }, 1200);
+      loadTokenStats(); /* summary_tokens могли измениться */
+      loadSummary();
+    } else {
+      /* 400/!ok: RU-ошибка; HUD-значения и localStorage не меняем */
+      let msg = 'ошибка: не удалось применить настройки сжатия';
+      if (data && typeof data.error === 'string') msg = 'ошибка: ' + data.error;
+      els.settingsError.textContent = msg;
+      els.settingsError.hidden = false;
+    }
+  } catch (err) {
+    els.settingsError.textContent = 'ошибка: сервер недоступен: ' + (err && err.message ? err.message : String(err));
+    els.settingsError.hidden = false;
+  }
+  compressionInFlight = false;
+  els.cfgApply.disabled = false;
+}
+
+/* Текст сводки активного диалога для HUD: GET /agent/dialogues/{id}
+   аддитивно отдаёт "summary" (main.py); нет диалога или сводки пусто → «—» */
+async function loadSummary() {
+  /* null = получить не удалось (нет активного диалога, сеть упала) —
+     текущее значение HUD не трогаем; '' = диалог отвечает, сводки нет */
+  let summary = null;
+  if (activeDialogueId != null) {
+    try {
+      const res = await fetch('/agent/dialogues/' + encodeURIComponent(activeDialogueId));
+      if (res.ok) {
+        try {
+          const data = await res.json();
+          summary = (data && typeof data.summary === 'string') ? data.summary : '';
+        } catch (e) { /* тело не-JSON — текущее значение оставляем */ }
+      }
+    } catch (e) {
+      /* сервер недоступен — текущее значение оставляем */
+    }
+  }
+  if (summary !== null) els.hudSummaryText.textContent = summary || '—';
+}
+
 /* ================= Активный диалог (GET /agent/history → #chatLog) ================= */
 /* Перерендер активного диалога: чистим ленту, показываем сообщения
    активного (или пустое состояние), синхронизируем статус и ввод. */
@@ -1609,6 +1891,7 @@ async function loadConversation() {
     saveReadCounts();
     renderDialogueList(dialoguesData); /* бейдж активного гаснет */
   }
+  loadSummary(); /* сводка активного диалога в HUD */
 }
 
 /* Конструктор пустого состояния чата (после сброса диалога) */
@@ -1761,6 +2044,8 @@ async function openDialogue(id) {
   hideError();
   activeDialogueId = id;
   await renderActiveChat();
+  loadTokenStats(); /* история другого диалога — другой подсчёт */
+  loadSummary(); /* сводка другого диалога */
   /* диалог открыт и отображается: read-указатель = текущий count
      (historyCount после рендера = message_count активного) */
   displayedDialogueId = id;
@@ -1941,26 +2226,107 @@ async function savePromptFromModal() {
    защищает от выхода из порядка: устаревший fetch не перезапишет
    результат более нового (быстрое закрытие/повторное открытие). */
 let requestFetchSeq = 0;
+/* pretty-JSON последнего запроса — для кнопки «Скопировать» */
+let lastRequestJson = null;
 async function openRequestModal() {
   openModal(els.requestModal, els.requestModalCloseBtn);
   els.requestJsonBody.textContent = 'Загрузка…';
+  lastRequestJson = null;
+  els.requestModalCopy.disabled = true;
   const seq = ++requestFetchSeq;
   try {
     const res = await fetch('/agent/last-request');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (seq !== requestFetchSeq) return; /* пришёл устаревший fetch */
-    els.requestJsonBody.textContent = (data && data.request)
-      ? JSON.stringify(data.request, null, 2)
-      : 'Запросов ещё не было';
+    if (data && data.request) {
+      lastRequestJson = JSON.stringify(data.request, null, 2);
+      els.requestJsonBody.textContent = lastRequestJson;
+      els.requestModalCopy.disabled = false;
+    } else {
+      els.requestJsonBody.textContent = 'Запросов ещё не было';
+    }
   } catch (e) {
     if (seq !== requestFetchSeq) return;
     els.requestJsonBody.textContent = 'Не удалось загрузить запрос';
   }
 }
 
+/* «Скопировать» — pretty-JSON в буфер обмена; фолбэк — execCommand */
+async function copyRequestJson() {
+  if (!lastRequestJson) return;
+  let ok = false;
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+    try {
+      await navigator.clipboard.writeText(lastRequestJson);
+      ok = true;
+    } catch (e) {
+      ok = false;
+    }
+  }
+  if (!ok) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = lastRequestJson;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand('copy');
+      ta.remove();
+    } catch (e) {
+      ok = false;
+    }
+  }
+  const btn = els.requestModalCopy;
+  btn.textContent = ok ? 'Скопировано ✓' : 'Не удалось';
+  setTimeout(function () { btn.textContent = 'Скопировать'; }, 1200);
+}
+
+/* Пересуваемая модалка: drag за угловой grip (pointer events).
+   Размер задаётся инлайн width/height + max-оверрайды; при повторном
+   открытии размер сохраняется. Ограничения: min 320×200, max — окно
+   браузера минус отступы overlay. */
+function makeResizable(modal, grip) {
+  let dragging = false;
+  let startX = 0, startY = 0, startW = 0, startH = 0;
+  grip.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    dragging = true;
+    grip.setPointerCapture(e.pointerId);
+    const rect = modal.getBoundingClientRect();
+    startX = e.clientX;
+    startY = e.clientY;
+    startW = rect.width;
+    startH = rect.height;
+    document.body.style.userSelect = 'none';
+  });
+  grip.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    const minW = 320, minH = 200;
+    const maxW = Math.max(minW, window.innerWidth - 40);
+    const maxH = Math.max(minH, window.innerHeight - 40);
+    const w = Math.max(minW, Math.min(maxW, startW + (e.clientX - startX)));
+    const h = Math.max(minH, Math.min(maxH, startH + (e.clientY - startY)));
+    modal.style.width = w + 'px';
+    modal.style.height = h + 'px';
+    modal.style.maxWidth = w + 'px';
+    modal.style.maxHeight = h + 'px';
+  });
+  function stop() {
+    if (!dragging) return;
+    dragging = false;
+    document.body.style.userSelect = '';
+  }
+  grip.addEventListener('pointerup', stop);
+  grip.addEventListener('pointercancel', stop);
+}
+
 /* ================= События ================= */
-els.input.addEventListener('input', syncSend);
+els.input.addEventListener('input', function () {
+  syncSend();
+  updateCurrentTokens();
+});
 els.send.addEventListener('click', send);
 els.input.addEventListener('keydown', function (e) {
   if (e.key === 'Enter') {
@@ -1970,6 +2336,10 @@ els.input.addEventListener('keydown', function (e) {
 });
 
 els.applySettings.addEventListener('click', applySettings);
+
+/* Task 9: применение настроек сжатия — POST /agent/config; детали в
+   applyCompression (HUD-индикатор, localStorage, RU-ошибки) */
+els.cfgApply.addEventListener('click', applyCompression);
 els.clearHistoryBtn.addEventListener('click', clearHistory);
 els.editPromptBtn.addEventListener('click', openPromptModal);
 els.promptModalClose.addEventListener('click', function () { closeModal(els.promptModal); });
@@ -1978,6 +2348,8 @@ els.promptModalSave.addEventListener('click', savePromptFromModal);
 els.jsonRequestBtn.addEventListener('click', openRequestModal);
 els.requestModalClose.addEventListener('click', function () { closeModal(els.requestModal); });
 els.requestModalCloseBtn.addEventListener('click', function () { closeModal(els.requestModal); });
+els.requestModalCopy.addEventListener('click', copyRequestJson);
+makeResizable(document.querySelector('#requestModal .modal'), els.requestModalResize);
 tempChips.forEach(function (chip) {
   chip.addEventListener('change', paintTemp);
 });
@@ -2009,8 +2381,11 @@ els.newDialogueBtn.addEventListener('click', async function () {
   restoreEmptyState();
   historyCount = 0;
   updateStatusLine();
+  loadTokenStats(); /* история пуста → 0 */
   await loadDialogues(); /* новый пустой активный → авто-baseline 0 */
   displayedDialogueId = activeDialogueId;
+  loadSummary(); /* новый диалог — сводки ещё нет (после loadDialogues:
+                     activeDialogueId уже новый) */
 });
 
 els.resetBtn.addEventListener('click', async function () {
@@ -2026,18 +2401,22 @@ els.resetBtn.addEventListener('click', async function () {
   restoreEmptyState();
   historyCount = 0;
   updateStatusLine();
+  loadTokenStats(); /* история пуста → 0 */
   await loadDialogues(); /* message_count активного меняется */
   displayedDialogueId = activeDialogueId;
+  loadSummary(); /* история очищена — переспрашиваем (сводка может сохраниться) */
 });
 
 /* ================= Инициализация ================= */
 syncSend();
 syncReasoningState();
 paintTemp();
+updateCurrentTokens();
 loadReadCounts();
 loadSettings();
 loadModels();
 loadConversation(); /* renderActiveChat + loadDialogues */
+loadTokenStats();
 loadHistory();
 renderHistory();
 /* опрос списка диалогов раз в 5 с: лёгкий GET, пере-рендер ТОЛЬКО

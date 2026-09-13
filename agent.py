@@ -16,6 +16,17 @@ messages}, ... ]}. Один диалог активен (closed_at=null), ост
 Настройки (system_prompt/model/temperature/max_tokens/reasoning) тоже хранятся
 в памяти агента и сбрасываются к значениям по умолчанию при рестарте сервера.
 
+Сжатие контекста (day9): в LLM уходят последние DEFAULT_WINDOW_SIZE сообщений
+активного диалога (скользящее окно) + LLM-сводка более старых сообщений,
+которая пересобирается, когда сообщений сверх окна накопилось
+DEFAULT_SUMMARY_GAP и более. Сводка хранится НА ДИАЛОГЕ (поле "summary") и
+уходит в LLM в system-сообщении как «Резюме диалога: ...». Сводка строится
+одним отдельным запросом к той же модели (temperature=0, thinking выключен,
+max_tokens=SUMMARY_MAX_TOKENS, RU-промпт). Ошибка или пустая сводка —
+деградация: история не трогается (повтор на следующем ask()), ask() работает
+со всей (необрезанной) историей. Сжатие выключено (compression_enabled=False)
+— режим day8: последние HISTORY_CAP сообщений, без сводки.
+
 Клиентские настройки (базовый URL и ключи) читаются из переменных окружения
 лениво, в момент каждого запроса:
   GPUSTACK_BASE_URL — базовый URL API (обязательна);
@@ -26,7 +37,9 @@ messages}, ... ]}. Один диалог активен (closed_at=null), ост
 """
 from datetime import datetime
 import json
+import math
 import os
+import sys
 import threading
 import urllib.error
 import urllib.request
@@ -42,6 +55,11 @@ MODEL_KEY_ENV = {
 
 TIMEOUT = 300  # неконтролируемая генерация может занимать >120 с
 HISTORY_CAP = 20  # держим последние N сообщений истории
+
+# day9 (сжатие контекста): скользящее окно + LLM-сводка
+DEFAULT_WINDOW_SIZE = 6  # в LLM уходят последние N сообщений диалога
+DEFAULT_SUMMARY_GAP = 4  # каждые N сообщений сверх окна — новая LLM-сводка
+SUMMARY_MAX_TOKENS = 300  # бюджет ответа сводочного запроса
 
 # диалоги на диске: по умолчанию рядом со скриптом
 DIALOGUES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dialogues.json")
@@ -64,6 +82,51 @@ CONTEXT_LIMITS = {
 }
 
 
+# Каллиброванные нормы токенизации (токенов на символ).
+# Измерено по реальному API GPustack (пробные запросы max_tokens=1), 12.09.2026:
+#   rate = (prompt_tokens(текст) - prompt_tokens("")) / len(текст)
+#   "other" — 142-символьный русский тест (кириллица/латиница/цифры/пунктуация);
+#   "cjk"   — 17-символьная CJK-строка.
+# rate считается от чистого контента (шаблон-оверхед p0 вычтен), поэтому
+# подсчёт — это токены ТЕКСТА сообщений, без служебных токенов chat-шаблона.
+TOKEN_RATES = {
+    "qwen3.8-27b":     {"other": 0.4366, "cjk": 0.588},
+    "deepseek-v4-flash": {"other": 0.3803, "cjk": 0.588},
+    "glm-5.3-flash":   {"other": 0.4085, "cjk": 0.588},
+}
+# запасная норма для неизвестной модели (средняя по замерам)
+DEFAULT_TOKEN_RATE = {"other": 0.408, "cjk": 0.588}
+
+
+def count_tokens(text: str, model: str | None = None) -> int:
+    """Оценка числа токенов ТЕКСТА (без BPE-токенайзера в stdlib).
+
+    Символы делятся на две группы, каждая умножается на каллиброванную
+    норму модели (см. TOKEN_RATES) и округляется вверх:
+      - CJK (Han/Kana/Hangul) — rates["cjk"] токенов на символ;
+      - остальное (кириллица, латиница, цифры, пунктуация, пробелы) —
+        rates["other"] токенов на символ.
+    Точность ±10% по замерам — для HUD достаточно.
+    Клиентское зеркало — countTokens() в index.html (нормы приходят из
+    GET /agent/models: token_rate); при изменении менять оба места.
+    """
+    if not isinstance(text, str) or not text:
+        return 0
+    rates = TOKEN_RATES.get(model, DEFAULT_TOKEN_RATE)
+    cjk = 0
+    other = 0
+    for ch in text:
+        o = ord(ch)
+        if (0x4E00 <= o <= 0x9FFF      # CJK Unified
+                or 0x3400 <= o <= 0x4DBF   # CJK Extension A
+                or 0x3040 <= o <= 0x30FF   # Kana
+                or 0xAC00 <= o <= 0xD7A3):  # Hangul
+            cjk += 1
+        else:
+            other += 1
+    return max(1, math.ceil(cjk * rates["cjk"] + other * rates["other"]))
+
+
 def _new_dialogue_id() -> str:
     """Новый id диалога: d-<YYYYMMDDTHHMMSS>-<4 hex> (уникальный за счёт uuid)."""
     import uuid
@@ -83,9 +146,15 @@ def _clean_messages(data) -> list:
 
 
 def list_models() -> list:
-    """Доступные чат-модели + лимит контекста: [{"id": ..., "context_limit": N|null}, ...]."""
+    """Доступные чат-модели: [{"id", "context_limit", "token_rate"}, ...].
+
+    token_rate — каллиброванные нормы (TOKEN_RATES) для клиентского live-
+    подсчёта «текущего запроса» (норма модели, unknown → null, клиент
+    подставит DEFAULT).
+    """
     return [
-        {"id": m, "context_limit": CONTEXT_LIMITS.get(m)}
+        {"id": m, "context_limit": CONTEXT_LIMITS.get(m),
+         "token_rate": TOKEN_RATES.get(m)}
         for m in MODEL_KEY_ENV
     ]
 
@@ -112,8 +181,11 @@ class SimpleAgent:
         get_config() -> dict — текущие настройки.
         get_last_request() -> dict | None — копия последнего JSON-запроса
         к LLM (payload /chat/completions) или None, если ask ещё не было.
-        get_history() -> list — копия истории активного диалога
-       [{"role": ..., "content": ...}, ...].
+         get_history() -> list — копия истории активного диалога
+        [{"role": ..., "content": ...}, ...].
+         get_token_stats() -> dict — токены для HUD: вся история
+        активного диалога (каллиброванный count_tokens по нормам модели)
+        + последний ответ модели (точные completion_tokens из usage).
        reset_history() — очистить активный диалог и файл (closed не
        помечается).
         new_dialogue() -> str — закрыть текущий (архив на диск) и открыть
@@ -140,10 +212,15 @@ class SimpleAgent:
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.reasoning = reasoning  # включено ли рассуждение (thinking) модели
+        # day9 (сжатие контекста): параметры скользящего окна и LLM-сводки
+        self._window_size = DEFAULT_WINDOW_SIZE
+        self._summary_gap = DEFAULT_SUMMARY_GAP
+        self._compression_enabled = True
         self.history_file = history_file or HISTORY_FILE  # только для миграции
         self.dialogues_file = dialogues_file or DIALOGUES_FILE
         self._lock = threading.Lock()
         self._last_request = None  # копия последнего payload ask() (под self._lock)
+        self._last_usage = None  # usage последнего ask(): точные токены API
         self._dialogues = self._load_dialogues()  # {"active_id", "dialogues"}
         # активный — по active_id (порядок в списке не гарантирует:
         # закрытые диалоги стоят раньше активного)
@@ -153,7 +230,8 @@ class SimpleAgent:
         self.history = self._active["messages"]  # алиас (тот же объект-список)
 
     def configure(self, system_prompt=UNSET, model=UNSET, temperature=UNSET, max_tokens=UNSET,
-                  reasoning=UNSET):
+                  reasoning=UNSET, window_size=UNSET, summary_gap=UNSET,
+                  compression_enabled=UNSET):
         """Атомарно изменить настройки: сначала валидация всех переданных
         (не-UNSET) значений, потом применение (все или ничего).
 
@@ -164,7 +242,10 @@ class SimpleAgent:
           system_prompt / model: None — ошибка (агент обязан иметь промпт
           и известную модель);
           reasoning: строго bool (int не проходит) — включать/выключать
-          рассуждение (thinking) модели.
+          рассуждение (thinking) модели;
+          window_size / summary_gap (day9): int (>=2 / >=1, bool не проходит) —
+          размер скользящего окна сообщений и шаг LLM-сводки;
+          compression_enabled (day9): строго bool — сжатие контекста вкл/выкл.
 
         Ошибки валидации — RuntimeError; при неудаче настройки не меняются.
         """
@@ -186,6 +267,16 @@ class SimpleAgent:
                 # bool — подтип int, но здесь нужен именно bool (1/0 не проходят)
                 if not isinstance(reasoning, bool):
                     raise RuntimeError("reasoning must be a boolean")
+            if window_size is not UNSET:
+                # bool — подтип int: 1/0 не проходят, нужен именно int
+                if isinstance(window_size, bool) or not isinstance(window_size, int) or window_size < 2:
+                    raise RuntimeError("window_size must be an integer >= 2")
+            if summary_gap is not UNSET:
+                if isinstance(summary_gap, bool) or not isinstance(summary_gap, int) or summary_gap < 1:
+                    raise RuntimeError("summary_gap must be an integer >= 1")
+            if compression_enabled is not UNSET:
+                if not isinstance(compression_enabled, bool):
+                    raise RuntimeError("compression_enabled must be a boolean")
 
             if system_prompt is not UNSET:
                 self.system_prompt = system_prompt
@@ -197,9 +288,16 @@ class SimpleAgent:
                 self.max_tokens = max_tokens
             if reasoning is not UNSET:
                 self.reasoning = reasoning
+            if window_size is not UNSET:
+                self._window_size = window_size
+            if summary_gap is not UNSET:
+                self._summary_gap = summary_gap
+            if compression_enabled is not UNSET:
+                self._compression_enabled = compression_enabled
 
     def get_config(self) -> dict:
-        """Текущие настройки: system_prompt, model, temperature, max_tokens, reasoning."""
+        """Текущие настройки: system_prompt, model, temperature, max_tokens,
+        reasoning, window_size, summary_gap, compression_enabled."""
         with self._lock:
             return {
                 "system_prompt": self.system_prompt,
@@ -207,6 +305,9 @@ class SimpleAgent:
                 "temperature": self.temperature,
                 "max_tokens": self.max_tokens,
                 "reasoning": self.reasoning,
+                "window_size": self._window_size,
+                "summary_gap": self._summary_gap,
+                "compression_enabled": self._compression_enabled,
             }
 
     def get_last_request(self) -> dict | None:
@@ -237,7 +338,8 @@ class SimpleAgent:
             "active_id": active_id,
             "dialogues": [
                 {"id": active_id, "created_at": now, "closed_at": None,
-                 "messages": legacy[-HISTORY_CAP:]}
+                 "messages": legacy[-HISTORY_CAP:],
+                 "summary": ""}  # legacy-диалоги без сводки
             ],
         }
 
@@ -267,6 +369,8 @@ class SimpleAgent:
                     else datetime.now().isoformat(timespec="seconds"),
                     "closed_at": d.get("closed_at") if isinstance(d.get("closed_at"), str) else None,
                     "messages": _clean_messages(d.get("messages"))[-HISTORY_CAP:],
+                    # whitelist day9: сводка диалога; не-str (None/число) -> ""
+                    "summary": d.get("summary") if isinstance(d.get("summary"), str) else "",
                 })
             if dialogues:
                 active_id = data.get("active_id")
@@ -303,10 +407,46 @@ class SimpleAgent:
         with self._lock:
             return [dict(m) for m in self.history]
 
+    def get_token_stats(self) -> dict:
+        """Токены активного диалога для HUD.
+
+        {"history_tokens": int,  # вся история: каллиброванный подсчёт
+                                  #  (count_tokens) по нормам модели
+          "reply_tokens": int,   # ответ модели: точные completion_tokens
+                                  #  из usage последнего API-ответа; если usage
+                                  #  ещё нет (после рестарта) — оценка по тексту
+          "summary_tokens": int} # сводка диалога: каллиброванный подсчёт
+                                  #  (count_tokens); пустая сводка — 0
+        """
+        with self._lock:
+            history_tokens = sum(
+                count_tokens(m.get("content") or "", self.model)
+                for m in self.history
+            )
+            reply_tokens = 0
+            usage = self._last_usage or {}
+            ct = usage.get("completion_tokens")
+            if isinstance(ct, int):
+                reply_tokens = ct
+            else:
+                for m in reversed(self.history):
+                    if m.get("role") == "assistant":
+                        reply_tokens = count_tokens(
+                            m.get("content") or "", self.model)
+                        break
+            summary_tokens = count_tokens(
+                self._active.get("summary", "") or "", self.model)
+            return {
+                "history_tokens": history_tokens,
+                "reply_tokens": reply_tokens,
+                "summary_tokens": summary_tokens,
+            }
+
     def reset_history(self) -> None:
         """Очистить активный диалог (и файл) — closed не помечается."""
         with self._lock:
             self.history.clear()  # in-place: алиас на self._active["messages"]
+            self._active["summary"] = ""  # day9: сводка к пустой истории не нужна
             self._save_dialogues()
 
     def new_dialogue(self) -> str:
@@ -320,7 +460,8 @@ class SimpleAgent:
             self._active["closed_at"] = datetime.now().isoformat(timespec="seconds")
             new_id = _new_dialogue_id()
             now = datetime.now().isoformat(timespec="seconds")
-            self._active = {"id": new_id, "created_at": now, "closed_at": None, "messages": []}
+            self._active = {"id": new_id, "created_at": now, "closed_at": None,
+                            "messages": [], "summary": ""}
             self._dialogues["dialogues"].append(self._active)
             self._dialogues["active_id"] = new_id
             self.history = self._active["messages"]
@@ -372,6 +513,83 @@ class SimpleAgent:
             self._save_dialogues()
             return dialogue_id
 
+    def _generate_summary(self, existing_summary: str, msgs: list) -> str:
+        """LLM-сводка старейших сообщений: ОДИН запрос к той же модели (day9).
+
+        Запрос: model=self.model, temperature=0, max_tokens=SUMMARY_MAX_TOKENS,
+        chat_template_kwargs={"enable_thinking": False} (сводке рассуждения
+        не нужны) и RU-промпт «Сожми диалог...» с предыдущей сводкой (если
+        есть) + сообщениями для сжатия. В self._last_request НЕ попадает
+        (это инспекция пользовательского запроса, а не служебного).
+
+        Возвращает стрижнутую непустую строку; при ЛЮБОЙ ошибке (сеть, API,
+        разбор) или пустом ответе — "" (деградация: ask() не ломается,
+        история не трогается — повтор на следующем ask()).
+        """
+        lines = [
+            "Сожми диалог в краткое резюме на русском языке (до 150 слов).",
+            "Сохрани важные решения, факты и текущее состояние задачи.",
+        ]
+        if existing_summary:
+            lines.append("Предыдущее резюме:\n" + existing_summary)
+        lines.append(
+            "Сообщения для сжатия:\n"
+            + "\n".join(f"{m['role']}: {m['content']}" for m in msgs)
+        )
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": "Ты сжимаешь историю диалога."},
+                {"role": "user", "content": "\n\n".join(lines)},
+            ],
+            "temperature": 0,
+            "max_tokens": SUMMARY_MAX_TOKENS,
+            "chat_template_kwargs": {"enable_thinking": False},
+        }
+        base = os.environ.get("GPUSTACK_BASE_URL", "").strip().rstrip("/")
+        key = os.environ.get(MODEL_KEY_ENV.get(self.model) or "", "").strip()
+        req = urllib.request.Request(
+            f"{base}/chat/completions",
+            data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+                raw = resp.read().decode("utf-8", errors="replace")
+            data = json.loads(raw)
+            content = data["choices"][0]["message"].get("content") or ""
+        except Exception as e:
+            # деградация: сбой сводки НЕ критичен — логируем (stderr-паттерн
+            # main.py), RuntimeError НЕ бросаем
+            print(f"[compression] не удалось построить сводку: {e}", file=sys.stderr)
+            return ""
+        return content.strip()
+
+    def _maybe_compress(self) -> bool:
+        """Сжать старейшие сообщения сверх окна (day9).
+
+        Вызывать из ask() под self._lock, ДО сборки payload. Порог: пока
+        len(history) - window_size >= summary_gap. Чанк для сжатия —
+        старейшие len(history) - window_size сообщений. Успех (непустая
+        сводка): сводка на диалоге + in-place trim del self.history[:k]
+        (алиас self._active["messages"] не рвётся) + запись на диск.
+        Сбой/пусто: False, история не трогается (повтор на след. ask()).
+        """
+        if not self._compression_enabled:
+            return False
+        k = len(self.history) - self._window_size
+        while k >= self._summary_gap:
+            summary = self._generate_summary(
+                self._active.get("summary") or "", self.history[:k])
+            if not summary:
+                return False
+            self._active["summary"] = summary  # сводка живёт на диалоге, не в messages
+            del self.history[:k]  # in-place: алиас не рвётся
+            self._save_dialogues()  # срез + сводка на диск (уже под self._lock)
+            k = len(self.history) - self._window_size
+        return True
+
     def ask(self, user_input: str) -> dict:
         """Отправить вопрос модели с учётом истории; вернуть результат ответа.
 
@@ -392,9 +610,22 @@ class SimpleAgent:
         Ответ добавляется в историю только после успешного ответа —
         только content (user+assistant), reasoning в историю не попадает.
         Ошибки API/сети/разбора — RuntimeError с описанием.
+
+        day9 (сжатие): перед сборкой payload (под тем же self._lock) вызывается
+        _maybe_compress(); при сжатии и непустой сводке активного диалога
+        system-сообщение = system_prompt + «\n\nРезюме диалога: ...» (одно
+        system-сообщение, фейковых реплик нет). Обрезка HISTORY_CAP применяется
+        только при включённом сжатии; сжатие выключено — режим day8 (последние
+        HISTORY_CAP, без сводки). Сбой сводки ask() не ломает.
         """
         with self._lock:
-            messages = [{"role": "system", "content": self.system_prompt}]
+            # сжатие до сборки payload: сбой сводки не критичен (деградация)
+            self._maybe_compress()
+            summary = self._active.get("summary") or ""
+            system_content = self.system_prompt
+            if self._compression_enabled and summary:
+                system_content += "\n\nРезюме диалога: " + summary
+            messages = [{"role": "system", "content": system_content}]
             messages += self.history
             messages.append({"role": "user", "content": user_input})
 
@@ -451,12 +682,22 @@ class SimpleAgent:
             # completion_tokens_details может отсутствовать целиком (GLM)
             reasoning_tokens = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens")
 
+            # точные токены последнего ответа (для get_token_stats / HUD)
+            self._last_usage = {
+                "prompt_tokens": usage.get("prompt_tokens"),
+                "completion_tokens": usage.get("completion_tokens"),
+                "total_tokens": usage.get("total_tokens"),
+                "reasoning_tokens": reasoning_tokens,
+            }
+
             # история активного диалога растёт только после успешного
             # ответа (только content); append/trim — in-place (алиас на
             # self._active["messages"] не рвётся)
             self.history.append({"role": "user", "content": user_input})
             self.history.append({"role": "assistant", "content": content})
-            if len(self.history) > HISTORY_CAP:
+            # day9: cap HISTORY_CAP — только при включённом сжатии; выключено =
+            # режим day8 (последние 20, история растёт без сводки)
+            if self._compression_enabled and len(self.history) > HISTORY_CAP:
                 del self.history[:len(self.history) - HISTORY_CAP]
             self._save_dialogues()
             return {
