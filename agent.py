@@ -17,7 +17,15 @@ messages}, ... ]}. Один диалог активен (closed_at=null), ост
 в памяти агента и сбрасываются к значениям по умолчанию при рестарте сервера.
 
 Сжатие контекста (day9): в LLM уходят последние DEFAULT_WINDOW_SIZE сообщений
-диалога (скользящее окно) + LLM-сводка старых сообщений (шаг DEFAULT_SUMMARY_GAP).
+активного диалога (скользящее окно) + LLM-сводка более старых сообщений,
+которая пересобирается, когда сообщений сверх окна накопилось
+DEFAULT_SUMMARY_GAP и более. Сводка хранится НА ДИАЛОГЕ (поле "summary") и
+уходит в LLM в system-сообщении как «Резюме диалога: ...». Сводка строится
+одним отдельным запросом к той же модели (temperature=0, thinking выключен,
+max_tokens=SUMMARY_MAX_TOKENS, RU-промпт). Ошибка или пустая сводка —
+деградация: история не трогается (повтор на следующем ask()), ask() работает
+со всей (необрезанной) историей. Сжатие выключено (compression_enabled=False)
+— режим day8: последние HISTORY_CAP сообщений, без сводки.
 
 Клиентские настройки (базовый URL и ключи) читаются из переменных окружения
 лениво, в момент каждого запроса:
@@ -31,6 +39,7 @@ from datetime import datetime
 import json
 import math
 import os
+import sys
 import threading
 import urllib.error
 import urllib.request
@@ -50,6 +59,7 @@ HISTORY_CAP = 20  # держим последние N сообщений ист�
 # day9 (сжатие контекста): скользящее окно + LLM-сводка
 DEFAULT_WINDOW_SIZE = 6  # в LLM уходят последние N сообщений диалога
 DEFAULT_SUMMARY_GAP = 4  # каждые N сообщений сверх окна — новая LLM-сводка
+SUMMARY_MAX_TOKENS = 300  # бюджет ответа сводочного запроса
 
 # диалоги на диске: по умолчанию рядом со скриптом
 DIALOGUES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dialogues.json")
@@ -436,6 +446,7 @@ class SimpleAgent:
         """Очистить активный диалог (и файл) — closed не помечается."""
         with self._lock:
             self.history.clear()  # in-place: алиас на self._active["messages"]
+            self._active["summary"] = ""  # day9: сводка к пустой истории не нужна
             self._save_dialogues()
 
     def new_dialogue(self) -> str:
@@ -449,7 +460,8 @@ class SimpleAgent:
             self._active["closed_at"] = datetime.now().isoformat(timespec="seconds")
             new_id = _new_dialogue_id()
             now = datetime.now().isoformat(timespec="seconds")
-            self._active = {"id": new_id, "created_at": now, "closed_at": None, "messages": []}
+            self._active = {"id": new_id, "created_at": now, "closed_at": None,
+                            "messages": [], "summary": ""}
             self._dialogues["dialogues"].append(self._active)
             self._dialogues["active_id"] = new_id
             self.history = self._active["messages"]
@@ -501,6 +513,83 @@ class SimpleAgent:
             self._save_dialogues()
             return dialogue_id
 
+    def _generate_summary(self, existing_summary: str, msgs: list) -> str:
+        """LLM-сводка старейших сообщений: ОДИН запрос к той же модели (day9).
+
+        Запрос: model=self.model, temperature=0, max_tokens=SUMMARY_MAX_TOKENS,
+        chat_template_kwargs={"enable_thinking": False} (сводке рассуждения
+        не нужны) и RU-промпт «Сожми диалог...» с предыдущей сводкой (если
+        есть) + сообщениями для сжатия. В self._last_request НЕ попадает
+        (это инспекция пользовательского запроса, а не служебного).
+
+        Возвращает стрижнутую непустую строку; при ЛЮБОЙ ошибке (сеть, API,
+        разбор) или пустом ответе — "" (деградация: ask() не ломается,
+        история не трогается — повтор на следующем ask()).
+        """
+        lines = [
+            "Сожми диалог в краткое резюме на русском языке (до 150 слов).",
+            "Сохрани важные решения, факты и текущее состояние задачи.",
+        ]
+        if existing_summary:
+            lines.append("Предыдущее резюме:\n" + existing_summary)
+        lines.append(
+            "Сообщения для сжатия:\n"
+            + "\n".join(f"{m['role']}: {m['content']}" for m in msgs)
+        )
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": "Ты сжимаешь историю диалога."},
+                {"role": "user", "content": "\n\n".join(lines)},
+            ],
+            "temperature": 0,
+            "max_tokens": SUMMARY_MAX_TOKENS,
+            "chat_template_kwargs": {"enable_thinking": False},
+        }
+        base = os.environ.get("GPUSTACK_BASE_URL", "").strip().rstrip("/")
+        key = os.environ.get(MODEL_KEY_ENV.get(self.model) or "", "").strip()
+        req = urllib.request.Request(
+            f"{base}/chat/completions",
+            data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+                raw = resp.read().decode("utf-8", errors="replace")
+            data = json.loads(raw)
+            content = data["choices"][0]["message"].get("content") or ""
+        except Exception as e:
+            # деградация: сбой сводки НЕ критичен — логируем (stderr-паттерн
+            # main.py), RuntimeError НЕ бросаем
+            print(f"[compression] не удалось построить сводку: {e}", file=sys.stderr)
+            return ""
+        return content.strip()
+
+    def _maybe_compress(self) -> bool:
+        """Сжать старейшие сообщения сверх окна (day9).
+
+        Вызывать из ask() под self._lock, ДО сборки payload. Порог: пока
+        len(history) - window_size >= summary_gap. Чанк для сжатия —
+        старейшие len(history) - window_size сообщений. Успех (непустая
+        сводка): сводка на диалоге + in-place trim del self.history[:k]
+        (алиас self._active["messages"] не рвётся) + запись на диск.
+        Сбой/пусто: False, история не трогается (повтор на след. ask()).
+        """
+        if not self._compression_enabled:
+            return False
+        k = len(self.history) - self._window_size
+        while k >= self._summary_gap:
+            summary = self._generate_summary(
+                self._active.get("summary") or "", self.history[:k])
+            if not summary:
+                return False
+            self._active["summary"] = summary  # сводка живёт на диалоге, не в messages
+            del self.history[:k]  # in-place: алиас не рвётся
+            self._save_dialogues()  # срез + сводка на диск (уже под self._lock)
+            k = len(self.history) - self._window_size
+        return True
+
     def ask(self, user_input: str) -> dict:
         """Отправить вопрос модели с учётом истории; вернуть результат ответа.
 
@@ -521,9 +610,22 @@ class SimpleAgent:
         Ответ добавляется в историю только после успешного ответа —
         только content (user+assistant), reasoning в историю не попадает.
         Ошибки API/сети/разбора — RuntimeError с описанием.
+
+        day9 (сжатие): перед сборкой payload (под тем же self._lock) вызывается
+        _maybe_compress(); при сжатии и непустой сводке активного диалога
+        system-сообщение = system_prompt + «\n\nРезюме диалога: ...» (одно
+        system-сообщение, фейковых реплик нет). Обрезка HISTORY_CAP применяется
+        только при включённом сжатии; сжатие выключено — режим day8 (последние
+        HISTORY_CAP, без сводки). Сбой сводки ask() не ломает.
         """
         with self._lock:
-            messages = [{"role": "system", "content": self.system_prompt}]
+            # сжатие до сборки payload: сбой сводки не критичен (деградация)
+            self._maybe_compress()
+            summary = self._active.get("summary") or ""
+            system_content = self.system_prompt
+            if self._compression_enabled and summary:
+                system_content += "\n\nРезюме диалога: " + summary
+            messages = [{"role": "system", "content": system_content}]
             messages += self.history
             messages.append({"role": "user", "content": user_input})
 
@@ -593,7 +695,9 @@ class SimpleAgent:
             # self._active["messages"] не рвётся)
             self.history.append({"role": "user", "content": user_input})
             self.history.append({"role": "assistant", "content": content})
-            if len(self.history) > HISTORY_CAP:
+            # day9: cap HISTORY_CAP — только при включённом сжатии; выключено =
+            # режим day8 (последние 20, история растёт без сводки)
+            if self._compression_enabled and len(self.history) > HISTORY_CAP:
                 del self.history[:len(self.history) - HISTORY_CAP]
             self._save_dialogues()
             return {
