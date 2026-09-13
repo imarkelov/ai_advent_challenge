@@ -784,6 +784,43 @@
     100% { text-shadow: 0 0 10px rgba(255, 159, 26, .5); }
   }
 
+  /* HUD: «Сводка диалога» — раскрывающаяся ячейка (свёрнута по умолчанию) */
+  .hud-summary { padding: 0; }
+  .hud-summary summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 10px 12px 12px;
+    user-select: none;
+  }
+  .hud-summary summary::-webkit-details-marker { display: none; }
+  .hud-summary summary .hud-label { margin-bottom: 0; }
+  .hud-summary summary::after {
+    content: "▸";
+    float: right;
+    color: var(--cyan-dim);
+  }
+  .hud-summary[open] summary { padding-bottom: 6px; }
+  .hud-summary[open] summary::after { content: "▾"; }
+  .hud-summary[open] .hud-value {
+    padding: 0 12px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text);
+    text-shadow: none;
+    white-space: pre-wrap;
+  }
+
+  /* ---------- Настройки: сжатие истории ---------- */
+  .comp-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .comp-row .field { margin-top: 0; }
+
   /* ---------- Модалки (системный промпт + JSON запроса) ---------- */
   .modal-overlay {
     position: fixed;
@@ -1100,7 +1137,25 @@
           <span class="reasoning-state" id="reasoningState">ВКЛ</span>
         </div>
 
+        <div class="reasoning-row">
+          <span class="row-label" id="compressionLabel">Сжатие истории</span>
+          <label class="neon-check" title="Включить/выключить сжатие истории диалога">
+            <input type="checkbox" id="cfg-compression" aria-labelledby="compressionLabel">
+            <span class="box"><span class="tick"></span></span>
+          </label>
+        </div>
+        <div class="comp-row">
+          <div class="field">
+            <label for="cfg-window-size">Окно (N)</label>
+            <input id="cfg-window-size" type="number" min="1" step="1" value="20" spellcheck="false" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="cfg-summary-gap">Порог (gap)</label>
+            <input id="cfg-summary-gap" type="number" min="1" step="1" value="5" spellcheck="false" autocomplete="off">
+          </div>
+        </div>
         <div class="settings-actions">
+          <button type="button" class="send" id="cfg-apply">Применить сжатие</button>
           <button type="button" class="send" id="applySettings">Применить</button>
         </div>
         <p class="settings-error" id="settingsError" hidden></p>
@@ -1128,6 +1183,18 @@
           <div class="hud-cell">
             <span class="hud-label">Ответ модели (Model response)</span>
             <span class="hud-value" id="hudReply">0</span>
+          </div>
+          <details class="hud-cell hud-summary" id="hud-summary">
+            <summary><span class="hud-label">Сводка диалога (Summary)</span></summary>
+            <span class="hud-value" id="hudSummaryText">—</span>
+          </details>
+          <div class="hud-cell">
+            <span class="hud-label">Сжатие (Compression)</span>
+            <span class="hud-value" id="hud-compression">сжатие: —</span>
+          </div>
+          <div class="hud-cell">
+            <span class="hud-label">Сводка: токены (Summary tokens)</span>
+            <span class="hud-value" id="hud-summary-tokens">--</span>
           </div>
         </div>
       </section>
@@ -1218,7 +1285,15 @@ const els = {
   hudLimit: $('hudLimit'),
   hudCurrent: $('hudCurrent'),
   hudHistoryTokens: $('hudHistoryTokens'),
-  hudReply: $('hudReply')
+  hudReply: $('hudReply'),
+  hudSummary: $('hud-summary'),
+  hudSummaryText: $('hudSummaryText'),
+  hudCompression: $('hud-compression'),
+  hudSummaryTokens: $('hud-summary-tokens'),
+  cfgCompression: $('cfg-compression'),
+  cfgWindowSize: $('cfg-window-size'),
+  cfgSummaryGap: $('cfg-summary-gap'),
+  cfgApply: $('cfg-apply')
 };
 
 let inFlight = false;
@@ -2131,6 +2206,13 @@ els.input.addEventListener('keydown', function (e) {
 });
 
 els.applySettings.addEventListener('click', applySettings);
+
+/* Скелет: применение настроек сжатия. Плейсхолдер в статус-строке,
+   реальный POST/логика — в Task 9. */
+els.cfgApply.addEventListener('click', function () {
+  // wiring: Task 9
+  els.statusLine.textContent = 'сохранение… (wiring: Task 9)';
+});
 els.clearHistoryBtn.addEventListener('click', clearHistory);
 els.editPromptBtn.addEventListener('click', openPromptModal);
 els.promptModalClose.addEventListener('click', function () { closeModal(els.promptModal); });
