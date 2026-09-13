@@ -1832,21 +1832,23 @@ async function applyCompression() {
 /* Текст сводки активного диалога для HUD: GET /agent/dialogues/{id}
    аддитивно отдаёт "summary" (main.py); нет диалога или сводки пусто → «—» */
 async function loadSummary() {
-  let summary = '';
+  /* null = получить не удалось (нет активного диалога, сеть упала) —
+     текущее значение HUD не трогаем; '' = диалог отвечает, сводки нет */
+  let summary = null;
   if (activeDialogueId != null) {
     try {
       const res = await fetch('/agent/dialogues/' + encodeURIComponent(activeDialogueId));
       if (res.ok) {
         try {
           const data = await res.json();
-          if (data && typeof data.summary === 'string') summary = data.summary;
-        } catch (e) { /* тело не-JSON */ }
+          summary = (data && typeof data.summary === 'string') ? data.summary : '';
+        } catch (e) { /* тело не-JSON — текущее значение оставляем */ }
       }
     } catch (e) {
       /* сервер недоступен — текущее значение оставляем */
     }
   }
-  els.hudSummaryText.textContent = summary ? summary : '—';
+  if (summary !== null) els.hudSummaryText.textContent = summary || '—';
 }
 
 /* ================= Активный диалог (GET /agent/history → #chatLog) ================= */
