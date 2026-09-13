@@ -30,9 +30,10 @@
   | Метод | Маршрут | Назначение |
   | ----- | ------- | ---------- |
   | GET | `/` | чат-страница (index.html) |
-  | GET / POST | `/agent/config` | текущие настройки / изменение (system prompt, модель, temperature, max_tokens, reasoning) |
+  | GET / POST | `/agent/config` | текущие настройки / изменение (system prompt, модель, temperature, max_tokens, reasoning; с дня 9 — window_size, summary_gap, compression_enabled) |
   | POST | `/agent/ask` | отправить сообщение, получить ответ |
   | GET / DELETE | `/agent/history` | история запросов / очистка |
+  | GET | `/agent/tokens` | токен-статистика: история диалога, ответ модели, сводка (summary_tokens) |
   | GET | `/agent/models` | список доступных моделей |
   | GET | `/agent/last-request` | JSON последнего API-запроса |
   | GET / POST | `/agent/dialogues` | список диалогов / новый диалог |
