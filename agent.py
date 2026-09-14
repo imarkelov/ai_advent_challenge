@@ -397,6 +397,21 @@ class SimpleAgent:
             for d in data["dialogues"]:
                 if not isinstance(d, dict) or not isinstance(d.get("id"), str):
                     continue
+                # whitelist day10: стратегия диалога — только str из STRATEGIES
+                # (отсутствует/не-str/неизвестная -> "legacy": байт-в-байт
+                # поведение day9 для старых файлов и повреждённых полей)
+                raw_strategy = d.get("strategy")
+                if not isinstance(raw_strategy, str) or raw_strategy not in STRATEGIES:
+                    raw_strategy = "legacy"
+                # whitelist day10: strategy_state — только dict; иначе свежий
+                # default_state() стратегии диалога (в т.ч. при отсутствии —
+                # как _ensure_strategy_state, но валидация уже при загрузке)
+                raw_state = d.get("strategy_state")
+                if not isinstance(raw_state, dict):
+                    raw_state = STRATEGIES[raw_strategy]().default_state()
+                else:
+                    for key, value in STRATEGIES[raw_strategy]().default_state().items():
+                        raw_state.setdefault(key, value)  # недостающие ключи дописать
                 dialogues.append({
                     "id": d["id"],
                     "created_at": d.get("created_at") if isinstance(d.get("created_at"), str)
@@ -405,6 +420,9 @@ class SimpleAgent:
                     "messages": _clean_messages(d.get("messages"))[-HISTORY_CAP:],
                     # whitelist day9: сводка диалога; не-str (None/число) -> ""
                     "summary": d.get("summary") if isinstance(d.get("summary"), str) else "",
+                    # whitelist day10: стратегия и её состояние (см. выше)
+                    "strategy": raw_strategy,
+                    "strategy_state": raw_state,
                 })
             if dialogues:
                 active_id = data.get("active_id")
@@ -481,6 +499,11 @@ class SimpleAgent:
         with self._lock:
             self.history.clear()  # in-place: алиас на self._active["messages"]
             self._active["summary"] = ""  # day9: сводка к пустой истории не нужна
+            # day10: state стратегии — как к пустой истории: свежий
+            # default_state() ТЕКУЩЕЙ стратегии диалога (имя стратегии не
+            # меняется; зеркалит сброс сводки, day9-семантика)
+            name = self._resolve_strategy_name()
+            self._active["strategy_state"] = STRATEGIES[name]().default_state()
             self._save_dialogues()
 
     def new_dialogue(self) -> str:
