@@ -16,8 +16,13 @@
      POST   /agent/dialogues/{id}/activate — открыть диалог для продолжения
               (он становится активным, предыдущий закрывается) -> {"id"};
               неизвестный id -> 404, повторный activate -> 200 (idempotent)
-   GET    /agent/last-request — JSON последнего запроса к LLM ({"request": ...|null})
-   GET    /agent/tokens       — подсчёт токенов (вся история + последний ответ)
+    GET    /agent/last-request — JSON последнего запроса к LLM ({"request": ...|null})
+    GET    /agent/tokens       — подсчёт токенов (вся история + последний ответ)
+    GET    /agent/strategy     — стратегия активного диалога + state + facts
+    GET    /agent/strategy/state — state стратегии активного диалога
+    POST   /agent/strategy/switch — {"strategy": X} -> info (неизвестная -> 400)
+    POST   /agent/strategy/checkpoint — чекпоинт (только branching, иначе 400)
+    POST   /agent/strategy/branch — {"branch": "A"|"B"} (только branching, иначе 400)
 
 Запуск:  python main.py
 Открыть: http://127.0.0.1:8000
@@ -139,6 +144,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
             # вся история активного диалога + последний ответ модели.
             self._send_json(200, AGENT.get_token_stats())
             return
+        # day10: стратегии контекста
+        if self.path == "/agent/strategy":
+            self._send_json(200, AGENT.get_strategy_info())
+            return
+        if self.path == "/agent/strategy/state":
+            self._send_json(200, AGENT.get_strategy_info()["strategy_state"])
+            return
         self._send_json(404, {"error": "not found", "hint": "GET / serves the page"})
 
     def do_POST(self):
@@ -233,9 +245,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 if key in data:
                     known[key] = data[key]
             # Неизвестные ключи в body игнорируются.
+            # day10: стратегия сборки контекста для НОВЫХ диалогов
+            # (absent = «не менять»; валидация — agent.configure, ValueError -> 400)
+            if "strategy" in data:
+                known["strategy"] = data["strategy"]
+            # Неизвестные ключи в body игнорируются.
             try:
                 AGENT.configure(**known)
-            except RuntimeError as e:
+            except (RuntimeError, ValueError) as e:
                 self._send_json(400, {"error": str(e)})
                 return
             self._send_json(200, {"ok": True})
@@ -255,6 +272,63 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if path == "/agent/dialogues":
             # Пустой body — не читаем (Content-Length может быть 0).
             self._send_json(200, {"id": AGENT.new_dialogue()})
+            return
+
+        # day10: стратегии контекста (валидация — ValueError агента -> 400)
+        if path == "/agent/strategy/switch":
+            try:
+                length = int(self.headers.get("Content-Length") or 0)
+                raw = self.rfile.read(length)
+            except (ValueError, OSError):
+                self._send_json(400, {"error": "invalid request body"})
+                return
+            try:
+                data = json.loads(raw)
+            except ValueError:
+                self._send_json(400, {"error": "invalid JSON"})
+                return
+            if not isinstance(data, dict) or not isinstance(data.get("strategy"), str):
+                self._send_json(400, {"error": "strategy must be a string"})
+                return
+            try:
+                info = AGENT.switch_strategy(data["strategy"])
+            except ValueError as e:
+                self._send_json(400, {"error": str(e)})
+                return
+            self._send_json(200, info)
+            return
+
+        if path == "/agent/strategy/checkpoint":
+            # Пустой body — не читаем (Content-Length может быть 0).
+            try:
+                state = AGENT.make_checkpoint()
+            except ValueError as e:
+                self._send_json(400, {"error": str(e)})
+                return
+            self._send_json(200, {"state": state})
+            return
+
+        if path == "/agent/strategy/branch":
+            try:
+                length = int(self.headers.get("Content-Length") or 0)
+                raw = self.rfile.read(length)
+            except (ValueError, OSError):
+                self._send_json(400, {"error": "invalid request body"})
+                return
+            try:
+                data = json.loads(raw)
+            except ValueError:
+                self._send_json(400, {"error": "invalid JSON"})
+                return
+            if not isinstance(data, dict) or not isinstance(data.get("branch"), str):
+                self._send_json(400, {"error": "branch must be a string"})
+                return
+            try:
+                state = AGENT.switch_branch(data["branch"])
+            except ValueError as e:
+                self._send_json(400, {"error": str(e)})
+                return
+            self._send_json(200, {"state": state})
             return
 
         # Прочие POST-пути — 404 (поведение day5)

@@ -319,3 +319,15 @@ class LegacyStrategy(ContextStrategy):
             system_content = system_prompt
         slice_ = list(history) + [{"role": "user", "content": user_input}]
         return system_content, slice_
+
+
+# ---------------------------------------------------------------------------
+# Task 9: реестр стратегий (ключ — strategy_name, значение — класс)
+# ---------------------------------------------------------------------------
+
+STRATEGIES = {
+    "legacy": LegacyStrategy,
+    "sliding_window": SlidingWindowStrategy,
+    "sticky_facts": StickyFactsStrategy,
+    "branching": BranchingStrategy,
+}

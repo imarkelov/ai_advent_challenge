@@ -44,7 +44,7 @@ import threading
 import urllib.error
 import urllib.request
 
-from strategies import LegacyStrategy
+from strategies import STRATEGIES
 
 DEFAULT_SYSTEM_PROMPT = "Ты — простой полезный ассистент. Отвечай на русском языке."
 
@@ -196,10 +196,18 @@ class SimpleAgent:
         (id, времена, message_count, last_message<=80, active_id).
         get_dialogue_messages(dialogue_id) -> list | None — копия сообщений
         диалога по id (активного или архивного); None, если такого нет.
-        activate_dialogue(dialogue_id) -> str | None — открыть диалог по id
-        для продолжения: он становится активным, предыдущий активный
-        закрывается (closed_at = now, даже если пуст); id == active → noop
-        (возврат того же id); None — такого диалога нет.
+         activate_dialogue(dialogue_id) -> str | None — открыть диалог по id
+         для продолжения: он становится активным, предыдущий активный
+         закрывается (closed_at = now, даже если пуст); id == active → noop
+         (возврат того же id); None — такого диалога нет.
+         get_strategy_info() -> dict — стратегия активного диалога,
+         состояние (глубокая копия) и факты (day10).
+         switch_strategy(name) -> dict — сменить стратегию активного
+         диалога (свежее state); неизвестная — ValueError.
+         make_checkpoint() -> dict — чекпоинт ветвления (только
+         "branching", иначе ValueError); возвращает state.
+         switch_branch(name) -> dict — переключить ветку A/B (только
+         "branching"; не branching / плохое имя — ValueError).
 
         Инвариант: в любой момент ровно один диалог активен (closed_at=null);
         при случайных двух closed_at=null в файле инвариант восстанавливается
@@ -218,12 +226,18 @@ class SimpleAgent:
         self._window_size = DEFAULT_WINDOW_SIZE
         self._summary_gap = DEFAULT_SUMMARY_GAP
         self._compression_enabled = True
-        # day10: стратегия сборки контекста (по умолчанию — legacy,
-        # байт-в-байт поведение day9)
-        self._strategy = LegacyStrategy()
+        # day10: стратегия сборки контекста. self._default_strategy —
+        # стратегия для НОВЫХ диалогов (меняется configure(strategy=...));
+        # текущая стратегия живёт на ДИАЛОГЕ (ключ "strategy", absent ->
+        # "legacy"). Экземпляры стратегий кэшируются по классу
+        # (self._strategy_instances) — состояние per-dialogue (strategy_state).
+        self._default_strategy = "legacy"  # байт-в-байт поведение day9
+        self._strategy_instances = {}
         self.history_file = history_file or HISTORY_FILE  # только для миграции
         self.dialogues_file = dialogues_file or DIALOGUES_FILE
-        self._lock = threading.Lock()
+        # RLock: методы стратегии (switch_strategy и др.) вызывают
+        # get_strategy_info(), который тоже берёт self._lock
+        self._lock = threading.RLock()
         self._last_request = None  # копия последнего payload ask() (под self._lock)
         self._last_usage = None  # usage последнего ask(): точные токены API
         self._dialogues = self._load_dialogues()  # {"active_id", "dialogues"}
@@ -236,7 +250,7 @@ class SimpleAgent:
 
     def configure(self, system_prompt=UNSET, model=UNSET, temperature=UNSET, max_tokens=UNSET,
                   reasoning=UNSET, window_size=UNSET, summary_gap=UNSET,
-                  compression_enabled=UNSET):
+                  compression_enabled=UNSET, strategy=UNSET):
         """Атомарно изменить настройки: сначала валидация всех переданных
         (не-UNSET) значений, потом применение (все или ничего).
 
@@ -248,11 +262,15 @@ class SimpleAgent:
           и известную модель);
           reasoning: строго bool (int не проходит) — включать/выключать
           рассуждение (thinking) модели;
-          window_size / summary_gap (day9): int (>=2 / >=1, bool не проходит) —
-          размер скользящего окна сообщений и шаг LLM-сводки;
-          compression_enabled (day9): строго bool — сжатие контекста вкл/выкл.
+           window_size / summary_gap (day9): int (>=2 / >=1, bool не проходит) —
+           размер скользящего окна сообщений и шаг LLM-сводки;
+           compression_enabled (day9): строго bool — сжатие контекста вкл/выкл;
+           strategy (day10): str из ключей STRATEGIES — стратегия сборки
+           контекста для НОВЫХ диалогов (активный диалог не меняется;
+           смена активного — switch_strategy()).
 
-        Ошибки валидации — RuntimeError; при неудаче настройки не меняются.
+        Ошибки валидации — RuntimeError (strategy — ValueError);
+        при неудаче настройки не меняются.
         """
         with self._lock:
             if system_prompt is not UNSET:
@@ -282,6 +300,12 @@ class SimpleAgent:
             if compression_enabled is not UNSET:
                 if not isinstance(compression_enabled, bool):
                     raise RuntimeError("compression_enabled must be a boolean")
+            if strategy is not UNSET:
+                if not isinstance(strategy, str) or strategy not in STRATEGIES:
+                    raise ValueError(
+                        f"неизвестная стратегия {strategy!r}: "
+                        f"доступные — {', '.join(STRATEGIES)}"
+                    )
 
             if system_prompt is not UNSET:
                 self.system_prompt = system_prompt
@@ -299,10 +323,12 @@ class SimpleAgent:
                 self._summary_gap = summary_gap
             if compression_enabled is not UNSET:
                 self._compression_enabled = compression_enabled
+            if strategy is not UNSET:
+                self._default_strategy = strategy
 
     def get_config(self) -> dict:
         """Текущие настройки: system_prompt, model, temperature, max_tokens,
-        reasoning, window_size, summary_gap, compression_enabled."""
+        reasoning, window_size, summary_gap, compression_enabled, strategy."""
         with self._lock:
             return {
                 "system_prompt": self.system_prompt,
@@ -313,6 +339,9 @@ class SimpleAgent:
                 "window_size": self._window_size,
                 "summary_gap": self._summary_gap,
                 "compression_enabled": self._compression_enabled,
+                # day10: стратегия для НОВЫХ диалогов (активный может жить
+                # на своей стратегии — см. "strategy" в dict диалога)
+                "strategy": self._default_strategy,
             }
 
     def get_last_request(self) -> dict | None:
@@ -461,12 +490,23 @@ class SimpleAgent:
         """
         with self._lock:
             if not self.history:
+                # day10: пустому активному диалогу проставляем стратегию по
+                # умолчанию (additive; только если ключа ещё нет)
+                if not isinstance(self._active.get("strategy"), str) \
+                        or self._active["strategy"] not in STRATEGIES:
+                    self._active["strategy"] = self._default_strategy
+                    self._active["strategy_state"] = \
+                        STRATEGIES[self._default_strategy]().default_state()
                 return self._active["id"]
             self._active["closed_at"] = datetime.now().isoformat(timespec="seconds")
             new_id = _new_dialogue_id()
             now = datetime.now().isoformat(timespec="seconds")
+            # day10: новый диалог получает стратегию по умолчанию
+            # (additive ключи strategy/strategy_state)
             self._active = {"id": new_id, "created_at": now, "closed_at": None,
-                            "messages": [], "summary": ""}
+                            "messages": [], "summary": "",
+                            "strategy": self._default_strategy,
+                            "strategy_state": STRATEGIES[self._default_strategy]().default_state()}
             self._dialogues["dialogues"].append(self._active)
             self._dialogues["active_id"] = new_id
             self.history = self._active["messages"]
@@ -513,10 +553,128 @@ class SimpleAgent:
             self._active["closed_at"] = datetime.now().isoformat(timespec="seconds")
             target["closed_at"] = None
             self._active = target
-            self._dialogues["active_id"] = dialogue_id
-            self.history = self._active["messages"]  # алиас (тот же объект-список)
+        self._dialogues["active_id"] = dialogue_id
+        self.history = self._active["messages"]  # алиас (тот же объект-список)
+        self._save_dialogues()
+        return dialogue_id
+
+    # ------------------------------------------------------------------
+    # day10 (Task 9): стратегии контекста — публичные методы для роутов
+    # ------------------------------------------------------------------
+
+    def _resolve_strategy_name(self) -> str:
+        """Стратегия активного диалога; absent/не-str/неизвестный — "legacy".
+
+        Вызывать под self._lock (читает self._active).
+        """
+        name = self._active.get("strategy")
+        if not isinstance(name, str) or name not in STRATEGIES:
+            return "legacy"
+        return name
+
+    def _ensure_strategy_state(self, strategy_name: str) -> dict:
+        """strategy_state активного диалога (additive, под self._lock).
+
+        Ключа нет/не-dict — заполнить свежим default_state() стратегии.
+        Есть — дописать недостающие ключи из default_state() (setdefault,
+        additive: существующие значения не перезаписываются). Возвращает
+        живой dict из dict диалога (мутации — in-place).
+        """
+        state = self._active.get("strategy_state")
+        if not isinstance(state, dict):
+            state = STRATEGIES[strategy_name]().default_state()
+            self._active["strategy_state"] = state
+        for key, value in STRATEGIES[strategy_name]().default_state().items():
+            state.setdefault(key, value)
+        return state
+
+    def _get_strategy_instance(self, strategy_name: str):
+        """Экземпляр стратегии (кэш по классу; состояние per-dialogue).
+
+        Вызывать под self._lock.
+        """
+        instance = self._strategy_instances.get(strategy_name)
+        if instance is None:
+            instance = STRATEGIES[strategy_name]()
+            self._strategy_instances[strategy_name] = instance
+        return instance
+
+    def get_strategy_info(self) -> dict:
+        """Стратегия активного диалога и состояние (для UI/роутов).
+
+        {"strategy": str, "strategy_state": dict (глубокая копия),
+         "facts": dict} — для legacy в копию подставляются актуальные
+        live-значения сводки и флага сжатия (в самом state диалога
+        summary живёт на поле "summary" диалога, а не в state).
+        """
+        with self._lock:
+            name = self._resolve_strategy_name()
+            state = self._ensure_strategy_state(name)
+            if name == "legacy":
+                state["summary"] = self._active.get("summary") or ""
+                state["compression_enabled"] = self._compression_enabled
+            facts = dict(state.get("facts") or {})
+            snapshot = json.loads(json.dumps(state))  # глубокая копия
+        return {"strategy": name, "strategy_state": snapshot, "facts": facts}
+
+    def switch_strategy(self, name: str) -> dict:
+        """Сменить стратегию активного диалога (свежее default_state()).
+
+        ``name`` — ключ STRATEGIES, иначе ValueError (RU). Старое
+        strategy_state НЕ переносится (состояние стратегий
+        несовместимо). Возвращает get_strategy_info().
+        """
+        with self._lock:
+            if not isinstance(name, str) or name not in STRATEGIES:
+                raise ValueError(
+                    f"неизвестная стратегия {name!r}: "
+                    f"доступные — {', '.join(STRATEGIES)}"
+                )
+            self._active["strategy"] = name
+            self._active["strategy_state"] = STRATEGIES[name]().default_state()
             self._save_dialogues()
-            return dialogue_id
+            return self.get_strategy_info()
+
+    def make_checkpoint(self) -> dict:
+        """Явный чекпоинт ветвления (только стратегия "branching").
+
+        Фиксирует преамбулу на текущей длине истории (сбрасывает ветки
+        A/B — контракт BranchingStrategy.checkpoint). Не branching —
+        ValueError (RU). Возвращает состояние стратегии (глубокая копия).
+        """
+        with self._lock:
+            name = self._resolve_strategy_name()
+            if name != "branching":
+                raise ValueError(
+                    "чекпоинт доступен только для стратегии 'branching' "
+                    f"(активна: {name!r})"
+                )
+            state = self._ensure_strategy_state(name)
+            self._get_strategy_instance(name).checkpoint(state, len(self.history))
+            self._save_dialogues()
+            return json.loads(json.dumps(state))
+
+    def switch_branch(self, name: str) -> dict:
+        """Переключить ветку A/B (только стратегия "branching").
+
+        Сначала имплицитный чекпоинт (BranchingStrategy.branch: первый,
+        если нет), затем switch_branch (неизвестное имя — ValueError,
+        RU). Не branching — ValueError. Возвращает состояние стратегии
+        (глубокая копия).
+        """
+        with self._lock:
+            name_s = self._resolve_strategy_name()
+            if name_s != "branching":
+                raise ValueError(
+                    "переключение веток доступно только для стратегии 'branching' "
+                    f"(активна: {name_s!r})"
+                )
+            state = self._ensure_strategy_state(name_s)
+            strategy = self._get_strategy_instance(name_s)
+            strategy.branch(state, len(self.history))
+            strategy.switch_branch(state, name)  # ValueError при плохом имени
+            self._save_dialogues()
+            return json.loads(json.dumps(state))
 
     def _generate_summary(self, existing_summary: str, msgs: list) -> str:
         """LLM-сводка старейших сообщений: ОДИН запрос к той же модели (day9).
@@ -541,12 +699,24 @@ class SimpleAgent:
             "Сообщения для сжатия:\n"
             + "\n".join(f"{m['role']}: {m['content']}" for m in msgs)
         )
+        return self._llm_raw_text([
+            {"role": "system", "content": "Ты сжимаешь историю диалога."},
+            {"role": "user", "content": "\n\n".join(lines)},
+        ])
+
+    def _llm_raw_text(self, messages: list) -> str:
+        """Служебный текстовый LLM-вызов (сводка/извлечение), общий механизм.
+
+        Запрос: model=self.model, temperature=0, max_tokens=SUMMARY_MAX_TOKENS,
+        chat_template_kwargs={"enable_thinking": False}. В
+        self._last_request НЕ попадает (это инспекция пользовательского
+        запроса ask(), а не служебного). Возвращает стрижнутый текст; при
+        ЛЮБОЙ ошибке (сеть, API, разбор) или пустом ответе — "" (деградация:
+        RuntimeError НЕ бросаем, логируем на stderr — паттерн main.py).
+        """
         payload = {
             "model": self.model,
-            "messages": [
-                {"role": "system", "content": "Ты сжимаешь историю диалога."},
-                {"role": "user", "content": "\n\n".join(lines)},
-            ],
+            "messages": messages,
             "temperature": 0,
             "max_tokens": SUMMARY_MAX_TOKENS,
             "chat_template_kwargs": {"enable_thinking": False},
@@ -565,11 +735,20 @@ class SimpleAgent:
             data = json.loads(raw)
             content = data["choices"][0]["message"].get("content") or ""
         except Exception as e:
-            # деградация: сбой сводки НЕ критичен — логируем (stderr-паттерн
-            # main.py), RuntimeError НЕ бросаем
-            print(f"[compression] не удалось построить сводку: {e}", file=sys.stderr)
+            print(f"[compression] служебный LLM-вызов не удался: {e}", file=sys.stderr)
             return ""
         return content.strip()
+
+    def _extraction_call(self, prompt: str) -> str:
+        """Служебный LLM-вызов для стратегии (извлечение sticky-фактов).
+
+        Оборачивает промпт стратегии в ОДИН user-сообщение и ходит тем же
+        механизмом, что day9-сводка (_llm_raw_text: temperature=0,
+        max_tokens=SUMMARY_MAX_TOKENS, thinking выключен). В
+        self._last_request НЕ попадает. При сбое — "" (fallback уже
+        в facts.extract_facts: прежние факты не меняются).
+        """
+        return self._llm_raw_text([{"role": "user", "content": prompt}])
 
     def _maybe_compress(self) -> bool:
         """Сжать старейшие сообщения сверх окна (day9).
@@ -622,18 +801,39 @@ class SimpleAgent:
         system-сообщение, фейковых реплик нет). Обрезка HISTORY_CAP применяется
         только при включённом сжатии; сжатие выключено — режим day8 (последние
         HISTORY_CAP, без сводки). Сбой сводки ask() не ломает.
+
+        day10 (стратегии): контекст собирает стратегия диалога (ключ
+        "strategy", absent — "legacy"). Порядок: on_user_message (хук, у
+        S3 кладёт user-ход в ветку) ПЕРЕД build_payload. Движок сжатия
+        (_maybe_compress) и обрезка HISTORY_CAP — только для legacy; прочие
+        стратегии non-destructive. Ответ ассистента, кроме основной истории,
+        дописывается в активную ветку при включённой ветке (branching +
+        установленный checkpoint). Служебные LLM-вызовы стратегии
+        (_extraction_call) в self._last_request не попадают.
         """
         with self._lock:
-            # сжатие до сборки payload: сбой сводки не критичен (деградация)
-            self._maybe_compress()
-            # day10: контекст собирает стратегия (дефолт legacy — day9
-            # инъекция «Резюме диалога» + полная (после trim) история)
-            strategy_state = {
-                "summary": self._active.get("summary") or "",
-                "compression_enabled": self._compression_enabled,
-            }
-            system_content, history_slice = self._strategy.build_payload(
-                self.system_prompt, self.history, user_input, strategy_state
+            # day10: контекст собирает стратегия диалога (ключ "strategy";
+            # absent/неизвестный — "legacy", поведение day9 байт-в-байт)
+            strategy_name = self._resolve_strategy_name()
+            strategy = self._get_strategy_instance(strategy_name)
+            if strategy_name == "legacy":
+                # движок сжатия day9 (окно + сводка + trim) — ТОЛЬКО legacy;
+                # сбой сводки не критичен (деградация)
+                self._maybe_compress()
+                state_for_call = {
+                    "summary": self._active.get("summary") or "",
+                    "compression_enabled": self._compression_enabled,
+                }
+            else:
+                # S1/S2/S3: non-destructive — движок сжатия и HISTORY_CAP
+                # НЕ применяются, state = strategy_state самого диалога
+                state_for_call = self._ensure_strategy_state(strategy_name)
+            # Контракт порядка вызовов (task 7): on_user_message ВСЕГДА
+            # ПЕРЕД build_payload (S3 кладёт user-ход в активную ветку)
+            strategy.on_user_message(user_input, state_for_call,
+                                     llm_call=self._extraction_call)
+            system_content, history_slice = strategy.build_payload(
+                self.system_prompt, self.history, user_input, state_for_call
             )
             messages = [{"role": "system", "content": system_content}] + history_slice
 
@@ -703,9 +903,17 @@ class SimpleAgent:
             # self._active["messages"] не рвётся)
             self.history.append({"role": "user", "content": user_input})
             self.history.append({"role": "assistant", "content": content})
-            # day9: cap HISTORY_CAP — только при включённом сжатии; выключено =
-            # режим day8 (последние 20, история растёт без сводки)
-            if self._compression_enabled and len(self.history) > HISTORY_CAP:
+            # day10 (task 7 контракт): S3 — агент дописывает assistant-ответ
+            # ещё и в активную ветку (user-ход туда уже положен
+            # on_user_message; чекпоинт не стоит — веток нет, no-op)
+            if strategy_name == "branching" and state_for_call.get("checkpoint") is not None:
+                state_for_call["branches"][state_for_call["active"]].append(
+                    {"role": "assistant", "content": content}
+                )
+            # day9: cap HISTORY_CAP — только legacy при включённом сжатии
+            # (выключено = режим day8); S1/S2/S3 non-destructive: del нет
+            if strategy_name == "legacy" and self._compression_enabled \
+                    and len(self.history) > HISTORY_CAP:
                 del self.history[:len(self.history) - HISTORY_CAP]
             self._save_dialogues()
             return {
