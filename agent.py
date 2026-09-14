@@ -576,10 +576,10 @@ class SimpleAgent:
             self._active["closed_at"] = datetime.now().isoformat(timespec="seconds")
             target["closed_at"] = None
             self._active = target
-        self._dialogues["active_id"] = dialogue_id
-        self.history = self._active["messages"]  # алиас (тот же объект-список)
-        self._save_dialogues()
-        return dialogue_id
+            self._dialogues["active_id"] = dialogue_id
+            self.history = self._active["messages"]  # алиас (тот же объект-список)
+            self._save_dialogues()
+            return dialogue_id
 
     # ------------------------------------------------------------------
     # day10 (Task 9): стратегии контекста — публичные методы для роутов
