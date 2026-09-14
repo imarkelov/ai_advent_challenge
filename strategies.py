@@ -13,9 +13,11 @@
   поле strategy_state в dialogues.json, без деструктивной миграции).
 
 Реализованные стратегии: ``SlidingWindowStrategy`` (скользящее окно N,
-day10 Task 5), ``StickyFactsStrategy`` (sticky-факты ТЗ, day10 Task 6;
-остальные — branching, legacy — в следующих задачах). Только стандартная библиотека (abc) + facts.py (чистые функции). Модуль
-импортируется standalone: без побочных эффектов, сети и чтения .env.
+day10 Task 5), ``StickyFactsStrategy`` (sticky-факты ТЗ, day10 Task 6),
+``BranchingStrategy`` (чекпоинт + ветки A/B, day10 Task 7; остальные —
+legacy — в следующих задачах). Только стандартная библиотека (abc) +
+facts.py (чистые функции). Модуль импортируется standalone: без побочных
+эффектов, сети и чтения .env.
 """
 import abc
 
@@ -160,3 +162,108 @@ class StickyFactsStrategy(ContextStrategy):
         n = state.get("window_size", 4)
         slice_ = list(history)[-n:] + [{"role": "user", "content": user_input}]
         return system_content, slice_
+
+
+# ---------------------------------------------------------------------------
+# Task 7: BranchingStrategy — чекпоинт + ветки A/B (day10)
+# ---------------------------------------------------------------------------
+
+class BranchingStrategy(ContextStrategy):
+    """Ветвление: чекпоинт фиксирует общую преамбулу, дальше — ветки A/B.
+
+    Состояние на диалог: ``checkpoint`` (индекс в истории, куда «замёрзла»
+    общая преамбула; None — ветвления ещё нет), ``branches`` — dict
+    ``{"A": [...], "B": [...]}`` (НЕ более двух веток, merge веток НЕ
+    предусмотрен), ``active`` — текущая ветка ("A" или "B").
+
+    Контракт порядка вызовов (обязателен для агента, Task 9): агент
+    ВСЕГДА вызывает ``on_user_message(...)`` ПЕРЕД ``build_payload(...)``.
+    Для S1/S2 on_user_message сообщения в списки не кладёт и build_payload
+    сам добавляет текущий user-ход последним элементом среза; для S3
+    (эта стратегия) при установленном чекпоинте on_user_message кладёт
+    user-ход в активную ветку, поэтому ``build_payload`` НЕ добавляет его
+    повторно. Ответ ассистента агент ВСЕГДА дописывает в основную историю
+    и (только S3) сам — под своим локом — в ``state["branches"][active]``
+    (отдельного метода стратегии для этого нет).
+
+    Ограничения: ОДИН чекпоинт (повторный ``checkpoint()`` заменяет старый
+    и сбрасывает обе ветки), веток не более двух, merge веток нет,
+    история диалога НИКОГДА не удаляется (срез — новый список).
+
+    Стратегия ЧИСТА: LLM-вызовов нет (``llm_call`` в on_user_message не
+    используется — извлечение в ветвлении не делается).
+    """
+
+    strategy_name = "branching"
+
+    def default_state(self) -> dict:
+        """Начальное состояние: чекпоинта нет, ветки A/B пустые, активна A."""
+        return {"checkpoint": None, "branches": {"A": [], "B": []}, "active": "A"}
+
+    def checkpoint(self, state: dict, history_len: int) -> None:
+        """Явный чекпоинт: фиксировать преамбулу на ``history_len``.
+
+        ЕДИНСТВЕННЫЙ чекпоинт: повторный вызов ЗАМЕНЯЕТ старый, обе ветки
+        сбрасываются в пустые списки (in-place), active остаётся "A".
+        """
+        state["checkpoint"] = history_len
+        branches = state["branches"]
+        branches["A"].clear()
+        branches["B"].clear()
+        state["active"] = "A"
+
+    def branch(self, state: dict, history_len: int) -> None:
+        """Имплицитное ветвление: первый чекпоинт, если его ещё нет.
+
+        ``checkpoint`` уже стоит — no-op (позиция не смещается).
+        """
+        if state["checkpoint"] is None:
+            state["checkpoint"] = history_len
+
+    def switch_branch(self, state: dict, name: str) -> str:
+        """Переключить активную ветку.
+
+        ``name`` — "A" или "B", иначе ``ValueError`` (не более двух веток).
+        Возвращает имя активной ветки.
+        """
+        if name not in ("A", "B"):
+            raise ValueError(
+                f"ветка {name!r} не существует: допустимы только 'A' и 'B'"
+            )
+        state["active"] = name
+        return name
+
+    def on_user_message(self, user_input: str, state: dict, llm_call) -> None:
+        """Положить user-ход в активную ветку (только если чекпоинт стоит).
+
+        checkpoint=None — no-op (режим полной истории, ветки не трогаются).
+        ``llm_call`` НЕ используется: ветвление извлечения не делает.
+        """
+        if state["checkpoint"] is None:
+            return
+        state["branches"][state["active"]].append(
+            {"role": "user", "content": user_input}
+        )
+
+    def build_payload(
+        self, system_prompt: str, history: list, user_input: str, state: dict
+    ) -> tuple:
+        """Собрать контекст: полная история (нет чекпоинта) или
+        преамбула до чекпоинта + активная ветка (чекпоинт стоит).
+
+        checkpoint=None: срез = ВЕСЬ история + текущий ход последним
+        (ни окна, ни ветки). Чекпоинт стоит: срез = ``history[:checkpoint]``
+        + сообщения активной ветки; текущий user-ход НЕ добавляется
+        повторно — on_user_message уже положил его в ветку (контракт
+        порядка вызовов, см. docstring класса). system-промт всегда
+        пробрасывается без изменений.
+        """
+        checkpoint = state["checkpoint"]
+        if checkpoint is None:
+            slice_ = list(history) + [{"role": "user", "content": user_input}]
+        else:
+            slice_ = (
+                list(history[:checkpoint])
+                + list(state["branches"][state["active"]])
+            )
+        return system_prompt, slice_
