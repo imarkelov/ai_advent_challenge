@@ -151,3 +151,115 @@ def test_sliding_window_short_history():
     assert len(slice_) == 3
     assert slice_[:2] == history
     assert slice_[-1] == {"role": "user", "content": "вопрос 2"}
+
+
+# ---------------------------------------------------------------------------
+# Task 6: StickyFactsStrategy (день 10) — TDD RED
+# ---------------------------------------------------------------------------
+
+from strategies import StickyFactsStrategy  # noqa: E402
+from facts import FACT_KEYS  # noqa: E402
+
+
+def test_sticky_facts_on_user_message_updates_in_place():
+    """on_user_message: извлечённые факты сохраняются in-place в state["facts"].
+
+    default_state: {"facts": {}, "window_size": 4}; имя стратегии —
+    "sticky_facts"; после хука state["facts"] — ТОТ ЖЕ объект dict (модификация
+    на месте, а не подмена ссылки).
+    """
+    s = StickyFactsStrategy()
+    assert s.strategy_name == "sticky_facts"
+    state = s.default_state()
+    assert state == {"facts": {}, "window_size": 4}
+    facts_ref = state["facts"]
+    s.on_user_message(
+        "делай портал на FastAPI", state,
+        lambda text: '{"цель": "портал", "стек": "FastAPI"}',
+    )
+    assert state["facts"] == {"цель": "портал", "стек": "FastAPI"}
+    assert state["facts"] is facts_ref  # in-place, ссылка не поменялась
+
+
+def test_sticky_facts_one_llm_call_per_user_turn():
+    """Каждый пользовательский ход = ровно один LLM-вызов извлечения."""
+    s = StickyFactsStrategy()
+    state = s.default_state()
+    counters = []
+    for i in range(3):
+        counters.append([0])
+
+        def fake(text, _n=counters[-1]):
+            _n[0] += 1
+            return '{"цель": "портал"}'
+        s.on_user_message(f"ход {i}", state, fake)
+    assert sum(c[0] for c in counters) == 3
+    assert all(c[0] == 1 for c in counters)
+
+
+def test_sticky_facts_build_payload_with_facts():
+    """Факты есть: system_content обогащён блоком «Актуальные факты:»,
+    срез = последние N сообщений + текущий ход последним."""
+    s = StickyFactsStrategy()
+    state = s.default_state()
+    state["facts"] = {"цель": "портал", "стек": "FastAPI"}
+    history = [
+        {"role": "user", "content": "вопрос 1"},
+        {"role": "assistant", "content": "ответ 1"},
+        {"role": "user", "content": "вопрос 2"},
+        {"role": "assistant", "content": "ответ 2"},
+    ]
+    system_content, slice_ = s.build_payload("СИСТЕМА", history, "вопрос 3", state)
+    assert "Актуальные факты:" in system_content
+    assert "- цель: портал" in system_content
+    assert system_content.startswith("СИСТЕМА")
+    # срез: последние window_size=4 сообщения + текущий ход
+    assert slice_[-1] == {"role": "user", "content": "вопрос 3"}
+    assert slice_[:-1] == history[-4:]
+
+
+def test_sticky_facts_build_payload_empty_facts():
+    """Фактов нет: system_content == system_prompt байт-в-байт (никакого блока,
+    ни одного лишнего перевода строки)."""
+    s = StickyFactsStrategy()
+    state = s.default_state()
+    assert state["facts"] == {}
+    system_content, _ = s.build_payload("СИСТЕМА", [], "вопрос", state)
+    assert system_content == "СИСТЕМА"
+
+
+def test_sticky_facts_llm_error_keeps_old_facts():
+    """API упало (RuntimeError из llm_call): прежние факты не меняются,
+    исключение наружу не выходит (есть фолбэк в facts.extract_facts)."""
+    s = StickyFactsStrategy()
+    state = s.default_state()
+    state["facts"] = {"цель": "портал"}
+
+    def broken(text):
+        raise RuntimeError("API упал")
+
+    s.on_user_message("ход", state, broken)
+    assert state["facts"] == {"цель": "портал"}
+
+
+def test_sticky_facts_malformed_json_keeps_old_facts():
+    """LLM ответила не-JSON: прежние факты не меняются, исключений нет."""
+    s = StickyFactsStrategy()
+    state = s.default_state()
+    state["facts"] = {"стек": "FastAPI"}
+    s.on_user_message("ход", state, lambda text: "не json")
+    assert state["facts"] == {"стек": "FastAPI"}
+
+
+def test_sticky_facts_block_order_follows_fact_keys():
+    """Порядок строк блока = порядок FACT_KEYS (цель раньше стека),
+    независимо от порядка установки в dict."""
+    s = StickyFactsStrategy()
+    state = s.default_state()
+    # стек установлен раньше цели, но в FACT_KEYS цель на первом месте
+    state["facts"] = {"стек": "FastAPI", "цель": "портал"}
+    system_content, _ = s.build_payload("СИСТЕМА", [], "вопрос", state)
+    i_goal = system_content.index("- цель: портал")
+    i_stack = system_content.index("- стек: FastAPI")
+    assert i_goal < i_stack
+    assert FACT_KEYS.index("цель") < FACT_KEYS.index("стек")
