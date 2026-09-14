@@ -821,6 +821,65 @@
   }
   .comp-row .field { margin-top: 0; }
 
+  /* ---------- Настройки: стратегии контекста ---------- */
+  .strategy-panel {
+    margin-top: 14px;
+    border: 1px solid var(--cyan-border);
+    background: var(--inset);
+    padding: 10px 12px;
+  }
+  .strategy-panel[hidden] { display: none; }
+  .strategy-panel-title {
+    margin: 0 0 8px;
+    font-family: var(--font-head);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .facts-list { margin: 0; }
+  .facts-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px;
+    padding: 4px 0;
+  }
+  .facts-row dt {
+    font-family: var(--font-head);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding-top: 1px;
+  }
+  .facts-row dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text);
+    overflow-wrap: break-word;
+  }
+  .branch-active {
+    margin: 0 0 10px;
+    font-size: 12.5px;
+    color: var(--text-faint);
+  }
+  .branch-active #branchActive {
+    font-family: var(--font-head);
+    font-weight: 700;
+    color: var(--cyan);
+    text-shadow: 0 0 8px rgba(25, 240, 255, .4);
+  }
+  .strategy-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
   /* ---------- Модалки (системный промпт + JSON запроса) ---------- */
   .modal-overlay {
     position: fixed;
@@ -1154,8 +1213,41 @@
             <input id="cfg-summary-gap" type="number" min="1" step="1" value="5" spellcheck="false" autocomplete="off">
           </div>
         </div>
+
+        <div class="field">
+          <label for="cfg-strategy">Стратегия контекста</label>
+          <select id="cfg-strategy">
+            <option value="legacy" selected>legacy — базовая: окно + сводка</option>
+            <option value="sliding_window">sliding_window — скользящее окно (N)</option>
+            <option value="sticky_facts">sticky_facts — липкие факты ТЗ</option>
+            <option value="branching">branching — чекпоинт + ветки A/B</option>
+          </select>
+        </div>
+
+        <div class="strategy-panel" id="strategyFactsPanel" hidden>
+          <p class="strategy-panel-title">Липкие факты (только чтение)</p>
+          <dl class="facts-list" id="factsList">
+            <div class="facts-row"><dt>Цель</dt><dd data-fact-key="цель">—</dd></div>
+            <div class="facts-row"><dt>Стек</dt><dd data-fact-key="стек">—</dd></div>
+            <div class="facts-row"><dt>Ограничения</dt><dd data-fact-key="ограничения">—</dd></div>
+            <div class="facts-row"><dt>Дедлайн</dt><dd data-fact-key="дедлайн">—</dd></div>
+            <div class="facts-row"><dt>Решения</dt><dd data-fact-key="решения">—</dd></div>
+          </dl>
+        </div>
+
+        <div class="strategy-panel" id="strategyBranchPanel" hidden>
+          <p class="strategy-panel-title">Ветвление</p>
+          <p class="branch-active">Активная ветка: <span id="branchActive">—</span></p>
+          <div class="strategy-actions">
+            <button type="button" class="ghost" id="strategyCheckpointBtn">Чекпоинт</button>
+            <button type="button" class="ghost" id="strategyBranchABtn">Ветка A</button>
+            <button type="button" class="ghost" id="strategyBranchBBtn">Ветка B</button>
+          </div>
+        </div>
+
         <div class="settings-actions">
           <button type="button" class="send" id="cfg-apply">Применить сжатие</button>
+          <button type="button" class="send" id="cfg-strategy-apply">Применить стратегию</button>
           <button type="button" class="send" id="applySettings">Применить</button>
         </div>
         <p class="settings-error" id="settingsError" hidden></p>
@@ -1293,7 +1385,15 @@ const els = {
   cfgCompression: $('cfg-compression'),
   cfgWindowSize: $('cfg-window-size'),
   cfgSummaryGap: $('cfg-summary-gap'),
-  cfgApply: $('cfg-apply')
+  cfgApply: $('cfg-apply'),
+  cfgStrategy: $('cfg-strategy'),
+  cfgStrategyApply: $('cfg-strategy-apply'),
+  strategyFactsPanel: $('strategyFactsPanel'),
+  strategyBranchPanel: $('strategyBranchPanel'),
+  branchActive: $('branchActive'),
+  strategyCheckpointBtn: $('strategyCheckpointBtn'),
+  strategyBranchABtn: $('strategyBranchABtn'),
+  strategyBranchBBtn: $('strategyBranchBBtn')
 };
 
 let inFlight = false;
@@ -1681,6 +1781,10 @@ async function loadSettings() {
   }
   if (typeof data.window_size === 'number') els.cfgWindowSize.value = String(data.window_size);
   if (typeof data.summary_gap === 'number') els.cfgSummaryGap.value = String(data.summary_gap);
+  /* Task 10: стратегия — из конфига (дефолт для новых диалогов); без
+     ключа select остаётся «legacy». Панели показывает refreshStrategy()
+     по реальному состоянию активного диалога (GET /agent/strategy). */
+  if (typeof data.strategy === 'string') els.cfgStrategy.value = data.strategy;
   restoreCompressionForm();
   let target = null;
   if (data.temperature != null) {
@@ -1827,6 +1931,146 @@ async function applyCompression() {
   }
   compressionInFlight = false;
   els.cfgApply.disabled = false;
+}
+
+/* ================= Task 10: стратегии контекста (/agent/strategy) =================
+   select + «Применить стратегию» — POST /agent/strategy/switch; панели
+   (липкие факты / ветвление) показывают состояние АКТИВНОГО диалога из
+   GET /agent/strategy. Весь пользовательский/LLM-текст — только
+   textContent (без innerHTML), как в addBubble. */
+
+/* Факты — фиксированная схема (зеркало facts.FACT_KEYS), порядок =
+   порядок строк панели */
+const FACT_KEYS = ['цель', 'стек', 'ограничения', 'дедлайн', 'решения'];
+let strategyInFlight = false;
+let strategyPollTimer = null;
+
+/* RU-ошибка в общую строку ошибок настроек (паттерн applyCompression) */
+function strategyShowError(data, fallback) {
+  let msg = fallback;
+  if (data && typeof data.error === 'string') msg = 'ошибка: ' + data.error;
+  els.settingsError.textContent = msg;
+  els.settingsError.hidden = false;
+}
+
+/* Факты в read-only панель: пустое/отсутствующее значение → «—» */
+function renderFacts(facts) {
+  els.strategyFactsPanel.querySelectorAll('dd[data-fact-key]').forEach(function (dd) {
+    const key = dd.getAttribute('data-fact-key');
+    const v = facts && FACT_KEYS.indexOf(key) !== -1 ? facts[key] : null;
+    dd.textContent = (typeof v === 'string' && v.trim() !== '') ? v : '—';
+  });
+}
+
+/* GET /agent/strategy → показ/скрытие панелей по активной стратегии,
+   факты и активная ветка из ответа. Сбой сети/не-JSON — панели
+   не трогаем (кроме синхронизации поллинга). */
+async function refreshStrategy() {
+  let info = null;
+  try {
+    const res = await fetch('/agent/strategy');
+    if (res.ok) {
+      try { info = await res.json(); } catch (e) { info = null; }
+    }
+  } catch (e) {
+    info = null;
+  }
+  if (info && typeof info === 'object' && typeof info.strategy === 'string') {
+    els.strategyFactsPanel.hidden = info.strategy !== 'sticky_facts';
+    els.strategyBranchPanel.hidden = info.strategy !== 'branching';
+    if (info.strategy === 'sticky_facts' && info.facts && typeof info.facts === 'object') {
+      renderFacts(info.facts);
+    }
+    if (info.strategy === 'branching') {
+      const state = (info.strategy_state && typeof info.strategy_state === 'object') ? info.strategy_state : {};
+      els.branchActive.textContent = (typeof state.active === 'string' && state.active !== '') ? state.active : '—';
+    }
+  }
+  syncStrategyPoll();
+}
+
+/* Поллинг /agent/strategy ТОЛЬКО пока видна панель ветвления (активная
+   ветка может смениться в другой вкладке); 2,5 с — тот же стиль, что
+   setInterval(loadDialogues, 5000) для списка диалогов */
+function syncStrategyPoll() {
+  const need = !els.strategyBranchPanel.hidden;
+  if (need && strategyPollTimer == null) {
+    strategyPollTimer = setInterval(refreshStrategy, 2500);
+  } else if (!need && strategyPollTimer != null) {
+    clearInterval(strategyPollTimer);
+    strategyPollTimer = null;
+  }
+}
+
+/* «Применить стратегию»: POST /agent/strategy/switch — по образцу
+   applyCompression (ошибка → settingsError, успех → refresh панелей) */
+async function applyStrategy() {
+  if (strategyInFlight) return;
+  strategyInFlight = true;
+  els.cfgStrategyApply.disabled = true;
+  els.settingsError.hidden = true;
+
+  const body = { strategy: els.cfgStrategy.value };
+  try {
+    const res = await fetch('/agent/strategy/switch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* тело не-JSON */ }
+    if (res.ok && data && typeof data.strategy === 'string') {
+      els.cfgStrategy.value = data.strategy;
+      els.cfgStrategyApply.textContent = 'Применено ✓';
+      setTimeout(function () { els.cfgStrategyApply.textContent = 'Применить стратегию'; }, 1200);
+      refreshStrategy();
+    } else {
+      strategyShowError(data, 'ошибка: не удалось применить стратегию');
+    }
+  } catch (err) {
+    strategyShowError(null, 'ошибка: сервер недоступен: ' + (err && err.message ? err.message : String(err)));
+  }
+  strategyInFlight = false;
+  els.cfgStrategyApply.disabled = false;
+}
+
+/* «Чекпоинт»: POST /agent/strategy/checkpoint (пустой body; 400 —
+   не-branching, RU-текст из data.error) */
+async function doCheckpoint() {
+  if (strategyInFlight) return;
+  strategyInFlight = true;
+  els.settingsError.hidden = true;
+  try {
+    const res = await fetch('/agent/strategy/checkpoint', { method: 'POST' });
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* тело не-JSON */ }
+    if (res.ok) refreshStrategy();
+    else strategyShowError(data, 'ошибка: не удалось создать чекпоинт');
+  } catch (err) {
+    strategyShowError(null, 'ошибка: сервер недоступен: ' + (err && err.message ? err.message : String(err)));
+  }
+  strategyInFlight = false;
+}
+
+/* «Ветка A» / «Ветка B»: POST /agent/strategy/branch {"branch": name} */
+async function doBranch(name) {
+  if (strategyInFlight) return;
+  strategyInFlight = true;
+  els.settingsError.hidden = true;
+  try {
+    const res = await fetch('/agent/strategy/branch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ branch: name })
+    });
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* тело не-JSON */ }
+    if (res.ok) refreshStrategy();
+    else strategyShowError(data, 'ошибка: не удалось переключить ветку');
+  } catch (err) {
+    strategyShowError(null, 'ошибка: сервер недоступен: ' + (err && err.message ? err.message : String(err)));
+  }
+  strategyInFlight = false;
 }
 
 /* Текст сводки активного диалога для HUD: GET /agent/dialogues/{id}
@@ -2340,6 +2584,11 @@ els.applySettings.addEventListener('click', applySettings);
 /* Task 9: применение настроек сжатия — POST /agent/config; детали в
    applyCompression (HUD-индикатор, localStorage, RU-ошибки) */
 els.cfgApply.addEventListener('click', applyCompression);
+/* Task 10: стратегии — применить (switch) + управление ветвлением */
+els.cfgStrategyApply.addEventListener('click', applyStrategy);
+els.strategyCheckpointBtn.addEventListener('click', doCheckpoint);
+els.strategyBranchABtn.addEventListener('click', function () { doBranch('A'); });
+els.strategyBranchBBtn.addEventListener('click', function () { doBranch('B'); });
 els.clearHistoryBtn.addEventListener('click', clearHistory);
 els.editPromptBtn.addEventListener('click', openPromptModal);
 els.promptModalClose.addEventListener('click', function () { closeModal(els.promptModal); });
@@ -2414,6 +2663,7 @@ paintTemp();
 updateCurrentTokens();
 loadReadCounts();
 loadSettings();
+refreshStrategy(); /* Task 10: панели стратегии — состояние активного диалога */
 loadModels();
 loadConversation(); /* renderActiveChat + loadDialogues */
 loadTokenStats();
