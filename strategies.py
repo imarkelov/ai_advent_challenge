@@ -12,12 +12,14 @@
 - ``default_state`` — начальное состояние стратегии на диалог (additive
   поле strategy_state в dialogues.json, без деструктивной миграции).
 
-Реализованные стратегии: ``SlidingWindowStrategy`` (скользящее окно N,
-day10 Task 5), ``StickyFactsStrategy`` (sticky-факты ТЗ, day10 Task 6),
-``BranchingStrategy`` (чекпоинт + ветки A/B, day10 Task 7; остальные —
-legacy — в следующих задачах). Только стандартная библиотека (abc) +
-facts.py (чистые функции). Модуль импортируется standalone: без побочных
-эффектов, сети и чтения .env.
+Реализованные стратегии: ``LegacyStrategy`` (поведение day9: полная
+история + сводка диалога в system-промте, day10 Task 8),
+``SlidingWindowStrategy`` (скользящее окно N, day10 Task 5),
+``StickyFactsStrategy`` (sticky-факты ТЗ, day10 Task 6),
+``BranchingStrategy`` (чекпоинт + ветки A/B, day10 Task 7).
+Только стандартная библиотека (abc) + facts.py (чистые функции).
+Модуль импортируется standalone: без побочных эффектов, сети и чтения
+.env.
 """
 import abc
 
@@ -267,3 +269,53 @@ class BranchingStrategy(ContextStrategy):
                 + list(state["branches"][state["active"]])
             )
         return system_prompt, slice_
+
+
+# ---------------------------------------------------------------------------
+# Task 8: LegacyStrategy — поведение day9 (сводка + полная история)
+# ---------------------------------------------------------------------------
+
+class LegacyStrategy(ContextStrategy):
+    """Legacy (day9): полная (после trim) история + сводка в system-промте.
+
+    Повторяет day9-поведение агента байт-в-байт: в LLM уходит ВЕСЬ
+    переданный список истории — окно НЕ применяется срезом (окно
+    обеспечивает trim движка сжатия агента, ``_maybe_compress``, до
+    ``build_payload``), а непустая сводка вставляется в system-промт
+    в точном day9-формате инъекции:
+    ``system_prompt + "\\n\\nРезюме диалога: " + summary`` (одна строка,
+    одно system-сообщение, фейковых реплик нет).
+
+    Сводка хранится на ДИАЛОГЕ (агента), а не в state: агент передаёт
+    актуальное значение сводки в ``state["summary"]`` перед каждым
+    ``build_payload``; ``state["compression_enabled"]`` управляет
+    инъекцией (сжатие выключено — режим day8, инъекции нет).
+
+    ``on_user_message`` НЕ переопределён: no-op по умолчанию корректен
+    (движок сжатия — агента, стратегия состояние не держит). Стратегия
+    ЧИСТА: LLM-вызовов нет, side effects нет.
+    """
+
+    strategy_name = "legacy"
+
+    def default_state(self) -> dict:
+        """Начальное состояние: сводки нет, сжатие включено (day9-дефолт)."""
+        return {"summary": None, "compression_enabled": True}
+
+    def build_payload(
+        self, system_prompt: str, history: list, user_input: str, state: dict
+    ) -> tuple:
+        """Полная история + текущий ход последним; сводка (если есть и
+        сжатие вкл) — day9-инъекция в system-промт.
+
+        ``slice_ = list(history) + [{"role": "user", "content":
+        user_input}]`` — вся история БЕЗ окна (окно обеспечивает trim
+        движка сжатия, не срез); исходный список не мутируется.
+        """
+        summary = state.get("summary") or ""
+        if state.get("compression_enabled", True) and summary:
+            system_content = system_prompt + "\n\nРезюме диалога: " + summary
+        else:
+            system_content = system_prompt
+        slice_ = list(history) + [{"role": "user", "content": user_input}]
+        return system_content, slice_

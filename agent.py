@@ -44,6 +44,8 @@ import threading
 import urllib.error
 import urllib.request
 
+from strategies import LegacyStrategy
+
 DEFAULT_SYSTEM_PROMPT = "Ты — простой полезный ассистент. Отвечай на русском языке."
 
 # Модель → env-переменная с API-ключом
@@ -216,6 +218,9 @@ class SimpleAgent:
         self._window_size = DEFAULT_WINDOW_SIZE
         self._summary_gap = DEFAULT_SUMMARY_GAP
         self._compression_enabled = True
+        # day10: стратегия сборки контекста (по умолчанию — legacy,
+        # байт-в-байт поведение day9)
+        self._strategy = LegacyStrategy()
         self.history_file = history_file or HISTORY_FILE  # только для миграции
         self.dialogues_file = dialogues_file or DIALOGUES_FILE
         self._lock = threading.Lock()
@@ -621,13 +626,16 @@ class SimpleAgent:
         with self._lock:
             # сжатие до сборки payload: сбой сводки не критичен (деградация)
             self._maybe_compress()
-            summary = self._active.get("summary") or ""
-            system_content = self.system_prompt
-            if self._compression_enabled and summary:
-                system_content += "\n\nРезюме диалога: " + summary
-            messages = [{"role": "system", "content": system_content}]
-            messages += self.history
-            messages.append({"role": "user", "content": user_input})
+            # day10: контекст собирает стратегия (дефолт legacy — day9
+            # инъекция «Резюме диалога» + полная (после trim) история)
+            strategy_state = {
+                "summary": self._active.get("summary") or "",
+                "compression_enabled": self._compression_enabled,
+            }
+            system_content, history_slice = self._strategy.build_payload(
+                self.system_prompt, self.history, user_input, strategy_state
+            )
+            messages = [{"role": "system", "content": system_content}] + history_slice
 
             # env-переменные читаются лениво — в момент запроса
             base = os.environ.get("GPUSTACK_BASE_URL", "").strip().rstrip("/")
