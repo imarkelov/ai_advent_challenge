@@ -812,6 +812,59 @@
     white-space: pre-wrap;
   }
 
+  /* ---------- Колонка чата: окно «Сводка диалога» (результат сжатия, всегда видимо) ----------
+     Стационарная панель над лентой сообщений: текст сводки виден без кликов.
+     Состояния через data-state: has / empty / off (см. renderSummaryWindow). */
+  .summary-window {
+    border: 1px solid var(--cyan-border);
+    background: var(--inset);
+    clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
+    padding: 10px 12px 12px;
+    margin-bottom: 14px;
+  }
+  .summary-window[data-state="has"] { border-color: var(--cyan-dim); }
+  .summary-window[data-state="has"] .summary-title { color: var(--cyan); }
+  .summary-window-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .summary-title {
+    font-family: var(--font-head);
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .summary-status {
+    font-family: var(--font-head);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .summary-status.off { color: var(--orange); }
+  .summary-window-body {
+    max-height: 160px;
+    overflow-y: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+  }
+  .summary-window-body.empty {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    color: var(--text-dim);
+  }
+
   /* ---------- Настройки: сжатие истории ---------- */
   .comp-row {
     display: grid;
@@ -1073,6 +1126,14 @@
         <h2>Чат</h2>
       </div>
 
+      <section class="summary-window" id="summaryWindow" aria-label="Сводка диалога (результат сжатия)">
+        <div class="summary-window-head">
+          <span class="summary-title">Сводка диалога (результат сжатия)</span>
+          <span class="summary-status" id="summaryStatus" aria-live="polite"></span>
+        </div>
+        <div class="summary-window-body" id="summaryWindowText">—</div>
+      </section>
+
       <div id="chatLog" role="log" aria-live="polite" aria-label="Сообщения">
         <div class="chat-empty" id="chatEmpty">
           <p class="overline">Станция готова</p>
@@ -1288,6 +1349,9 @@ const els = {
   hudReply: $('hudReply'),
   hudSummary: $('hud-summary'),
   hudSummaryText: $('hudSummaryText'),
+  summaryWindow: $('summaryWindow'),
+  summaryWindowText: $('summaryWindowText'),
+  summaryStatus: $('summaryStatus'),
   hudCompression: $('hud-compression'),
   hudSummaryTokens: $('hud-summary-tokens'),
   cfgCompression: $('cfg-compression'),
@@ -1829,6 +1893,37 @@ async function applyCompression() {
   els.cfgApply.disabled = false;
 }
 
+/* Видимое окно сводки в колонке чата (#summaryWindow): тот же sentinel,
+   что loadSummary — null = получить не удалось, окно НЕ трогаем;
+   '' = диалог отвечает, сводки нет → плейсхолдер. Состояние сжатия —
+   из формы (cfg-compression, prefill из localStorage): approximation
+   серверного compression_enabled (точное значение не опрашивается). */
+function renderSummaryWindow(summary) {
+  if (summary === null) return; /* нет активного диалога / сеть упала */
+  const win = els.summaryWindow, body = els.summaryWindowText, status = els.summaryStatus;
+  const compOn = els.cfgCompression.checked;
+  if (summary) {
+    win.dataset.state = 'has';
+    body.classList.remove('empty');
+    body.textContent = summary;
+    body.scrollTop = body.scrollHeight; /* хвост сводки = самое свежее */
+    status.classList.toggle('off', !compOn);
+    status.textContent = compOn ? 'актуально' : 'сжатие выкл — не обновляется';
+  } else if (compOn) {
+    win.dataset.state = 'empty';
+    body.classList.add('empty');
+    body.textContent = 'Сводки пока нет: за окном не набралось порога (gap) для пересчёта.';
+    status.classList.remove('off');
+    status.textContent = 'нет сводки';
+  } else {
+    win.dataset.state = 'off';
+    body.classList.add('empty');
+    body.textContent = 'Сжатие выключено — сводка не генерируется.';
+    status.classList.add('off');
+    status.textContent = 'выключено';
+  }
+}
+
 /* Текст сводки активного диалога для HUD: GET /agent/dialogues/{id}
    аддитивно отдаёт "summary" (main.py); нет диалога или сводки пусто → «—» */
 async function loadSummary() {
@@ -1849,6 +1944,7 @@ async function loadSummary() {
     }
   }
   if (summary !== null) els.hudSummaryText.textContent = summary || '—';
+  renderSummaryWindow(summary); /* видимое окно в колонке чата (тот же sentinel) */
 }
 
 /* ================= Активный диалог (GET /agent/history → #chatLog) ================= */
