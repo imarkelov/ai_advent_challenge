@@ -15,6 +15,7 @@
 | День 7 | [day7](https://github.com/imarkelov/ai_advent_challenge/tree/day7) | Сохранение контекста: история в history.json, восстановление после перезапуска; TRON-HUD: токены (вход/рассуждения/всего), лимит контекста, toggle рассуждений, выбор модели, история запросов, модалки: редактор системного промпта (с описанием параметров) и JSON последнего API-запроса, новый диалог (архив старых), продолжение диалога из архива (клик — выбранный становится активным, предыдущий закрывается), бейдж непрочитанных диалогов, фикс модалки JSON-запроса |
 | День 8 | [`day8`](https://github.com/imarkelov/ai_advent_challenge/tree/day8) | Подсчёт токенов: текущий запрос (live в поле ввода), вся история диалога, ответ модели (эвристический алгоритм, сервер + клиент) + лимит токенов выбранной модели в HUD; модалка JSON-запроса: кнопка «Скопировать» последнего JSON и изменение размера окна (drag-grip в углу) |
 | День 9 | [day9](https://github.com/imarkelov/ai_advent_challenge/tree/day9) | Управление контекстом: скользящее окно N + LLM-сводка старых сообщений + бенчмарк расхода токенов |
+| День 11 (студия) | [`day11-studio`](https://github.com/imarkelov/ai_advent_challenge/tree/day11-studio) | Студия: FastAPI + React-чат с LLM (SSE-стриминг), 3 слоя памяти (диалог / рабочая / долговременная), токен-статистика, журнал LLM-запросов |
 
 ## День 7: как работает сервис
 
@@ -173,3 +174,137 @@ python -m pytest -q         # тесты
 ### Замечание
 
 Код дня 9 смержен в `master` и запушен (ветка `day9` в origin).
+
+## День 11 (студия): release notes
+
+### Что это
+
+Отдельная «Студия» — обучающее веб-приложение на **новом стеке** (FastAPI + React),
+не наследующее код дней 1–10. Чат с LLM (GPustack, OpenAI-совместимый API) со
+стримингом по SSE, три слоя памяти, токен-статистика и журнал LLM-запросов.
+
+### Стек
+
+- **Бэкенд** — FastAPI + uvicorn + httpx (синхронный `httpx.Client`, без asyncio-магии).
+- **Фронтенд** — React 19 + Vite + TypeScript; без UI-фреймворков, чистый CSS-дизайн.
+- **Состояние** — React Context + `useReducer` (без Zustand/TanStack).
+- **Стриминг** — `fetch` + `ReadableStream` (EventSource не умеет POST), SSE-кадры `data: {json}\n\n`.
+- **Хранилище** — JSON-файлы в `studio/data/` (атомарная запись: tmp + `os.replace`).
+- **Тесты** — pytest (бэкенд, `httpx.MockTransport`, без сети) + Vitest/Testing Library (фронтенд).
+
+### Память (3 слоя)
+
+| Слой | Ключ | Область | Что хранит |
+| --- | --- | --- | --- |
+| Диалог (ST) | `dialogues.json` | на диалог | сообщения чата (история) |
+| Рабочая (WM) | `working.json` | на диалог | ключ-значения «текущей задачи» |
+| Долговременная (LT) | `longterm.json` | глобально | ключ-значения знаний |
+
+WM активного диалога и LT инжектятся в system-промт блоками `- key: value`
+(пустой слой → блок не добавляется). Сообщения диалога (ST) идут в `messages`
+тела запроса, не в system-промт.
+
+### Компоненты (фронтенд)
+
+| Файл | Назначение |
+| --- | --- |
+| `src/state.tsx` | `StudioProvider` + `useStudio` — контекст, reducer, все API-вызовы |
+| `src/api.ts` | REST-хелперы + `chatStream` (SSE через `fetch`/`ReadableStream`) |
+| `src/glossary.ts` | словарь описаний параметров API (RU) + фолбэк для неизвестных |
+| `components/Sidebar.tsx` | диалоги + сводка слоёв памяти (EN-имена по hover) |
+| `components/ChatPanel.tsx` | чат: сообщения, стрим-ответ, ввод |
+| `components/ContextPanel.tsx` | правая панель: вкладки Память / Токены / Запрос |
+| `components/MemoryTab.tsx` | 3 слоя: CRUD ключ-значений + очистка |
+| `components/TokensTab.tsx` | последний usage + сессионные токены + лимит контекста |
+| `components/RequestsTab.tsx` | журнал LLM-запросов: список + детализация (тело запроса) |
+
+Журнал запросов (вкладка «Запрос») можно выключить/включить тумблером
+(состояние — в `localStorage`). Каждый параметр в теле запроса подписан
+описанием из `glossary.ts`; неизвестный параметр подсвечивается и помечается
+«(доп. параметр, без описания)».
+
+### Структура
+
+```
+studio/
+  backend/
+    main.py        # FastAPI-приложение и все роуты (400/404 с RU-detail)
+    agent.py       # StudioAgent — запрос к LLM, SSE, конфиг, журнал, токены
+    memory.py      # MemoryStore — диалоги (ST), рабочая (WM), долговременная (LT)
+    tests/         # офлайн-тесты (tmp_path + MockTransport)
+    requirements.txt
+  frontend/
+    src/           # React-компоненты, state, api, glossary, styles.css
+    tests/         # Vitest + Testing Library
+    package.json
+  data/            # runtime-данные (в .gitignore)
+scripts/e2e_studio.py   # E2E smoke (prod-сервер + реальный GPustack)
+```
+
+### API
+
+| Метод | Путь | Назначение |
+| --- | --- | --- |
+| POST | `/api/chat` | Чат: SSE-стрим `data: {delta\|done\|error}` |
+| GET / POST | `/api/config` | Конфиг LLM (модель, температура, max_tokens, system_prompt) |
+| GET | `/api/models` | Модели API с контекстными лимитами (502 при недоступности) |
+| GET / POST | `/api/dialogues` | Список диалогов / создать (201, становится активным) |
+| GET / DELETE | `/api/dialogues/{id}` | Диалог с сообщениями / удалить |
+| POST | `/api/dialogues/{id}/activate` | Сделать диалог активным |
+| POST | `/api/memory/st/clear` | Очистить сообщения активного диалога |
+| GET | `/api/memory` | Статистика слоёв памяти + `active_id` |
+| POST / DELETE | `/api/memory/working[/{key}]` | Заметки рабочей памяти (на диалог) |
+| POST | `/api/memory/working/clear` | Очистить рабочую память |
+| POST / DELETE | `/api/memory/longterm[/{key}]` | Глобальные заметки |
+| POST | `/api/memory/longterm/clear` | Очистить глобальные заметки |
+| GET | `/api/tokens` | Последний usage, сессионные токены, лимит контекста |
+| GET | `/api/requests` | Журнал LLM-запросов (без тел) |
+| GET | `/api/requests/{id}` | Полная запись журнала (с телом запроса) |
+| DELETE | `/api/requests` | Очистить журнал |
+
+Секреты — из `.env` в корне репозитория: `GPUSTACK_BASE_URL`, `GPUSTACK_API_KEY`.
+
+### Запуск
+
+**Dev** (API + Vite-дево-сервер с прокси `/api` → 8000):
+
+```bash
+# терминал 1 — API
+cd studio/backend
+pip install -r requirements.txt
+uvicorn main:app --port 8000
+
+# терминал 2 — фронтенд
+cd studio/frontend
+npm install
+npm run dev          # http://localhost:5173
+```
+
+**Prod** (один процесс: API + собранный фронтенд из `dist`):
+
+```bash
+cd studio/frontend && npm run build     # собрать dist
+python -m uvicorn studio.backend.main:app --port 8000   # из корня репозитория
+# открыть http://127.0.0.1:8000
+```
+
+### Тесты
+
+```bash
+cd studio/backend && python -m pytest -q     # 65 тестов (офлайн)
+cd studio/frontend && npm test               # 48 тестов (Vitest)
+python scripts/e2e_studio.py                 # E2E smoke (prod + реальный GPustack)
+```
+
+E2E: собирает `dist`, поднимает prod-сервер на порту 8100, гоняет UI + API
+(диалог, WM/LT, чат SSE, токены, журнал) и всегда убивает сервер. Чат — SKIP,
+если GPustack недоступен. Выход 0 для PASS/SKIP, 1 для FAIL.
+
+### Рабочие модели
+
+`qwen3.8-27b` (лимит 32768), `deepseek-v4-flash` (16384), `glm-5.3-flash` (16384).
+
+### Статус
+
+Бэкенд — 65 тестов PASS; фронтенд — 48 тестов PASS; E2E smoke — PASS.
+Ветка `day11-studio` (отдельный стек, не наследует дни 1–10).
