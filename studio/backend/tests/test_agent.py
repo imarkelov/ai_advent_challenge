@@ -1127,3 +1127,236 @@ def test_list_models_unavailable_raises(data_dir):
     agent = make_agent(data_dir, handler)
     with pytest.raises(httpx.HTTPError):
         agent.list_models()
+
+
+# ---------- задача: оркестратор stage-агентов (день 13) ----------
+
+def make_task_script_handler(script):
+    """Mock-LLM для пайплайна задачи: non-stream, ответ — по роли стадии.
+
+    script: {"planning": str, "execution": [str, ...], "validation": [str, ...]}
+    Возвращает (handler, calls); calls — список system-промптов вызовов.
+    """
+    state = {"execution": list(script.get("execution", [])),
+             "validation": list(script.get("validation", []))}
+    calls = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = json.loads(request.content)
+        system = (payload["messages"][0] or {}).get("content", "")
+        calls.append(system)
+        if "Планировщик" in system:
+            text = script["planning"]
+        elif "Исполнитель" in system:
+            text = state["execution"].pop(0)
+        elif "Валидатор" in system:
+            text = state["validation"].pop(0)
+        else:
+            text = "ИТОГОВОЕ ОТВЕЧЕНИЕ"
+        return httpx.Response(200, json={"choices": [
+            {"message": {"content": text}}]})
+
+    return handler, calls
+
+
+def task_ready(agent):
+    """Диалог: профиль declined (день 12) — готов к обычным запросам."""
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    return d
+
+
+def test_task_run_full_cycle(data_dir):
+    handler, calls = make_task_script_handler({
+        "planning": "1. Шаг А\n2. Шаг Б",
+        "execution": ["Код готов"],
+        "validation": ["Всё ок <verdict>pass</verdict>"],
+    })
+    agent = make_agent(data_dir, handler)
+    d = task_ready(agent)
+    agent.store.task_new(d["id"], "Сделать кнопку")
+    events = list(agent.task_run(d["id"]))
+    kinds = [(e["type"], e.get("stage")) for e in events]
+    assert ("stage", "planning") in kinds
+    assert ("stage_done", "planning") in kinds
+    assert ("stage", "execution") in kinds
+    assert ("stage", "validation") in kinds
+    assert ("stage", "done") in kinds
+    assert events[-1]["type"] == "task_done"
+    t = agent.store.task_get(d["id"])
+    assert t["active"] is True and t["stage"] == "done"
+    assert t["stages"]["planning"]["output"] == "1. Шаг А\n2. Шаг Б"
+    assert t["stages"]["validation"]["verdict"] == "pass"
+    # инъекция state: у Исполнителя — план, у Валидатора — план и работа
+    assert any("Планировщик" in s and "Сделать кнопку" in s for s in calls)
+    assert any("Исполнитель" in s and "1. Шаг А" in s for s in calls)
+    assert any("Валидатор" in s and "Код готов" in s for s in calls)
+    # stage-сообщения в истории с меткой, финальный ответ — обычный assistant
+    msgs = agent.store.get_messages(d["id"])
+    stage_msgs = [m for m in msgs if m.get("task_stage")]
+    assert [m["task_stage"] for m in stage_msgs] == \
+        ["planning", "execution", "validation"]
+    assert msgs[-1].get("task_stage") is None
+    assert msgs[-1]["role"] == "assistant"
+
+
+def test_task_run_retry_on_validation_fail(data_dir):
+    handler, calls = make_task_script_handler({
+        "planning": "1. Шаг",
+        "execution": ["Криво", "Правильно"],
+        "validation": ["Не то <verdict>fail</verdict>",
+                       "Ок <verdict>pass</verdict>"],
+    })
+    agent = make_agent(data_dir, handler)
+    d = task_ready(agent)
+    agent.store.task_new(d["id"], "X")
+    events = list(agent.task_run(d["id"]))
+    t = agent.store.task_get(d["id"])
+    assert t["stage"] == "done"
+    assert t["retries"] == 1
+    assert t["stages"]["execution"]["output"] == "Правильно"
+    assert t["stages"]["execution"]["attempts"] == 2
+    assert any(e["type"] == "stage_done" and e.get("retry") for e in events)
+    # фидбэк: промпт повторного Исполнителя — старая работа + замечания
+    executor_prompts = [s for s in calls if "Исполнитель" in s]
+    assert len(executor_prompts) == 2
+    assert "Криво" in executor_prompts[1]
+    assert "Не то" in executor_prompts[1]
+
+
+def test_task_run_second_fail_goes_done(data_dir):
+    handler, calls = make_task_script_handler({
+        "planning": "1. Шаг",
+        "execution": ["Криво", "Снова криво"],
+        "validation": ["Нет <verdict>fail</verdict>",
+                       "Снова нет <verdict>fail</verdict>"],
+    })
+    agent = make_agent(data_dir, handler)
+    d = task_ready(agent)
+    agent.store.task_new(d["id"], "X")
+    events = list(agent.task_run(d["id"]))
+    t = agent.store.task_get(d["id"])
+    assert t["stage"] == "done"
+    assert t["retries"] == 1
+    assert t["stages"]["validation"]["verdict"] == "fail"
+    assert events[-1]["type"] == "task_done"
+
+
+def test_task_run_missing_verdict_treated_pass(data_dir):
+    handler, calls = make_task_script_handler({
+        "planning": "1. Шаг", "execution": ["Код"],
+        "validation": ["Видимо ок"],
+    })
+    agent = make_agent(data_dir, handler)
+    d = task_ready(agent)
+    agent.store.task_new(d["id"], "X")
+    events = list(agent.task_run(d["id"]))
+    t = agent.store.task_get(d["id"])
+    assert t["stage"] == "done"
+    assert t["stages"]["validation"]["verdict"] == "pass"
+    assert events[-1]["type"] == "task_done"
+
+
+def test_task_run_pause_between_stages(data_dir):
+    handler, calls = make_task_script_handler({
+        "planning": "План", "execution": ["Работа"],
+        "validation": ["<verdict>pass</verdict>"],
+    })
+    agent = make_agent(data_dir, handler)
+    d = task_ready(agent)
+    agent.store.task_new(d["id"], "X")
+    # пауза на границе: после stage_done(planning) — флаг; execution не стартует
+    for e in agent.task_run(d["id"]):
+        if e["type"] == "stage_done" and e["stage"] == "planning":
+            agent.store.task_pause(d["id"])
+            break
+    t = agent.store.task_get(d["id"])
+    assert t["paused"] is True
+    assert t["stage"] == "execution"
+    assert "execution" not in t["stages"]
+    # повторный run на паузе — сразу task_paused, LLM не вызывается
+    before = len(calls)
+    events2 = list(agent.task_run(d["id"]))
+    assert events2 == [{"type": "task_paused", "stage": "execution"}]
+    assert len(calls) == before
+    # resume — продолжение с сохранённого состояния, planning не повторяется
+    agent.store.task_resume(d["id"])
+    before_planner = len([s for s in calls if "Планировщик" in s])
+    events3 = list(agent.task_run(d["id"]))
+    assert events3[-1]["type"] == "task_done"
+    assert agent.store.task_get(d["id"])["stage"] == "done"
+    after_planner = len([s for s in calls if "Планировщик" in s])
+    assert after_planner == before_planner
+
+
+def test_task_run_instruction_applied_once(data_dir):
+    handler, calls = make_task_script_handler({
+        "planning": "План", "execution": ["Работа"],
+        "validation": ["<verdict>pass</verdict>"],
+    })
+    agent = make_agent(data_dir, handler)
+    d = task_ready(agent)
+    agent.store.task_new(d["id"], "X")
+    agent.store.task_pause(d["id"])
+    agent.store.task_set_instruction(d["id"], "Используй Kotlin")
+    agent.store.task_resume(d["id"])
+    list(agent.task_run(d["id"]))
+    planner = next(s for s in calls if "Планировщик" in s)
+    assert "Используй Kotlin" in planner
+    executor = next(s for s in calls if "Исполнитель" in s)
+    assert "Используй Kotlin" not in executor
+    assert agent.store.task_get(d["id"])["instruction"] == ""
+
+
+def test_task_run_stage_error_and_retry_stage(data_dir):
+    state = {"fail_first": True}
+    handler, calls = make_task_script_handler({
+        "planning": "План", "execution": ["Р"],
+        "validation": ["<verdict>pass</verdict>"],
+    })
+
+    def flaky(request: httpx.Request) -> httpx.Response:
+        if state["fail_first"]:
+            state["fail_first"] = False
+            payload = json.loads(request.content)
+            system = (payload["messages"][0] or {}).get("content", "")
+            if "Планировщик" in system:
+                return httpx.Response(500, json={"error": "boom"})
+        return handler(request)
+
+    agent = make_agent(data_dir, flaky)
+    d = task_ready(agent)
+    agent.store.task_new(d["id"], "X")
+    events = list(agent.task_run(d["id"]))
+    assert events[-1]["type"] == "error"
+    t = agent.store.task_get(d["id"])
+    assert t["error"] is not None
+    assert t["paused"] is True
+    assert t["stage"] == "planning"
+    # повтор после resume — та же стадия, дальше — полный прогон
+    agent.store.task_resume(d["id"])
+    events2 = list(agent.task_run(d["id"]))
+    assert events2[-1]["type"] == "task_done"
+    assert agent.store.task_get(d["id"])["stage"] == "done"
+
+
+def test_task_run_inactive_task(data_dir):
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    events = list(agent.task_run(d["id"]))
+    assert events == [{"type": "error", "message": "Задача не активна"}]
+
+
+def test_ask_stream_blocked_by_active_task(data_dir):
+    agent = make_agent(data_dir, ok_handler)
+    d = task_ready(agent)
+    agent.store.task_new(d["id"], "X")
+    events = list(agent.ask_stream(d["id"], "привет"))
+    assert len(events) == 1
+    assert events[0]["type"] == "error"
+    assert "Задача выполняется" in events[0]["message"]
+    assert agent.store.get_messages(d["id"]) == []  # не сохранено
+    # на паузе чат работает
+    agent.store.task_pause(d["id"])
+    events2 = list(agent.ask_stream(d["id"], "привет"))
+    assert events2[-1]["type"] == "done"

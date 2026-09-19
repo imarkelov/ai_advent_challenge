@@ -5,6 +5,7 @@
 сессионные токены (in-memory, обнуляются при рестарте).
 """
 import json
+import re
 import os
 import threading
 import time
@@ -118,6 +119,55 @@ PROFILE_INTERVIEW_MARKERS = ("интерв",)
 PROFILE_MANUAL_MARKERS = ("вручную",)
 PROFILE_DECLINE_MARKERS = ("отказ", "не надо", "не нужно", "не буду",
                            "не заполня", "не хоч")
+
+# Состояние задачи (день 13): stage-агенты + детерминированный оркестратор.
+# FSM, хранение, паузы — MemoryStore.task_* (memory.py); здесь только
+# LLM-вызовы стадий и цикл. Stage-вызовы не пишутся в requests.json.
+TASK_AGENT_NAMES = {
+    "planning": "Планировщик",
+    "execution": "Исполнитель",
+    "validation": "Валидатор",
+    "done": "Оркестратор",
+}
+
+TASK_EXPECTED = {
+    "planning": "составить план шагов задачи",
+    "execution": "выполнить работу по плану задачи",
+    "execution_retry": "исправить работу по замечаниям валидации и дать обновлённый результат",
+    "validation": "сверить работу с планом и выдать вердикт",
+    "done": "собрать финальный ответ из материалов всех стадий",
+}
+
+TASK_STAGE_PROMPTS = {
+    "planning": (
+        "Ты — Планировщик (стадия planning). По описанию задачи составь план: "
+        "3–7 пронумерованных шагов, каждый — что конкретно сделать. "
+        "Ответ — только план, без отступлений и служебных меток."),
+    "execution": (
+        "Ты — Исполнитель (стадия execution). Выполни работу по плану задачи "
+        "и дай результат. Ответ — только работа, без отступлений и служебных "
+        "меток."),
+    "validation": (
+        "Ты — Валидатор (стадия validation). Сверь результат работы с планом "
+        "задачи: выполнено ли всё, где отклонения. Ответ — заключение, а в "
+        "КОНЦЕ отдельной строкой метку: <verdict>pass</verdict> если план "
+        "выполнен, <verdict>fail</verdict> если нет."),
+    "done": (
+        "Ты — Оркестратор. Из материалов стадий (план, работа, вердикт "
+        "валидации) собери один связный финальный ответ по задаче. "
+        "Ответ — только итог, без служебных меток."),
+}
+
+TASK_STAGE_USER = {
+    "planning": "Составь план для задачи, описанной выше.",
+    "execution": "Выполни работу по плану задачи.",
+    "execution_retry": ("Исправь работу по замечаниям валидации и дай "
+                        "обновлённый результат."),
+    "validation": "Проверь работу против плана и выдай вердикт.",
+    "done": "Собери финальный ответ.",
+}
+
+MAX_TASK_RETRIES = 1  # один повтор execution после fail-вердикта
 
 # TTL кэша доступности моделей (сек). Зонд — минимальный запрос max_tokens=1;
 # GPustack отдаёт 403 «Api key not allowed», если ключу модель не доступна.
@@ -271,6 +321,14 @@ class StudioAgent:
         (исключение наружу не бросается).
         """
         d = self.store.get_dialogue(dialogue_id)
+        # День 13: активная непаузанная незавершённая задача — чат
+        # приостановлен (сообщение не сохраняется, LLM не вызывается).
+        t = self.store.task_get(dialogue_id)
+        if t["active"] and t["stage"] != "done" and not t["paused"]:
+            yield {"type": "error",
+                   "message": ("Задача выполняется: поставьте паузу (кнопка "
+                               "в шапке чата) или завершите задачу")}
+            return
         need_title = (d is not None and not d.get("messages")
                       and d.get("title") == DEFAULT_DIALOGUE_TITLE)
         self.store.append_message(dialogue_id, "user", message)
@@ -519,6 +577,135 @@ class StudioAgent:
             self.store.profile_action(dialogue_id, "decline")
             return PROFILE_DECLINED_TEXT
         return PROFILE_INVITE_TEXT
+
+    # ---------- задача: оркестратор stage-агентов (день 13) ----------
+
+    def build_task_state_block(self, t: dict, stage: str,
+                               instruction: str = "") -> str:
+        """Блок состояния задачи для system-промпта stage-агента."""
+        lines = ["", "", "Состояние задачи:", f"Задача: {t['description']}"]
+        done = []
+        for s in ("planning", "execution", "validation"):
+            e = t["stages"].get(s)
+            if e and e.get("output"):
+                extra = f" (вердикт: {e['verdict']})" if e.get("verdict") else ""
+                done.append(f"- {s}: {e['output']}{extra}")
+        if done:
+            lines.append("Выполнено:")
+            lines.extend(done)
+        key = "execution_retry" if (stage == "execution" and t["retries"] > 0) \
+            else stage
+        lines.append(f"Ожидаемое действие: {TASK_EXPECTED[key]}")
+        if instruction:
+            lines.append(f"Инструкция пользователя (обязательно учти): {instruction}")
+        return "\n".join(lines)
+
+    def _task_llm_call(self, cfg: dict, system: str, user: str) -> str:
+        """Non-stream LLM-вызов stage-агента (не входит в requests.json).
+        Бросает исключение при ошибке (httpx.HTTPError, ValueError,
+        RuntimeError) — оркестратор превратит его в error-событие."""
+        body = {
+            "model": cfg["model"],
+            "temperature": cfg["temperature"],
+            "max_tokens": cfg["max_tokens"],
+            "messages": [{"role": "system", "content": system},
+                         {"role": "user", "content": user}],
+        }
+        resp = self._client.post(
+            self.base_url + "/chat/completions",
+            headers={"Authorization": "Bearer " + self._key_for(cfg["model"])},
+            json=body, timeout=120,
+        )
+        if resp.status_code != 200:
+            raise RuntimeError(f"Модель вернула ошибку HTTP {resp.status_code}")
+        content = (((resp.json().get("choices") or [{}])[0]
+                    .get("message") or {}).get("content") or "").strip()
+        if not content:
+            raise RuntimeError("Пустой ответ модели")
+        return content
+
+    @staticmethod
+    def _parse_verdict(output: str) -> str:
+        """Вердикт валидатора: <verdict>pass|fail</verdict>; отсутствие/сбой
+        метки — pass (пайплайн не должен ломаться о метку мелких моделей)."""
+        m = re.search(r"<verdict>\s*(pass|fail)\s*</verdict>", output,
+                      re.IGNORECASE)
+        return m.group(1).lower() if m else "pass"
+
+    def task_run(self, dialogue_id: str):
+        """Оркестратор пайплайна задачи: синхронный генератор событий.
+
+        События: {"type": "stage", "stage", "agent"},
+        {"type": "stage_done", "stage", "output", "verdict"?},
+        {"type": "task_paused", "stage"}, {"type": "task_done", "answer"},
+        {"type": "error", "message"}. Исключение наружу не бросается.
+        Пауза/стоп проверяются на границе стадий (текущий LLM-вызов
+        доигрывается).
+        """
+        t = self.store.task_get(dialogue_id)
+        if not t["active"]:
+            yield {"type": "error", "message": "Задача не активна"}
+            return
+        cfg = self.get_config()
+        while True:
+            t = self.store.task_get(dialogue_id)
+            if t["paused"]:
+                yield {"type": "task_paused", "stage": t["stage"]}
+                return
+            stage = t["stage"]
+            instruction = self.store.task_instruction_take(dialogue_id)
+            if stage == "done":
+                yield {"type": "stage", "stage": "done",
+                       "agent": TASK_AGENT_NAMES["done"]}
+                try:
+                    answer = self._task_llm_call(
+                        cfg,
+                        TASK_STAGE_PROMPTS["done"]
+                        + self.build_task_state_block(t, "done", instruction),
+                        TASK_STAGE_USER["done"])
+                except Exception as e:
+                    self.store.task_set_error(dialogue_id,
+                                              f"Оркестратор: {e}")
+                    yield {"type": "error",
+                           "message": f"Ошибка финального синтеза: {e}"}
+                    return
+                self.store.append_message(dialogue_id, "assistant", answer,
+                                          model=cfg["model"])
+                yield {"type": "task_done", "answer": answer}
+                return
+            yield {"type": "stage", "stage": stage,
+                   "agent": TASK_AGENT_NAMES[stage]}
+            key = "execution_retry" if (stage == "execution"
+                                        and t["retries"] > 0) else stage
+            try:
+                output = self._task_llm_call(
+                    cfg,
+                    TASK_STAGE_PROMPTS[stage]
+                    + self.build_task_state_block(t, stage, instruction),
+                    TASK_STAGE_USER[key])
+            except Exception as e:
+                self.store.task_set_error(dialogue_id,
+                                          f"{TASK_AGENT_NAMES[stage]}: {e}")
+                yield {"type": "error",
+                       "message": f"Ошибка стадии {TASK_AGENT_NAMES[stage]}: {e}"}
+                return
+            verdict = None
+            if stage == "validation":
+                verdict = self._parse_verdict(output)
+                if verdict == "fail" and t["retries"] < MAX_TASK_RETRIES:
+                    self.store.task_retry_execution(dialogue_id, output,
+                                                    verdict)
+                    yield {"type": "stage_done", "stage": stage,
+                           "output": output, "verdict": verdict,
+                           "retry": True}
+                    continue  # следующая итерация — execution с фидбэком
+            self.store.task_stage_done(dialogue_id, stage, output, verdict)
+            self.store.append_message(dialogue_id, "assistant", output,
+                                      model=cfg["model"], task_stage=stage)
+            event = {"type": "stage_done", "stage": stage, "output": output}
+            if verdict:
+                event["verdict"] = verdict
+            yield event
 
     def _detect_taboo(self, dialogue_id: str, message: str) -> list:
         """Табу-слова АКТИВНОГО профиля, встречающиеся в запросе (D8).
