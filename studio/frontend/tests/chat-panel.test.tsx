@@ -291,3 +291,37 @@ describe('ChatPanel — бейдж инициализации профиля в 
     expect(screen.queryByRole('button', { name: /профиль/i })).toBeNull()
   })
 })
+
+describe('ChatPanel — режим задачи (день 13)', () => {
+  const TASK_RUNNING = {
+    active: true, stage: 'execution', paused: false,
+    description: 'Сделать кнопку', instruction: '', stages: {},
+    retries: 0, error: null, updated: null,
+  }
+
+  it('активная задача: статус-строка стадий, инпут заблокирован', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = normalizeUrl(input)
+        if (url === '/api/dialogues') {
+          return jsonResponse({
+            active_id: 'd1',
+            dialogues: [{ id: 'd1', title: 'Д', created: '', message_count: 0, task: TASK_RUNNING }],
+          })
+        }
+        return jsonResponse(API_FIXTURES[url] ?? { ok: true })
+      }),
+    )
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    // статус-строка: активная стадия «Исполнение»
+    await screen.findByText('Исполнение')
+    const ta = document.querySelector('.input-capsule') as HTMLTextAreaElement
+    expect(ta.disabled).toBe(true)
+    expect(ta.placeholder).toMatch(/Задача выполняется/)
+  })
+})
