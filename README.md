@@ -326,13 +326,13 @@ python -m uvicorn studio.backend.main:app --port 8000   # из корня реп
 
 ```bash
 cd studio/backend && python -m pytest -q     # 113 тестов (офлайн)
-cd studio/frontend && npm test               # 72 теста (Vitest)
+cd studio/frontend && npm test               # 75 тестов (Vitest)
 python scripts/e2e_studio.py                 # E2E smoke (prod + реальный GPustack)
 ```
 
 E2E: собирает `dist`, поднимает prod-сервер на порту 8100, гоняет UI + API
-(диалог, rename, WM/LT, чат SSE, авто-заголовок + model, токены, журнал) и
-всегда убивает сервер. Чат — SKIP, если GPustack недоступен.
+(диалог, rename, WM/LT, тумблеры слоёв памяти, чат SSE, авто-заголовок + model,
+токены, журнал) и всегда убивает сервер. Чат — SKIP, если GPustack недоступен.
 Выход 0 для PASS/SKIP, 1 для FAIL.
 
 ### Рабочие модели
@@ -357,7 +357,7 @@ GPustack отдаёт в `/models` все модели без статуса д�
 
 ### Статус
 
-Бэкенд — 113 тестов PASS; фронтенд — 72 теста PASS; E2E smoke — 13/13 PASS
+Бэкенд — 113 тестов PASS; фронтенд — 75 тестов PASS; E2E smoke — 13/13 PASS
 (3 модели: qwen3.8-27b, deepseek-v4-flash, glm-5.3-flash).
 Ветка `day11-studio` (отдельный стек, не наследует дни 1–10).
 

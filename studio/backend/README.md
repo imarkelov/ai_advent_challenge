@@ -45,7 +45,8 @@ python -m pytest -q
 | POST | `/api/dialogues/{id}/rename` | Переименовать диалог (`{title}`; 400 пустой, 404 не найден) |
 | POST | `/api/dialogues/{id}/activate` | Сделать диалог активным |
 | POST | `/api/memory/st/clear` | Очистить сообщения активного диалога |
-| GET | `/api/memory` | Статистика слоёв памяти + `active_id` |
+| GET | `/api/memory` | Статистика слоёв памяти + `active_id` + `toggles` |
+| GET / POST | `/api/memory/toggles` | Тумблеры слоёв `{st,wm,lt: bool}` / `{layer, enabled}` (400 — неизвестный слой или не-bool) |
 | POST | `/api/memory/working` | Поставить заметку в WM активного диалога `{key,value}` |
 | DELETE | `/api/memory/working/{key}` | Удалить заметку WM |
 | POST | `/api/memory/working/clear` | Очистить WM активного диалога |
