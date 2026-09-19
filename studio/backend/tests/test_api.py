@@ -471,3 +471,118 @@ def test_profile_action_unknown_dialogue_404(client):
     r = client.post("/api/profile/action", json={
         "dialogue_id": "nope", "action": "decline"})
     assert r.status_code == 404
+
+
+# ---------- задача: FSM + stage-агенты (день 13) ----------
+
+def task_dialogue(client):
+    """Диалог с declined-профилем (день 12) и активной задачей."""
+    did = client.post("/api/dialogues").json()["dialogue"]["id"]
+    client.post("/api/profile/action",
+                json={"dialogue_id": did, "action": "decline"})
+    r = client.post("/api/task/start",
+                    json={"dialogue_id": did, "description": "Сделать кнопку"})
+    assert r.status_code == 200
+    return did
+
+
+def test_task_start_and_get(client):
+    r = client.post("/api/task/start",
+                    json={"dialogue_id": "nope", "description": "X"})
+    assert r.status_code == 404
+    r = client.post("/api/task/start",
+                    json={"dialogue_id": "x", "description": "  "})
+    assert r.status_code == 400
+    did = client.post("/api/dialogues").json()["dialogue"]["id"]
+    r = client.post("/api/task/start",
+                    json={"dialogue_id": did, "description": "Сделать кнопку"})
+    assert r.status_code == 200
+    assert r.json()["task"]["stage"] == "planning"
+    r = client.get("/api/task", params={"dialogue_id": did})
+    assert r.json()["task"]["description"] == "Сделать кнопку"
+    # task в выдаче диалогов
+    assert client.get("/api/dialogues").json()["dialogues"][0]["task"]["active"] is True
+    assert client.get(f"/api/dialogues/{did}").json()["dialogue"]["task"]["active"] is True
+
+
+def test_task_start_rejects_active(client):
+    did = task_dialogue(client)
+    r = client.post("/api/task/start",
+                    json={"dialogue_id": did, "description": "Ещё"})
+    assert r.status_code == 400
+
+
+def test_task_run_sse_cycle(client):
+    did = task_dialogue(client)
+    with client.stream("POST", "/api/task/run",
+                       json={"dialogue_id": did}) as resp:
+        assert resp.status_code == 200
+        lines = resp.iter_lines()
+        events = parse_sse(list(lines))
+    kinds = [(e["type"], e.get("stage")) for e in events]
+    assert ("stage", "planning") in kinds
+    assert ("stage", "execution") in kinds
+    assert ("stage", "validation") in kinds
+    assert events[-1]["type"] == "task_done"
+    t = client.get("/api/task", params={"dialogue_id": did}).json()["task"]
+    assert t["stage"] == "done"
+    # stage-сообщения с меткой в истории диалога
+    msgs = client.get(f"/api/dialogues/{did}").json()["dialogue"]["messages"]
+    assert [m["task_stage"] for m in msgs if m.get("task_stage")] == \
+        ["planning", "execution", "validation"]
+
+
+def test_task_run_requires_active(client):
+    did = client.post("/api/dialogues").json()["dialogue"]["id"]
+    r = client.post("/api/task/run", json={"dialogue_id": did})
+    assert r.status_code == 400
+
+
+def test_task_pause_resume_instruction(client):
+    did = task_dialogue(client)
+    assert client.post("/api/task/resume",
+                       json={"dialogue_id": did}).status_code == 400
+    # instruction вне паузы — 400
+    assert client.post("/api/task/instruction",
+                       json={"dialogue_id": did, "text": "x"}).status_code == 400
+    assert client.post("/api/task/pause",
+                       json={"dialogue_id": did}).status_code == 200
+    r = client.post("/api/task/instruction",
+                    json={"dialogue_id": did, "text": "Используй Kotlin"})
+    assert r.status_code == 200
+    assert r.json()["task"]["instruction"] == "Используй Kotlin"
+    assert client.post("/api/task/resume",
+                       json={"dialogue_id": did}).status_code == 200
+    # run на паузе снята: пайплайн доходит до done
+    with client.stream("POST", "/api/task/run",
+                       json={"dialogue_id": did}) as resp:
+        events = parse_sse(list(resp.iter_lines()))
+    assert events[-1]["type"] == "task_done"
+    # instruction попала в planning-промпт (видна в body-запросах)
+    # и очищена
+    assert client.get("/api/task", params={"dialogue_id": did}).json()["task"]["instruction"] == ""
+
+
+def test_task_reset(client):
+    did = task_dialogue(client)
+    assert client.post("/api/task/reset",
+                       json={"dialogue_id": did}).status_code == 200
+    t = client.get("/api/task", params={"dialogue_id": did}).json()["task"]
+    assert t["active"] is False
+    # после reset — новая задача
+    r = client.post("/api/task/start",
+                    json={"dialogue_id": did, "description": "Новая"})
+    assert r.status_code == 200
+    assert r.json()["task"]["description"] == "Новая"
+
+
+def test_chat_blocked_by_active_task(client):
+    did = task_dialogue(client)
+    r = client.post("/api/chat", json={"dialogue_id": did, "message": "привет"})
+    assert r.status_code == 200  # SSE; внутри — error-событие
+    text = r.text
+    assert "Задача выполняется" in text
+    # на паузе чат работает
+    client.post("/api/task/pause", json={"dialogue_id": did})
+    r2 = client.post("/api/chat", json={"dialogue_id": did, "message": "привет"})
+    assert '"type": "done"' in r2.text

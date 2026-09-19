@@ -94,6 +94,107 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
             raise HTTPException(404, str(e))
         return {"profile": p}
 
+    # ---------- задача: FSM + stage-агенты (день 13) ----------
+
+    @app.post("/api/task/start")
+    def task_start(body: dict):
+        """Создать задачу: {dialogue_id, description}. 400 — пустое описание
+        или уже есть активная задача; 404 — диалог."""
+        dialogue_id = body.get("dialogue_id")
+        description = body.get("description")
+        if not isinstance(dialogue_id, str) or not dialogue_id:
+            raise HTTPException(400, "Не передан dialogue_id")
+        if not isinstance(description, str) or not description.strip():
+            raise HTTPException(400, "Описание задачи не может быть пустым")
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        try:
+            t = agent.store.task_new(dialogue_id, description.strip())
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        return {"task": t}
+
+    @app.post("/api/task/run")
+    def task_run(body: dict):
+        """SSE-пайплайн задачи: события stage/stage_done/task_paused/
+        task_done/error."""
+        dialogue_id = body.get("dialogue_id")
+        if not isinstance(dialogue_id, str) or not dialogue_id:
+            raise HTTPException(400, "Не передан dialogue_id")
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        if not agent.store.task_get(dialogue_id)["active"]:
+            raise HTTPException(400, "Задача не активна")
+
+        def gen():
+            for event in agent.task_run(dialogue_id):
+                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+        return StreamingResponse(gen(), media_type="text/event-stream")
+
+    @app.post("/api/task/pause")
+    def task_pause(body: dict):
+        """Поставить паузу (вступает на границе стадии)."""
+        dialogue_id = body.get("dialogue_id")
+        if not isinstance(dialogue_id, str) or not dialogue_id:
+            raise HTTPException(400, "Не передан dialogue_id")
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        try:
+            t = agent.store.task_pause(dialogue_id)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        return {"task": t}
+
+    @app.post("/api/task/resume")
+    def task_resume(body: dict):
+        """Снять паузу (и ошибку); пайплайн запускается через /api/task/run."""
+        dialogue_id = body.get("dialogue_id")
+        if not isinstance(dialogue_id, str) or not dialogue_id:
+            raise HTTPException(400, "Не передан dialogue_id")
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        try:
+            t = agent.store.task_resume(dialogue_id)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        return {"task": t}
+
+    @app.post("/api/task/instruction")
+    def task_instruction(body: dict):
+        """Инструкция пользователя — только на паузе."""
+        dialogue_id = body.get("dialogue_id")
+        text = body.get("text")
+        if not isinstance(dialogue_id, str) or not dialogue_id:
+            raise HTTPException(400, "Не передан dialogue_id")
+        if not isinstance(text, str) or not text.strip():
+            raise HTTPException(400, "Инструкция не может быть пустой")
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        try:
+            t = agent.store.task_set_instruction(dialogue_id, text.strip())
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        return {"task": t}
+
+    @app.post("/api/task/reset")
+    def task_reset(body: dict):
+        """Сбросить состояние задачи (готовность к новой задаче)."""
+        dialogue_id = body.get("dialogue_id")
+        if not isinstance(dialogue_id, str) or not dialogue_id:
+            raise HTTPException(400, "Не передан dialogue_id")
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        t = agent.store.task_reset(dialogue_id)
+        return {"task": t}
+
+    @app.get("/api/task")
+    def task_get(dialogue_id: str):
+        """Состояние задачи диалога (нет задачи — active=false)."""
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        return {"task": agent.store.task_get(dialogue_id)}
+
     # ---------- конфиг ----------
 
     @app.get("/api/config")
