@@ -286,6 +286,19 @@ class StudioAgent:
         self._models_cache_ts = now
         return available
 
+    def ensure_model_available(self) -> None:
+        """Self-heal: если модель из конфига недоступна (не прошла зонд), а
+        доступные есть — сбросить на первую доступную (persist). API недоступен
+        или доступных нет — конфиг не трогаем."""
+        try:
+            available = self.list_models()
+        except httpx.HTTPError:
+            return
+        if not available:
+            return
+        if self.get_config()["model"] not in {m["id"] for m in available}:
+            self.set_config({"model": available[0]["id"]})
+
     def _probe_model(self, model_id: str) -> bool:
         """Минимальный зонд доступности модели: 200 — доступна для ключа."""
         try:

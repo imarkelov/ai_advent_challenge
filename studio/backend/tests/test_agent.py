@@ -309,6 +309,44 @@ def test_list_models_probe_cached(data_dir):
     assert probes["n"] == 1
 
 
+def test_ensure_model_available_resets_unavailable(data_dir):
+    """Модель из конфига недоступна (403) — сброс на первую доступную, persist."""
+    def handler(request):
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [{"id": "qwen3.8-27b"}, {"id": "b"}]})
+        if json.loads(request.content)["model"] == "b":
+            return httpx.Response(403, json={})
+        return httpx.Response(200, json={})
+
+    agent = make_agent(data_dir, handler)
+    agent.set_config({"model": "whisper-large-v3-turbo"})
+    agent.ensure_model_available()
+    assert agent.get_config()["model"] == "qwen3.8-27b"
+
+
+def test_ensure_model_available_keeps_available(data_dir):
+    def handler(request):
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [{"id": "qwen3.8-27b"}, {"id": "b"}]})
+        return httpx.Response(200, json={})
+
+    agent = make_agent(data_dir, handler)
+    agent.set_config({"model": "qwen3.8-27b"})
+    agent.ensure_model_available()
+    assert agent.get_config()["model"] == "qwen3.8-27b"
+
+
+def test_ensure_model_available_api_down_no_change(data_dir):
+    """API недоступен — конфиг не трогаем (неизвестно, что доступно)."""
+    def handler(request):
+        raise httpx.ConnectError("нет сети", request=request)
+
+    agent = make_agent(data_dir, handler)
+    agent.set_config({"model": "ghost-model"})
+    agent.ensure_model_available()
+    assert agent.get_config()["model"] == "ghost-model"
+
+
 def test_list_models_unavailable_raises(data_dir):
     def handler(request):
         raise httpx.ConnectError("нет сети", request=request)

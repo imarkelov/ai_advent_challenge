@@ -76,8 +76,10 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
 
     @app.get("/api/models")
     def models():
-        """Список моделей API с контекстными лимитами; 502 если API недоступно."""
+        """Доступные модели API (зонд) с лимитами; self-heal недоступной модели
+        из конфига; 502 если API недоступно."""
         try:
+            agent.ensure_model_available()
             return {"models": agent.list_models()}
         except Exception:
             raise HTTPException(502, "Не удалось получить список моделей с API")

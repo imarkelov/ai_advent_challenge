@@ -120,6 +120,14 @@ def test_models(client):
     ]}
 
 
+def test_models_self_heals_config(client):
+    """GET /api/models сбрасывает недоступную модель из конфига на доступную."""
+    assert client.post("/api/config", json={"model": "ghost-model"}).status_code == 200
+    r = client.get("/api/models")
+    assert r.status_code == 200
+    assert client.get("/api/config").json()["model"] == "qwen3.8-27b"
+
+
 def test_models_unavailable_502(tmp_path):
     def handler(request):
         raise httpx.ConnectError("нет сети", request=request)

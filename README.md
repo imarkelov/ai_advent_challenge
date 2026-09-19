@@ -252,7 +252,7 @@ scripts/e2e_studio.py   # E2E smoke (prod-сервер + реальный GPusta
 | --- | --- | --- |
 | POST | `/api/chat` | Чат: SSE-стрим `data: {delta\|done\|error}` |
 | GET / POST | `/api/config` | Конфиг LLM (модель, температура, max_tokens, system_prompt) |
-| GET | `/api/models` | **Доступные** модели (зонд max_tokens=1, кэш 10 мин) с контекстными лимитами (502 при недоступности) |
+| GET | `/api/models` | **Доступные** модели (зонд max_tokens=1, кэш 10 мин) с контекстными лимитами; self-heal: недоступная модель из конфига сбрасывается на первую доступную (502 при недоступности) |
 | GET / POST | `/api/dialogues` | Список диалогов / создать (201, становится активным) |
 | GET / DELETE | `/api/dialogues/{id}` | Диалог с сообщениями / удалить |
 | POST | `/api/dialogues/{id}/activate` | Сделать диалог активным |
