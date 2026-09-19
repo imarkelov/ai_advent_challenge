@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import type { UserProfile } from '../src/api'
+import type { TaskState, UserProfile } from '../src/api'
 import {
   activeProfileOf,
+  activeTaskOf,
   appendDelta,
   finishAssistant,
   initialState,
   reducer,
+  tasksFrom,
   type DialogueMeta,
   type StudioState,
 } from '../src/state'
@@ -227,5 +229,33 @@ describe('reducer — профиль пользователя (день 12)', ()
     const refreshed: DialogueMeta = { ...d1, profile: profileDeclined }
     const s2 = reducer(s1, { type: 'dialogues-refresh', dialogues: [refreshed, d2] })
     expect(activeProfileOf(s2)).toEqual(profileDeclined)
+  })
+})
+
+// ── задача: tasksFrom / activeTaskOf (день 13) ──
+
+const taskA: TaskState = {
+  active: true, stage: 'planning', paused: false,
+  description: 'Сделать кнопку', instruction: '', stages: {},
+  retries: 0, error: null, updated: null,
+}
+
+describe('tasksFrom', () => {
+  it('извлекает task из диалогов, пропускает записи без поля', () => {
+    const out = tasksFrom([
+      { id: 'a', title: '', created: '', message_count: 0, task: taskA },
+      { id: 'b', title: '', created: '', message_count: 0 },
+    ])
+    expect(out.a).toEqual(taskA)
+    expect(out.b).toBeUndefined()
+  })
+})
+
+describe('activeTaskOf', () => {
+  it('возвращает task активного диалога или null', () => {
+    const st = { activeId: 'a', tasks: { a: taskA } }
+    expect(activeTaskOf(st)).toEqual(taskA)
+    expect(activeTaskOf({ activeId: 'b', tasks: { a: taskA } })).toBeNull()
+    expect(activeTaskOf({ activeId: null, tasks: {} })).toBeNull()
   })
 })

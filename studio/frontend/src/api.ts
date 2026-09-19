@@ -78,6 +78,111 @@ export function apiPostProfileAction(
   return apiPost('/profile/action', { dialogue_id, action })
 }
 
+// ── Состояние задачи (день 13): FSM per-диалог ─────────────────────────────
+// POST /api/task/start {dialogue_id, description} → {task}
+// POST /api/task/run {dialogue_id} → SSE: stage/stage_done/task_paused/
+//   task_done/error
+// POST /api/task/pause|resume|reset {dialogue_id} → {task}
+// POST /api/task/instruction {dialogue_id, text} → {task} (только на паузе)
+// GET  /api/task?dialogue_id= → {task}
+
+export type TaskStage = 'planning' | 'execution' | 'validation' | 'done'
+
+export interface TaskStageEntry {
+  output: string
+  ts: string
+  verdict: 'pass' | 'fail' | null
+  attempts?: number
+}
+
+export interface TaskState {
+  active: boolean
+  stage: TaskStage | null
+  paused: boolean
+  description: string
+  instruction: string
+  stages: Record<string, TaskStageEntry>
+  retries: number
+  error: string | null
+  updated: string | null
+}
+
+export type TaskEvent =
+  | { type: 'stage'; stage: TaskStage; agent: string }
+  | { type: 'stage_done'; stage: TaskStage; output: string; verdict?: 'pass' | 'fail'; retry?: boolean }
+  | { type: 'task_paused'; stage: TaskStage }
+  | { type: 'task_done'; answer: string }
+  | { type: 'error'; message: string }
+
+export function apiPostTaskStart(
+  dialogue_id: string,
+  description: string,
+): Promise<{ task: TaskState }> {
+  return apiPost('/task/start', { dialogue_id, description })
+}
+
+export function apiPostTaskPause(dialogue_id: string): Promise<{ task: TaskState }> {
+  return apiPost('/task/pause', { dialogue_id })
+}
+
+export function apiPostTaskResume(dialogue_id: string): Promise<{ task: TaskState }> {
+  return apiPost('/task/resume', { dialogue_id })
+}
+
+export function apiPostTaskInstruction(
+  dialogue_id: string,
+  text: string,
+): Promise<{ task: TaskState }> {
+  return apiPost('/task/instruction', { dialogue_id, text })
+}
+
+export function apiPostTaskReset(dialogue_id: string): Promise<{ task: TaskState }> {
+  return apiPost('/task/reset', { dialogue_id })
+}
+
+export function apiGetTask(dialogue_id: string): Promise<{ task: TaskState }> {
+  return apiGet(`/task?dialogue_id=${encodeURIComponent(dialogue_id)}`)
+}
+
+// SSE POST /api/task/run — тот же паттерн, что chatStream (fetch + ReadableStream)
+export async function taskStream(
+  dialogueId: string,
+  onEvent: (e: TaskEvent) => void,
+): Promise<void> {
+  const res = await fetch(`${BASE}/task/run`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+    body: JSON.stringify({ dialogue_id: dialogueId }),
+  })
+  if (!res.ok) await fail(res)
+  if (!res.body) throw new ApiError(0, 'Пустой SSE-поток (нет тела ответа)')
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buf = ''
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buf += decoder.decode(value, { stream: true })
+    let sep: number
+    while ((sep = buf.indexOf('\n\n')) !== -1) {
+      const frame = buf.slice(0, sep)
+      buf = buf.slice(sep + 2)
+      for (const line of frame.split('\n')) {
+        const l = line.trim()
+        if (!l.startsWith('data:')) continue
+        const raw = l.slice(5).trim()
+        if (!raw) continue
+        try {
+          onEvent(JSON.parse(raw) as TaskEvent)
+        } catch {
+          // битый кадр — пропускаем
+        }
+      }
+    }
+  }
+}
+
 // ── SSE-контракт дня 11 ─────────────────────────────────────────────────────
 // POST /api/chat {dialogue_id, message} → поток кадров `data: {json}\n\n`:
 //   {"type":"delta","text"} — кусок ответа
