@@ -13,11 +13,16 @@
   6. POST /api/dialogues → 201 + active_id.
   7. WM: POST /api/memory/working → ok; GET /api/memory → working.entries == 1.
    8. LT: POST /api/memory/longterm → ok; GET /api/memory → long_term.entries == 1.
-   8b. Тумблеры слоёв: POST /api/memory/toggles wm off → /api/memory видит
-       wm=false (ст/lt не тронуты) → restore on.
-   9. Чат (если GPustack достижим): POST /api/chat → SSE: >=1 delta + done.
-  10. Авто-заголовок: чат в НОВОМ диалоге → title меняется с «Новый диалог»;
-      assistant-сообщение хранится с model.
+    8b. Тумблеры слоёв: POST /api/memory/toggles wm off → /api/memory видит
+        wm=false (ст/lt не тронуты) → restore on.
+    8c. Профиль (день 12, свой диалог): pending по умолчанию → POST /api/profile
+        (active) → GET /api/rules (profile_block + active) → decline.
+        Эндпоинты детерминированы — без зависимости от GPustack.
+    9. Чат (если GPustack достижим): POST /api/chat → SSE: >=1 delta + done.
+       (день 12: чат-диалоги сначала decline-профильт — pending-диалог не
+       уходит в LLM; день-11 поведение проверяется на не-pending диалоге)
+    10. Авто-заголовок: чат в НОВОМ диалоге (после decline профиля) →
+       title меняется с «Новый диалог»; assistant-сообщение хранится с model.
   11. GET /api/tokens → {last, session, context_limit}.
   11. GET /api/requests → список; после успешного чата запись с model.
   12. finally: ВСЕГДА убить свой uvicorn, убедиться, что порт 8100 закрыт.
@@ -226,6 +231,7 @@ def main() -> int:
     proc = start_server()
     dlg_id: str | None = None
     dlg2_id: str | None = None
+    prof_dlg_id: str | None = None
     orig_model: str | None = None
     try:
         if proc is None:
@@ -340,6 +346,59 @@ def main() -> int:
                    f"off={code} mem={code2} on={code3} toggles={tog}")
             return 1
 
+        # 7c. профиль (день 12): pending → set → block в rules → decline.
+        #     Детерминированные эндпоинты — без GPustack. Свой свежий диалог
+        #     (не трогает диалоги других шагов); удаляется в _cleanup.
+        code, body, _ = http("POST", "/api/dialogues")
+        prof_dlg = json.loads(body).get("dialogue", {})
+        prof_dlg_id = prof_dlg.get("id")
+        if code == 201 and prof_dlg_id:
+            code, body, _ = http("GET", f"/api/dialogues/{prof_dlg_id}")
+            prof = json.loads(body).get("dialogue", {}).get("profile", {})
+            if code == 200 and prof.get("status") == "pending":
+                record("API: профиль pending по умолчанию", "PASS")
+            else:
+                record("API: профиль pending по умолчанию", "FAIL",
+                       f"code={code} status={prof.get('status')!r}")
+                return 1
+
+            code, body, _ = http("POST", "/api/profile",
+                                 {"dialogue_id": prof_dlg_id, "name": "Иван",
+                                  "role": "backend", "tone": "кратко",
+                                  "taboos": ""})
+            prof = json.loads(body).get("profile", {})
+            if (code == 200 and prof.get("status") == "active"
+                    and prof.get("name") == "Иван"):
+                record("API: профиль set (Иван, active)", "PASS")
+            else:
+                record("API: профиль set (Иван, active)", "FAIL",
+                       f"code={code} profile={prof}")
+                return 1
+
+            code, body, _ = http("GET", f"/api/rules?dialogue_id={prof_dlg_id}")
+            rules = json.loads(body)
+            if (code == 200 and "Иван" in rules.get("profile_block", "")
+                    and rules.get("profile_status") == "active"):
+                record("API: профиль в rules (block + active)", "PASS")
+            else:
+                record("API: профиль в rules (block + active)", "FAIL",
+                       f"code={code} block={rules.get('profile_block')!r} "
+                       f"status={rules.get('profile_status')!r}")
+                return 1
+
+            code, body, _ = http("POST", "/api/profile/action",
+                                 {"dialogue_id": prof_dlg_id, "action": "decline"})
+            prof = json.loads(body).get("profile", {})
+            if code == 200 and prof.get("status") == "declined":
+                record("API: профиль decline (declined)", "PASS")
+            else:
+                record("API: профиль decline (declined)", "FAIL",
+                       f"code={code} status={prof.get('status')!r}")
+                return 1
+        else:
+            record("API: профиль dialogue", "FAIL", f"code={code}")
+            return 1
+
         # 8. чат (SSE) — SKIP, если GPustack недоступен
         skip_reason = probe_gpustack()
         if skip_reason:
@@ -355,6 +414,11 @@ def main() -> int:
             code0, body0, _ = http("GET", "/api/config")
             orig_model = json.loads(body0).get("model")
             http("POST", "/api/config", {"model": avail[0]["id"]}, timeout=30)
+            # День 12: новый диалог = pending-профиль → первый запрос не
+            # уходит в LLM (служебный ход приглашения). Отказ от профиля,
+            # чтобы проверить по-прежнему день-11 поведение (LLM-стрим).
+            http("POST", "/api/profile/action",
+                 {"dialogue_id": dlg["id"], "action": "decline"})
             code, raw, _ = http("POST", "/api/chat",
                                 {"dialogue_id": dlg["id"], "message": "Скажи: OK"},
                                 timeout=CHAT_TIMEOUT)
@@ -376,6 +440,9 @@ def main() -> int:
             code, body, _ = http("POST", "/api/dialogues")
             dlg2 = json.loads(body).get("dialogue", {})
             dlg2_id = dlg2.get("id")
+            # Тот же pending-гейт дня 12 — сначала отказ от профиля.
+            http("POST", "/api/profile/action",
+                 {"dialogue_id": dlg2_id, "action": "decline"})
             code, raw, _ = http("POST", "/api/chat",
                                 {"dialogue_id": dlg2_id,
                                  "message": "Скажи: ОК"},
@@ -427,7 +494,7 @@ def main() -> int:
             f"{len(skips)} SKIP, {len(fails)} FAIL")
         return 1 if fails else 0
     finally:
-        _cleanup([dlg_id, dlg2_id], orig_model)
+        _cleanup([dlg_id, dlg2_id, prof_dlg_id], orig_model)
         stop_server(proc)
 
 
