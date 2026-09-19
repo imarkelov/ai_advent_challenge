@@ -25,9 +25,14 @@
         title меняется с «Новый диалог»; assistant-сообщение хранится с model.
     10c. Персонализация (день 12, live): два диалога с разными active-
          профилями, один вопрос → разные ответы (best-effort) + профиль-
-         блоки в телах запросов журнала; запрос с табу-словом → system-
-         напоминание гарда (D8) в теле LLM-запроса.
-  11. GET /api/tokens → {last, session, context_limit}.
+          блоки в телах запросов журнала; запрос с табу-словом → system-
+          напоминание гарда (D8) в теле LLM-запроса.
+     8d. Задача (день 13): FSM-пайплайн — start → run (SSE в потоке +
+         polling статуса) → pause на границе стадии + гард чата →
+         instruction → resume → повторный run до task_done → start на
+         готовой задаче → 400 → stage-сообщения в диалоге → reset
+         (неактивная задача). SKIP, если GPustack недоступен.
+   11. GET /api/tokens → {last, session, context_limit}.
   11. GET /api/requests → список; после успешного чата запись с model.
   12. finally: ВСЕГДА убить свой uvicorn, убедиться, что порт 8100 закрыт.
 
@@ -40,6 +45,7 @@ import re
 import socket
 import subprocess
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -171,6 +177,12 @@ def _try_dialogues():
 def _cleanup(dialogue_ids: list[str | None], orig_model: str | None) -> None:
     """Убрать артефакты самого e2e (не трогая данные пользователя)."""
     try:
+        # День 13: сброс задач ДО удаления диалогов (reset 404 на
+        # несуществующем диалоге).
+        for dialogue_id in dialogue_ids:
+            if dialogue_id:
+                http("POST", "/api/task/reset",
+                     {"dialogue_id": dialogue_id}, timeout=10)
         for dialogue_id in dialogue_ids:
             if dialogue_id:
                 http("DELETE", f"/api/dialogues/{dialogue_id}", timeout=10)
@@ -551,6 +563,86 @@ def main() -> int:
                        f"dones={len(dones3)}/{len(dones4)}/{len(donest)} "
                        f"block3={ok3} block4={ok4} guard={okt} "
                        f"a3={a3[:40]!r} a4={a4[:40]!r}")
+                return 1
+
+        # 8d. Задача (день 13): FSM-пайплайн — SKIP, если GPustack
+        #     недоступен (задача ходит в LLM, как и чат).
+        if skip_reason:
+            record("TASK: пайплайн (FSM)", "SKIP", skip_reason)
+        else:
+            did = dlg["id"]
+            # 8d.1 старт (stage=planning)
+            code, raw, _ = http("POST", "/api/task/start",
+                                {"dialogue_id": did,
+                                 "description": "Сделать простую кнопку"})
+            task_ok = (code == 200
+                       and json.loads(raw)["task"]["stage"] == "planning")
+            # 8d.2 run в потоке: SSE блокирует до конца; параллельно —
+            #     polling статуса задачи
+            box = {}
+            def run_task():
+                c, r, _ = http("POST", "/api/task/run",
+                               {"dialogue_id": did}, timeout=300)
+                box["code"], box["raw"] = c, r
+            th = threading.Thread(target=run_task, daemon=True)
+            th.start()
+            boundary = None
+            for _ in range(60):
+                time.sleep(0.5)
+                c, r, _ = http("GET", f"/api/task?dialogue_id={did}")
+                st = json.loads(r)["task"]
+                if st["stage"] != "planning":
+                    boundary = st["stage"]
+                    break
+                if not th.is_alive():
+                    break
+            # 8d.3 гард чата: активная задача — чат отвечает error
+            #     (best-effort)
+            chat_guard = "n/a"
+            if boundary and th.is_alive():
+                c, r, _ = http("POST", "/api/chat",
+                               {"dialogue_id": did, "message": "привет"},
+                               timeout=60)
+                chat_guard = ("ок" if "Задача выполняется".encode() in r
+                              else "не сработал")
+            # 8d.4 стоп на границе стадии + instruction (только на паузе)
+            if boundary:
+                http("POST", "/api/task/pause", {"dialogue_id": did})
+            th.join(timeout=330)
+            paused = b"task_paused" in box.get("raw", b"")
+            i_code, _, _ = http("POST", "/api/task/instruction",
+                                {"dialogue_id": did,
+                                 "text": "Добавь обработку нажатия"})
+            # 8d.5 resume + повторный run до task_done
+            http("POST", "/api/task/resume", {"dialogue_id": did})
+            c2, r2, _ = http("POST", "/api/task/run", {"dialogue_id": did},
+                             timeout=300)
+            done = b"task_done" in r2
+            c3, r3, _ = http("GET", f"/api/task?dialogue_id={did}")
+            t3 = json.loads(r3)["task"]
+            # 8d.6 гард: start на готовой задаче → 400
+            c6, _, _ = http("POST", "/api/task/start",
+                            {"dialogue_id": did, "description": "ещё раз"})
+            start_guard = c6 == 400
+            # 8d.7 stage-сообщения в истории диалога
+            c4, r4, _ = http("GET", f"/api/dialogues/{did}")
+            msgs = json.loads(r4)["dialogue"]["messages"]
+            stage_msgs = [m for m in msgs if m.get("task_stage")]
+            # 8d.8 сброс → неактивная задача (active=false, stage=null)
+            c5, r5, _ = http("POST", "/api/task/reset", {"dialogue_id": did})
+            t5 = json.loads(r5)["task"] if c5 == 200 else {}
+            reset_ok = (c5 == 200 and t5.get("active") is False
+                        and t5.get("stage") is None)
+            ok = (task_ok and paused and i_code == 200 and done
+                  and t3["stage"] == "done" and start_guard
+                  and len(stage_msgs) >= 3 and reset_ok)
+            record("TASK: пайплайн (FSM)",
+                   "PASS" if ok else "FAIL",
+                   f"start={task_ok} paused={paused} instruction={i_code} "
+                   f"done={done} stage={t3['stage']} "
+                   f"start_guard={start_guard} stage_msgs={len(stage_msgs)} "
+                   f"reset={reset_ok} chat_guard={chat_guard}")
+            if not ok:
                 return 1
 
         # 9. токены
