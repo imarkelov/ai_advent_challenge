@@ -1,0 +1,242 @@
+"""FastAPI-приложение «Студия» (день 11).
+
+Все бизнес-логика — в StudioAgent/MemoryStore; роуты здесь только
+валидация (400/404 с RU detail) и формат ответа.
+"""
+import json
+from pathlib import Path
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+
+import httpx
+
+from agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, StudioAgent
+
+# Секреты/настройки — из .env в корне репозитория.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+
+# Данные лежат в studio/data (создаётся при первой записи, в git не коммитится).
+DATA_DIR = str(Path(__file__).resolve().parents[1] / "data")
+
+
+def create_app(agent: StudioAgent | None = None) -> FastAPI:
+    """Создаёт FastAPI-приложение. agent inject-ится для тестов;
+    по умолчанию — StudioAgent(DATA_DIR) с настройками из окружения."""
+    agent = agent or StudioAgent(DATA_DIR)
+    app = FastAPI(title="Студия")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # ---------- чат (SSE) ----------
+
+    @app.post("/api/chat")
+    def chat(body: dict):
+        """Стриминг ответа LLM по SSE: data: {событие}\n\n."""
+        dialogue_id = body.get("dialogue_id")
+        message = body.get("message")
+        if not isinstance(dialogue_id, str) or not dialogue_id:
+            raise HTTPException(400, "Не передан dialogue_id")
+        if not isinstance(message, str) or not message.strip():
+            raise HTTPException(400, "Сообщение не может быть пустым")
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+
+        def gen():
+            for event in agent.ask_stream(dialogue_id, message):
+                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+        return StreamingResponse(gen(), media_type="text/event-stream")
+
+    # ---------- конфиг ----------
+
+    @app.get("/api/config")
+    def config_get():
+        """Актуальный конфиг LLM."""
+        return agent.get_config()
+
+    @app.post("/api/config")
+    def config_post(body: dict):
+        """Частичное обновление конфига; 200 — актуальный конфиг."""
+        try:
+            return agent.set_config(body)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+
+    # ---------- модели ----------
+
+    @app.get("/api/models")
+    def models():
+        """Список моделей API с контекстными лимитами; 502 если API недоступно."""
+        try:
+            return {"models": agent.list_models()}
+        except Exception:
+            raise HTTPException(502, "Не удалось получить список моделей с API")
+
+    # ---------- диалоги ----------
+
+    @app.get("/api/dialogues")
+    def dialogues_list():
+        """Список диалогов и id активного."""
+        return {"active_id": agent.store.active_id(),
+                "dialogues": agent.store.list_dialogues()}
+
+    @app.post("/api/dialogues", status_code=201)
+    def dialogues_new():
+        """Создать диалог (становится активным)."""
+        d = agent.store.new_dialogue()
+        return {"dialogue": d, "active_id": agent.store.active_id()}
+
+    @app.get("/api/dialogues/{dialogue_id}")
+    def dialogues_get(dialogue_id: str):
+        """Диалог с сообщениями."""
+        d = agent.store.get_dialogue(dialogue_id)
+        if d is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        return {"dialogue": d}
+
+    @app.delete("/api/dialogues/{dialogue_id}")
+    def dialogues_delete(dialogue_id: str):
+        """Удалить диалог и его рабочую память."""
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        agent.store.delete_dialogue(dialogue_id)
+        return {"ok": True}
+
+    @app.post("/api/dialogues/{dialogue_id}/activate")
+    def dialogues_activate(dialogue_id: str):
+        """Сделать диалог активным."""
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        agent.store.activate(dialogue_id)
+        return {"active_id": agent.store.active_id()}
+
+    # ---------- память: ST ----------
+
+    @app.post("/api/memory/st/clear")
+    def memory_st_clear():
+        """Очистить сообщения активного диалога."""
+        active = agent.store.active_id()
+        if active is None:
+            raise HTTPException(400, "Нет активного диалога")
+        agent.store.clear_st(active)
+        return {"ok": True}
+
+    @app.get("/api/memory")
+    def memory_get():
+        """Статистика слоёв памяти (по активному диалогу) + active_id."""
+        stats = agent.store.layer_stats()
+        stats["active_id"] = agent.store.active_id()
+        return stats
+
+    # ---------- память: WM ----------
+
+    @app.post("/api/memory/working")
+    def memory_working_set(body: dict):
+        """Поставить заметку в рабочую память активного диалога."""
+        active = agent.store.active_id()
+        if active is None:
+            raise HTTPException(400, "Нет активного диалога")
+        key = body.get("key")
+        value = body.get("value")
+        if not isinstance(key, str) or not key:
+            raise HTTPException(400, "Ключ не может быть пустым")
+        if not isinstance(value, str):
+            raise HTTPException(400, "Значение должно быть строкой")
+        agent.store.wm_set(active, key, value)
+        return {"ok": True}
+
+    @app.delete("/api/memory/working/{key}")
+    def memory_working_delete(key: str):
+        """Удалить заметку из рабочей памяти активного диалога."""
+        active = agent.store.active_id()
+        if active is None:
+            raise HTTPException(400, "Нет активного диалога")
+        if not agent.store.wm_remove(active, key):
+            raise HTTPException(404, f"Заметка «{key}» не найдена")
+        return {"ok": True}
+
+    @app.post("/api/memory/working/clear")
+    def memory_working_clear():
+        """Очистить рабочую память активного диалога."""
+        active = agent.store.active_id()
+        if active is None:
+            raise HTTPException(400, "Нет активного диалога")
+        agent.store.wm_clear(active)
+        return {"ok": True}
+
+    # ---------- память: LT ----------
+
+    @app.post("/api/memory/longterm")
+    def memory_longterm_set(body: dict):
+        """Поставить глобальную заметку."""
+        key = body.get("key")
+        value = body.get("value")
+        if not isinstance(key, str) or not key:
+            raise HTTPException(400, "Ключ не может быть пустым")
+        if not isinstance(value, str):
+            raise HTTPException(400, "Значение должно быть строкой")
+        agent.store.lt_set(key, value)
+        return {"ok": True}
+
+    @app.delete("/api/memory/longterm/{key}")
+    def memory_longterm_delete(key: str):
+        """Удалить глобальную заметку."""
+        if not agent.store.lt_remove(key):
+            raise HTTPException(404, f"Заметка «{key}» не найдена")
+        return {"ok": True}
+
+    @app.post("/api/memory/longterm/clear")
+    def memory_longterm_clear():
+        """Очистить все глобальные заметки."""
+        agent.store.lt_clear()
+        return {"ok": True}
+
+    # ---------- токены ----------
+
+    @app.get("/api/tokens")
+    def tokens():
+        """Последний usage, сессионные токены и лимит контекста модели."""
+        usage = agent.last_usage()
+        last = None
+        if usage:
+            reasoning = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens") or 0
+            last = {"prompt": usage.get("prompt_tokens", 0),
+                    "completion": usage.get("completion_tokens", 0),
+                    "reasoning": reasoning,
+                    "total": usage.get("total_tokens", 0)}
+        model = agent.get_config()["model"]
+        return {"last": last, "session": agent.session_tokens(),
+                "context_limit": CONTEXT_LIMITS.get(model, DEFAULT_CONTEXT_LIMIT)}
+
+    # ---------- журнал запросов ----------
+
+    @app.get("/api/requests")
+    def requests_list():
+        """Журнал LLM-запросов без тел."""
+        return {"requests": agent.requests_list()}
+
+    @app.get("/api/requests/{request_id}")
+    def requests_get(request_id: int):
+        """Полная запись журнала (с телом запроса)."""
+        e = agent.requests_get(request_id)
+        if e is None:
+            raise HTTPException(404, f"Запрос №{request_id} не найден")
+        return e
+
+    @app.delete("/api/requests")
+    def requests_clear():
+        """Очистить журнал запросов."""
+        agent.requests_clear()
+        return {"ok": True}
+
+    return app
+
+
+app = create_app()
