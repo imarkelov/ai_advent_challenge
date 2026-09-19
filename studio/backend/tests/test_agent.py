@@ -256,24 +256,57 @@ def test_requests_clear(data_dir):
 
 # ---------- список моделей ----------
 
-def test_list_models(data_dir):
+def test_list_models_filters_unavailable(data_dir):
+    """В списке только модели, прошедшие зонд: 403 «нет доступа у ключа» — мимо."""
     def handler(request):
-        assert str(request.url) == BASE + "/models"
-        assert request.headers.get("Authorization") == "Bearer test-key"
-        return httpx.Response(200, json={"data": [
-            {"id": "qwen3.8-27b"},
-            {"id": "deepseek-v4-flash"},
-            {"id": "модель-неизвестная"},
-        ]})
+        if request.url.path.endswith("/models"):
+            assert request.headers.get("Authorization") == "Bearer test-key"
+            return httpx.Response(200, json={"data": [
+                {"id": "qwen3.8-27b"},
+                {"id": "deepseek-v4-flash"},
+                {"id": "модель-неизвестная"},
+            ]})
+        body = json.loads(request.content)
+        if body["model"] == "deepseek-v4-flash":
+            return httpx.Response(403, json={"message": "Api key not allowed"})
+        return httpx.Response(200, json={"choices": []})
 
     agent = make_agent(data_dir, handler)
     models = agent.list_models()
     assert models == [
         {"id": "qwen3.8-27b", "context_limit": 32768},
-        {"id": "deepseek-v4-flash", "context_limit": 16384},
         {"id": "модель-неизвестная", "context_limit": 32768},
     ]
     assert CONTEXT_LIMITS["glm-5.3-flash"] == 16384
+
+
+def test_list_models_probe_error_excludes_model(data_dir):
+    """Сетевой сбой зонда модели — модель не в списке, остальные остаются."""
+    def handler(request):
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [{"id": "a"}, {"id": "b"}]})
+        if json.loads(request.content)["model"] == "b":
+            raise httpx.ConnectError("нет сети", request=request)
+        return httpx.Response(200, json={})
+
+    agent = make_agent(data_dir, handler)
+    assert [m["id"] for m in agent.list_models()] == ["a"]
+
+
+def test_list_models_probe_cached(data_dir):
+    """Повторный вызов в пределах TTL не повторяет зонды."""
+    probes = {"n": 0}
+
+    def handler(request):
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [{"id": "qwen3.8-27b"}]})
+        probes["n"] += 1
+        return httpx.Response(200, json={})
+
+    agent = make_agent(data_dir, handler)
+    agent.list_models()
+    agent.list_models()
+    assert probes["n"] == 1
 
 
 def test_list_models_unavailable_raises(data_dir):

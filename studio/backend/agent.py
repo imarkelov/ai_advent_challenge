@@ -7,6 +7,7 @@
 import json
 import os
 import threading
+import time
 from datetime import datetime
 
 import httpx
@@ -46,6 +47,10 @@ MEMORY_RULE = (
 
 JOURNAL_CAP = 100  # максимум записей в журнале (FIFO)
 
+# TTL кэша доступности моделей (сек). Зонд — минимальный запрос max_tokens=1;
+# GPustack отдаёт 403 «Api key not allowed», если ключу модель не доступна.
+MODEL_PROBE_TTL = 600
+
 
 def _now() -> str:
     """Текущее время в формате 'YYYY-MM-DD HH:MM:SS'."""
@@ -72,6 +77,8 @@ class StudioAgent:
         self._last_usage = None
         self._p_config = os.path.join(data_dir, "config.json")
         self._p_requests = os.path.join(data_dir, "requests.json")
+        self._models_cache = None      # кэш доступных моделей (list_models)
+        self._models_cache_ts = 0.0
 
     # ---------- конфиг ----------
 
@@ -253,11 +260,17 @@ class StudioAgent:
     # ---------- список моделей ----------
 
     def list_models(self) -> list:
-        """Список моделей API: [{id, context_limit}].
+        """Доступные для ключа модели API: [{id, context_limit}].
 
+        GPustack в /models отдаёт ВСЕ модели без статуса, поэтому доступность
+        определяется зондом (минимальный запрос max_tokens=1): 200 — модель в
+        списке, 403/ошибка — нет. Результат кэшируется на MODEL_PROBE_TTL.
         Неизвестной модели — DEFAULT_CONTEXT_LIMIT; при недоступном API
         бросает httpx.HTTPError (роут вернёт 502).
         """
+        now = time.time()
+        if self._models_cache is not None and now - self._models_cache_ts < MODEL_PROBE_TTL:
+            return self._models_cache
         resp = self._client.get(self.base_url + "/models",
                                 headers={"Authorization": "Bearer " + self.api_key})
         if resp.status_code != 200:
@@ -265,6 +278,24 @@ class StudioAgent:
                 f"Модель вернула ошибку HTTP {resp.status_code}",
                 request=resp.request, response=resp)
         data = resp.json().get("data") or []
-        return [{"id": m.get("id"),
-                 "context_limit": CONTEXT_LIMITS.get(m.get("id"), DEFAULT_CONTEXT_LIMIT)}
-                for m in data if isinstance(m, dict) and m.get("id")]
+        models = [{"id": m.get("id"),
+                   "context_limit": CONTEXT_LIMITS.get(m.get("id"), DEFAULT_CONTEXT_LIMIT)}
+                  for m in data if isinstance(m, dict) and m.get("id")]
+        available = [m for m in models if self._probe_model(m["id"])]
+        self._models_cache = available
+        self._models_cache_ts = now
+        return available
+
+    def _probe_model(self, model_id: str) -> bool:
+        """Минимальный зонд доступности модели: 200 — доступна для ключа."""
+        try:
+            resp = self._client.post(
+                self.base_url + "/chat/completions",
+                headers={"Authorization": "Bearer " + self.api_key},
+                json={"model": model_id, "max_tokens": 1,
+                      "messages": [{"role": "user", "content": "."}]},
+                timeout=15,
+            )
+            return resp.status_code == 200
+        except httpx.HTTPError:
+            return False

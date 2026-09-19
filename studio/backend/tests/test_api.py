@@ -21,6 +21,9 @@ def agent_env(tmp_path):
                 {"id": "qwen3.8-27b"},
                 {"id": "unknown-x"},
             ]})
+        # зонд доступности: у ключа нет доступа к unknown-x (403)
+        if json.loads(request.content).get("model") == "unknown-x":
+            return httpx.Response(403, json={"message": "no access"})
         body = sse_body([delta_chunk("Прив"), delta_chunk("ет"), usage_chunk(), "[DONE]"])
         return httpx.Response(200, content=body.encode("utf-8"))
 
@@ -109,11 +112,11 @@ def test_config_post_invalid_400(client):
 # ---------- /api/models ----------
 
 def test_models(client):
+    """unknown-x не в списке — зонд получил 403 (нет доступа у ключа)."""
     r = client.get("/api/models")
     assert r.status_code == 200
     assert r.json() == {"models": [
         {"id": "qwen3.8-27b", "context_limit": 32768},
-        {"id": "unknown-x", "context_limit": 32768},
     ]}
 
 

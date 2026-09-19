@@ -155,12 +155,14 @@ def _try_dialogues():
         return 0, b"", {}
 
 
-def _cleanup(dialogue_id: str | None) -> None:
+def _cleanup(dialogue_id: str | None, orig_model: str | None) -> None:
     """Убрать артефакты самого e2e (не трогая данные пользователя)."""
     try:
         if dialogue_id:
             http("DELETE", f"/api/dialogues/{dialogue_id}", timeout=10)
         http("DELETE", "/api/memory/longterm/e2e", timeout=10)
+        if orig_model:
+            http("POST", "/api/config", {"model": orig_model}, timeout=10)
     except Exception:
         pass
 
@@ -218,6 +220,7 @@ def main() -> int:
 
     proc = start_server()
     dlg_id: str | None = None
+    orig_model: str | None = None
     try:
         if proc is None:
             log("FAIL server did not come up on port 8100")
@@ -257,11 +260,13 @@ def main() -> int:
             record("API: config", "FAIL", f"code={code}")
             return 1
 
-        # 4. модели (502 допустим)
-        code, body, _ = http("GET", "/api/models", timeout=30)
+        # 4. модели (502 допустим). list_models фильтрует доступные (зонд
+        # max_tokens=1): в списке только то, чем ключ реально может работать.
+        code, body, _ = http("GET", "/api/models", timeout=60)
+        avail = []
         if code == 200:
-            models = json.loads(body).get("models", [])
-            record(f"API: models ({len(models)})", "PASS")
+            avail = json.loads(body).get("models", [])
+            record(f"API: models available ({len(avail)}: {', '.join(m['id'] for m in avail)})", "PASS")
         elif code == 502:
             record("API: models", "PASS", "502 — GPustack недоступен, допустимо")
         else:
@@ -306,7 +311,17 @@ def main() -> int:
         skip_reason = probe_gpustack()
         if skip_reason:
             record("API: chat SSE", "SKIP", skip_reason)
+        elif not avail:
+            record("API: chat SSE", "FAIL",
+                   "нет ни одной доступной модели (у ключа нет доступа)")
+            return 1
         else:
+            # Детерминизм: модель чата — первая доступная. Конфиг пользователя
+            # может содержать модель, доступ к которой у ключа отсутствует.
+            # Оригинал восстанавливается в _cleanup.
+            code0, body0, _ = http("GET", "/api/config")
+            orig_model = json.loads(body0).get("model")
+            http("POST", "/api/config", {"model": avail[0]["id"]}, timeout=30)
             code, raw, _ = http("POST", "/api/chat",
                                 {"dialogue_id": dlg["id"], "message": "Скажи: OK"},
                                 timeout=CHAT_TIMEOUT)
@@ -348,7 +363,7 @@ def main() -> int:
             f"{len(skips)} SKIP, {len(fails)} FAIL")
         return 1 if fails else 0
     finally:
-        _cleanup(dlg_id)
+        _cleanup(dlg_id, orig_model)
         stop_server(proc)
 
 
