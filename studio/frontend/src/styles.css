@@ -1188,3 +1188,50 @@ button {
   opacity: 0.5;
   pointer-events: none;
 }
+
+/* ── Вкладка «Профили» (день 12) ─────────────────────────────────────────── */
+
+/* Чип статуса профиля: pending — янтарный, active — зелёный, declined — приглушённый */
+.profile-chip {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--panel-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.profile-chip.pending {
+  color: var(--wm);
+  border-color: rgba(224, 160, 57, 0.45);
+  background: rgba(224, 160, 57, 0.1);
+}
+.profile-chip.active {
+  color: var(--ok);
+  border-color: rgba(61, 220, 132, 0.4);
+  background: rgba(61, 220, 132, 0.08);
+}
+.profile-chip.declined {
+  color: var(--muted);
+}
+
+/* Поле профиля: RU-подпись над input */
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.profile-field label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+/* Подсказка после «Провести интервью» */
+.profile-hint {
+  font-size: 13px;
+  color: var(--accent);
+}

@@ -1,14 +1,16 @@
-// Правая панель «Контекст»: вкладки Память / Токены / Запрос
+// Правая панель «Контекст»: вкладки Память / Токены / Запрос / Профили
 // (активная вкладка подчёркнута).
 import { useState } from 'react'
 import MemoryTab from './MemoryTab'
 import TokensTab from './TokensTab'
 import RequestsTab from './RequestsTab'
+import ProfileTab from './ProfileTab'
 
 const TABS = [
   { id: 'memory', label: 'Память' },
   { id: 'tokens', label: 'Токены' },
   { id: 'request', label: 'Запрос' },
+  { id: 'profile', label: 'Профили' },
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
@@ -36,6 +38,7 @@ export default function ContextPanel() {
         {tab === 'memory' && <MemoryTab />}
         {tab === 'tokens' && <TokensTab />}
         {tab === 'request' && <RequestsTab />}
+        {tab === 'profile' && <ProfileTab />}
       </div>
     </aside>
   )
