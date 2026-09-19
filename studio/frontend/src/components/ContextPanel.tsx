@@ -1,10 +1,12 @@
 // Правая панель «Контекст»: вкладки Память / Токены / Запрос / Профили
-// (активная вкладка подчёркнута).
-import { useState } from 'react'
+// (активная вкладка подчёркнута). День 12: активная вкладка хранится в
+// общем состоянии StudioProvider — бейдж профиля в шапке чата открывает
+// вкладку «Профили» извне панели.
 import MemoryTab from './MemoryTab'
 import TokensTab from './TokensTab'
 import RequestsTab from './RequestsTab'
 import ProfileTab from './ProfileTab'
+import { useStudio } from '../state'
 
 const TABS = [
   { id: 'memory', label: 'Память' },
@@ -16,7 +18,8 @@ const TABS = [
 type TabId = (typeof TABS)[number]['id']
 
 export default function ContextPanel() {
-  const [tab, setTab] = useState<TabId>('memory')
+  const { state, setContextTab } = useStudio()
+  const tab: TabId = state.contextTab
 
   return (
     <aside className="panel context">
@@ -28,7 +31,7 @@ export default function ContextPanel() {
             role="tab"
             aria-selected={tab === t.id}
             className={tab === t.id ? 'tab active' : 'tab'}
-            onClick={() => setTab(t.id)}
+            onClick={() => setContextTab(t.id)}
           >
             {t.label}
           </button>

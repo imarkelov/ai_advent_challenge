@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { StudioProvider } from '../src/state'
+import { StudioProvider, useStudio } from '../src/state'
+import type { UserProfile } from '../src/api'
 import ChatPanel from '../src/components/ChatPanel'
 import Sidebar from '../src/components/Sidebar'
 
@@ -219,5 +220,74 @@ describe('ChatPanel + Sidebar — перечитывание списка диа
     await waitFor(() => expect(screen.getAllByText('Авто-заголовок')).toHaveLength(2))
     await waitFor(() => expect(dialoguesGets).toBe(2))
     expect(screen.queryByText('Новый диалог')).toBeNull()
+  })
+})
+
+describe('ChatPanel — бейдж инициализации профиля в шапке (день 12)', () => {
+  // Проба: ловит вкладку контекстной панели из состояния провайдера
+  // (клик по бейджу должен установить её в «Профили»)
+  let capturedTab = 'memory'
+  function TabProbe() {
+    const { state } = useStudio()
+    capturedTab = state.contextTab
+    return null
+  }
+
+  // loadAll-контракты + активный диалог d1 с заданным профилем
+  function stubProfileFetch(profile: UserProfile) {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = normalizeUrl(input)
+        if (url === '/api/dialogues') {
+          return jsonResponse({
+            active_id: 'd1',
+            dialogues: [{ id: 'd1', title: 'Диалог', created: '2026-09-19', message_count: 0, profile }],
+          })
+        }
+        if (url === '/api/dialogues/d1') {
+          return jsonResponse({ dialogue: { messages: [] } })
+        }
+        return jsonResponse(API_FIXTURES[url] ?? { ok: true })
+      }),
+    )
+  }
+
+  it('pending — бейдж «Профиль не заполнен», клик → вкладка «Профили»', async () => {
+    stubProfileFetch({ status: 'pending', interview: false, name: '', role: '', tone: '', taboos: '' })
+    capturedTab = 'memory'
+    render(
+      <StudioProvider>
+        <TabProbe />
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const badge = await screen.findByRole('button', { name: 'Профиль не заполнен' })
+    expect(badge).toHaveAttribute('title', 'Открыть вкладку «Профили»')
+    expect(badge.className).toContain('pending')
+    fireEvent.click(badge)
+    await waitFor(() => expect(capturedTab).toBe('profile'))
+  })
+
+  it('declined — бейдж «Профиль отключён» (приглушённый)', async () => {
+    stubProfileFetch({ status: 'declined', interview: false, name: '', role: '', tone: '', taboos: '' })
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const badge = await screen.findByRole('button', { name: 'Профиль отключён' })
+    expect(badge.className).toContain('declined')
+  })
+
+  it('active — бейджа в шапке нет', async () => {
+    stubProfileFetch({ status: 'active', interview: false, name: 'Иван', role: '', tone: '', taboos: '' })
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('Диалог') // дождались загрузки активного диалога
+    expect(screen.queryByRole('button', { name: /профиль/i })).toBeNull()
   })
 })

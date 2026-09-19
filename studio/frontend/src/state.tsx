@@ -94,6 +94,10 @@ export interface ModelInfo {
   context_limit: number
 }
 
+// Активная вкладка правой панели «Контекст» (день 12: бейдж в шапке чата
+// открывает вкладку «Профили» извне панели)
+export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile'
+
 export interface StudioState {
   loaded: boolean
   config: Config | null
@@ -109,6 +113,8 @@ export interface StudioState {
   showRequests: boolean
   streaming: boolean
   lastRequest: RequestDetail | null
+  // Вкладка правой панели «Контекст» (день 12)
+  contextTab: ContextTab
 }
 
 // Ключ localStorage для тумблера «Показывать запросы»
@@ -137,6 +143,7 @@ export function initialState(): StudioState {
     showRequests: show,
     streaming: false,
     lastRequest: null,
+    contextTab: 'memory',
   }
 }
 
@@ -209,6 +216,7 @@ export type StudioAction =
   | { type: 'config'; config: Config }
   | { type: 'last-request'; detail: RequestDetail | null }
   | { type: 'show-requests'; on: boolean }
+  | { type: 'context-tab'; tab: ContextTab }
 
 // Чистый reducer: все переходы состояния без побочных эффектов
 export function reducer(state: StudioState, action: StudioAction): StudioState {
@@ -297,6 +305,8 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
       return { ...state, lastRequest: action.detail }
     case 'show-requests':
       return { ...state, showRequests: action.on }
+    case 'context-tab':
+      return { ...state, contextTab: action.tab }
   }
 }
 
@@ -313,6 +323,10 @@ export interface StudioApi {
   setModel: (id: string) => Promise<void>
   updateConfig: (partial: Partial<Config>) => Promise<void>
   setShowRequests: (on: boolean) => void
+  // Вкладка правой панели «Контекст» (день 12): читаем текущую, устанавливаем
+  // извне (бейдж в шапке чата открывает «Профили»)
+  contextTab: ContextTab
+  setContextTab: (tab: ContextTab) => void
   refreshMemory: () => Promise<void>
   setMemoryToggle: (layer: 'st' | 'wm' | 'lt', on: boolean) => Promise<void>
   reloadDialogue: () => Promise<void>
@@ -487,6 +501,12 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'show-requests', on })
   }, [])
 
+  // Переключить вкладку правой панели «Контекст» (день 12): клик по вкладке
+  // внутри панели и клик по бейджу профиля в шапке чата — один и тот же путь
+  const setContextTab = useCallback((tab: ContextTab) => {
+    dispatch({ type: 'context-tab', tab })
+  }, [])
+
   // Перечитать память (после изменений в MemoryTab)
   const refreshMemory = useCallback(async () => {
     dispatch({ type: 'memory', memory: await apiGet<MemoryState>('/memory') })
@@ -552,6 +572,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setModel,
     updateConfig,
     setShowRequests,
+    contextTab: state.contextTab,
+    setContextTab,
     refreshMemory,
     setMemoryToggle,
     reloadDialogue,

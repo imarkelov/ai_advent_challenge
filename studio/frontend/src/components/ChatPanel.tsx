@@ -1,12 +1,13 @@
-// Центральная панель: шапка (название диалога + дропдаун модели), лента
-// сообщений с авто-скроллом и дописыванием дельт при стриминге, инпут-капсула.
+// Центральная панель: шапка (название диалога + бейдж инициализации профиля
+// (день 12) + дропдаун модели), лента сообщений с авто-скроллом и
+// дописыванием дельт при стриминге, инпут-капсула.
 // Enter — отправить, Shift+Enter — перенос строки.
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useStudio, type Message } from '../state'
 import SaveMessageModal from './SaveMessageModal'
 
 export default function ChatPanel() {
-  const { state, sendMessage, setModel } = useStudio()
+  const { state, activeProfile, sendMessage, setModel, setContextTab } = useStudio()
   const [draft, setDraft] = useState('')
   const [saveMsg, setSaveMsg] = useState<Message | null>(null)
   const feedRef = useRef<HTMLDivElement>(null)
@@ -47,19 +48,33 @@ export default function ChatPanel() {
     <main className="panel chat">
       <header className="chat-head">
         <h1 className="chat-title">{active ? active.title : 'Нет активного диалога'}</h1>
-        <select
-          className="model-select"
-          title="Модель LLM"
-          value={currentModel}
-          disabled={state.streaming || modelOptions.length === 0}
-          onChange={(e) => void setModel(e.target.value)}
-        >
-          {modelOptions.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.id}
-            </option>
-          ))}
-        </select>
+        <div className="chat-head-actions">
+          {activeProfile && activeProfile.status !== 'active' && (
+            <button
+              type="button"
+              className={`profile-chip profile-badge ${
+                activeProfile.status === 'declined' ? 'declined' : 'pending'
+              }`}
+              title="Открыть вкладку «Профили»"
+              onClick={() => setContextTab('profile')}
+            >
+              {activeProfile.status === 'declined' ? 'Профиль отключён' : 'Профиль не заполнен'}
+            </button>
+          )}
+          <select
+            className="model-select"
+            title="Модель LLM"
+            value={currentModel}
+            disabled={state.streaming || modelOptions.length === 0}
+            onChange={(e) => void setModel(e.target.value)}
+          >
+            {modelOptions.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.id}
+              </option>
+            ))}
+          </select>
+        </div>
       </header>
 
       <div className="chat-feed" ref={feedRef}>

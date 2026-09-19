@@ -446,6 +446,14 @@ button {
   opacity: 0.6;
 }
 
+/* Правая часть шапки чата: бейдж профиля + выбор модели (день 12) */
+.chat-head-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-shrink: 0;
+}
+
 .chat-feed {
   flex: 1;
   overflow-y: auto;
@@ -1215,6 +1223,17 @@ button {
 }
 .profile-chip.declined {
   color: var(--muted);
+}
+
+/* Тот же чип, но кнопка в шапке чата (день 12): сброс UA-стилей button +
+   hover; клик открывает вкладку «Профили» */
+.profile-badge {
+  appearance: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.profile-badge:hover {
+  filter: brightness(1.25);
 }
 
 /* Поле профиля: RU-подпись над input */
