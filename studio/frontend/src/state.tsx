@@ -77,6 +77,11 @@ export interface Config {
   system_prompt: string
 }
 
+export interface ModelInfo {
+  id: string
+  context_limit: number
+}
+
 export interface StudioState {
   loaded: boolean
   config: Config | null
@@ -86,6 +91,7 @@ export interface StudioState {
   memory: MemoryState | null
   tokens: TokenState | null
   requests: RequestSummary[]
+  models: ModelInfo[]
   showRequests: boolean
   streaming: boolean
   lastRequest: RequestDetail | null
@@ -112,6 +118,7 @@ export function initialState(): StudioState {
     memory: null,
     tokens: null,
     requests: [],
+    models: [],
     showRequests: show,
     streaming: false,
     lastRequest: null,
@@ -161,6 +168,8 @@ export type StudioAction =
       lastRequest?: RequestDetail
     }
   | { type: 'memory'; memory: MemoryState }
+  | { type: 'models'; models: ModelInfo[] }
+  | { type: 'config'; config: Config }
   | { type: 'last-request'; detail: RequestDetail | null }
   | { type: 'show-requests'; on: boolean }
 
@@ -216,6 +225,10 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
       }
     case 'memory':
       return { ...state, memory: action.memory }
+    case 'models':
+      return { ...state, models: action.models }
+    case 'config':
+      return { ...state, config: action.config }
     case 'last-request':
       return { ...state, lastRequest: action.detail }
     case 'show-requests':
@@ -230,6 +243,7 @@ export interface StudioApi {
   newDialogue: () => Promise<void>
   activateDialogue: (id: string) => Promise<void>
   sendMessage: (text: string) => Promise<void>
+  setModel: (id: string) => Promise<void>
   setShowRequests: (on: boolean) => void
   refreshMemory: () => Promise<void>
   reloadDialogue: () => Promise<void>
@@ -298,6 +312,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     if (last) {
       dispatch({ type: 'last-request', detail: await apiGet<RequestDetail>(`/requests/${last.id}`) })
     }
+    // Модели — отдельным запросом: недоступность API (502) не ломает загрузку,
+    // в дропдауне останется только текущая модель из конфига.
+    apiGet<{ models: ModelInfo[] }>('/models')
+      .then((r) => dispatch({ type: 'models', models: r.models }))
+      .catch((err) => console.error('models:', err))
   }, [])
 
   useEffect(() => {
@@ -357,6 +376,12 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     [refreshPanels],
   )
 
+  // Смена модели: POST /api/config {model} → сервер отвечает актуальным конфигом
+  const setModel = useCallback(async (id: string) => {
+    const cfg = await apiPost<Config>('/config', { model: id })
+    dispatch({ type: 'config', config: cfg })
+  }, [])
+
   // Тумблер «Показывать запросы» (персистится в localStorage)
   const setShowRequests = useCallback((on: boolean) => {
     try {
@@ -385,6 +410,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     newDialogue,
     activateDialogue,
     sendMessage,
+    setModel,
     setShowRequests,
     refreshMemory,
     reloadDialogue,

@@ -1,14 +1,24 @@
-// Центральная панель: шапка (название диалога + бейдж модели), лента сообщений
-// с авто-скроллом и дописыванием дельт при стриминге, инпут-капсула.
+// Центральная панель: шапка (название диалога + дропдаун модели), лента
+// сообщений с авто-скроллом и дописыванием дельт при стриминге, инпут-капсула.
 // Enter — отправить, Shift+Enter — перенос строки.
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useStudio } from '../state'
 
 export default function ChatPanel() {
-  const { state, sendMessage } = useStudio()
+  const { state, sendMessage, setModel } = useStudio()
   const [draft, setDraft] = useState('')
   const feedRef = useRef<HTMLDivElement>(null)
   const active = state.dialogues.find((d) => d.id === state.activeId)
+
+  // Модели для дропдауна: список /api/models + гарантия, что текущая модель
+  // из конфига всегда в списке (API недоступен → только текущая).
+  const currentModel = state.config?.model ?? ''
+  const currentInList = state.models.some((m) => m.id === currentModel)
+  const modelOptions = currentInList
+    ? state.models
+    : currentModel
+      ? [{ id: currentModel, context_limit: 0 }, ...state.models]
+      : state.models
 
   // Авто-скролл вниз при новых сообщениях и дельтах стрима
   useEffect(() => {
@@ -35,7 +45,19 @@ export default function ChatPanel() {
     <main className="panel chat">
       <header className="chat-head">
         <h1 className="chat-title">{active ? active.title : 'Нет активного диалога'}</h1>
-        <span className="model-badge">{state.config?.model ?? '—'}</span>
+        <select
+          className="model-select"
+          title="Модель LLM"
+          value={currentModel}
+          disabled={state.streaming || modelOptions.length === 0}
+          onChange={(e) => void setModel(e.target.value)}
+        >
+          {modelOptions.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.id}
+            </option>
+          ))}
+        </select>
       </header>
 
       <div className="chat-feed" ref={feedRef}>

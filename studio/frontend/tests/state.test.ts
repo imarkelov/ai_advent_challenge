@@ -98,10 +98,10 @@ describe('reducer — чистые переходы состояния', () => {
   it('created: новый диалог становится активным, лента чистая', () => {
     const s = reducer(base, {
       type: 'created',
-      dialogue: { id: 3, title: 'Диалог 3', created: '2026-09-19', message_count: 0 },
-      activeId: 3,
+      dialogue: { id: 'd3', title: 'Диалог 3', created: '2026-09-19', message_count: 0 },
+      activeId: 'd3',
     })
-    expect(s.activeId).toBe(3)
+    expect(s.activeId).toBe('d3')
     expect(s.dialogues).toHaveLength(1)
     expect(s.messages).toEqual([])
   })
@@ -109,5 +109,23 @@ describe('reducer — чистые переходы состояния', () => {
   it('show-requests: переключает видимость журнала', () => {
     expect(reducer(base, { type: 'show-requests', on: false }).showRequests).toBe(false)
     expect(reducer(base, { type: 'show-requests', on: true }).showRequests).toBe(true)
+  })
+
+  it('models: хранит список моделей для дропдауна', () => {
+    const models = [
+      { id: 'qwen3.8-27b', context_limit: 32768 },
+      { id: 'deepseek-v4-flash', context_limit: 16384 },
+    ]
+    expect(base.models).toEqual([])
+    const s = reducer(base, { type: 'models', models })
+    expect(s.models).toEqual(models)
+  })
+
+  it('config: обновление конфига (например, после выбора модели)', () => {
+    const s = reducer(base, {
+      type: 'config',
+      config: { model: 'deepseek-v4-flash', temperature: 0.7, max_tokens: 1024, system_prompt: 'sp' },
+    })
+    expect(s.config?.model).toBe('deepseek-v4-flash')
   })
 })

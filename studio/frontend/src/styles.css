@@ -344,7 +344,7 @@ button {
   white-space: nowrap;
 }
 
-.model-badge {
+.model-select {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--st);
@@ -353,6 +353,13 @@ button {
   border-radius: var(--r-pill);
   padding: 2px var(--sp-2);
   white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.model-select:disabled {
+  cursor: default;
+  opacity: 0.6;
 }
 
 .chat-feed {

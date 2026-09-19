@@ -7,7 +7,7 @@ import json
 import httpx
 import pytest
 
-from agent import CONTEXT_LIMITS, StudioAgent
+from agent import CONTEXT_LIMITS, MEMORY_RULE, StudioAgent
 from conftest import USAGE, delta_chunk, sse_body, usage_chunk
 
 BASE = "https://mock.local/v1"
@@ -100,10 +100,26 @@ def test_build_payload_system_with_blocks_and_messages(data_dir):
     payload = agent.build_payload(d["id"])
     expected_system = (agent.get_config()["system_prompt"]
                        + "\n\nТекущая задача:\n- t: задача"
-                       + "\n\nДолговременная память:\n- u: юзер")
+                       + "\n\nДолговременная память:\n- u: юзер"
+                       + MEMORY_RULE)
     assert payload[0] == {"role": "system", "content": expected_system}
     assert payload[1] == {"role": "user", "content": "привет"}
     assert payload[2] == {"role": "assistant", "content": "здравствуй"}
+
+
+def test_build_payload_no_memory_no_rule(data_dir):
+    """Без записей памяти правило о противоречиях НЕ добавляется."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    payload = agent.build_payload(d["id"])
+    assert payload[0]["content"] == agent.get_config()["system_prompt"]
+    assert MEMORY_RULE not in payload[0]["content"]
+
+
+def test_memory_rule_forbids_silent_compliance():
+    """Само правило: память — ограничения, тихое подчинение запрещено."""
+    assert "противореч" in MEMORY_RULE
+    assert "молча" in MEMORY_RULE
 
 
 # ---------- ask_stream: успех ----------

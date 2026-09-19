@@ -155,6 +155,16 @@ def _try_dialogues():
         return 0, b"", {}
 
 
+def _cleanup(dialogue_id: str | None) -> None:
+    """Убрать артефакты самого e2e (не трогая данные пользователя)."""
+    try:
+        if dialogue_id:
+            http("DELETE", f"/api/dialogues/{dialogue_id}", timeout=10)
+        http("DELETE", "/api/memory/longterm/e2e", timeout=10)
+    except Exception:
+        pass
+
+
 def stop_server(proc: subprocess.Popen | None) -> None:
     if proc is None:
         return
@@ -207,6 +217,7 @@ def main() -> int:
         return 0
 
     proc = start_server()
+    dlg_id: str | None = None
     try:
         if proc is None:
             log("FAIL server did not come up on port 8100")
@@ -261,35 +272,34 @@ def main() -> int:
         code, body, _ = http("POST", "/api/dialogues")
         dlg = json.loads(body).get("dialogue", {})
         if code == 201 and dlg.get("id"):
+            dlg_id = dlg["id"]
             record(f"API: dialogue created ({dlg['id'][:8]})", "PASS")
         else:
             record("API: dialogue", "FAIL", f"code={code}")
             return 1
 
-        # 6. WM
+        # 6. WM (проверка конкретного ключа — не зависит от чужих данных)
         code, _, _ = http("POST", "/api/memory/working",
                           {"key": "e2e", "value": "проверка"})
         code2, body, _ = http("GET", "/api/memory")
-        mem = json.loads(body)
-        entries = mem.get("working", {}).get("entries")
-        if code == 200 and code2 == 200 and entries == 1:
+        wm_items = json.loads(body).get("working", {}).get("items", {})
+        if code == 200 and code2 == 200 and wm_items.get("e2e") == "проверка":
             record("API: WM set + memory", "PASS")
         else:
             record("API: WM set + memory", "FAIL",
-                   f"set={code} mem={code2} entries={entries}")
+                   f"set={code} mem={code2} items={wm_items}")
             return 1
 
-        # 7. LT
+        # 7. LT (то же самое, глобальный слой)
         code, _, _ = http("POST", "/api/memory/longterm",
                           {"key": "e2e", "value": "глобальная"})
         code2, body, _ = http("GET", "/api/memory")
-        mem = json.loads(body)
-        entries = mem.get("long_term", {}).get("entries")
-        if code == 200 and code2 == 200 and entries == 1:
+        lt_items = json.loads(body).get("long_term", {}).get("items", {})
+        if code == 200 and code2 == 200 and lt_items.get("e2e") == "глобальная":
             record("API: LT set + memory", "PASS")
         else:
             record("API: LT set + memory", "FAIL",
-                   f"set={code} mem={code2} entries={entries}")
+                   f"set={code} mem={code2} items={lt_items}")
             return 1
 
         # 8. чат (SSE) — SKIP, если GPustack недоступен
@@ -338,6 +348,7 @@ def main() -> int:
             f"{len(skips)} SKIP, {len(fails)} FAIL")
         return 1 if fails else 0
     finally:
+        _cleanup(dlg_id)
         stop_server(proc)
 
 
