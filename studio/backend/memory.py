@@ -51,6 +51,18 @@ def _tok_est(text: str) -> int:
     return math.ceil(len(text) / 4)
 
 
+# Профиль пользователя (день 12): 4 текстовых поля + статус + флаг интервью.
+# Профиль принадлежит диалогу (поле записи в dialogues.json).
+PROFILE_FIELDS = ("name", "role", "tone", "taboos")
+PROFILE_ACTIONS = ("interview", "decline", "reset")
+
+
+def new_profile() -> dict:
+    """Свежий профиль: pending, пустые поля, интервью не начато."""
+    return {"status": "pending", "interview": False,
+            "name": "", "role": "", "tone": "", "taboos": ""}
+
+
 class MemoryStore:
     """Хранилище трёх слоёв памяти с файловым персистентным бэкендом."""
 
@@ -111,7 +123,7 @@ class MemoryStore:
         with self._lock:
             data = self._read_dialogues()
             d = {"id": uuid.uuid4().hex, "title": "Новый диалог",
-                 "created": _now(), "messages": []}
+                 "created": _now(), "messages": [], "profile": new_profile()}
             data["dialogues"].append(d)
             data["active_id"] = d["id"]
             self._write_dialogues(data)
@@ -123,7 +135,8 @@ class MemoryStore:
             data = self._read_dialogues()
             return [{"id": d["id"], "title": d.get("title", ""),
                      "created": d.get("created", ""),
-                     "message_count": len(d.get("messages", []))}
+                     "message_count": len(d.get("messages", [])),
+                     "profile": self._profile_of(d)}
                     for d in data["dialogues"]]
 
     def get_dialogue(self, dialogue_id: str) -> dict | None:
@@ -135,7 +148,8 @@ class MemoryStore:
                 return None
             return {"id": d["id"], "title": d.get("title", ""),
                     "created": d.get("created", ""),
-                    "messages": list(d.get("messages", []))}
+                    "messages": list(d.get("messages", [])),
+                    "profile": self._profile_of(d)}
 
     def get_messages(self, dialogue_id: str) -> list:
         """Сообщения диалога [{role,content}] ([] если диалог не найден)."""
@@ -209,6 +223,72 @@ class MemoryStore:
                 return
             d["messages"] = []
             self._write_dialogues(data)
+
+    # ---------- профиль пользователя (день 12, per-диалог) ----------
+
+    def _profile_of(self, d: dict) -> dict:
+        """Профиль записи диалога; отсутствие поля/битое значение — дефолт (pending)."""
+        raw = d.get("profile")
+        if not isinstance(raw, dict):
+            return new_profile()
+        p = new_profile()
+        for k in ("status", "interview", *PROFILE_FIELDS):
+            if k in raw:
+                p[k] = raw[k]
+        return p
+
+    def profile_get(self, dialogue_id: str) -> dict:
+        """Профиль диалога; ValueError, если диалог не существует."""
+        with self._lock:
+            data = self._read_dialogues()
+            d = self._find(data, dialogue_id)
+            if d is None:
+                raise ValueError(f"Диалог «{dialogue_id}» не найден")
+            return self._profile_of(d)
+
+    def profile_set(self, dialogue_id: str, name: str, role: str,
+                    tone: str, taboos: str) -> dict:
+        """Сохранить 4 поля профиля; непустое содержимое → active
+        (все пустые → pending); interview сбрасывается. ValueError на не-str
+        значения или неизвестный диалог. Возвращает сохранённый профиль."""
+        for v in (name, role, tone, taboos):
+            if not isinstance(v, str):
+                raise ValueError("Поля профиля должны быть строками")
+        with self._lock:
+            data = self._read_dialogues()
+            d = self._find(data, dialogue_id)
+            if d is None:
+                raise ValueError(f"Диалог «{dialogue_id}» не найден")
+            d["profile"] = {
+                "status": "active" if any((name, role, tone, taboos)) else "pending",
+                "interview": False,
+                "name": name, "role": role, "tone": tone, "taboos": taboos,
+            }
+            self._write_dialogues(data)
+            return d["profile"]
+
+    def profile_action(self, dialogue_id: str, action: str) -> dict:
+        """Действие с профилем: interview (флаг, статус остаётся pending),
+        decline (status declined), reset (свежий профиль). ValueError на
+        неизвестное действие или неизвестный диалог."""
+        if action not in PROFILE_ACTIONS:
+            raise ValueError(f"Неизвестное действие профиля: {action}")
+        with self._lock:
+            data = self._read_dialogues()
+            d = self._find(data, dialogue_id)
+            if d is None:
+                raise ValueError(f"Диалог «{dialogue_id}» не найден")
+            p = self._profile_of(d)
+            if action == "interview":
+                p["interview"] = True
+            elif action == "decline":
+                p["status"] = "declined"
+                p["interview"] = False
+            else:  # reset
+                p = new_profile()
+            d["profile"] = p
+            self._write_dialogues(data)
+            return d["profile"]
 
     # ---------- WM (рабочая память, per-dialogue) ----------
 

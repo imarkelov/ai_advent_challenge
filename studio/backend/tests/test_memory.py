@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from memory import MemoryStore
+from memory import MemoryStore, new_profile
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def store(data_dir):
 
 def test_new_dialogue_auto_activate(store):
     d = store.new_dialogue()
-    assert set(d) == {"id", "title", "created", "messages"}
+    assert set(d) == {"id", "title", "created", "messages", "profile"}
     assert d["messages"] == []
     assert store.active_id() == d["id"]
 
@@ -35,7 +35,8 @@ def test_list_dialogues_order_and_shape(store):
     lst = store.list_dialogues()
     assert [x["id"] for x in lst] == [a["id"], b["id"]]  # порядок создания
     assert lst[0] == {"id": a["id"], "title": a["title"],
-                      "created": a["created"], "message_count": 1}
+                      "created": a["created"], "message_count": 1,
+                      "profile": new_profile()}
     assert lst[1]["message_count"] == 0
 
 
@@ -304,3 +305,95 @@ def test_blocks_respect_toggles(store):
     store.set_toggle("wm", True)
     store.set_toggle("lt", True)
     assert store.build_memory_blocks(d["id"]).startswith("\n\nТекущая задача:")
+
+
+# ---------- профиль пользователя (день 12, per-диалог) ----------
+
+class TestProfile:
+    def setup_method(self):
+        import tempfile
+        self.d = tempfile.TemporaryDirectory()
+        self.s = MemoryStore(self.d.name)
+
+    def teardown_method(self):
+        self.d.cleanup()
+
+    def test_new_dialogue_has_pending_profile(self):
+        d = self.s.new_dialogue()
+        assert d["profile"] == new_profile()
+        p = self.s.profile_get(d["id"])
+        assert p["status"] == "pending"
+        assert p["interview"] is False
+        assert p["name"] == "" and p["role"] == "" and p["tone"] == "" and p["taboos"] == ""
+
+    def test_profile_set_active_on_nonempty(self):
+        d = self.s.new_dialogue()
+        p = self.s.profile_set(d["id"], "Иван", "backend-разработчик, e-commerce",
+                               "дружелюбно и по делу", "мат, политика")
+        assert p["status"] == "active"
+        assert self.s.profile_get(d["id"])["name"] == "Иван"
+        s2 = MemoryStore(self.d.name)  # переживает рестарт
+        assert s2.profile_get(d["id"])["status"] == "active"
+        assert s2.profile_get(d["id"])["taboos"] == "мат, политика"
+
+    def test_profile_set_all_empty_keeps_pending(self):
+        d = self.s.new_dialogue()
+        assert self.s.profile_set(d["id"], "", "", "", "")["status"] == "pending"
+
+    def test_profile_set_rejects_non_str(self):
+        d = self.s.new_dialogue()
+        with pytest.raises(ValueError):
+            self.s.profile_set(d["id"], 5, "", "", "")
+        assert self.s.profile_get(d["id"])["status"] == "pending"
+
+    def test_profile_set_unknown_dialogue(self):
+        with pytest.raises(ValueError):
+            self.s.profile_set("nope", "a", "", "", "")
+
+    def test_profile_action_interview_keeps_pending_sets_flag(self):
+        d = self.s.new_dialogue()
+        p = self.s.profile_action(d["id"], "interview")
+        assert p["status"] == "pending" and p["interview"] is True
+
+    def test_profile_action_decline(self):
+        d = self.s.new_dialogue()
+        p = self.s.profile_action(d["id"], "decline")
+        assert p["status"] == "declined" and p["interview"] is False
+
+    def test_profile_action_reset_clears_fields(self):
+        d = self.s.new_dialogue()
+        self.s.profile_set(d["id"], "Иван", "роль", "тон", "табу")
+        assert self.s.profile_action(d["id"], "reset") == new_profile()
+
+    def test_profile_action_unknown(self):
+        d = self.s.new_dialogue()
+        with pytest.raises(ValueError):
+            self.s.profile_action(d["id"], "bogus")
+
+    def test_profile_isolated_per_dialogue(self):
+        a = self.s.new_dialogue()["id"]
+        b = self.s.new_dialogue()["id"]
+        self.s.profile_set(a, "Иван", "", "", "")
+        assert self.s.profile_get(b)["status"] == "pending"
+        assert self.s.profile_get(b)["name"] == ""
+
+    def test_profile_removed_with_dialogue(self):
+        d = self.s.new_dialogue()
+        self.s.profile_set(d["id"], "Иван", "", "", "")
+        self.s.delete_dialogue(d["id"])
+        with pytest.raises(ValueError):
+            self.s.profile_get(d["id"])
+
+    def test_old_dialogue_without_profile_field_is_pending(self):
+        """Бэкворд-совместимость: запись диалога без поля profile."""
+        d = self.s.new_dialogue()
+        import os
+        path = os.path.join(self.d.name, "dialogues.json")
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        for dd in data["dialogues"]:
+            dd.pop("profile", None)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+        assert self.s.profile_get(d["id"])["status"] == "pending"
+        assert self.s.get_dialogue(d["id"])["profile"]["status"] == "pending"
