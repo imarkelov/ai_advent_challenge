@@ -4,7 +4,7 @@
 // «Провести интервью» / «Заполнить заново» / «Отказаться» →
 // POST /api/profile/action. После каждого ответа профиль обновляется
 // через setProfile (реducer 'profile-set'), поля синхронизируются за ним.
-import { useEffect, useId, useState } from 'react'
+import { useId, useState } from 'react'
 import { apiPostProfile, apiPostProfileAction, type UserProfile } from '../api'
 import { useStudio } from '../state'
 
@@ -47,23 +47,40 @@ export default function ProfileTab() {
   const { state, activeProfile, setProfile } = useStudio()
   const dialogueId = state.activeId
   const p = activeProfile
-  const [name, setName] = useState('')
-  const [role, setRole] = useState('')
-  const [tone, setTone] = useState('')
-  const [taboos, setTaboos] = useState('')
   const [busy, setBusy] = useState(false)
   const [hint, setHint] = useState('')
 
-  // Синхронизация полей: смена диалога или статуса профиля (после
-  // save/decline/reset профиль приходит из ответа API; после интервью
-  // в чате — через перечитанный список диалогов)
-  useEffect(() => {
-    setName(p?.name ?? '')
-    setRole(p?.role ?? '')
-    setTone(p?.tone ?? '')
-    setTaboos(p?.taboos ?? '')
-    setHint('')
-  }, [dialogueId, p?.status, p?.name, p?.role, p?.tone, p?.taboos])
+  // Ключ источника профиля: меняется при смене диалога или при смене
+  // полей/статуса (ответы API после save/reset/decline, перечитанный
+  // список диалогов после интервью в чате).
+  const profileKey = p
+    ? `${dialogueId}|${p.status}|${p.name}|${p.role}|${p.tone}|${p.taboos}`
+    : ''
+
+  // Черновик незаполненных в API полей. Сбрасывается синхронно в момент
+  // рендера, когда источник профиля изменился (не через пассивный effect —
+  // поля не отстают от обновления профиля и не «сбрасывают» введённое
+  // между событиями ввода; паттерн «adjusting state during render»).
+  const [draft, setDraft] = useState<{
+    name: string
+    role: string
+    tone: string
+    taboos: string
+  } | null>(null)
+  const [draftKey, setDraftKey] = useState(profileKey)
+  if (draftKey !== profileKey) {
+    setDraftKey(profileKey)
+    if (draft !== null) setDraft(null)
+    if (hint !== '') setHint('')
+  }
+
+  const values =
+    draft ?? {
+      name: p?.name ?? '',
+      role: p?.role ?? '',
+      tone: p?.tone ?? '',
+      taboos: p?.taboos ?? '',
+    }
 
   if (!dialogueId || !p) {
     return (
@@ -78,7 +95,7 @@ export default function ProfileTab() {
     void (async () => {
       setBusy(true)
       try {
-        const { profile } = await apiPostProfile(dialogueId, name, role, tone, taboos)
+        const { profile } = await apiPostProfile(dialogueId, values.name, values.role, values.tone, values.taboos)
         setProfile(dialogueId, profile)
       } catch (err) {
         console.error('profile save:', err)
@@ -111,10 +128,10 @@ export default function ProfileTab() {
           <h3>Профиль пользователя</h3>
           <StatusChip status={p.status} />
         </header>
-        <Field label="Имя пользователя" placeholder="как к вам обращаться" value={name} onChange={setName} />
-        <Field label="Роль и сфера" placeholder="профессия, область работы" value={role} onChange={setRole} />
-        <Field label="Тон и стиль общения" placeholder="например: кратко и по делу" value={tone} onChange={setTone} />
-        <Field label="Стоп-слова / табу" placeholder="слова или темы, которых избегать" value={taboos} onChange={setTaboos} />
+        <Field label="Имя пользователя" placeholder="как к вам обращаться" value={values.name} onChange={(v) => setDraft({ ...values, name: v })} />
+        <Field label="Роль и сфера" placeholder="профессия, область работы" value={values.role} onChange={(v) => setDraft({ ...values, role: v })} />
+        <Field label="Тон и стиль общения" placeholder="например: кратко и по делу" value={values.tone} onChange={(v) => setDraft({ ...values, tone: v })} />
+        <Field label="Стоп-слова / табу" placeholder="слова или темы, которых избегать" value={values.taboos} onChange={(v) => setDraft({ ...values, taboos: v })} />
         <div className="ctx-toolbar">
           <button type="button" className="btn" disabled={busy} onClick={save}>
             Сохранить
