@@ -220,6 +220,43 @@ def test_auto_title_failure_keeps_default(data_dir):
     assert agent.store.get_dialogue(d["id"])["title"] == "Новый диалог"
 
 
+def test_auto_title_extracts_from_thinking_tail(data_dir):
+    """glm «думает» в content: название — в конце строки после точки."""
+    thinking = ('The user asks about the capital of France. A good title would '
+                'be "X" - that is 2 words. Good.Париж')
+    handler = _title_handler(
+        httpx.Response(200, json={"choices": [{"message": {"content": thinking}}]}),
+        {"n": 0})
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    list(agent.ask_stream(d["id"], "Назови столицу Франции"))
+    assert agent.store.get_dialogue(d["id"])["title"] == "Париж"
+
+
+def test_auto_title_skips_truncated_answer(data_dir):
+    """finish_reason=length — обрезанный ответ не называем (даже с коротким хвостом)."""
+    body = {"choices": [{"message": {"content": 'The user asks "OK". I need to create a short'},
+                         "finish_reason": "length"}]}
+    handler = _title_handler(httpx.Response(200, json=body), {"n": 0})
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    list(agent.ask_stream(d["id"], "привет"))
+    assert agent.store.get_dialogue(d["id"])["title"] == "Новый диалог"
+
+
+def test_auto_title_rejects_truncated_thinking(data_dir):
+    """Обрезанное «размышление» без границы — не мусор в title."""
+    garbage = ('The user is asking me to name the capital and I should answer '
+               'with a short title for this dialogu')
+    handler = _title_handler(
+        httpx.Response(200, json={"choices": [{"message": {"content": garbage}}]}),
+        {"n": 0})
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    list(agent.ask_stream(d["id"], "Назови столицу Франции"))
+    assert agent.store.get_dialogue(d["id"])["title"] == "Новый диалог"
+
+
 def test_payload_messages_clean_of_model(data_dir):
     """Во второй ход LLM-payload содержит только role/content (без model)."""
     calls = {"n": 0}

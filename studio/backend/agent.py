@@ -368,14 +368,27 @@ class StudioAgent:
                 if resp.status_code != 200:
                     continue
                 choice = (resp.json().get("choices") or [{}])[0]
+                if choice.get("finish_reason") == "length":
+                    # ответ обрезан — «хвост» будет осколком размышления,
+                    # а не названием; пробуем следующую попытку
+                    continue
                 content = ((choice.get("message") or {}).get("content")
                            or "").strip()
                 if not content:
                     continue
                 lines = [l.strip() for l in content.splitlines() if l.strip()]
+                line = lines[-1]
+                if len(line) > 60:
+                    # модель «подумала» в той же строке: название — после
+                    # последней точки/восклицания/вопроса (finish=stop)
+                    idx = max(line.rfind("."), line.rfind("!"), line.rfind("?"))
+                    if idx != -1:
+                        line = line[idx + 1:].strip()
                 # цитаты и точка в конце: «Название»., "Название"., Название
-                title = lines[-1].strip('"«»\'').strip().rstrip(".").strip().strip('"«»\'').strip()
-                if not title:
+                title = line.strip('"«»\'').strip().rstrip(".").strip().strip('"«»\'').strip()
+                # > 50 символов — не название, а осколок «размышлений»:
+                # лучше без названия, чем мусор
+                if not title or len(title) > 50:
                     continue
                 return title[:60]
             except (httpx.HTTPError, ValueError):
