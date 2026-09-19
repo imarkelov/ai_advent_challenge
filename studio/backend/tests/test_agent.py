@@ -118,9 +118,13 @@ def test_build_payload_no_memory_no_rule(data_dir):
 
 
 def test_memory_rule_forbids_silent_compliance():
-    """Само правило: память — ограничения, тихое подчинение запрещено."""
+    """Правило: память — ограничения, тихое подчинение запрещено; при
+    противоречии — вежливый отказ + юмор + решение действовать по памяти."""
     assert "противореч" in MEMORY_RULE
     assert "молча" in MEMORY_RULE
+    assert "откажись" in MEMORY_RULE
+    assert "шутк" in MEMORY_RULE
+    assert "решени" in MEMORY_RULE
 
 
 # ---------- ask_stream: успех ----------
