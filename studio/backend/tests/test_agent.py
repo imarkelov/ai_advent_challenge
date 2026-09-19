@@ -20,10 +20,11 @@ def data_dir(tmp_path):
     return d
 
 
-def make_agent(data_dir, handler):
-    """Агент на MockTransport с указанным handler(request) -> httpx.Response."""
+def make_agent(data_dir, handler, env=None):
+    """Агент на MockTransport с данным handler(request) -> httpx.Response."""
     client = httpx.Client(transport=httpx.MockTransport(handler))
-    return StudioAgent(str(data_dir), base_url=BASE, api_key="test-key", client=client)
+    return StudioAgent(str(data_dir), base_url=BASE, api_key="test-key",
+                       client=client, env=env)
 
 
 def ok_handler(request: httpx.Request) -> httpx.Response:
@@ -307,6 +308,65 @@ def test_list_models_probe_cached(data_dir):
     agent.list_models()
     agent.list_models()
     assert probes["n"] == 1
+
+
+def test_probe_uses_model_specific_key(data_dir):
+    """Зонд берёт ключ по модели (MODEL_KEY_ENV): 3 ключа -> 3 модели."""
+    env = {"GPUSTACK_API_KEY": "k-main",
+           "GPUSTACK_KEY_DEEPSEEK": "k-deep",
+           "GPUSTACK_KEY_GLM": "k-glm"}
+
+    def handler(request):
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [
+                {"id": "qwen3.8-27b"}, {"id": "deepseek-v4-flash"},
+                {"id": "glm-5.3-flash"}]})
+        model = json.loads(request.content)["model"]
+        wanted = {"qwen3.8-27b": "k-main", "deepseek-v4-flash": "k-deep",
+                  "glm-5.3-flash": "k-glm"}[model]
+        if request.headers["Authorization"] == "Bearer " + wanted:
+            return httpx.Response(200, json={})
+        return httpx.Response(403, json={})
+
+    agent = make_agent(data_dir, handler, env=env)
+    models = {m["id"] for m in agent.list_models()}
+    assert models == {"qwen3.8-27b", "deepseek-v4-flash", "glm-5.3-flash"}
+
+
+def test_chat_uses_model_specific_key(data_dir):
+    """Чат шлёт ключ, привязанный к выбранной модели."""
+    env = {"GPUSTACK_API_KEY": "k-main",
+           "GPUSTACK_KEY_DEEPSEEK": "k-deep",
+           "GPUSTACK_KEY_GLM": "k-glm"}
+    seen = {}
+
+    def handler(request):
+        seen["auth"] = request.headers.get("Authorization")
+        body = sse_body([delta_chunk("ok"), usage_chunk(), "[DONE]"])
+        return httpx.Response(200, content=body.encode("utf-8"))
+
+    agent = make_agent(data_dir, handler, env=env)
+    agent.set_config({"model": "deepseek-v4-flash"})
+    d = agent.store.new_dialogue()
+    events = list(agent.ask_stream(d["id"], "привет"))
+    assert events[-1]["type"] == "done"
+    assert seen["auth"] == "Bearer k-deep"
+
+
+def test_probe_unknown_model_falls_back_to_main_key(data_dir):
+    """Модель вне маппинга MODEL_KEY_ENV — зонд переменной DEFAULT_KEY_ENV."""
+    env = {"GPUSTACK_API_KEY": "k-main"}
+    seen = {}
+
+    def handler(request):
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [{"id": "gpt-4o"}]})
+        seen["auth"] = request.headers.get("Authorization")
+        return httpx.Response(200, json={})
+
+    agent = make_agent(data_dir, handler, env=env)
+    agent.list_models()
+    assert seen["auth"] == "Bearer k-main"
 
 
 def test_ensure_model_available_resets_unavailable(data_dir):

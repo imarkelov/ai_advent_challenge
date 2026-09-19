@@ -128,6 +128,35 @@ def test_models_self_heals_config(client):
     assert client.get("/api/config").json()["model"] == "qwen3.8-27b"
 
 
+def test_models_per_model_keys(tmp_path):
+    """3 ключа по моделям -> /api/models отдаёт 3 модели; gpt-4o (403) — нет."""
+    d = tmp_path / "d"
+    d.mkdir()
+
+    def handler(request):
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [
+                {"id": "qwen3.8-27b"}, {"id": "deepseek-v4-flash"},
+                {"id": "glm-5.3-flash"}, {"id": "gpt-4o"}]})
+        model = json.loads(request.content)["model"]
+        wanted = {"qwen3.8-27b": "Bearer k-main", "deepseek-v4-flash": "Bearer k-deep",
+                  "glm-5.3-flash": "Bearer k-glm", "gpt-4o": "Bearer k-none"}[model]
+        return httpx.Response(200 if request.headers.get("Authorization") == wanted
+                              else 403, json={})
+
+    agent = StudioAgent(str(d), base_url="https://mock.local/v1", api_key="test-key",
+                        client=httpx.Client(transport=httpx.MockTransport(handler)),
+                        env={"GPUSTACK_API_KEY": "k-main",
+                             "GPUSTACK_KEY_DEEPSEEK": "k-deep",
+                             "GPUSTACK_KEY_GLM": "k-glm"})
+    from main import create_app
+    c = TestClient(create_app(agent))
+    r = c.get("/api/models")
+    assert r.status_code == 200
+    assert [m["id"] for m in r.json()["models"]] == \
+        ["qwen3.8-27b", "deepseek-v4-flash", "glm-5.3-flash"]
+
+
 def test_models_unavailable_502(tmp_path):
     def handler(request):
         raise httpx.ConnectError("нет сети", request=request)

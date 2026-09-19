@@ -25,6 +25,16 @@ CONTEXT_LIMITS = {
 }
 DEFAULT_CONTEXT_LIMIT = 32768
 
+# GPustack выдаёт ключу доступ только к «своей» модели, поэтому у моделей —
+# отдельные ключи. Модель -> переменная окружения с ключом; неизвестной —
+# DEFAULT_KEY_ENV. (Паттерн из agent.py дней 5–11.)
+DEFAULT_KEY_ENV = "GPUSTACK_API_KEY"
+MODEL_KEY_ENV = {
+    "qwen3.8-27b": "GPUSTACK_API_KEY",
+    "deepseek-v4-flash": "GPUSTACK_KEY_DEEPSEEK",
+    "glm-5.3-flash": "GPUSTACK_KEY_GLM",
+}
+
 DEFAULT_CONFIG = {
     "model": "qwen3.8-27b",
     "temperature": 0.7,
@@ -60,17 +70,20 @@ def _now() -> str:
 class StudioAgent:
     """Агент-обёртка над LLM API (OpenAI-совместимое) с памятью и журналом."""
 
-    def __init__(self, data_dir: str, base_url: str = None, api_key: str = None, client=None):
+    def __init__(self, data_dir: str, base_url: str = None, api_key: str = None,
+                 client=None, env=None):
         """Создаёт агента.
 
         data_dir — каталог данных (MemoryStore + config.json + requests.json);
         base_url/api_key — по умолчанию из окружения GPUSTACK_BASE_URL/GPUSTACK_API_KEY;
-        client — httpx.Client (в тестах — с MockTransport).
+        client — httpx.Client (в тестах — с MockTransport);
+        env — словарь окружения для per-model ключей (тесты), по умолчанию os.environ.
         """
         self.store = MemoryStore(data_dir)
         self.base_url = (base_url or os.environ.get("GPUSTACK_BASE_URL",
                         "https://gpustack.data.lmru.tech/v1")).rstrip("/")
         self.api_key = api_key if api_key is not None else os.environ.get("GPUSTACK_API_KEY", "")
+        self._env = os.environ if env is None else env
         self._client = client or httpx.Client(timeout=120)
         self._lock = threading.Lock()  # только для журнала requests.json
         self._session = {"prompt": 0, "completion": 0, "total": 0}  # in-memory
@@ -159,7 +172,7 @@ class StudioAgent:
         try:
             with self._client.stream(
                 "POST", self.base_url + "/chat/completions", json=body,
-                headers={"Authorization": "Bearer " + self.api_key}) as resp:
+                headers={"Authorization": "Bearer " + self._key_for(cfg["model"])}) as resp:
                 if resp.status_code != 200:
                     error = f"Модель вернула ошибку HTTP {resp.status_code}"
                 else:
@@ -299,12 +312,17 @@ class StudioAgent:
         if self.get_config()["model"] not in {m["id"] for m in available}:
             self.set_config({"model": available[0]["id"]})
 
+    def _key_for(self, model: str) -> str:
+        """Ключ API для модели: переменная MODEL_KEY_ENV[модель] из окружения;
+        фолбэк — основной self.api_key (например, если переменная не задана)."""
+        return self._env.get(MODEL_KEY_ENV.get(model, DEFAULT_KEY_ENV)) or self.api_key
+
     def _probe_model(self, model_id: str) -> bool:
-        """Минимальный зонд доступности модели: 200 — доступна для ключа."""
+        """Минимальный зонд доступности модели: 200 — доступна для её ключа."""
         try:
             resp = self._client.post(
                 self.base_url + "/chat/completions",
-                headers={"Authorization": "Bearer " + self.api_key},
+                headers={"Authorization": "Bearer " + self._key_for(model_id)},
                 json={"model": model_id, "max_tokens": 1,
                       "messages": [{"role": "user", "content": "."}]},
                 timeout=15,

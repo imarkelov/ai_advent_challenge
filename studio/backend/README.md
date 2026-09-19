@@ -17,7 +17,8 @@ OpenAI-совместимый API) со стримингом по SSE, три с
 Данные — в `../data/` (создаётся при работе: `dialogues.json`, `working.json`,
 `longterm.json`, `requests.json`, `config.json`). Секреты — из `.env` в корне
 репозитория: `GPUSTACK_BASE_URL` (по умолчанию `https://gpustack.data.lmru.tech/v1`),
-`GPUSTACK_API_KEY`.
+`GPUSTACK_API_KEY` (qwen), `GPUSTACK_KEY_DEEPSEEK`, `GPUSTACK_KEY_GLM`
+(per-model ключи: маппинг `MODEL_KEY_ENV` в `agent.py`).
 
 ## Запуск (dev)
 
@@ -38,7 +39,7 @@ python -m pytest -q
 |---|---|---|
 | POST | `/api/chat` | Чат: SSE-стрим `data: {delta\|done\|error}` |
 | GET / POST | `/api/config` | Конфиг LLM (GET — текущий, POST — частичное обновление) |
-| GET | `/api/models` | Модели API с контекстными лимитами (502 при недоступности) |
+| GET | `/api/models` | Доступные модели (зонд с per-model ключом, кэш 10 мин) с лимитами; self-heal модели конфига (502 при недоступности) |
 | GET / POST | `/api/dialogues` | Список диалогов / создать (201, становится активным) |
 | GET / DELETE | `/api/dialogues/{id}` | Диалог с сообщениями / удалить |
 | POST | `/api/dialogues/{id}/activate` | Сделать диалог активным |

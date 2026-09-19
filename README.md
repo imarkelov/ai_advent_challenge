@@ -267,7 +267,10 @@ scripts/e2e_studio.py   # E2E smoke (prod-сервер + реальный GPusta
 | GET | `/api/requests/{id}` | Полная запись журнала (с телом запроса) |
 | DELETE | `/api/requests` | Очистить журнал |
 
-Секреты — из `.env` в корне репозитория: `GPUSTACK_BASE_URL`, `GPUSTACK_API_KEY`.
+Секреты — из `.env` в корне репозитория: `GPUSTACK_BASE_URL`,
+`GPUSTACK_API_KEY` (qwen), `GPUSTACK_KEY_DEEPSEEK`, `GPUSTACK_KEY_GLM`
+(GPustack выдаёт ключу доступ только к «своей» модели — у каждой модели
+свой ключ; маппинг `MODEL_KEY_ENV` в `agent.py`).
 
 ### Запуск
 
@@ -296,7 +299,7 @@ python -m uvicorn studio.backend.main:app --port 8000   # из корня реп
 ### Тесты
 
 ```bash
-cd studio/backend && python -m pytest -q     # 65 тестов (офлайн)
+cd studio/backend && python -m pytest -q     # 80 тестов (офлайн)
 cd studio/frontend && npm test               # 48 тестов (Vitest)
 python scripts/e2e_studio.py                 # E2E smoke (prod + реальный GPustack)
 ```
@@ -313,11 +316,20 @@ GPustack отдаёт в `/models` все модели без статуса д�
 или ошибка — нет. Результат кэшируется 10 минут. В дропдауне выбора модели
 показываются только доступные.
 
-Контекстные лимиты: `qwen3.8-27b` — 32768, `deepseek-v4-flash` /
-`glm-5.3-flash` — 16384, неизвестная — 32768. На текущем ключе GPustack
-доступна `qwen3.8-27b` (остальные модели — 403).
+**Per-model ключи.** GPustack выдаёт ключу доступ только к «своей» модели,
+поэтому у каждой модели — свой ключ из `.env` (маппинг `MODEL_KEY_ENV` в
+`agent.py`, паттерн из дней 5–11): зонд и чат берут ключ по выбранной модели.
+
+| Модель | Ключ (.env) | Лимит контекста |
+| --- | --- | --- |
+| `qwen3.8-27b` | `GPUSTACK_API_KEY` | 32768 |
+| `deepseek-v4-flash` | `GPUSTACK_KEY_DEEPSEEK` | 16384 |
+| `glm-5.3-flash` | `GPUSTACK_KEY_GLM` | 16384 |
+
+Неизвестной модели — лимит 32768 и ключ `GPUSTACK_API_KEY`.
 
 ### Статус
 
-Бэкенд — 65 тестов PASS; фронтенд — 48 тестов PASS; E2E smoke — PASS.
+Бэкенд — 80 тестов PASS; фронтенд — 63 теста PASS; E2E smoke — PASS
+(3 модели: qwen3.8-27b, deepseek-v4-flash, glm-5.3-flash).
 Ветка `day11-studio` (отдельный стек, не наследует дни 1–10).
