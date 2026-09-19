@@ -222,9 +222,10 @@ def test_payload_wm_lt_off_no_blocks_no_rule(data_dir):
     agent.store.set_toggle("wm", False)
     agent.store.set_toggle("lt", False)
     list(agent.ask_stream(d["id"], "привет"))
-    assert "Текущая задача" not in seen["system"]
-    assert "Долговременная память" not in seen["system"]
+    assert "Текущая задача:\n" not in seen["system"]
+    assert "Долговременная память:\n" not in seen["system"]
     assert "Правило памяти" not in seen["system"]
+    assert "Отключённые слои" in seen["system"]  # оба слоя непустые и off
 
 
 def test_payload_wm_off_lt_on_keeps_rule(data_dir):
@@ -242,9 +243,10 @@ def test_payload_wm_off_lt_on_keeps_rule(data_dir):
     agent.store.lt_set("u", "юзер")
     agent.store.set_toggle("wm", False)
     list(agent.ask_stream(d["id"], "привет"))
-    assert "Текущая задача" not in seen["system"]
+    assert "Текущая задача:\n" not in seen["system"]
     assert "Долговременная память" in seen["system"]
     assert "Правило памяти" in seen["system"]
+    assert "Отключённые слои" in seen["system"]  # WM непустой и off
 
 
 def test_guard_skips_disabled_layers(data_dir):
@@ -261,6 +263,61 @@ def test_guard_skips_disabled_layers(data_dir):
     assert [k for k, _ in hits] == ["Стек"]
     agent.store.set_toggle("lt", False)
     assert agent._detect_memory_conflict(d["id"], "Напиши ТЗ: источник гугл, стек питон") == []
+
+
+# ---------- заметка об отключённом слое в system-промте ----------
+
+def test_payload_off_layer_note_present(data_dir):
+    """LT off + непустой LT → заметка «слой отключён» в system-промте."""
+    seen = {}
+
+    def handler(request):
+        if "stream" in json.loads(request.content):
+            seen["system"] = json.loads(request.content)["messages"][0]["content"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.lt_set("SA", "запросы BFF")
+    agent.store.set_toggle("lt", False)
+    list(agent.ask_stream(d["id"], "привет"))
+    assert "Отключённые слои" in seen["system"]
+    assert "Долговременная память" in seen["system"]
+    assert "«SA: запросы BFF»" not in seen["system"]  # содержимое не светим
+    assert "Текущая задача" not in seen["system"]
+
+
+def test_payload_off_layer_note_absent_when_empty(data_dir):
+    """LT off + ПУСТОЙ LT → заметки нет (ссылаться не на что)."""
+    seen = {}
+
+    def handler(request):
+        if "stream" in json.loads(request.content):
+            seen["system"] = json.loads(request.content)["messages"][0]["content"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.set_toggle("lt", False)
+    list(agent.ask_stream(d["id"], "привет"))
+    assert "Отключённые слои" not in seen["system"]
+
+
+def test_payload_off_layer_note_absent_when_on(data_dir):
+    """Слои включены → заметки нет."""
+    seen = {}
+
+    def handler(request):
+        if "stream" in json.loads(request.content):
+            seen["system"] = json.loads(request.content)["messages"][0]["content"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.lt_set("SA", "запросы BFF")
+    list(agent.ask_stream(d["id"], "привет"))
+    assert "Отключённые слои" not in seen["system"]
+    assert "Долговременная память" in seen["system"]
 
 
 # ---------- server-side гард «запрос ↔ память» ----------

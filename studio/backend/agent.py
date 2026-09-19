@@ -173,9 +173,23 @@ class StudioAgent:
         сообщение (история не шлётся, сообщения по-прежнему хранятся);
         wm/lt off — их блоки не добавляются в system-промт."""
         cfg = self.get_config()
-        st_on = self.store.get_toggles()["st"]
+        t = self.store.get_toggles()
+        st_on = t["st"]
         blocks = self.store.build_memory_blocks(dialogue_id)
         system = cfg["system_prompt"] + blocks + (MEMORY_RULE if blocks else "")
+        # Отключённый непустой слой: его следы могут остаться в истории
+        # («по памяти ...» в прошлых ответах) — явно говорим, что слой
+        # отключён, иначе модель продолжает «отрабатывать» память из диалога.
+        disabled = []
+        if not t["wm"] and self.store.wm_items(dialogue_id):
+            disabled.append("рабочая память «Текущая задача»")
+        if not t["lt"] and self.store.lt_items():
+            disabled.append("«Долговременная память»")
+        if disabled:
+            system += ("\n\nОтключённые слои: " + ", ".join(disabled) +
+                       ". Они не применяются к этому запросу: не ссылайся "
+                       "на их пункты и не отказывай, ссылаясь на них, даже "
+                       "если они упоминались ранее в диалоге.")
         msgs = self.store.get_messages(dialogue_id)
         if st_on:
             history = [{"role": m["role"], "content": m["content"]} for m in msgs]
