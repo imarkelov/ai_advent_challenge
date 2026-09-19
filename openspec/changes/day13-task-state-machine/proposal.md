@@ -36,18 +36,21 @@
   её вместе со state.
 - **Статус работы в UI**: SSE-события `stage`/`stage_done`/`task_done`/
   `task_paused`; stage-outputs отображаются в чате как сообщения с чипом
-  «агент + стадия»; статус-строка стадий в ChatPanel (агент работает… /
-  выполнено) и новая вкладка «Задача» в панели «Контекст» (описание,
-  стадии с outputs, вердикт, instruction, кнопки Пауза/Продолжить/Новая
-  задача).
+  «задача»; статус-строка стадий в ChatPanel (текущая — подсвечена /
+  пройденные — ✓), кнопки Стоп/Продолжить в шапке; новая вкладка «Задача»
+  в панели «Контекст» — вход в задачу: запуск по описанию, стадии с
+  outputs, вердикт, instruction на паузе, кнопки Пауза/Продолжить/Новая
+  задача.
 - **API**: `POST /api/task/run` (SSE-пайплайн), `POST /api/task/start`,
   `POST /api/task/pause`, `POST /api/task/resume`,
   `POST /api/task/instruction`, `POST /api/task/reset`,
   `GET /api/task?dialogue_id=`; `task` в ответах `/api/dialogues`. Гард:
-  `/api/chat` при активной непазованной задаче → 400 RU.
+  `/api/chat` при активной непаузанной незавершённой задаче → ответ 200
+  с SSE `error` «Задача выполняется…» (сообщение не сохраняется).
 - **Проверка**: pytest (бэкенд, MockTransport: FSM-цикл, пауза/резюм,
   retry-валидация, парсинг verdict, инъекция state, API 400/404,
-  guard), Vitest (TaskTab, task-режим ChatPanel), расширение
+  guard), Vitest (TaskTab, ChatPanel: статус-строка/стоп/резюм/чип/
+  блокировка ввода), расширение
   `scripts/e2e_studio.py` (детерминированное ядро через API + live
   best-effort полный пайплайн).
 
@@ -72,8 +75,9 @@
   `studio/backend/agent.py` (оркестратор `task_run`, stage-промпты,
   парсинг verdict, гард в `ask_stream`), `studio/backend/main.py`
   (эндпоинты `/api/task/*`); фронтенд: новый `components/TaskTab.tsx`,
-  правки `ChatPanel.tsx` (режим «Задача», кнопка Стоп/Продолжить,
-  статус-строка стадий), `ContextPanel.tsx` (таб), `state.tsx`, `api.ts`
+  правки `ChatPanel.tsx` (кнопки Стоп/Продолжить, статус-строка
+  стадий, чип «задача», блокировка ввода на время стадии),
+  `ContextPanel.tsx` (таб), `state.tsx`, `api.ts`
   (SSE `/api/task/run`).
 - **Данные**: `dialogues.json` — новое поле `task` в записи диалога
   (бэкворд-совместимо: отсутствие поля = задача неактивна).

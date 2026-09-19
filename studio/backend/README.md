@@ -45,8 +45,8 @@ python -m pytest -q
 | POST | `/api/dialogues/{id}/rename` | Переименовать диалог (`{title}`; 400 пустой, 404 не найден) |
 | POST | `/api/dialogues/{id}/activate` | Сделать диалог активным |
 | POST | `/api/task/start` | Создать задачу по описанию `{dialogue_id, description}` (200; 400 — уже есть активная задача, включая done, или пустое описание; 404 — диалог) |
-| POST | `/api/task/run` | Запустить/продолжить пайплайн: SSE-стрим `data: {json}\n\n` (события `stage` / `stage_done` / `task_paused` / `task_done` / `error`; 400 — задача не активна) |
-| POST | `/api/task/pause` | Пауза на границе стадии `{dialogue_id}` (400 — нет активной задачи) |
+| POST | `/api/task/run` | Запустить/продолжить пайплайн: SSE-стрим `data: {json}\n\n` (события `stage` / `stage_done` / `task_paused` / `task_done` / `error`; 400 — нет задачи или задача завершена) |
+| POST | `/api/task/pause` | Пауза на границе стадии `{dialogue_id}` (400 — нет активной задачи или задача завершена) |
 | POST | `/api/task/resume` | Снять паузу `{dialogue_id}` (400 — задача не на паузе) |
 | POST | `/api/task/instruction` | Инструкция на паузе `{dialogue_id, text}` (400 — не на паузе / не-строка) |
 | POST | `/api/task/reset` | Сброс задачи `{dialogue_id}` (active=false, поля чистые) |
