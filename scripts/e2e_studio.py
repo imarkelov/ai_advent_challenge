@@ -283,6 +283,17 @@ def main() -> int:
             record("API: dialogue", "FAIL", f"code={code}")
             return 1
 
+        # 5b. переименование диалога
+        code, body, _ = http("POST", f"/api/dialogues/{dlg_id}/rename",
+                             {"title": "e2e-диалог"})
+        code2, body2, _ = http("GET", "/api/dialogues")
+        titles = [d.get("title") for d in json.loads(body2).get("dialogues", [])]
+        if code == 200 and "e2e-диалог" in titles:
+            record("API: dialogue rename", "PASS")
+        else:
+            record("API: dialogue rename", "FAIL", f"code={code} titles={titles}")
+            return 1
+
         # 6. WM (проверка конкретного ключа — не зависит от чужих данных)
         code, _, _ = http("POST", "/api/memory/working",
                           {"key": "e2e", "value": "проверка"})

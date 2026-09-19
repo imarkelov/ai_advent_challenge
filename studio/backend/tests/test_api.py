@@ -172,6 +172,28 @@ def test_models_unavailable_502(tmp_path):
     assert r.json()["detail"]
 
 
+# ---------- /api/dialogues: rename ----------
+
+def test_rename_dialogue(client, dialogue_id):
+    r = client.post(f"/api/dialogues/{dialogue_id}/rename", json={"title": "Новое имя"})
+    assert r.status_code == 200
+    assert r.json()["dialogue"]["title"] == "Новое имя"
+    titles = [d["title"] for d in client.get("/api/dialogues").json()["dialogues"]]
+    assert "Новое имя" in titles
+
+
+def test_rename_dialogue_missing_404(client):
+    r = client.post("/api/dialogues/nope/rename", json={"title": "x"})
+    assert r.status_code == 404
+
+
+def test_rename_dialogue_empty_title_400(client, dialogue_id):
+    r = client.post(f"/api/dialogues/{dialogue_id}/rename", json={"title": "  "})
+    assert r.status_code == 400
+    r2 = client.post(f"/api/dialogues/{dialogue_id}/rename", json={})
+    assert r2.status_code == 400
+
+
 # ---------- /api/dialogues ----------
 
 def test_dialogues_list_empty(client):

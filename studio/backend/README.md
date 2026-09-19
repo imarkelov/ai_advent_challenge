@@ -42,6 +42,7 @@ python -m pytest -q
 | GET | `/api/models` | Доступные модели (зонд с per-model ключом, кэш 10 мин) с лимитами; self-heal модели конфига (502 при недоступности) |
 | GET / POST | `/api/dialogues` | Список диалогов / создать (201, становится активным) |
 | GET / DELETE | `/api/dialogues/{id}` | Диалог с сообщениями / удалить |
+| POST | `/api/dialogues/{id}/rename` | Переименовать диалог (`{title}`; 400 пустой, 404 не найден) |
 | POST | `/api/dialogues/{id}/activate` | Сделать диалог активным |
 | POST | `/api/memory/st/clear` | Очистить сообщения активного диалога |
 | GET | `/api/memory` | Статистика слоёв памяти + `active_id` |

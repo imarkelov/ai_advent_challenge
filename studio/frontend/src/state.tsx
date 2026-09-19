@@ -10,7 +10,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react'
-import { apiGet, apiPost, chatStream, type ChatEvent } from './api'
+import { apiDelete, apiGet, apiPost, chatStream, type ChatEvent } from './api'
 
 // ── Типы по контракту API дня 11 ────────────────────────────────────────────
 export type Role = 'system' | 'user' | 'assistant'
@@ -168,6 +168,8 @@ export type StudioAction =
       lastRequest?: RequestDetail
     }
   | { type: 'memory'; memory: MemoryState }
+  | { type: 'renamed'; id: string; title: string }
+  | { type: 'dialogues-updated'; dialogues: DialogueMeta[]; activeId: string | null; messages: Message[] }
   | { type: 'models'; models: ModelInfo[] }
   | { type: 'config'; config: Config }
   | { type: 'last-request'; detail: RequestDetail | null }
@@ -225,6 +227,20 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
       }
     case 'memory':
       return { ...state, memory: action.memory }
+    case 'renamed':
+      return {
+        ...state,
+        dialogues: state.dialogues.map((d) =>
+          d.id === action.id ? { ...d, title: action.title } : d,
+        ),
+      }
+    case 'dialogues-updated':
+      return {
+        ...state,
+        dialogues: action.dialogues,
+        activeId: action.activeId,
+        messages: action.messages,
+      }
     case 'models':
       return { ...state, models: action.models }
     case 'config':
@@ -248,6 +264,8 @@ export interface StudioApi {
   setShowRequests: (on: boolean) => void
   refreshMemory: () => Promise<void>
   reloadDialogue: () => Promise<void>
+  deleteDialogues: (ids: string[]) => Promise<void>
+  renameDialogue: (id: string, title: string) => Promise<void>
 }
 
 const StudioCtx = createContext<StudioApi | null>(null)
@@ -336,9 +354,12 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const activateDialogue = useCallback(async (id: string) => {
     if (id === stateRef.current.activeId) return
     await apiPost<{ active_id: string }>(`/dialogues/${id}/activate`)
-    const [d, det] = await Promise.all([
+    const [d, det, memory] = await Promise.all([
       apiGet<DialoguesResponse>('/dialogues'),
       apiGet<DialogueDetailResponse>(`/dialogues/${id}`),
+      // Панели памяти: WM читаем в том же батче — иначе после переключения
+      // диалога «текущая задача» останется от прежнего
+      apiGet<MemoryState>('/memory'),
     ])
     dispatch({
       type: 'activated',
@@ -346,6 +367,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       dialogues: d.dialogues,
       messages: det.dialogue.messages,
     })
+    dispatch({ type: 'memory', memory })
   }, [])
 
   // Отправка сообщения: дельты стримом в чат, done → обновление всех панелей,
@@ -404,6 +426,39 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'memory', memory: await apiGet<MemoryState>('/memory') })
   }, [])
 
+  // Удаление диалогов: для каждого id — DELETE /api/dialogues/{id}
+  // (404 — логируем и продолжаем остальные), затем перечитываем список,
+  // сообщения активного и память
+  const deleteDialogues = useCallback(async (ids: string[]) => {
+    for (const id of ids) {
+      try {
+        await apiDelete<{ ok: boolean }>(`/dialogues/${id}`)
+      } catch (err) {
+        console.error('deleteDialogue:', err)
+      }
+    }
+    const [d, memory] = await Promise.all([
+      apiGet<DialoguesResponse>('/dialogues'),
+      apiGet<MemoryState>('/memory'),
+    ])
+    let messages: Message[] = []
+    if (d.active_id != null) {
+      messages = (await apiGet<DialogueDetailResponse>(`/dialogues/${d.active_id}`)).dialogue.messages
+    }
+    dispatch({ type: 'dialogues-updated', dialogues: d.dialogues, activeId: d.active_id, messages })
+    dispatch({ type: 'memory', memory })
+  }, [])
+
+  // Переименование: POST /api/dialogues/{id}/rename {title} → 200 {dialogue}
+  const renameDialogue = useCallback(async (id: string, title: string) => {
+    try {
+      await apiPost<{ dialogue: DialogueMeta }>(`/dialogues/${id}/rename`, { title })
+      dispatch({ type: 'renamed', id, title })
+    } catch (err) {
+      console.error('renameDialogue:', err)
+    }
+  }, [])
+
   // Перечитать сообщения активного диалога (например, после /memory/st/clear)
   const reloadDialogue = useCallback(async () => {
     const id = stateRef.current.activeId
@@ -422,6 +477,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setShowRequests,
     refreshMemory,
     reloadDialogue,
+    deleteDialogues,
+    renameDialogue,
   }
 
   return <StudioCtx.Provider value={api}>{children}</StudioCtx.Provider>

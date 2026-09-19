@@ -164,6 +164,19 @@ class MemoryStore:
             w.pop(dialogue_id, None)
             self._write_working(w)
 
+    def rename_dialogue(self, dialogue_id: str, title: str) -> None:
+        """Сменить заголовок диалога; ValueError, если диалог не существует
+        или title пуст (после strip)."""
+        with self._lock:
+            if not isinstance(title, str) or not title.strip():
+                raise ValueError("Заголовок не может быть пустым")
+            data = self._read_dialogues()
+            d = self._find(data, dialogue_id)
+            if d is None:
+                raise ValueError(f"Диалог «{dialogue_id}» не найден")
+            d["title"] = title.strip()
+            self._write_dialogues(data)
+
     def append_message(self, dialogue_id: str, role: str, content: str) -> None:
         """Добавить сообщение в диалог; ValueError, если диалог не существует."""
         with self._lock:

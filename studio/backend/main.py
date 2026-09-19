@@ -114,6 +114,20 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
         agent.store.delete_dialogue(dialogue_id)
         return {"ok": True}
 
+    @app.post("/api/dialogues/{dialogue_id}/rename")
+    def dialogues_rename(dialogue_id: str, body: dict):
+        """Переименовать диалог (body: {title})."""
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        title = body.get("title")
+        if not isinstance(title, str) or not title.strip():
+            raise HTTPException(400, "Заголовок не может быть пустым")
+        agent.store.rename_dialogue(dialogue_id, title)
+        d = agent.store.get_dialogue(dialogue_id)
+        return {"dialogue": {"id": d["id"], "title": d["title"],
+                             "created": d["created"],
+                             "message_count": len(d["messages"])}}
+
     @app.post("/api/dialogues/{dialogue_id}/activate")
     def dialogues_activate(dialogue_id: str):
         """Сделать диалог активным."""

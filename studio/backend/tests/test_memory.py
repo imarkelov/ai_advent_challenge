@@ -93,6 +93,23 @@ def test_delete_missing_dialogue_is_noop(store):
     store.clear_st("nope")  # не бросает
 
 
+def test_rename_dialogue(store):
+    d = store.new_dialogue()
+    store.rename_dialogue(d["id"], "Мой диалог")
+    assert store.get_dialogue(d["id"])["title"] == "Мой диалог"
+
+
+def test_rename_dialogue_missing_raises(store):
+    with pytest.raises(ValueError):
+        store.rename_dialogue("nope", "x")
+
+
+def test_rename_dialogue_empty_title_raises(store):
+    d = store.new_dialogue()
+    with pytest.raises(ValueError):
+        store.rename_dialogue(d["id"], "   ")
+
+
 def test_clear_st(store):
     d = store.new_dialogue()
     store.append_message(d["id"], "user", "x")

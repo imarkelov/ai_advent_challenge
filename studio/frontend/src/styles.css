@@ -18,6 +18,7 @@
   --wm: #e0a039;  /* слой: текущая задача (Working) */
   --lt: #b48ce8;  /* слой: долговременная (Long-Term) */
   --ok: #3ddc84;
+  --danger: #e05d5d; /* опасные действия (удаление) */
 
   /* Производные токены */
   --accent-soft: rgba(224, 123, 57, 0.18); /* подложка user-сообщения */
@@ -25,6 +26,7 @@
   --accent-glow: rgba(224, 123, 57, 0.35);
   --glow-blue: rgba(74, 158, 255, 0.07);
   --glow-purple: rgba(180, 140, 232, 0.06);
+  --danger-soft: rgba(224, 93, 93, 0.15); /* подложка опасных действий */
 
   /* Масштаб отступов */
   --sp-1: 4px;
@@ -278,6 +280,51 @@ button {
   font-size: 11px;
   color: var(--muted);
   flex-shrink: 0;
+}
+
+/* Строка диалога: чекбокс выбора + кнопка-строка (или inline-инпут ренейма) */
+.dialogue-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.dialogue-item > .dialogue,
+.dialogue-item > .dialogue-rename {
+  flex: 1;
+  min-width: 0;
+}
+
+.dialogue-check {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+/* Inline-ренейм: инпут на месте строки диалога */
+.dialogue-rename {
+  padding: 0 var(--sp-2);
+}
+.rename-input {
+  width: 100%;
+}
+
+/* Кнопка удаления выбранных: компактная, при наведении — опасный оттенок */
+.btn-delete {
+  width: 100%;
+  margin-bottom: var(--sp-2);
+  font-size: 12px;
+  padding: var(--sp-1) var(--sp-3);
+  color: var(--muted);
+  transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+.btn-delete:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
 .new-dialogue {
