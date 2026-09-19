@@ -22,7 +22,11 @@
        (день 12: чат-диалоги сначала decline-профильт — pending-диалог не
        уходит в LLM; день-11 поведение проверяется на не-pending диалоге)
     10. Авто-заголовок: чат в НОВОМ диалоге (после decline профиля) →
-       title меняется с «Новый диалог»; assistant-сообщение хранится с model.
+        title меняется с «Новый диалог»; assistant-сообщение хранится с model.
+    10c. Персонализация (день 12, live): два диалога с разными active-
+         профилями, один вопрос → разные ответы (best-effort) + профиль-
+         блоки в телах запросов журнала; запрос с табу-словом → system-
+         напоминание гарда (D8) в теле LLM-запроса.
   11. GET /api/tokens → {last, session, context_limit}.
   11. GET /api/requests → список; после успешного чата запись с model.
   12. finally: ВСЕГДА убить свой uvicorn, убедиться, что порт 8100 закрыт.
@@ -232,6 +236,8 @@ def main() -> int:
     dlg_id: str | None = None
     dlg2_id: str | None = None
     prof_dlg_id: str | None = None
+    dlg3_id: str | None = None
+    dlg4_id: str | None = None
     orig_model: str | None = None
     try:
         if proc is None:
@@ -467,6 +473,86 @@ def main() -> int:
                        f"title={dlg2_after.get('title')!r} model={got_model!r}")
                 return 1
 
+            # 8c. Персонализация (день 12, live): разные active-профили →
+            #     разные ответы + гард табу-слов. Детерминированное ядро:
+            #     профиль-блоки и гард-напоминание в ТЕЛАХ запросов журнала
+            #     (GET /api/requests/{id}); различие live-ответов — best-
+            #     effort (fix-ап в detail, не FAIL — мелкие модели).
+            code, body, _ = http("POST", "/api/dialogues")
+            dlg3_id = json.loads(body).get("dialogue", {}).get("id")
+            code, body, _ = http("POST", "/api/dialogues")
+            dlg4_id = json.loads(body).get("dialogue", {}).get("id")
+            if not (dlg3_id and dlg4_id):
+                record("API: персонализация (диалоги)", "FAIL",
+                       "не удалось создать диалоги для профилей")
+                return 1
+            http("POST", "/api/profile",
+                 {"dialogue_id": dlg3_id, "name": "Иван",
+                  "role": "backend-разработчик",
+                  "tone": "отвечай ровно одним словом", "taboos": "мат"})
+            http("POST", "/api/profile",
+                 {"dialogue_id": dlg4_id, "name": "Мария",
+                  "role": "дизайнер",
+                  "tone": "дружелюбно, 2-3 предложения", "taboos": ""})
+            q = "Кто ты? Ответь кратко."
+            _, raw3, _ = http("POST", "/api/chat",
+                              {"dialogue_id": dlg3_id, "message": q},
+                              timeout=CHAT_TIMEOUT)
+            dones3 = parse_sse(raw3)[1]
+            a3 = dones3[-1].get("answer", "") if dones3 else ""
+            _, raw4, _ = http("POST", "/api/chat",
+                              {"dialogue_id": dlg4_id, "message": q},
+                              timeout=CHAT_TIMEOUT)
+            dones4 = parse_sse(raw4)[1]
+            a4 = dones4[-1].get("answer", "") if dones4 else ""
+            # Табу-гард (D8): запрос с табу-словом → system-напоминание в
+            # теле LLM-запроса (детерминированно), ответ — вежливый отказ.
+            _, rawt, _ = http("POST", "/api/chat",
+                              {"dialogue_id": dlg3_id,
+                               "message": "Напиши фразу, используя мат"},
+                              timeout=CHAT_TIMEOUT)
+            donest = parse_sse(rawt)[1]
+            at = donest[-1].get("answer", "") if donest else ""
+            # Журнал: ищем тела запросов по маркерам в system-сообщениях.
+            code, body, _ = http("GET", "/api/requests")
+            req_ids = [r["id"] for r in json.loads(body).get("requests", [])][-6:]
+            msgs_by_marker = {}
+            for rid in req_ids:
+                code, body, _ = http("GET", f"/api/requests/{rid}")
+                if code != 200:
+                    continue
+                msgs = json.loads(body).get("request", {}).get("messages", [])
+                sys_txt = " ".join(m.get("content", "") for m in msgs
+                                   if m.get("role") == "system")
+                for marker in ("Иван", "Мария", "⚠️ Табу"):
+                    if marker in sys_txt and marker not in msgs_by_marker:
+                        msgs_by_marker[marker] = msgs
+            p3 = msgs_by_marker.get("Иван", [])
+            p4 = msgs_by_marker.get("Мария", [])
+            pt = msgs_by_marker.get("⚠️ Табу", [])
+            ok3 = any("Иван" in m.get("content", "")
+                      and "отвечай ровно одним словом" in m.get("content", "")
+                      for m in p3 if m.get("role") == "system")
+            ok4 = any("Мария" in m.get("content", "") for m in p4
+                      if m.get("role") == "system")
+            okt = any("⚠️ Табу" in m.get("content", "") and "мат" in m.get("content", "")
+                      for m in pt if m.get("role") == "system")
+            if (dones3 and dones4 and donest and ok3 and ok4 and okt):
+                detail = (f"Иван(1 слово): {a3[:60]!r} | "
+                          f"Мария: {a4[:60]!r} | "
+                          f"гард: {at[:60]!r}")
+                if a3.strip() == a4.strip():
+                    detail += " [warn: ответы совпали — best-effort]"
+                record("API: персонализация (профили → ответы + гард табу)",
+                       "PASS", detail)
+            else:
+                record("API: персонализация (профили → ответы + гард табу)",
+                       "FAIL",
+                       f"dones={len(dones3)}/{len(dones4)}/{len(donest)} "
+                       f"block3={ok3} block4={ok4} guard={okt} "
+                       f"a3={a3[:40]!r} a4={a4[:40]!r}")
+                return 1
+
         # 9. токены
         code, body, _ = http("GET", "/api/tokens")
         tok = json.loads(body)
@@ -494,7 +580,7 @@ def main() -> int:
             f"{len(skips)} SKIP, {len(fails)} FAIL")
         return 1 if fails else 0
     finally:
-        _cleanup([dlg_id, dlg2_id, prof_dlg_id], orig_model)
+        _cleanup([dlg_id, dlg2_id, prof_dlg_id, dlg3_id, dlg4_id], orig_model)
         stop_server(proc)
 
 

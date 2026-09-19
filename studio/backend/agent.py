@@ -311,6 +311,22 @@ class StudioAgent:
                             "пункт) и сообщить, что принято решение "
                             "действовать по памяти."),
             })
+        # День 12 (D8): табу-слова активного профиля в запросе — system-
+        # напоминание (тот же паттерн, что конфликт-гард). Профиль —
+        # предпочтения, детект детерминированный, LLM не участвует.
+        taboo_hits = self._detect_taboo(dialogue_id, message)
+        if taboo_hits:
+            items = "; ".join(f"«{t}»" for t in taboo_hits)
+            messages.append({
+                "role": "system",
+                "content": (f"⚠️ Табу: запрос пользователя содержит "
+                            f"табу-слова из профиля: {items}. По правилу "
+                            "профиля ты обязан вежливо отказаться выполнить "
+                            "задействующую их часть запроса (с лёгкой "
+                            "доброжелательной шуткой, ссылаясь на конкретное "
+                            "табу-слово) и сообщить, что принято решение "
+                            "действовать по профилю пользователя."),
+            })
         body = {
             "model": cfg["model"],
             "temperature": cfg["temperature"],
@@ -503,6 +519,27 @@ class StudioAgent:
             self.store.profile_action(dialogue_id, "decline")
             return PROFILE_DECLINED_TEXT
         return PROFILE_INVITE_TEXT
+
+    def _detect_taboo(self, dialogue_id: str, message: str) -> list:
+        """Табу-слова АКТИВНОГО профиля, встречающиеся в запросе (D8).
+
+        Эвристика: поле «стоп-слова/табу» режется по ,/;, trim; токены
+        короче 2 символов пропускаются (шум); lower-подстрочное
+        совпадение. LLM не участвует. Возвращает список совпавших токенов
+        ([] = гард не срабатывает). non-active/пустые табу — всегда [].
+        """
+        p = self.store.profile_get(dialogue_id)
+        if p["status"] != "active" or not p["taboos"]:
+            return []
+        msg = message.lower()
+        found = []
+        for tok in p["taboos"].replace(";", ",").split(","):
+            tok = tok.strip()
+            if len(tok) < 2 or tok in found:
+                continue
+            if tok.lower() in msg:
+                found.append(tok)
+        return found
 
     def _detect_memory_conflict(self, dialogue_id: str, message: str) -> list:
         """Пункты ВКЛЮЧЁННЫХ слоёв (WM диалога + LT), противоречащие запросу.

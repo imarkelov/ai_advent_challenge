@@ -175,6 +175,128 @@ def test_profile_coexists_with_memory_blocks(data_dir):
     assert agent.build_payload(d["id"])[0]["content"] == expected
 
 
+# ---------- гард табу-слов (день 12, D8) ----------
+
+def test_taboo_reminder_appended_to_payload(data_dir):
+    """active + табу-слово в запросе → system-напоминание в КОНЦЕ messages."""
+    seen = {}
+
+    def handler(request):
+        seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.profile_set(d["id"], "Иван", "backend", "кратко", "мат, эмодзи")
+    list(agent.ask_stream(d["id"], "добавь в ответ эмодзи"))
+    assert seen["messages"][-1]["role"] == "system"
+    assert "эмодзи" in seen["messages"][-1]["content"]
+    assert seen["messages"][-2]["role"] == "user"
+    # статус профиля не меняется
+    assert agent.store.profile_get(d["id"])["status"] == "active"
+
+
+def test_taboo_reminder_second_token(data_dir):
+    """Сплит по запятой: срабатывает и второе табу-слово."""
+    seen = {}
+
+    def handler(request):
+        seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.profile_set(d["id"], "Иван", "", "", "мат, эмодзи")
+    list(agent.ask_stream(d["id"], "напиши фразу, используя мат"))
+    assert seen["messages"][-1]["role"] == "system"
+    assert "мат" in seen["messages"][-1]["content"]
+    assert "эмодзи" not in seen["messages"][-1]["content"]  # только найденное
+
+
+def test_no_taboo_reminder_without_taboo_word(data_dir):
+    seen = {}
+
+    def handler(request):
+        seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.profile_set(d["id"], "Иван", "", "", "мат, эмодзи")
+    list(agent.ask_stream(d["id"], "расскажи анекдот"))
+    assert seen["messages"][-1]["role"] == "user"
+
+
+def test_no_taboo_reminder_non_active(data_dir):
+    """declined → гард неактивен, даже если табу-поле заполнено."""
+    seen = {}
+
+    def handler(request):
+        seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.profile_set(d["id"], "Иван", "", "", "мат")
+    agent.store.profile_action(d["id"], "decline")
+    assert agent.store.profile_get(d["id"])["taboos"] == "мат"  # поля сохранились
+    list(agent.ask_stream(d["id"], "напиши фразу с матом"))
+    assert seen["messages"][-1]["role"] == "user"
+
+
+def test_no_taboo_reminder_empty_taboos(data_dir):
+    seen = {}
+
+    def handler(request):
+        seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.profile_set(d["id"], "Иван", "роль", "тон", "")
+    list(agent.ask_stream(d["id"], "напиши фразу, используя мат"))
+    assert seen["messages"][-1]["role"] == "user"
+
+
+def test_taboo_short_token_skipped(data_dir):
+    """Токен короче 2 символов не детектится (шум), остальные — да."""
+    seen = {}
+
+    def handler(request):
+        seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.profile_set(d["id"], "Иван", "", "", "x, мат")
+    list(agent.ask_stream(d["id"], "напиши букву x"))
+    assert seen["messages"][-1]["role"] == "user"
+    list(agent.ask_stream(d["id"], "напиши фразу с матом"))
+    assert seen["messages"][-1]["role"] == "system"
+    assert "мат" in seen["messages"][-1]["content"]
+
+
+def test_taboo_coexists_with_conflict_guard(data_dir):
+    """Табу-гард и конфликт-гард WM/LT независимы: оба напоминания в хвосте."""
+    seen = {}
+
+    def handler(request):
+        seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.profile_set(d["id"], "Иван", "", "", "мат")
+    agent.store.wm_set(d["id"], "Источник", "Яндекс")
+    list(agent.ask_stream(d["id"], "напиши ТЗ с матом, источник — гугл"))
+    tail = [m for m in seen["messages"][-2:] if m["role"] == "system"]
+    assert len(tail) == 2
+    joined = " ".join(m["content"] for m in tail)
+    assert "мат" in joined and "Источник: Яндекс" in joined
+
+
+# ---------- правило памяти ----------
+
 def test_memory_rule_forbids_silent_compliance():
     """Правило: память — ограничения, тихое подчинение запрещено; при
     противоречии — вежливый отказ + юмор + решение действовать по памяти."""
