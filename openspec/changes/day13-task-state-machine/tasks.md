@@ -7,7 +7,7 @@
 
 - [ ] 1.1 `studio/backend/tests/test_memory.py` (новый раздел):
       тесты task-методов — `task_create` (stage=planning, active,
-      400/ValueError при активной незавершённой), `task_set_stage`/
+      400/ValueError при любой активной задаче, включая done), `task_set_stage`/
       `task_stage_done` (output+ts, переход только вперёд по FSM,
       backward/прыжок игнорируется), `task_pause`/`task_resume` (флаг,
       ValueError вне условий), `task_set_instruction` (только paused,
@@ -47,18 +47,18 @@
       `task_run(dialogue_id)` — синхронный генератор-цикл (паттерн
       `ask_stream`): выполнить стадию → сохранить output → проверить
       stop-флаг/паузу → следующая; парсинг `<verdict>` (best-effort);
-      non-stream для planning/execution/validation, stream — синтез.
+      non-stream для всех стадий, включая синтез (событий `delta` в task-стриме нет).
 - [ ] 2.3 Гард в `ask_stream`/`/api/chat`: активная непаузанная задача →
       error-событие/400 RU, сообщение в диалог не пишется (тест в
       `test_agent.py` + `test_api.py`).
-- [ ] 2.4 Коммит: `feat(day13-task): оркестратор pайплайна stage-агентов
+- [ ] 2.4 Коммит: `feat(day13-task): оркестратор пайплайна stage-агентов
       (FSM-цикл, SSE-события, verdict-ретрай, пауза на границе стадии,
       гард /api/chat)`
 
 ## 3. API: эндпоинты /api/task/*
 
 - [ ] 3.1 `studio/backend/tests/test_api.py` (новый раздел):
-      `POST /api/task/start` (201; 400 при активной незавершённой;
+      `POST /api/task/start` (200; 400 при любой активной задаче, включая done;
       400 пустое description; 404 диалог), `POST /api/task/run`
       (SSE: stage/stage_done/task_done; 400 без задачи), `pause`
       (400 без активной), `resume` (400 без паузы), `instruction`
@@ -75,7 +75,7 @@
 - [ ] 4.1 `studio/frontend/src/api.ts`: `apiTaskGet/Start/Pause/Resume/
       Instruction/Reset` + `taskRun` (SSE через fetch/ReadableStream,
       парсер событий `stage`/`stage_done`/`task_paused`/`task_done`/
-      `delta`/`error`, паттерн `chatStream`).
+      `error`, паттерн `chatStream`).
 - [ ] 4.2 `studio/frontend/src/state.tsx`: `task` в reducer (из
       dialogues), экшены (запуск/пауза/резюм/instruction/reset,
       stage-события из SSE), перечитывание `/api/dialogues`+`/api/task`
