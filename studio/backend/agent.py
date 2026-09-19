@@ -82,6 +82,43 @@ CONFLICT_VERBS = (
 # Заголовок нового диалога; равен ему → авто-название по первому сообщению.
 DEFAULT_DIALOGUE_TITLE = "Новый диалог"
 
+# Профиль пользователя (день 12): тексты служебного потока инициализации.
+# Детерминированные — LLM в них не участвует (мелкие модели не должны
+# управлять служебным потоком).
+PROFILE_INVITE_TEXT = (
+    "Перед началом работы нужно инициализировать профиль пользователя.\n"
+    "Выберите один из вариантов:\n"
+    "1) заполнить вручную — откройте вкладку «Профили» в панели «Контекст» "
+    "справа и сохраните 4 поля (имя, роль и сфера, тон и стиль, "
+    "стоп-слова/табу);\n"
+    "2) провести интервью — напишите «интервью», я задам 4 вопроса одним "
+    "сообщением;\n"
+    "3) отказаться — напишите «отказ»; запросы будут выполняться как обычно, "
+    "но без учёта ваших предпочтений.")
+
+PROFILE_INTERVIEW_TEXT = (
+    "Давайте интервью для профиля. Ответьте, пожалуйста, одним сообщением "
+    "на 4 вопроса:\n"
+    "1) Как вас зовут (имя пользователя);\n"
+    "2) Ваша профессиональная роль и сфера;\n"
+    "3) Какой тон и стиль общения вам подходит;\n"
+    "4) Стоп-слова/табу — слова или темы, которых нужно избегать.")
+
+PROFILE_MANUAL_TEXT = (
+    "Хорошо, заполните профиль вручную: откройте панель «Контекст» справа, "
+    "вкладка «Профили», заполните 4 поля и нажмите «Сохранить». После "
+    "сохранения профиль будет применяться к каждому запросу автоматически.")
+
+PROFILE_DECLINED_TEXT = (
+    "Хорошо, профиль не заполняем. Запросы буду выполнять как обычно; "
+    "подсказка о инициализации останется в интерфейсе — вернуться к ней "
+    "можно в любой момент.")
+
+PROFILE_INTERVIEW_MARKERS = ("интерв",)
+PROFILE_MANUAL_MARKERS = ("вручную",)
+PROFILE_DECLINE_MARKERS = ("отказ", "не надо", "не нужно", "не буду",
+                           "не заполня", "не хоч")
+
 # TTL кэша доступности моделей (сек). Зонд — минимальный запрос max_tokens=1;
 # GPustack отдаёт 403 «Api key not allowed», если ключу модель не доступна.
 MODEL_PROBE_TTL = 600
@@ -164,6 +201,30 @@ class StudioAgent:
 
     # ---------- построение запроса ----------
 
+    def build_profile_block(self, dialogue_id: str) -> str:
+        """Блок профиля пользователя для system-промпта (день 12).
+
+        Пусто, если профиль не active или все поля пусты. Порядок в
+        build_payload: базовый промпт → профиль → блоки памяти."""
+        p = self.store.profile_get(dialogue_id)
+        if p["status"] != "active":
+            return ""
+        lines = []
+        if p["name"]:
+            lines.append(f"- Имя: {p['name']}")
+        if p["role"]:
+            lines.append(f"- Роль и сфера: {p['role']}")
+        if p["tone"]:
+            lines.append(f"- Тон и стиль: {p['tone']}")
+        if p["taboos"]:
+            lines.append(f"- Стоп-слова/табу: {p['taboos']}")
+        if not lines:
+            return ""
+        block = "\n\nПрофиль пользователя:\n" + "\n".join(lines)
+        if p["taboos"]:
+            block += f"\nИзбегай: {p['taboos']}"
+        return block
+
     def build_payload(self, dialogue_id: str) -> list:
         """Список сообщений для LLM: [system (промпт + блоки ВКЛЮЧЁННЫХ слоёв
         памяти + правило при наличии памяти)] + история диалога (только
@@ -176,7 +237,8 @@ class StudioAgent:
         t = self.store.get_toggles()
         st_on = t["st"]
         blocks = self.store.build_memory_blocks(dialogue_id)
-        system = cfg["system_prompt"] + blocks + (MEMORY_RULE if blocks else "")
+        system = (cfg["system_prompt"] + self.build_profile_block(dialogue_id)
+                  + blocks + (MEMORY_RULE if blocks else ""))
         # Отключённый непустой слой: его следы могут остаться в истории
         # («по памяти ...» в прошлых ответах) — явно говорим, что слой
         # отключён, иначе модель продолжает «отрабатывать» память из диалога.
@@ -221,6 +283,16 @@ class StudioAgent:
                     self.store.rename_dialogue(dialogue_id, new_title)
                 except ValueError:
                     pass
+        # День 12: pending-профиль — служебный ход без LLM-стрима
+        # (приглашение/интервью/отказ); первый запрос не выполняется.
+        profile = self.store.profile_get(dialogue_id)
+        if profile["status"] == "pending":
+            answer = self._profile_init_turn(dialogue_id, message,
+                                             cfg["model"])
+            self.store.append_message(dialogue_id, "assistant", answer)
+            yield {"type": "done", "answer": answer,
+                   "usage": None, "request_id": None}
+            return
         messages = self.build_payload(dialogue_id)
         # Server-side гард: мелкие модели при истории диалога подчиняются
         # свежему противоречащему запросу, игнорируя правило в system-промте.
@@ -394,6 +466,44 @@ class StudioAgent:
         if self.get_config()["model"] not in {m["id"] for m in available}:
             self.set_config({"model": available[0]["id"]})
 
+    def _profile_init_turn(self, dialogue_id: str, message: str,
+                           model: str) -> str:
+        """Ход служебного потока инициализации профиля (pending-диалог).
+
+        Возвращает текст ответа; меняет статус профиля:
+        - interview-флаг: ответ трактуется как анкета → LLM-экстракт;
+          успех → active + подтверждение, сбой → просьба повторить;
+        - маркеры в сообщении: интервью/вручную/отказ;
+        - иначе → повторное приглашение.
+        """
+        p = self.store.profile_get(dialogue_id)
+        if p["interview"]:
+            extracted = self._extract_profile(model, message)
+            if extracted:
+                self.store.profile_set(dialogue_id, extracted["name"],
+                                       extracted["role"], extracted["tone"],
+                                       extracted["taboos"])
+                return ("Профиль сохранён (имя: {}, роль и сфера: {}, "
+                        "тон и стиль: {}, стоп-слова/табу: {}). Теперь "
+                        "буду отвечать с учётом ваших предпочтений.".format(
+                            extracted["name"] or "—",
+                            extracted["role"] or "—",
+                            extracted["tone"] or "—",
+                            extracted["taboos"] or "—"))
+            return ("Не смог разобрать ответ по всем вопросам анкеты. "
+                    "Повторите, пожалуйста, одним сообщением: имя, роль и "
+                    "сфера, тон и стиль общения, стоп-слова/табу.")
+        low = message.lower()
+        if any(m in low for m in PROFILE_INTERVIEW_MARKERS):
+            self.store.profile_action(dialogue_id, "interview")
+            return PROFILE_INTERVIEW_TEXT
+        if any(m in low for m in PROFILE_MANUAL_MARKERS):
+            return PROFILE_MANUAL_TEXT
+        if any(m in low for m in PROFILE_DECLINE_MARKERS):
+            self.store.profile_action(dialogue_id, "decline")
+            return PROFILE_DECLINED_TEXT
+        return PROFILE_INVITE_TEXT
+
     def _detect_memory_conflict(self, dialogue_id: str, message: str) -> list:
         """Пункты ВКЛЮЧЁННЫХ слоёв (WM диалога + LT), противоречащие запросу.
 
@@ -421,6 +531,50 @@ class StudioAgent:
             if k in msg and v and v not in msg:
                 hits.append((key, value))
         return hits
+
+    def _extract_profile(self, model: str, answer: str) -> dict | None:
+        """Извлечь профиль из ответа на анкету (best-effort, non-stream).
+
+        Не входит в requests.json (как авто-заголовок). Успех →
+        {"name","role","tone","taboos": str}; сбой/не-JSON → None
+        (интервью остаётся активным, агент попросит повторить)."""
+        body = {
+            "model": model,
+            "temperature": 0.2,
+            "max_tokens": 600,
+            "chat_template_kwargs": {"enable_thinking": False},
+            "messages": [
+                {"role": "system",
+                 "content": ("Пользователь ответил на анкету профиля: имя; "
+                             "профессиональная роль и сфера; тон и стиль "
+                             "общения; стоп-слова/табу. Извлеки значения и "
+                             "верни ТОЛЬКО JSON-объект без пояснений и без "
+                             'markdown: {"name": "...", "role": "...", '
+                             '"tone": "...", "taboos": "..."}. Если значение '
+                             "не указано — пустая строка.")},
+                {"role": "user", "content": answer[:1000]},
+            ],
+        }
+        try:
+            resp = self._client.post(
+                self.base_url + "/chat/completions",
+                headers={"Authorization": "Bearer " + self._key_for(model)},
+                json=body, timeout=60,
+            )
+            if resp.status_code != 200:
+                return None
+            content = (((resp.json().get("choices") or [{}])[0]
+                        .get("message") or {}).get("content") or "")
+            s, e = content.find("{"), content.rfind("}")
+            if s == -1 or e <= s:
+                return None
+            obj = json.loads(content[s:e + 1])
+            if not isinstance(obj, dict):
+                return None
+            return {f: (obj[f].strip() if isinstance(obj.get(f), str) else "")
+                    for f in ("name", "role", "tone", "taboos")}
+        except (httpx.HTTPError, ValueError):
+            return None
 
     def _generate_title(self, model: str, message: str) -> str | None:
         """Авто-заголовок диалога по первому сообщению (best-effort).

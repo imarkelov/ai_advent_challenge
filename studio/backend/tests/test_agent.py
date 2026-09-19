@@ -27,6 +27,11 @@ def make_agent(data_dir, handler, env=None):
                        client=client, env=env)
 
 
+def ready(agent, d):
+    """Диалог готов к обычным запросам (профиль declined, день 12)."""
+    agent.store.profile_action(d["id"], "decline")
+
+
 def ok_handler(request: httpx.Request) -> httpx.Response:
     """Стандартный SSE-ответ: 2 дельты + usage + [DONE]."""
     body = sse_body([delta_chunk("Прив"), delta_chunk("ет"), usage_chunk(), "[DONE]"])
@@ -117,6 +122,59 @@ def test_build_payload_no_memory_no_rule(data_dir):
     assert MEMORY_RULE not in payload[0]["content"]
 
 
+# ---------- профиль пользователя (день 12): инъекция ----------
+
+def test_profile_block_active_in_system(data_dir):
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    agent.store.profile_set(d["id"], "Иван", "backend-разработчик",
+                            "кратко и по делу", "мат")
+    agent.store.append_message(d["id"], "user", "привет")
+    system = agent.build_payload(d["id"])[0]["content"]
+    base = agent.get_config()["system_prompt"]
+    assert system.startswith(base + "\n\nПрофиль пользователя:\n")
+    assert "- Имя: Иван" in system
+    assert "- Роль и сфера: backend-разработчик" in system
+    assert "- Тон и стиль: кратко и по делу" in system
+    assert "- Стоп-слова/табу: мат" in system
+    assert "\nИзбегай: мат" in system
+
+
+def test_profile_block_empty_fields_skipped(data_dir):
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    agent.store.profile_set(d["id"], "Иван", "", "", "")
+    system = agent.build_payload(d["id"])[0]["content"]
+    assert "\n\nПрофиль пользователя:\n- Имя: Иван" in system
+    assert "Избегай:" not in system
+    assert "Роль и сфера" not in system  # пустые поля не светим
+
+
+def test_profile_block_pending_declined_absent(data_dir):
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    assert "Профиль пользователя" not in agent.build_payload(d["id"])[0]["content"]
+    agent.store.profile_action(d["id"], "decline")
+    assert "Профиль пользователя" not in agent.build_payload(d["id"])[0]["content"]
+
+
+def test_profile_coexists_with_memory_blocks(data_dir):
+    """Профиль + WM/LT: все блоки на месте, порядок — профиль до памяти."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    agent.store.profile_set(d["id"], "Иван", "роль", "тон", "")
+    agent.store.wm_set(d["id"], "t", "задача")
+    agent.store.lt_set("u", "юзер")
+    agent.store.append_message(d["id"], "user", "привет")
+    base = agent.get_config()["system_prompt"]
+    expected = (base + "\n\nПрофиль пользователя:\n- Имя: Иван\n"
+                "- Роль и сфера: роль\n- Тон и стиль: тон"
+                + "\n\nТекущая задача:\n- t: задача"
+                + "\n\nДолговременная память:\n- u: юзер"
+                + MEMORY_RULE)
+    assert agent.build_payload(d["id"])[0]["content"] == expected
+
+
 def test_memory_rule_forbids_silent_compliance():
     """Правило: память — ограничения, тихое подчинение запрещено; при
     противоречии — вежливый отказ + юмор + решение действовать по памяти."""
@@ -153,6 +211,7 @@ def test_ask_stream_success(data_dir):
 
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     events = list(agent.ask_stream(d["id"], "привет"))
     assert events[0] == {"type": "delta", "text": "Прив"}
     assert events[1] == {"type": "delta", "text": "ет"}
@@ -193,6 +252,7 @@ def test_payload_st_off_sends_only_current_message(data_dir):
 
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     list(agent.ask_stream(d["id"], "первое"))
     list(agent.ask_stream(d["id"], "второе"))
     agent.store.set_toggle("st", False)
@@ -217,6 +277,7 @@ def test_payload_wm_lt_off_no_blocks_no_rule(data_dir):
 
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     agent.store.wm_set(d["id"], "t", "задача")
     agent.store.lt_set("u", "юзер")
     agent.store.set_toggle("wm", False)
@@ -239,6 +300,7 @@ def test_payload_wm_off_lt_on_keeps_rule(data_dir):
 
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     agent.store.wm_set(d["id"], "t", "задача")
     agent.store.lt_set("u", "юзер")
     agent.store.set_toggle("wm", False)
@@ -278,6 +340,7 @@ def test_payload_off_layer_note_present(data_dir):
 
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     agent.store.lt_set("SA", "запросы BFF")
     agent.store.set_toggle("lt", False)
     list(agent.ask_stream(d["id"], "привет"))
@@ -298,6 +361,7 @@ def test_payload_off_layer_note_absent_when_empty(data_dir):
 
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     agent.store.set_toggle("lt", False)
     list(agent.ask_stream(d["id"], "привет"))
     assert "Отключённые слои" not in seen["system"]
@@ -314,6 +378,7 @@ def test_payload_off_layer_note_absent_when_on(data_dir):
 
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     agent.store.lt_set("SA", "запросы BFF")
     list(agent.ask_stream(d["id"], "привет"))
     assert "Отключённые слои" not in seen["system"]
@@ -372,6 +437,7 @@ def test_conflict_reminder_appended_to_payload(data_dir):
 
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     agent.store.wm_set(d["id"], "Источник", "Яндекс")
     list(agent.ask_stream(d["id"], "Напиши ТЗ, источник — гугл"))
     assert seen["messages"][-1]["role"] == "system"
@@ -389,6 +455,7 @@ def test_no_conflict_reminder_without_conflict(data_dir):
 
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     agent.store.wm_set(d["id"], "Источник", "Яндекс")
     list(agent.ask_stream(d["id"], "Расскажи анекдот"))
     assert seen["messages"][-1]["role"] == "user"
@@ -499,9 +566,183 @@ def test_payload_messages_clean_of_model(data_dir):
 
     agent = make_agent(data_dir, handler_with_capture)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     list(agent.ask_stream(d["id"], "первое"))
     list(agent.ask_stream(d["id"], "второе"))
     assert all(set(m.keys()) == {"role", "content"} for m in seen["messages"])
+
+
+# ---------- LLM-экстракт профиля (день 12) ----------
+
+def _profile_extract_handler(content_or_status, calls):
+    """non-stream → str (JSON-ответ с content) или int (HTTP-статус)."""
+    def handler(request):
+        assert "stream" not in json.loads(request.content)
+        calls["n"] += 1
+        if isinstance(content_or_status, int):
+            return httpx.Response(content_or_status, json={"error": "boom"})
+        return httpx.Response(200, json={"choices": [
+            {"message": {"content": content_or_status}}]})
+    return handler
+
+
+def test_extract_profile_valid_json(data_dir):
+    calls = {"n": 0}
+    agent = make_agent(data_dir, _profile_extract_handler(
+        '{"name": "Иван", "role": "backend", "tone": "кратко", "taboos": "мат"}',
+        calls))
+    p = agent._extract_profile("qwen3.8-27b", "Иван, backend, кратко, не мат")
+    assert p == {"name": "Иван", "role": "backend", "tone": "кратко", "taboos": "мат"}
+    assert calls["n"] == 1
+
+
+def test_extract_profile_fenced_with_garbage(data_dir):
+    """Модель «думает» + markdown-ограды: вырезаем объект по {...}."""
+    content = ('Хорошо, извлекаю поля.\n```json\n'
+               '{"name": "Мария", "role": "дизайнер", "tone": "формально", '
+               '"taboos": "шутки"}\n```')
+    agent = make_agent(data_dir, _profile_extract_handler(content, {"n": 0}))
+    p = agent._extract_profile("glm-5.3-flash", "ответ")
+    assert p["name"] == "Мария"
+    assert p["taboos"] == "шутки"
+
+
+def test_extract_profile_missing_fields_become_empty(data_dir):
+    content = '{"name": "Иван", "role": "", "tone": "", "taboos": ""}'
+    agent = make_agent(data_dir, _profile_extract_handler(content, {"n": 0}))
+    assert agent._extract_profile("qwen3.8-27b", "только имя Иван") == \
+        {"name": "Иван", "role": "", "tone": "", "taboos": ""}
+
+
+def test_extract_profile_non_json_returns_none(data_dir):
+    agent = make_agent(data_dir, _profile_extract_handler(
+        "не удалось разобрать", {"n": 0}))
+    assert agent._extract_profile("qwen3.8-27b", "мусор") is None
+
+
+def test_extract_profile_api_error_returns_none(data_dir):
+    agent = make_agent(data_dir, _profile_extract_handler(500, {"n": 0}))
+    assert agent._extract_profile("qwen3.8-27b", "ответ") is None
+
+
+# ---------- state machine инициализации профиля (день 12) ----------
+
+def _profile_handler(extract_content, calls, streams):
+    """non-stream: 1-й — авто-заголовок (пустой), 2-й — экстракт; stream → SSE."""
+    def handler(request):
+        body = json.loads(request.content)
+        if "stream" not in body:
+            calls["n"] += 1
+            if calls["n"] == 1:  # авто-заголовок
+                return httpx.Response(200, json={"choices": [
+                    {"message": {"content": "Тайтл"}}]})
+            return httpx.Response(200, json={"choices": [
+                {"message": {"content": extract_content}}]})
+        streams.append(body)
+        b = sse_body([delta_chunk("ок"), usage_chunk(), "[DONE]"])
+        return httpx.Response(200, content=b.encode("utf-8"))
+    return handler
+
+
+def test_pending_first_message_gets_invite_not_llm(data_dir):
+    calls, streams = {"n": 0}, []
+    agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
+    d = agent.store.new_dialogue()
+    events = list(agent.ask_stream(d["id"], "объясни лямбды"))
+    assert len(streams) == 0  # LLM-стрим НЕ вызывался
+    done = events[-1]
+    assert done["type"] == "done"
+    assert done["usage"] is None and done["request_id"] is None
+    assert "инициализировать профиль" in done["answer"]
+    assert "вручную" in done["answer"] and "интервью" in done["answer"]
+    assert "отказ" in done["answer"]
+    # user + assistant сохранены; запрос в journal не ушёл
+    msgs = agent.store.get_messages(d["id"])
+    assert msgs[0] == {"role": "user", "content": "объясни лямбды"}
+    assert msgs[1]["role"] == "assistant"
+    assert agent.requests_list() == []
+
+
+def test_pending_unrecognized_repeats_invite(data_dir):
+    calls, streams = {"n": 0}, []
+    agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
+    d = agent.store.new_dialogue()
+    list(agent.ask_stream(d["id"], "привет"))
+    events = list(agent.ask_stream(d["id"], "расскажи про акул"))
+    assert len(streams) == 0
+    assert "инициализировать профиль" in events[-1]["answer"]
+    assert agent.store.profile_get(d["id"])["status"] == "pending"
+
+
+def test_pending_manual_marker_points_to_tab(data_dir):
+    calls, streams = {"n": 0}, []
+    agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
+    d = agent.store.new_dialogue()
+    list(agent.ask_stream(d["id"], "вручную"))
+    assert len(streams) == 0
+    assert agent.store.profile_get(d["id"])["status"] == "pending"
+    assert agent.store.profile_get(d["id"])["interview"] is False
+
+
+def test_pending_decline_marker_sets_declined_then_normal_flow(data_dir):
+    calls, streams = {"n": 0}, []
+    agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
+    d = agent.store.new_dialogue()
+    events = list(agent.ask_stream(d["id"], "отказ"))
+    assert agent.store.profile_get(d["id"])["status"] == "declined"
+    assert "отказ" in events[-1]["answer"].lower() or "обычно" in events[-1]["answer"]
+    # следующий ход — уже обычный LLM-поток, без блока профиля
+    list(agent.ask_stream(d["id"], "привет"))
+    assert len(streams) == 1
+    assert "Профиль пользователя" not in streams[0]["messages"][0]["content"]
+
+
+def test_pending_interview_flow_creates_active_profile(data_dir):
+    extract = ('{"name": "Иван", "role": "backend", "tone": "кратко", '
+               '"taboos": "мат"}')
+    calls, streams = {"n": 0}, []
+    agent = make_agent(data_dir, _profile_handler(extract, calls, streams))
+    d = agent.store.new_dialogue()
+    # 1) выбор интервью
+    e1 = list(agent.ask_stream(d["id"], "интервью"))
+    p = agent.store.profile_get(d["id"])
+    assert p["status"] == "pending" and p["interview"] is True
+    assert "имя" in e1[-1]["answer"].lower()
+    assert "стоп-слова" in e1[-1]["answer"].lower() or "табу" in e1[-1]["answer"].lower()
+    # 2) ответ на анкету → экстракт → active
+    e2 = list(agent.ask_stream(d["id"], "Иван, backend-разработчик, кратко, не мат"))
+    p = agent.store.profile_get(d["id"])
+    assert p["status"] == "active" and p["name"] == "Иван" and p["taboos"] == "мат"
+    assert "сохранён" in e2[-1]["answer"].lower() or "профиль" in e2[-1]["answer"].lower()
+    # 3) следующий ход — обычный LLM-поток С блоком профиля
+    list(agent.ask_stream(d["id"], "привет"))
+    assert len(streams) == 1
+    assert "Профиль пользователя" in streams[0]["messages"][0]["content"]
+    assert "Иван" in streams[0]["messages"][0]["content"]
+
+
+def test_pending_interview_failed_extraction_repeats_questions(data_dir):
+    calls, streams = {"n": 0}, []
+    agent = make_agent(data_dir, _profile_handler("не разобрать", calls, streams))
+    d = agent.store.new_dialogue()
+    list(agent.ask_stream(d["id"], "интервью"))
+    events = list(agent.ask_stream(d["id"], "мусор без полей"))
+    p = agent.store.profile_get(d["id"])
+    assert p["status"] == "pending" and p["interview"] is True
+    assert "повтор" in events[-1]["answer"].lower()
+    assert len(streams) == 0
+
+
+def test_reset_back_to_pending_repeats_invite(data_dir):
+    calls, streams = {"n": 0}, []
+    agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
+    d = agent.store.new_dialogue()
+    agent.store.profile_set(d["id"], "Иван", "", "", "")
+    assert agent.store.profile_get(d["id"])["status"] == "active"
+    agent.store.profile_action(d["id"], "reset")
+    events = list(agent.ask_stream(d["id"], "привет"))
+    assert len(streams) == 0
+    assert "инициализировать профиль" in events[-1]["answer"]
 
 
 # ---------- ask_stream: ошибки ----------
@@ -512,6 +753,7 @@ def test_ask_stream_connect_error(data_dir):
 
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     events = list(agent.ask_stream(d["id"], "привет"))
     assert len(events) == 1
     assert events[0]["type"] == "error"
@@ -534,6 +776,7 @@ def test_ask_stream_http_500(data_dir):
 
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     events = list(agent.ask_stream(d["id"], "привет"))
     assert events == [{"type": "error", "message": "Модель вернула ошибку HTTP 500"}]
     assert agent.requests_list()[0]["error"] is not None
@@ -546,6 +789,7 @@ def test_ask_stream_broken_chunk(data_dir):
 
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     events = list(agent.ask_stream(d["id"], "привет"))
     assert len(events) == 1
     assert events[0]["type"] == "error"
@@ -557,6 +801,7 @@ def test_ask_stream_broken_chunk(data_dir):
 def test_journal_list_and_get(data_dir):
     agent = make_agent(data_dir, ok_handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     list(agent.ask_stream(d["id"], "первый"))
     list(agent.ask_stream(d["id"], "второй"))
     lst = agent.requests_list()
@@ -578,6 +823,7 @@ def test_journal_cap_100_fifo(data_dir):
 
     agent = make_agent(data_dir, minimal)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     for i in range(105):
         list(agent.ask_stream(d["id"], f"сообщение {i}"))
     lst = agent.requests_list()
@@ -590,6 +836,7 @@ def test_journal_cap_100_fifo(data_dir):
 def test_requests_clear(data_dir):
     agent = make_agent(data_dir, ok_handler)
     d = agent.store.new_dialogue()
+    ready(agent, d)
     list(agent.ask_stream(d["id"], "x"))
     agent.requests_clear()
     assert agent.requests_list() == []
@@ -691,6 +938,7 @@ def test_chat_uses_model_specific_key(data_dir):
     agent = make_agent(data_dir, handler, env=env)
     agent.set_config({"model": "deepseek-v4-flash"})
     d = agent.store.new_dialogue()
+    ready(agent, d)
     events = list(agent.ask_stream(d["id"], "привет"))
     assert events[-1]["type"] == "done"
     assert seen["auth"] == "Bearer k-deep"
