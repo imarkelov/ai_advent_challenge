@@ -14,7 +14,9 @@
   7. WM: POST /api/memory/working → ok; GET /api/memory → working.entries == 1.
   8. LT: POST /api/memory/longterm → ok; GET /api/memory → long_term.entries == 1.
   9. Чат (если GPustack достижим): POST /api/chat → SSE: >=1 delta + done.
-  10. GET /api/tokens → {last, session, context_limit}.
+  10. Авто-заголовок: чат в НОВОМ диалоге → title меняется с «Новый диалог»;
+      assistant-сообщение хранится с model.
+  11. GET /api/tokens → {last, session, context_limit}.
   11. GET /api/requests → список; после успешного чата запись с model.
   12. finally: ВСЕГДА убить свой uvicorn, убедиться, что порт 8100 закрыт.
 
@@ -155,11 +157,12 @@ def _try_dialogues():
         return 0, b"", {}
 
 
-def _cleanup(dialogue_id: str | None, orig_model: str | None) -> None:
+def _cleanup(dialogue_ids: list[str | None], orig_model: str | None) -> None:
     """Убрать артефакты самого e2e (не трогая данные пользователя)."""
     try:
-        if dialogue_id:
-            http("DELETE", f"/api/dialogues/{dialogue_id}", timeout=10)
+        for dialogue_id in dialogue_ids:
+            if dialogue_id:
+                http("DELETE", f"/api/dialogues/{dialogue_id}", timeout=10)
         http("DELETE", "/api/memory/longterm/e2e", timeout=10)
         if orig_model:
             http("POST", "/api/config", {"model": orig_model}, timeout=10)
@@ -220,6 +223,7 @@ def main() -> int:
 
     proc = start_server()
     dlg_id: str | None = None
+    dlg2_id: str | None = None
     orig_model: str | None = None
     try:
         if proc is None:
@@ -347,6 +351,37 @@ def main() -> int:
                        f"code={code} deltas={len(deltas)} dones={len(dones)}")
                 return 1
 
+            # 8b. авто-заголовок: первое сообщение в НОВОМ диалоге (с title
+            #     «Новый диалог») → LLM называет диалог; assistant-сообщение
+            #     хранится с model. Чат в первом диалоге не проверяет
+            #     авто-заголовок — его title уже переименован (чек 5b).
+            code, body, _ = http("POST", "/api/dialogues")
+            dlg2 = json.loads(body).get("dialogue", {})
+            dlg2_id = dlg2.get("id")
+            code, raw, _ = http("POST", "/api/chat",
+                                {"dialogue_id": dlg2_id,
+                                 "message": "Скажи: ОК"},
+                                timeout=CHAT_TIMEOUT)
+            deltas2, dones2, errors2 = parse_sse(raw)
+            code, body, _ = http("GET", "/api/dialogues")
+            dlg2_after = next(
+                (d for d in json.loads(body).get("dialogues", [])
+                 if d.get("id") == dlg2_id), {})
+            code, body, _ = http("GET", f"/api/dialogues/{dlg2_id}")
+            msgs = json.loads(body).get("dialogue", {}).get("messages", [])
+            assistants = [m for m in msgs if m.get("role") == "assistant"]
+            got_model = assistants[-1].get("model") if assistants else None
+            if (code == 200 and dones2 and not errors2
+                    and dlg2_after.get("title") not in (None, "", "Новый диалог")
+                    and got_model == avail[0]["id"]):
+                record(f"API: chat auto-title + model «{dlg2_after['title']}»",
+                       "PASS")
+            else:
+                record("API: chat auto-title + model", "FAIL",
+                       f"chat={code} dones={len(dones2)} "
+                       f"title={dlg2_after.get('title')!r} model={got_model!r}")
+                return 1
+
         # 9. токены
         code, body, _ = http("GET", "/api/tokens")
         tok = json.loads(body)
@@ -374,7 +409,7 @@ def main() -> int:
             f"{len(skips)} SKIP, {len(fails)} FAIL")
         return 1 if fails else 0
     finally:
-        _cleanup(dlg_id, orig_model)
+        _cleanup([dlg_id, dlg2_id], orig_model)
         stop_server(proc)
 
 

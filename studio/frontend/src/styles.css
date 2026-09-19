@@ -311,6 +311,43 @@ button {
   width: 100%;
 }
 
+/* Заголовок «Диалоги» + переключатель режима выбора */
+.side-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-2);
+}
+.side-title-row .side-title {
+  margin-bottom: 0;
+}
+.select-mode.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* Иконки-действия справа от строки диалога: карандаш + корзина
+   (соседи .dialogue внутри li.dialogue-item, не вложенные кнопки) */
+.dialogue-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.dialogue-actions .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 4px;
+}
+.dialogue-actions .btn-icon svg {
+  display: block;
+}
+/* Корзина: наведение — опасный оттенок */
+.btn-icon-danger:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
 /* Кнопка удаления выбранных: компактная, при наведении — опасный оттенок */
 .btn-delete {
   width: 100%;
@@ -453,6 +490,19 @@ button {
   white-space: pre-wrap;
   word-break: break-word;
   font-size: 15px;
+}
+
+/* Чип модели под assistant-сообщением: какой моделью выполнен запрос */
+.msg-model-chip {
+  display: inline-block;
+  margin-top: var(--sp-1);
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--panel-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
 }
 
 .msg.user {

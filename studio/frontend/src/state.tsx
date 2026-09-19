@@ -18,6 +18,8 @@ export type Role = 'system' | 'user' | 'assistant'
 export interface Message {
   role: Role
   content: string
+  // Модель, которой выполнен запрос (assistant-сообщения из бэкенда; старые — без поля)
+  model?: string
 }
 
 export interface DialogueMeta {
@@ -169,6 +171,7 @@ export type StudioAction =
     }
   | { type: 'memory'; memory: MemoryState }
   | { type: 'renamed'; id: string; title: string }
+  | { type: 'dialogues-refresh'; dialogues: DialogueMeta[] }
   | { type: 'dialogues-updated'; dialogues: DialogueMeta[]; activeId: string | null; messages: Message[] }
   | { type: 'models'; models: ModelInfo[] }
   | { type: 'config'; config: Config }
@@ -234,6 +237,10 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
           d.id === action.id ? { ...d, title: action.title } : d,
         ),
       }
+    case 'dialogues-refresh':
+      // Только state.dialogues: бэкенд присвоил диалогу авто-название —
+      // перечитали список, остальные поля не трогаем
+      return { ...state, dialogues: action.dialogues }
     case 'dialogues-updated':
       return {
         ...state,
@@ -385,6 +392,12 @@ export function StudioProvider({ children }: { children: ReactNode }) {
           } else if (e.type === 'done') {
             dispatch({ type: 'done', answer: e.answer })
             void refreshPanels(e.request_id).catch((err) => console.error('refreshPanels:', err))
+            // Бэкенд сам назвал новый диалог по первому сообщению — перечитываем
+            // список, чтобы сайдбар показал авто-название без перезагрузки.
+            // Ошибка перечитывания не ломает чат.
+            void apiGet<DialoguesResponse>('/dialogues')
+              .then((d) => dispatch({ type: 'dialogues-refresh', dialogues: d.dialogues }))
+              .catch((err) => console.error('dialogues-refresh:', err))
           } else {
             dispatch({ type: 'error-message', text: `Ошибка: ${e.message}` })
           }

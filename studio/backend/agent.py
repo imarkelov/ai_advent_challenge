@@ -61,6 +61,9 @@ MEMORY_RULE = (
 
 JOURNAL_CAP = 100  # максимум записей в журнале (FIFO)
 
+# Заголовок нового диалога; равен ему → авто-название по первому сообщению.
+DEFAULT_DIALOGUE_TITLE = "Новый диалог"
+
 # TTL кэша доступности моделей (сек). Зонд — минимальный запрос max_tokens=1;
 # GPustack отдаёт 403 «Api key not allowed», если ключу модель не доступна.
 MODEL_PROBE_TTL = 600
@@ -145,11 +148,14 @@ class StudioAgent:
 
     def build_payload(self, dialogue_id: str) -> list:
         """Список сообщений для LLM: [system (промпт + блоки памяти + правило
-        при наличии памяти)] + история диалога."""
+        при наличии памяти)] + история диалога (только role/content — служебные
+        поля вроде model в API не уходят)."""
         cfg = self.get_config()
         blocks = self.store.build_memory_blocks(dialogue_id)
         system = cfg["system_prompt"] + blocks + (MEMORY_RULE if blocks else "")
-        return [{"role": "system", "content": system}] + self.store.get_messages(dialogue_id)
+        history = [{"role": m["role"], "content": m["content"]}
+                   for m in self.store.get_messages(dialogue_id)]
+        return [{"role": "system", "content": system}] + history
 
     # ---------- стриминг ответа ----------
 
@@ -160,8 +166,19 @@ class StudioAgent:
         "usage", "request_id"}; при любой ошибке — {"type": "error", "message"}
         (исключение наружу не бросается).
         """
+        d = self.store.get_dialogue(dialogue_id)
+        need_title = (d is not None and not d.get("messages")
+                      and d.get("title") == DEFAULT_DIALOGUE_TITLE)
         self.store.append_message(dialogue_id, "user", message)
         cfg = self.get_config()
+        if need_title:
+            # Авто-название по первому сообщению (best-effort: ошибка — без названия)
+            new_title = self._generate_title(cfg["model"], message)
+            if new_title:
+                try:
+                    self.store.rename_dialogue(dialogue_id, new_title)
+                except ValueError:
+                    pass
         body = {
             "model": cfg["model"],
             "temperature": cfg["temperature"],
@@ -206,7 +223,8 @@ class StudioAgent:
             return
 
         answer = "".join(parts)
-        self.store.append_message(dialogue_id, "assistant", answer)
+        self.store.append_message(dialogue_id, "assistant", answer,
+                                  model=cfg["model"])
         if usage:
             self._session["prompt"] += usage.get("prompt_tokens", 0)
             self._session["completion"] += usage.get("completion_tokens", 0)
@@ -315,6 +333,54 @@ class StudioAgent:
             return
         if self.get_config()["model"] not in {m["id"] for m in available}:
             self.set_config({"model": available[0]["id"]})
+
+    def _generate_title(self, model: str, message: str) -> str | None:
+        """Авто-заголовок диалога по первому сообщению (best-effort).
+
+        Non-stream. Первая попытка с отключённым reasoning
+        (chat_template_kwargs) — у reasoning-моделей (deepseek) бюджет
+        max_tokens съедает «размышление» и content пуст. Если не сработала —
+        повтор без параметра с большим max_tokens: заголовок берётся из
+        последней строки ответа (glm «думает» внутри content).
+        Любой сбой → None — чат это не затрагивает.
+        """
+        base_body = {"model": model, "temperature": 0.3, "messages": [
+            {"role": "system",
+             "content": ("Ты придумываешь названия диалогов. По сообщению "
+                         "пользователя придумай краткое название диалога: "
+                         "2–5 слов, без кавычек, без точки в конце, без "
+                         "пояснений. Ответь только названием.")},
+            {"role": "user", "content": message[:500]},
+        ]}
+        attempts = [
+            dict(base_body, max_tokens=40,
+                 chat_template_kwargs={"enable_thinking": False}),
+            dict(base_body, max_tokens=400),
+        ]
+        for body in attempts:
+            try:
+                resp = self._client.post(
+                    self.base_url + "/chat/completions",
+                    headers={"Authorization": "Bearer " + self._key_for(model)},
+                    json=body,
+                    timeout=60,
+                )
+                if resp.status_code != 200:
+                    continue
+                choice = (resp.json().get("choices") or [{}])[0]
+                content = ((choice.get("message") or {}).get("content")
+                           or "").strip()
+                if not content:
+                    continue
+                lines = [l.strip() for l in content.splitlines() if l.strip()]
+                # цитаты и точка в конце: «Название»., "Название"., Название
+                title = lines[-1].strip('"«»\'').strip().rstrip(".").strip().strip('"«»\'').strip()
+                if not title:
+                    continue
+                return title[:60]
+            except (httpx.HTTPError, ValueError):
+                continue
+        return None
 
     def _key_for(self, model: str) -> str:
         """Ключ API для модели: переменная MODEL_KEY_ENV[модель] из окружения;

@@ -85,6 +85,11 @@ export default function ChatPanel() {
                   <span className="caret" aria-hidden />
                 )}
               </div>
+              {m.role === 'assistant' && m.model && (
+                <span className="msg-model-chip" title="Модель, которой выполнен запрос">
+                  {m.model}
+                </span>
+              )}
             </div>
           )
         })}

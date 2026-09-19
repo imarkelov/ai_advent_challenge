@@ -177,14 +177,22 @@ class MemoryStore:
             d["title"] = title.strip()
             self._write_dialogues(data)
 
-    def append_message(self, dialogue_id: str, role: str, content: str) -> None:
-        """Добавить сообщение в диалог; ValueError, если диалог не существует."""
+    def append_message(self, dialogue_id: str, role: str, content: str,
+                       model: str | None = None) -> None:
+        """Добавить сообщение в диалог; ValueError, если диалог не существует.
+
+        model — необязательная метка (используется для assistant-сообщений:
+        какой моделью выполнен запрос).
+        """
         with self._lock:
             data = self._read_dialogues()
             d = self._find(data, dialogue_id)
             if d is None:
                 raise ValueError(f"Диалог «{dialogue_id}» не найден")
-            d.setdefault("messages", []).append({"role": role, "content": content})
+            msg = {"role": role, "content": content}
+            if model is not None:
+                msg["model"] = model
+            d.setdefault("messages", []).append(msg)
             self._write_dialogues(data)
 
     def clear_st(self, dialogue_id: str) -> None:

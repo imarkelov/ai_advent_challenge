@@ -119,6 +119,16 @@ def test_clear_st(store):
 
 # ---------- WM (per-dialogue) ----------
 
+def test_append_message_with_model(store):
+    """Assistant-сообщение хранится с model; user — без."""
+    d = store.new_dialogue()
+    store.append_message(d["id"], "assistant", "ok", model="qwen3.8-27b")
+    store.append_message(d["id"], "user", "hi")
+    msgs = store.get_messages(d["id"])
+    assert msgs[0] == {"role": "assistant", "content": "ok", "model": "qwen3.8-27b"}
+    assert msgs[1] == {"role": "user", "content": "hi"}
+
+
 def test_wm_isolation_between_dialogues(store):
     a = store.new_dialogue()
     b = store.new_dialogue()

@@ -148,11 +148,13 @@ def test_ask_stream_success(data_dir):
     assert done["answer"] == "Привет"
     assert done["usage"] == USAGE
     assert done["request_id"] == 1
-    # сообщение сохранено в диалоге
+    # сообщение сохранено в диалоге (assistant — с model; ok_handler отвечает
+    # SSE и на non-stream, поэтому авто-заголовок не сгенерирован)
     assert agent.store.get_messages(d["id"]) == [
         {"role": "user", "content": "привет"},
-        {"role": "assistant", "content": "Привет"},
+        {"role": "assistant", "content": "Привет", "model": "qwen3.8-27b"},
     ]
+    assert agent.store.get_dialogue(d["id"])["title"] == "Новый диалог"
     # запрос ушёл с auth и полными параметрами
     assert seen["url"] == BASE + "/chat/completions"
     assert seen["auth"] == "Bearer test-key"
@@ -163,6 +165,79 @@ def test_ask_stream_success(data_dir):
     # сессионные токены
     assert agent.session_tokens() == {"prompt": 10, "completion": 5, "total": 15}
     assert agent.last_usage() == USAGE
+
+
+# ---------- ask_stream: авто-заголовок и model в сообщениях ----------
+
+def _title_handler(title_response, calls):
+    """non-stream (авто-заголовок) → title_response; stream → SSE."""
+    def handler(request):
+        if request.url.path.endswith("/chat/completions"):
+            if "stream" not in json.loads(request.content):
+                calls["n"] += 1
+                return title_response
+            body = sse_body([delta_chunk("ok"), usage_chunk(), "[DONE]"])
+            return httpx.Response(200, content=body.encode("utf-8"))
+        return httpx.Response(404, json={})
+
+    return handler
+
+
+def test_auto_title_after_first_message(data_dir):
+    """Первое сообщение нового диалога → non-stream запрос → title обновлён."""
+    calls = {"n": 0}
+    handler = _title_handler(
+        httpx.Response(200, json={"choices": [{"message": {"content": " «Про акул». "}}]}),
+        calls)
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    events = list(agent.ask_stream(d["id"], "Расскажи про акул"))
+    assert events[-1]["type"] == "done"
+    assert calls["n"] == 1
+    assert agent.store.get_dialogue(d["id"])["title"] == "Про акул"
+
+
+def test_auto_title_only_for_first_message(data_dir):
+    calls = {"n": 0}
+    handler = _title_handler(
+        httpx.Response(200, json={"choices": [{"message": {"content": "Тайтл"}}]}),
+        calls)
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    list(agent.ask_stream(d["id"], "первое"))
+    list(agent.ask_stream(d["id"], "второе"))
+    assert calls["n"] == 1
+    assert agent.store.get_dialogue(d["id"])["title"] == "Тайтл"
+
+
+def test_auto_title_failure_keeps_default(data_dir):
+    """Ошибка генерации заголовка — чат завершается, title по умолчанию."""
+    handler = _title_handler(httpx.Response(500, json={"error": "boom"}), {"n": 0})
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    events = list(agent.ask_stream(d["id"], "привет"))
+    assert events[-1]["type"] == "done"
+    assert agent.store.get_dialogue(d["id"])["title"] == "Новый диалог"
+
+
+def test_payload_messages_clean_of_model(data_dir):
+    """Во второй ход LLM-payload содержит только role/content (без model)."""
+    calls = {"n": 0}
+    seen = {}
+    handler = _title_handler(
+        httpx.Response(200, json={"choices": [{"message": {"content": "Т"}}]}),
+        calls)
+
+    def handler_with_capture(request):
+        if "stream" in json.loads(request.content):
+            seen["messages"] = json.loads(request.content)["messages"]
+        return handler(request)
+
+    agent = make_agent(data_dir, handler_with_capture)
+    d = agent.store.new_dialogue()
+    list(agent.ask_stream(d["id"], "первое"))
+    list(agent.ask_stream(d["id"], "второе"))
+    assert all(set(m.keys()) == {"role", "content"} for m in seen["messages"])
 
 
 # ---------- ask_stream: ошибки ----------

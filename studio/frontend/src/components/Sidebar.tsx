@@ -1,17 +1,84 @@
-// Левая панель: бренд, список диалогов (чекбоксы-выбор, удаление, inline-ренейм),
-// сводка памяти с точками слоёв.
-// У имён слоёв title — английские имена (hover-EN).
+// Левая панель: бренд, список диалогов, сводка памяти с точками слоёв.
+// Строка диалога: клик — ТОЛЬКО активация; карандаш (title="Переименовать") —
+// inline-ренейм; корзина (title="Удалить") — одиночное удаление с confirm.
+// Иконка «Режим выбора» (title) в заголовке «Диалоги»: чекбоксы на всех строках,
+// массовое удаление «Удалить (N)»; иконки-действия в этом режиме скрыты.
 import { useRef, useState } from 'react'
 import { useStudio } from '../state'
+
+// Inline-SVG иконки 15px (stroke: currentColor) — без icon-библиотек
+function PencilIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+    </svg>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M19 6l-1 14H6L5 6" />
+      <path d="M10 11v6M14 11v6" />
+    </svg>
+  )
+}
+
+function SelectModeIcon() {
+  return (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 5l2 2 3-3" />
+      <path d="M3 12l2 2 3-3" />
+      <path d="M3 19l2 2 3-3" />
+      <path d="M13 5h8M13 12h8M13 19h8" />
+    </svg>
+  )
+}
 
 export default function Sidebar() {
   const { state, newDialogue, activateDialogue, deleteDialogues, renameDialogue } = useStudio()
   const { dialogues, activeId, memory } = state
 
+  // Режим выбора: чекбоксы на строках, переключатель в заголовке «Диалоги»
+  const [selectMode, setSelectMode] = useState(false)
   // Выбор для удаления — локальное состояние, сбрасывается после удаления
+  // и при выключении режима выбора
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
   const [deleting, setDeleting] = useState(false)
-  // Inline-ренейм: id редактируемого диалога + текущее значение инпута
+  // Inline-ренейм: id редактируемого диалога + текущее значение инпута.
+  // Открывается ТОЛЬКО по клику на иконку карандаша.
   const [renaming, setRenaming] = useState<{ id: string; value: string } | null>(null)
   const renameCancelled = useRef(false)
 
@@ -24,6 +91,11 @@ export default function Sidebar() {
     })
   }
 
+  const exitSelectMode = () => {
+    setSelectMode(false)
+    setSelected(new Set())
+  }
+
   const onDeleteSelected = async () => {
     const ids = [...selected]
     if (ids.length === 0 || deleting) return
@@ -31,13 +103,20 @@ export default function Sidebar() {
     setDeleting(true)
     try {
       await deleteDialogues(ids)
-      setSelected(new Set())
+      // после успешного удаления режим выбора выключается
+      exitSelectMode()
     } finally {
       setDeleting(false)
     }
   }
 
-  // Клик по заголовку — режим редактирования (не валим диалог)
+  // Корзина: одиночное удаление с confirm
+  const onDeleteOne = (id: string, title: string) => {
+    if (!window.confirm(`Удалить диалог «${title}»?`)) return
+    void deleteDialogues([id]).then(() => setSelected(new Set()))
+  }
+
+  // Карандаш — режим редактирования (единственный способ переименовать)
   const startRename = (e: React.MouseEvent, id: string, title: string) => {
     e.stopPropagation()
     renameCancelled.current = false
@@ -62,18 +141,30 @@ export default function Sidebar() {
       <div className="brand">◆ День 11</div>
 
       <section className="side-block">
-        <h2 className="side-title">Диалоги</h2>
+        <div className="side-title-row">
+          <h2 className="side-title">Диалоги</h2>
+          <button
+            type="button"
+            className={selectMode ? 'btn-icon select-mode active' : 'btn-icon select-mode'}
+            title="Режим выбора"
+            onClick={() => (selectMode ? exitSelectMode() : setSelectMode(true))}
+          >
+            <SelectModeIcon />
+          </button>
+        </div>
         <ul className="dialogue-list">
           {dialogues.map((d) => (
             <li key={d.id} className="dialogue-item">
-              <input
-                type="checkbox"
-                className="dialogue-check"
-                checked={selected.has(d.id)}
-                onChange={() => toggleSelect(d.id)}
-                onClick={(e) => e.stopPropagation()}
-                aria-label={`Выбрать «${d.title}»`}
-              />
+              {selectMode && (
+                <input
+                  type="checkbox"
+                  className="dialogue-check"
+                  checked={selected.has(d.id)}
+                  onChange={() => toggleSelect(d.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label={`Выбрать «${d.title}»`}
+                />
+              )}
               {renaming?.id === d.id ? (
                 <div className="dialogue-rename" onClick={(e) => e.stopPropagation()}>
                   <input
@@ -92,22 +183,42 @@ export default function Sidebar() {
                   />
                 </div>
               ) : (
-                <button
-                  type="button"
-                  className={d.id === activeId ? 'dialogue active' : 'dialogue'}
-                  onClick={() => void activateDialogue(d.id)}
-                >
-                  <span className="dialogue-title" onClick={(e) => startRename(e, d.id, d.title)}>
-                    {d.title}
-                  </span>
-                  <span className="dialogue-count">{d.message_count}</span>
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className={d.id === activeId ? 'dialogue active' : 'dialogue'}
+                    onClick={() => (selectMode ? toggleSelect(d.id) : void activateDialogue(d.id))}
+                  >
+                    <span className="dialogue-title">{d.title}</span>
+                    <span className="dialogue-count">{d.message_count}</span>
+                  </button>
+                  {!selectMode && (
+                    <div className="dialogue-actions">
+                      <button
+                        type="button"
+                        className="btn-icon"
+                        title="Переименовать"
+                        onClick={(e) => startRename(e, d.id, d.title)}
+                      >
+                        <PencilIcon />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-icon btn-icon-danger"
+                        title="Удалить"
+                        onClick={() => onDeleteOne(d.id, d.title)}
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </li>
           ))}
           {dialogues.length === 0 && <li className="kv-empty">Пока нет диалогов</li>}
         </ul>
-        {selected.size > 0 && (
+        {selectMode && selected.size > 0 && (
           <button
             type="button"
             className="btn btn-delete"

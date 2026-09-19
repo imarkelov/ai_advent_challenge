@@ -21,9 +21,14 @@ def agent_env(tmp_path):
                 {"id": "qwen3.8-27b"},
                 {"id": "unknown-x"},
             ]})
+        payload = json.loads(request.content)
         # зонд доступности: у ключа нет доступа к unknown-x (403)
-        if json.loads(request.content).get("model") == "unknown-x":
+        if payload.get("model") == "unknown-x":
             return httpx.Response(403, json={"message": "no access"})
+        # non-stream — запрос авто-заголовка диалога
+        if "stream" not in payload:
+            return httpx.Response(200, json={"choices": [
+                {"message": {"content": "E2E-название"}}]})
         body = sse_body([delta_chunk("Прив"), delta_chunk("ет"), usage_chunk(), "[DONE]"])
         return httpx.Response(200, content=body.encode("utf-8"))
 
@@ -170,6 +175,18 @@ def test_models_unavailable_502(tmp_path):
     r = c.get("/api/models")
     assert r.status_code == 502
     assert r.json()["detail"]
+
+
+def test_chat_auto_titles_new_dialogue(client, dialogue_id):
+    """Первое сообщение в новом диалоге → бэкенд сам называет диалог."""
+    r = client.post("/api/chat",
+                    json={"dialogue_id": dialogue_id, "message": "Привет"})
+    assert r.status_code == 200
+    d = client.get(f"/api/dialogues/{dialogue_id}").json()["dialogue"]
+    assert d["title"] == "E2E-название"
+    # assistant-сообщение хранится с model
+    assert d["messages"][-1] == {"role": "assistant", "content": "Привет",
+                                 "model": "qwen3.8-27b"}
 
 
 # ---------- /api/dialogues: rename ----------
