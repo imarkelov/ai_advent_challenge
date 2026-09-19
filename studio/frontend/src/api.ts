@@ -45,6 +45,39 @@ export function apiDelete<T>(path: string): Promise<T> {
   return fetch(`${BASE}${path}`, { method: 'DELETE' }).then((r) => parseJson<T>(r))
 }
 
+// ── Профиль пользователя (день 12) ──────────────────────────────────────────
+// Профиль привязан к диалогу: 4 текстовых поля + статус + флаг интервью.
+// POST /api/profile      {dialogue_id, name, role, tone, taboos} → {profile}
+// POST /api/profile/action {dialogue_id, action: interview|decline|reset} → {profile}
+
+export interface UserProfile {
+  status: 'pending' | 'active' | 'declined'
+  interview: boolean
+  name: string
+  role: string
+  tone: string
+  taboos: string
+}
+
+// Сохранить 4 поля профиля (непустое содержимое → active, все пустые → pending)
+export function apiPostProfile(
+  dialogue_id: string,
+  name: string,
+  role: string,
+  tone: string,
+  taboos: string,
+): Promise<{ profile: UserProfile }> {
+  return apiPost('/profile', { dialogue_id, name, role, tone, taboos })
+}
+
+// Действие с профилем: interview (флаг, статус pending), decline, reset
+export function apiPostProfileAction(
+  dialogue_id: string,
+  action: 'interview' | 'decline' | 'reset',
+): Promise<{ profile: UserProfile }> {
+  return apiPost('/profile/action', { dialogue_id, action })
+}
+
 // ── SSE-контракт дня 11 ─────────────────────────────────────────────────────
 // POST /api/chat {dialogue_id, message} → поток кадров `data: {json}\n\n`:
 //   {"type":"delta","text"} — кусок ответа

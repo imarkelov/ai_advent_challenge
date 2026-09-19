@@ -10,7 +10,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react'
-import { apiDelete, apiGet, apiPost, chatStream, type ChatEvent } from './api'
+import { apiDelete, apiGet, apiPost, chatStream, type ChatEvent, type UserProfile } from './api'
 
 // ── Типы по контракту API дня 11 ────────────────────────────────────────────
 export type Role = 'system' | 'user' | 'assistant'
@@ -27,6 +27,8 @@ export interface DialogueMeta {
   title: string
   created: string
   message_count: number
+  // Профиль пользователя (день 12): опционально — старые dialogues.json без поля
+  profile?: UserProfile
 }
 
 export interface MemoryLayer {
@@ -96,6 +98,8 @@ export interface StudioState {
   loaded: boolean
   config: Config | null
   dialogues: DialogueMeta[]
+  // Профили диалогов (день 12): id диалога → профиль (из GET /api/dialogues)
+  profiles: Record<string, UserProfile>
   activeId: string | null
   messages: Message[]
   memory: MemoryState | null
@@ -123,6 +127,7 @@ export function initialState(): StudioState {
     loaded: false,
     config: null,
     dialogues: [],
+    profiles: {},
     activeId: null,
     messages: [],
     memory: null,
@@ -153,6 +158,24 @@ export function finishAssistant(messages: Message[], answer: string): Message[] 
   return answer ? [...messages, { role: 'assistant', content: answer }] : messages
 }
 
+// Извлечь профили из списка диалогов (записи без profile пропускаются —
+// бэкворд-совместимость со старыми dialogues.json)
+export function profilesFrom(dialogues: DialogueMeta[]): Record<string, UserProfile> {
+  const out: Record<string, UserProfile> = {}
+  for (const d of dialogues) {
+    if (d.profile) out[d.id] = d.profile
+  }
+  return out
+}
+
+// Профиль активного диалога (derived: из profiles + activeId)
+export function activeProfileOf(
+  state: Pick<StudioState, 'activeId' | 'profiles'>,
+): UserProfile | null {
+  if (state.activeId == null) return null
+  return state.profiles[state.activeId] ?? null
+}
+
 export type StudioAction =
   | {
       type: 'loaded'
@@ -181,6 +204,7 @@ export type StudioAction =
   | { type: 'renamed'; id: string; title: string }
   | { type: 'dialogues-refresh'; dialogues: DialogueMeta[] }
   | { type: 'dialogues-updated'; dialogues: DialogueMeta[]; activeId: string | null; messages: Message[] }
+  | { type: 'profile-set'; id: string; profile: UserProfile }
   | { type: 'models'; models: ModelInfo[] }
   | { type: 'config'; config: Config }
   | { type: 'last-request'; detail: RequestDetail | null }
@@ -195,6 +219,7 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
         loaded: true,
         config: action.config,
         dialogues: action.dialogues,
+        profiles: profilesFrom(action.dialogues),
         activeId: action.activeId,
         memory: action.memory,
         tokens: action.tokens,
@@ -206,6 +231,9 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
       return {
         ...state,
         dialogues: [action.dialogue, ...state.dialogues],
+        profiles: action.dialogue.profile
+          ? { ...state.profiles, [action.dialogue.id]: action.dialogue.profile }
+          : state.profiles,
         activeId: action.activeId,
         messages: [],
       }
@@ -214,6 +242,7 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
         ...state,
         activeId: action.activeId,
         dialogues: action.dialogues,
+        profiles: profilesFrom(action.dialogues),
         messages: action.messages,
       }
     case 'user-message':
@@ -246,16 +275,20 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
         ),
       }
     case 'dialogues-refresh':
-      // Только state.dialogues: бэкенд присвоил диалогу авто-название —
-      // перечитали список, остальные поля не трогаем
-      return { ...state, dialogues: action.dialogues }
+      // Только state.dialogues + profiles: бэкенд присвоил диалогу авто-название
+      // — перечитали список, остальные поля не трогаем
+      return { ...state, dialogues: action.dialogues, profiles: profilesFrom(action.dialogues) }
     case 'dialogues-updated':
       return {
         ...state,
         dialogues: action.dialogues,
+        profiles: profilesFrom(action.dialogues),
         activeId: action.activeId,
         messages: action.messages,
       }
+    case 'profile-set':
+      // Обновить профиль диалога (после save/decline/reset, день 12)
+      return { ...state, profiles: { ...state.profiles, [action.id]: action.profile } }
     case 'models':
       return { ...state, models: action.models }
     case 'config':
@@ -271,7 +304,10 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
 
 export interface StudioApi {
   state: StudioState
+  // Профиль активного диалога (день 12, derived из profiles + activeId)
+  activeProfile: UserProfile | null
   newDialogue: () => Promise<void>
+  setProfile: (id: string, profile: UserProfile) => void
   activateDialogue: (id: string) => Promise<void>
   sendMessage: (text: string) => Promise<void>
   setModel: (id: string) => Promise<void>
@@ -307,6 +343,14 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   // Актуальное состояние для асинхронных замыканий (sendMessage)
   const stateRef = useRef(state)
   stateRef.current = state
+
+  // Профиль активного диалога (день 12) — вычисляется из state каждый рендер
+  const activeProfile = activeProfileOf(state)
+
+  // Обновить профиль диалога после save/decline/reset (день 12)
+  const setProfile = useCallback((id: string, profile: UserProfile) => {
+    dispatch({ type: 'profile-set', id, profile })
+  }, [])
 
   // Обновление боковых панелей после действий: memory/tokens/requests (+ lastRequest)
   const refreshPanels = useCallback(async (lastId?: number) => {
@@ -500,7 +544,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
 
   const api: StudioApi = {
     state,
+    activeProfile,
     newDialogue,
+    setProfile,
     activateDialogue,
     sendMessage,
     setModel,

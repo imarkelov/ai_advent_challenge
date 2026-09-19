@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { appendDelta, finishAssistant, initialState, reducer, type StudioState } from '../src/state'
+import type { UserProfile } from '../src/api'
+import {
+  activeProfileOf,
+  appendDelta,
+  finishAssistant,
+  initialState,
+  reducer,
+  type DialogueMeta,
+  type StudioState,
+} from '../src/state'
 
 // Базовое состояние: чистый reducer-тест без React
 const base: StudioState = { ...initialState() }
@@ -128,5 +137,95 @@ describe('reducer — чистые переходы состояния', () => {
       config: { model: 'deepseek-v4-flash', temperature: 0.7, max_tokens: 1024, system_prompt: 'sp' },
     })
     expect(s.config?.model).toBe('deepseek-v4-flash')
+  })
+})
+
+describe('reducer — профиль пользователя (день 12)', () => {
+  const profileActive: UserProfile = {
+    status: 'active',
+    interview: false,
+    name: 'Иван',
+    role: 'backend',
+    tone: 'кратко',
+    taboos: 'мат',
+  }
+  const profilePending: UserProfile = {
+    status: 'pending',
+    interview: false,
+    name: '',
+    role: '',
+    tone: '',
+    taboos: '',
+  }
+  const profileDeclined: UserProfile = {
+    status: 'declined',
+    interview: false,
+    name: '',
+    role: '',
+    tone: '',
+    taboos: '',
+  }
+  const memory = {
+    active_id: 'd1',
+    dialogue: { message_count: 1, tokens_est: 5 },
+    working: { entries: 0, tokens_est: 0, items: {} },
+    long_term: { entries: 0, tokens_est: 0, items: {} },
+    toggles: { st: true, wm: true, lt: true },
+  }
+  const tokens = { last: null, session: { prompt: 0, completion: 0, total: 0 }, context_limit: 32768 }
+
+  const d1: DialogueMeta = { id: 'd1', title: 'Первый', created: '2026-01-01', message_count: 1, profile: profileActive }
+  const d2: DialogueMeta = { id: 'd2', title: 'Второй', created: '2026-01-02', message_count: 0, profile: profilePending }
+
+  function loadedAction(dialogues: DialogueMeta[], activeId: string | null) {
+    return {
+      type: 'loaded' as const,
+      config: { model: 'm', temperature: 0.7, max_tokens: 1024, system_prompt: 'sp' },
+      dialogues,
+      activeId,
+      memory,
+      tokens,
+      requests: [],
+    }
+  }
+
+  it('loaded: profiles наполняются из списка диалогов, activeProfileOf — профиль активного', () => {
+    const s = reducer(base, loadedAction([d1, d2], 'd1'))
+    expect(s.profiles).toEqual({ d1: profileActive, d2: profilePending })
+    expect(activeProfileOf(s)).toEqual(profileActive)
+  })
+
+  it('loaded: диалог без поля profile — нет записи, activeProfileOf null (бэкворд)', () => {
+    const old: DialogueMeta = { id: 'd1', title: 'Старый', created: '2026-01-01', message_count: 1 }
+    const s = reducer(base, loadedAction([old], 'd1'))
+    expect(s.profiles).toEqual({})
+    expect(activeProfileOf(s)).toBeNull()
+  })
+
+  it('activeProfileOf: null, когда активного диалога нет', () => {
+    const s = reducer(base, loadedAction([d1], null))
+    expect(s.profiles).toEqual({ d1: profileActive })
+    expect(activeProfileOf(s)).toBeNull()
+  })
+
+  it('profile-set: обновляет профиль активного — activeProfileOf пересчитан', () => {
+    const s1 = reducer(base, loadedAction([d1, d2], 'd1'))
+    const s2 = reducer(s1, { type: 'profile-set', id: 'd1', profile: profileDeclined })
+    expect(s2.profiles['d1']).toEqual(profileDeclined)
+    expect(activeProfileOf(s2)).toEqual(profileDeclined)
+  })
+
+  it('profile-set: чужой (неактивный) диалог — activeProfileOf не меняется', () => {
+    const s1 = reducer(base, loadedAction([d1, d2], 'd1'))
+    const s2 = reducer(s1, { type: 'profile-set', id: 'd2', profile: profileDeclined })
+    expect(s2.profiles['d2']).toEqual(profileDeclined)
+    expect(activeProfileOf(s2)).toEqual(profileActive)
+  })
+
+  it('dialogues-refresh: перечитывает profiles из нового списка', () => {
+    const s1 = reducer(base, loadedAction([d1, d2], 'd1'))
+    const refreshed: DialogueMeta = { ...d1, profile: profileDeclined }
+    const s2 = reducer(s1, { type: 'dialogues-refresh', dialogues: [refreshed, d2] })
+    expect(activeProfileOf(s2)).toEqual(profileDeclined)
   })
 })
