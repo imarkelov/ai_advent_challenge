@@ -6,6 +6,8 @@
 # OpenCode / агенты
 .omo/
 .opencode/
+.superpowers/
+.playwright-mcp/
 
 # OS
 .DS_Store
@@ -25,3 +27,11 @@ __pycache__/
 # Данные агента
 history.json
 dialogues.json
+
+# День 11 (студия)
+studio/data/
+studio/frontend/node_modules/
+studio/frontend/dist/
+dialogues.json.bak*
+working_memory.json
+memory.json
