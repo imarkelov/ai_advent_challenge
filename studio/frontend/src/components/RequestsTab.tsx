@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { apiGet } from '../api'
 import { PARAM_GLOSSARY, UNKNOWN_HINT } from '../glossary'
 import { useStudio, type RequestDetail } from '../state'
+import Modal from './Modal'
 
 // Усекание длинных значений для отображения
 const truncate = (s: string, n: number): string => (s.length > n ? s.slice(0, n) + '…' : s)
@@ -79,8 +80,11 @@ function renderChildren(name: string, value: unknown) {
   return null
 }
 
-// Аннотированная карточка запроса: «→ Запрос #N» + «← Ответ · расход токенов»
+// Аннотированная карточка запроса: «→ Запрос #N» + «← Ответ · расход токенов».
+// Кнопка «Полный запрос (JSON)» — resizable-модалка с pretty-JSON и копированием.
 export function RequestCard({ detail }: { detail: RequestDetail }) {
+  const [jsonOpen, setJsonOpen] = useState(false)
+  const json = JSON.stringify(detail.request, null, 2)
   return (
     <article className="req-card">
       <header className="req-head">
@@ -100,6 +104,19 @@ export function RequestCard({ detail }: { detail: RequestDetail }) {
         )}
       </div>
       {detail.error && <p className="req-error">Ошибка: {detail.error}</p>}
+      <button type="button" className="btn req-json-btn" onClick={() => setJsonOpen(true)}>
+        Полный запрос (JSON)
+      </button>
+      {jsonOpen && (
+        <Modal
+          title={`Запрос #${detail.id} — JSON`}
+          onClose={() => setJsonOpen(false)}
+          resizable
+          copyText={json}
+        >
+          <pre className="json-pre">{json}</pre>
+        </Modal>
+      )}
     </article>
   )
 }

@@ -244,6 +244,7 @@ export interface StudioApi {
   activateDialogue: (id: string) => Promise<void>
   sendMessage: (text: string) => Promise<void>
   setModel: (id: string) => Promise<void>
+  updateConfig: (partial: Partial<Config>) => Promise<void>
   setShowRequests: (on: boolean) => void
   refreshMemory: () => Promise<void>
   reloadDialogue: () => Promise<void>
@@ -382,6 +383,12 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'config', config: cfg })
   }, [])
 
+  // Частичное обновление конфига: POST /api/config {…} → сервер отвечает актуальным конфигом
+  const updateConfig = useCallback(async (partial: Partial<Config>) => {
+    const cfg = await apiPost<Config>('/config', partial)
+    dispatch({ type: 'config', config: cfg })
+  }, [])
+
   // Тумблер «Показывать запросы» (персистится в localStorage)
   const setShowRequests = useCallback((on: boolean) => {
     try {
@@ -411,6 +418,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     activateDialogue,
     sendMessage,
     setModel,
+    updateConfig,
     setShowRequests,
     refreshMemory,
     reloadDialogue,

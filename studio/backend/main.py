@@ -14,9 +14,9 @@ from fastapi.responses import StreamingResponse
 import httpx
 
 try:  # пакетный режим: uvicorn studio.backend.main:app из корня репозитория
-    from .agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, StudioAgent
+    from .agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE, StudioAgent
 except ImportError:  # dev-режим: uvicorn main:app из studio/backend
-    from agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, StudioAgent
+    from agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE, StudioAgent
 
 # Секреты/настройки — из .env в корне репозитория.
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
@@ -217,6 +217,19 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
         model = agent.get_config()["model"]
         return {"last": last, "session": agent.session_tokens(),
                 "context_limit": CONTEXT_LIMITS.get(model, DEFAULT_CONTEXT_LIMIT)}
+
+    # ---------- правила агента ----------
+
+    @app.get("/api/rules")
+    def rules():
+        """Активные правила: системный промпт + правило памяти
+        (активно, когда в памяти активного диалога есть записи)."""
+        cfg = agent.get_config()
+        active = agent.store.active_id()
+        blocks = agent.store.build_memory_blocks(active) if active else ""
+        return {"system_prompt": cfg["system_prompt"],
+                "memory_rule": MEMORY_RULE,
+                "rule_active": bool(blocks)}
 
     # ---------- журнал запросов ----------
 

@@ -2,11 +2,13 @@
 // сообщений с авто-скроллом и дописыванием дельт при стриминге, инпут-капсула.
 // Enter — отправить, Shift+Enter — перенос строки.
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import { useStudio } from '../state'
+import { useStudio, type Message } from '../state'
+import SaveMessageModal from './SaveMessageModal'
 
 export default function ChatPanel() {
   const { state, sendMessage, setModel } = useStudio()
   const [draft, setDraft] = useState('')
+  const [saveMsg, setSaveMsg] = useState<Message | null>(null)
   const feedRef = useRef<HTMLDivElement>(null)
   const active = state.dialogues.find((d) => d.id === state.activeId)
 
@@ -66,7 +68,17 @@ export default function ChatPanel() {
           const isTail = i === state.messages.length - 1
           return (
             <div key={i} className={m.role === 'user' ? 'msg user' : 'msg assistant'}>
-              <div className="msg-role">{m.role === 'user' ? 'вы' : 'модель'}</div>
+              <div className="msg-role">
+                {m.role === 'user' ? 'вы' : 'модель'}
+                <button
+                  type="button"
+                  className="btn-icon msg-save"
+                  title="Сохранить в память"
+                  onClick={() => setSaveMsg(m)}
+                >
+                  в память
+                </button>
+              </div>
               <div className="msg-text">
                 {m.content}
                 {state.streaming && isTail && m.role === 'assistant' && (
@@ -96,6 +108,10 @@ export default function ChatPanel() {
           Отправить
         </button>
       </div>
+
+      {saveMsg && (
+        <SaveMessageModal message={saveMsg.content} onClose={() => setSaveMsg(null)} />
+      )}
     </main>
   )
 }

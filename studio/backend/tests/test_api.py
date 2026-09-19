@@ -267,3 +267,25 @@ def test_requests_routes(client, dialogue_id):
     # delete
     assert client.delete("/api/requests").json() == {"ok": True}
     assert client.get("/api/requests").json() == {"requests": []}
+
+
+# ---------- /api/rules ----------
+
+def test_rules_inactive_without_memory(client, dialogue_id):
+    """Без записей памяти правило неактивно, но возвращается в полном виде."""
+    r = client.get("/api/rules")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["rule_active"] is False
+    assert body["memory_rule"]
+    assert body["system_prompt"] == client.get("/api/config").json()["system_prompt"]
+
+
+def test_rules_active_with_working_memory(client, dialogue_id):
+    assert client.post("/api/memory/working", json={"key": "k", "value": "v"}).status_code == 200
+    assert client.get("/api/rules").json()["rule_active"] is True
+
+
+def test_rules_active_with_longterm_memory(client, dialogue_id):
+    assert client.post("/api/memory/longterm", json={"key": "k", "value": "v"}).status_code == 200
+    assert client.get("/api/rules").json()["rule_active"] is True

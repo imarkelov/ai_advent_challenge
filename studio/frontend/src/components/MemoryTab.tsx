@@ -4,6 +4,8 @@
 import { useState } from 'react'
 import { apiDelete, apiPost } from '../api'
 import { useStudio, type MemoryLayer } from '../state'
+import RulesModal from './RulesModal'
+import SystemPromptModal from './SystemPromptModal'
 
 // Карточка диалогового слоя: счётчик сообщений + tokens_est,
 // сворачиваемый список сообщений, [clear] → POST /api/memory/st/clear
@@ -150,8 +152,18 @@ function LayerCard({
 
 export default function MemoryTab() {
   const { state } = useStudio()
+  const [rulesOpen, setRulesOpen] = useState(false)
+  const [promptOpen, setPromptOpen] = useState(false)
   return (
     <div className="ctx-sections">
+      <div className="ctx-toolbar">
+        <button type="button" className="btn" onClick={() => setRulesOpen(true)}>
+          Правила
+        </button>
+        <button type="button" className="btn" onClick={() => setPromptOpen(true)}>
+          Системный промпт
+        </button>
+      </div>
       <DialogueCard />
       <LayerCard
         label="Текущая задача"
@@ -165,6 +177,8 @@ export default function MemoryTab() {
         base="longterm"
         layer={state.memory?.long_term}
       />
+      {rulesOpen && <RulesModal onClose={() => setRulesOpen(false)} />}
+      {promptOpen && <SystemPromptModal onClose={() => setPromptOpen(false)} />}
     </div>
   )
 }
