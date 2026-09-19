@@ -15,10 +15,10 @@ import httpx
 
 try:  # пакетный режим: uvicorn studio.backend.main:app из корня репозитория
     from .agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE, StudioAgent
-    from .memory import MemoryStore
+    from .memory import PROFILE_ACTIONS, MemoryStore
 except ImportError:  # dev-режим: uvicorn main:app из studio/backend
     from agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE, StudioAgent
-    from memory import MemoryStore
+    from memory import PROFILE_ACTIONS, MemoryStore, PROFILE_ACTIONS
 
 # Секреты/настройки — из .env в корне репозитория.
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
@@ -58,6 +58,41 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
                 yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
 
         return StreamingResponse(gen(), media_type="text/event-stream")
+
+    # ---------- профиль пользователя (день 12) ----------
+
+    @app.post("/api/profile")
+    def profile_set(body: dict):
+        """Сохранить 4 поля профиля диалога (день 12).
+        Body: {dialogue_id, name, role, tone, taboos} — все обязательны."""
+        keys = ("dialogue_id", "name", "role", "tone", "taboos")
+        for k in keys:
+            if k not in body:
+                raise HTTPException(400, f"Не указано поле «{k}»")
+        for k in keys[1:]:
+            if not isinstance(body[k], str):
+                raise HTTPException(400, "Поля профиля должны быть строками")
+        try:
+            p = agent.store.profile_set(body["dialogue_id"], body["name"],
+                                        body["role"], body["tone"],
+                                        body["taboos"])
+        except ValueError as e:
+            raise HTTPException(404, str(e))
+        return {"profile": p}
+
+    @app.post("/api/profile/action")
+    def profile_action(body: dict):
+        """Действие с профилем: interview / decline / reset (день 12).
+        Body: {dialogue_id, action}."""
+        if "dialogue_id" not in body or "action" not in body:
+            raise HTTPException(400, "Не указаны dialogue_id или action")
+        if body["action"] not in PROFILE_ACTIONS:
+            raise HTTPException(400, f"Неизвестное действие: {body['action']}")
+        try:
+            p = agent.store.profile_action(body["dialogue_id"], body["action"])
+        except ValueError as e:
+            raise HTTPException(404, str(e))
+        return {"profile": p}
 
     # ---------- конфиг ----------
 
@@ -256,15 +291,20 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
     # ---------- правила агента ----------
 
     @app.get("/api/rules")
-    def rules():
+    def rules(dialogue_id: str | None = None):
         """Активные правила: системный промпт + правило памяти
-        (активно, когда в памяти активного диалога есть записи)."""
+        (активно, когда в памяти диалога есть записи) + профиль (день 12).
+        dialogue_id — опционально; без него — активный диалог."""
         cfg = agent.get_config()
-        active = agent.store.active_id()
-        blocks = agent.store.build_memory_blocks(active) if active else ""
+        did = dialogue_id or agent.store.active_id()
+        blocks = agent.store.build_memory_blocks(did) if did else ""
+        profile = agent.store.profile_get(did) if did else \
+            {"status": "pending"}
         return {"system_prompt": cfg["system_prompt"],
                 "memory_rule": MEMORY_RULE,
-                "rule_active": bool(blocks)}
+                "rule_active": bool(blocks),
+                "profile_block": agent.build_profile_block(did) if did else "",
+                "profile_status": profile["status"]}
 
     # ---------- журнал запросов ----------
 

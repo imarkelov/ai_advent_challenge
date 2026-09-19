@@ -62,6 +62,8 @@ def parse_sse(lines):
 # ---------- /api/chat ----------
 
 def test_chat_sse_stream(client, dialogue_id):
+    client.post("/api/profile/action", json={"dialogue_id": dialogue_id,
+                                             "action": "decline"})
     with client.stream("POST", "/api/chat",
                        json={"dialogue_id": dialogue_id, "message": "привет"}) as resp:
         assert resp.status_code == 200
@@ -179,6 +181,8 @@ def test_models_unavailable_502(tmp_path):
 
 def test_chat_auto_titles_new_dialogue(client, dialogue_id):
     """Первое сообщение в новом диалоге → бэкенд сам называет диалог."""
+    client.post("/api/profile/action", json={"dialogue_id": dialogue_id,
+                                             "action": "decline"})
     r = client.post("/api/chat",
                     json={"dialogue_id": dialogue_id, "message": "Привет"})
     assert r.status_code == 200
@@ -331,6 +335,8 @@ def test_tokens_before_chat(client):
 
 
 def test_tokens_after_chat(client, dialogue_id):
+    client.post("/api/profile/action", json={"dialogue_id": dialogue_id,
+                                             "action": "decline"})
     with client.stream("POST", "/api/chat",
                        json={"dialogue_id": dialogue_id, "message": "привет"}) as resp:
         list(resp.iter_lines())
@@ -343,6 +349,8 @@ def test_tokens_after_chat(client, dialogue_id):
 # ---------- /api/requests ----------
 
 def test_requests_routes(client, dialogue_id):
+    client.post("/api/profile/action", json={"dialogue_id": dialogue_id,
+                                             "action": "decline"})
     with client.stream("POST", "/api/chat",
                        json={"dialogue_id": dialogue_id, "message": "привет"}) as resp:
         list(resp.iter_lines())
@@ -385,3 +393,81 @@ def test_rules_active_with_working_memory(client, dialogue_id):
 def test_rules_active_with_longterm_memory(client, dialogue_id):
     assert client.post("/api/memory/longterm", json={"key": "k", "value": "v"}).status_code == 200
     assert client.get("/api/rules").json()["rule_active"] is True
+
+
+def test_rules_includes_profile(client, dialogue_id):
+    # pending → блок пуст
+    r = client.get("/api/rules")
+    assert r.status_code == 200
+    assert r.json()["profile_block"] == ""
+    assert r.json()["profile_status"] == "pending"
+    # active → блок заполнен
+    client.post("/api/profile", json={
+        "dialogue_id": dialogue_id, "name": "Иван", "role": "",
+        "tone": "", "taboos": ""})
+    r2 = client.get("/api/rules", params={"dialogue_id": dialogue_id})
+    assert r2.json()["profile_status"] == "active"
+    assert "Иван" in r2.json()["profile_block"]
+
+
+# ---------- профиль: REST (день 12) ----------
+
+def test_profile_set_endpoint(client, dialogue_id):
+    r = client.post("/api/profile", json={
+        "dialogue_id": dialogue_id, "name": "Иван",
+        "role": "backend", "tone": "кратко", "taboos": "мат"})
+    assert r.status_code == 200
+    p = r.json()["profile"]
+    assert p["status"] == "active" and p["name"] == "Иван"
+    r2 = client.get(f"/api/dialogues/{dialogue_id}")
+    assert r2.json()["dialogue"]["profile"]["status"] == "active"
+
+
+def test_profile_set_empty_keeps_pending(client, dialogue_id):
+    r = client.post("/api/profile", json={
+        "dialogue_id": dialogue_id, "name": "", "role": "",
+        "tone": "", "taboos": ""})
+    assert r.status_code == 200
+    assert r.json()["profile"]["status"] == "pending"
+
+
+def test_profile_set_non_str_400(client, dialogue_id):
+    r = client.post("/api/profile", json={
+        "dialogue_id": dialogue_id, "name": 5, "role": "",
+        "tone": "", "taboos": ""})
+    assert r.status_code == 400
+    assert "строки" in r.json()["detail"] or "Поля" in r.json()["detail"]
+
+
+def test_profile_set_unknown_dialogue_404(client):
+    r = client.post("/api/profile", json={
+        "dialogue_id": "nope", "name": "a", "role": "",
+        "tone": "", "taboos": ""})
+    assert r.status_code == 404
+
+
+def test_profile_action_interview_decline_reset(client, dialogue_id):
+    r = client.post("/api/profile/action", json={
+        "dialogue_id": dialogue_id, "action": "interview"})
+    assert r.status_code == 200
+    assert r.json()["profile"]["interview"] is True
+    r = client.post("/api/profile/action", json={
+        "dialogue_id": dialogue_id, "action": "decline"})
+    assert r.json()["profile"]["status"] == "declined"
+    r = client.post("/api/profile/action", json={
+        "dialogue_id": dialogue_id, "action": "reset"})
+    assert r.json()["profile"]["status"] == "pending"
+    assert r.json()["profile"]["name"] == ""
+
+
+def test_profile_action_unknown_400(client, dialogue_id):
+    r = client.post("/api/profile/action", json={
+        "dialogue_id": dialogue_id, "action": "bogus"})
+    assert r.status_code == 400
+    assert "Неизвестное действие" in r.json()["detail"]
+
+
+def test_profile_action_unknown_dialogue_404(client):
+    r = client.post("/api/profile/action", json={
+        "dialogue_id": "nope", "action": "decline"})
+    assert r.status_code == 404
