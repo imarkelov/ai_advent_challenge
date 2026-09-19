@@ -54,6 +54,10 @@ def _tok_est(text: str) -> int:
 class MemoryStore:
     """Хранилище трёх слоёв памяти с файловым персистентным бэкендом."""
 
+    # Слои памяти, которые можно включать/отключать (порядок не важен —
+    # любое сочетание работает независимо).
+    TOGGLE_LAYERS = ("st", "wm", "lt")
+
     def __init__(self, data_dir: str):
         """Создаёт store поверх каталога data_dir (каталог создаётся при первой записи)."""
         self.data_dir = data_dir
@@ -61,6 +65,7 @@ class MemoryStore:
         self._p_dialogues = os.path.join(data_dir, "dialogues.json")
         self._p_working = os.path.join(data_dir, "working.json")
         self._p_longterm = os.path.join(data_dir, "longterm.json")
+        self._p_toggles = os.path.join(data_dir, "toggles.json")
 
     # ---------- внутреннее чтение/запись ----------
 
@@ -272,24 +277,52 @@ class MemoryStore:
         with self._lock:
             self._write_longterm({})
 
+    # ---------- тумблеры слоёв памяти (toggles.json) ----------
+
+    def _read_toggles(self) -> dict:
+        """Тумблеры {st,wm,lt: bool}; битый/отсутствующий файл — всё включено."""
+        t = read_json(self._p_toggles, None)
+        if not isinstance(t, dict):
+            t = {}
+        return {layer: bool(t.get(layer, True)) for layer in self.TOGGLE_LAYERS}
+
+    def get_toggles(self) -> dict:
+        """Текущие тумблеры слоёв (все True по умолчанию)."""
+        with self._lock:
+            return self._read_toggles()
+
+    def set_toggle(self, layer: str, enabled: bool) -> dict:
+        """Включить/отключить слой; ValueError на неизвестный слой или не-bool.
+        Возвращает актуальные тумблеры."""
+        if layer not in self.TOGGLE_LAYERS:
+            raise ValueError(f"Неизвестный слой памяти: {layer}")
+        if not isinstance(enabled, bool):
+            raise ValueError("Флаг должен быть bool (true/false)")
+        with self._lock:
+            t = self._read_toggles()
+            t[layer] = enabled
+            atomic_write_json(self._p_toggles, t)
+            return t
+
     # ---------- сборка блока памяти и статистика ----------
 
     def build_memory_blocks(self, dialogue_id: str) -> str:
         """Текст блоков памяти для системного промпта.
 
-        Пустые слои пропускаются; порядок WM → LT:
+        Пустые и ОТКЛЮЧЁННЫЕ (тумблеры) слои пропускаются; порядок WM → LT:
         «\\n\\nТекущая задача:\\n- key: value» и/или
         «\\n\\nДолговременная память:\\n- key: value».
         """
         with self._lock:
+            t = self._read_toggles()
             w = self._read_working()
             wm = w.get(dialogue_id)
             wm = wm if isinstance(wm, dict) else {}
             lt = self._read_longterm()
         parts = []
-        if wm:
+        if t["wm"] and wm:
             parts.append("\n\nТекущая задача:\n" + "\n".join(f"- {k}: {v}" for k, v in wm.items()))
-        if lt:
+        if t["lt"] and lt:
             parts.append("\n\nДолговременная память:\n" + "\n".join(f"- {k}: {v}" for k, v in lt.items()))
         return "".join(parts)
 

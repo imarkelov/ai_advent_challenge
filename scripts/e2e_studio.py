@@ -12,8 +12,10 @@
   5. GET /api/config; GET /api/models (502 допустим — фиксируем, не FAIL).
   6. POST /api/dialogues → 201 + active_id.
   7. WM: POST /api/memory/working → ok; GET /api/memory → working.entries == 1.
-  8. LT: POST /api/memory/longterm → ok; GET /api/memory → long_term.entries == 1.
-  9. Чат (если GPustack достижим): POST /api/chat → SSE: >=1 delta + done.
+   8. LT: POST /api/memory/longterm → ok; GET /api/memory → long_term.entries == 1.
+   8b. Тумблеры слоёв: POST /api/memory/toggles wm off → /api/memory видит
+       wm=false (ст/lt не тронуты) → restore on.
+   9. Чат (если GPustack достижим): POST /api/chat → SSE: >=1 delta + done.
   10. Авто-заголовок: чат в НОВОМ диалоге → title меняется с «Новый диалог»;
       assistant-сообщение хранится с model.
   11. GET /api/tokens → {last, session, context_limit}.
@@ -320,6 +322,22 @@ def main() -> int:
         else:
             record("API: LT set + memory", "FAIL",
                    f"set={code} mem={code2} items={lt_items}")
+            return 1
+
+        # 7b. Тумблеры слоёв: wm off → отражается в /api/memory → restore on
+        code, _, _ = http("POST", "/api/memory/toggles",
+                          {"layer": "wm", "enabled": False})
+        code2, body, _ = http("GET", "/api/memory")
+        tog = json.loads(body).get("toggles", {})
+        code3, _, _ = http("POST", "/api/memory/toggles",
+                           {"layer": "wm", "enabled": True})
+        if (code == 200 and code2 == 200 and code3 == 200
+                and tog.get("wm") is False and tog.get("st") is True
+                and tog.get("lt") is True):
+            record("API: memory toggles (wm off/on)", "PASS")
+        else:
+            record("API: memory toggles (wm off/on)", "FAIL",
+                   f"off={code} mem={code2} on={code3} toggles={tog}")
             return 1
 
         # 8. чат (SSE) — SKIP, если GPustack недоступен

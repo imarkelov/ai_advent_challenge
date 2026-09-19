@@ -204,6 +204,15 @@ WM активного диалога и LT инжектятся в system-про
 (пустой слой → блок не добавляется). Сообщения диалога (ST) идут в `messages`
 тела запроса, не в system-промт.
 
+**Тумблеры слоёв.** Каждый слой (ст/wm/lt) можно включить/отключить в любой
+последовательности (свитчи в вкладке «Память», состояние — `toggles.json`,
+в ответе `GET /api/memory` и `GET /api/memory/toggles`). Выключенный слой не
+уходит в LLM: ст off — в запросе только текущее сообщение (сообщения при этом
+хранятся и видны в UI), wm/lt off — их блоки не добавляются в system-промт,
+правило конфликтов и server-side гард смотрят только включённые слои.
+Данные слоя при выключении не удаляются — включил, всё на месте. В UI
+выключенный слой задиммится и редактирование в нём блокируется.
+
 **Правило конфликтов.** Когда память непустая, к system-промту добавляется
 правило: пункты памяти — устойчивые ограничения **с приоритетом над любыми
 запросами диалога** (включая последние); перед ответом запрос сверяется с
@@ -234,7 +243,7 @@ few-shot пример (мелкие модели без явного приме�
 | `components/Sidebar.tsx` | диалоги (активация, иконки ренейм/удаление, режим выбора) + сводка слоёв памяти (EN-имена по hover) |
 | `components/ChatPanel.tsx` | чат: сообщения (+ чип модели у assistant), стрим-ответ, ввод, дропдаун выбора модели |
 | `components/ContextPanel.tsx` | правая панель: вкладки Память / Токены / Запрос |
-| `components/MemoryTab.tsx` | 3 слоя: CRUD ключ-значений + очистка |
+| `components/MemoryTab.tsx` | 3 слоя: CRUD ключ-значений + очистка + свитчи вкл/выкл слоя (toggles) |
 | `components/TokensTab.tsx` | последний usage + сессионные токены + лимит контекста |
 | `components/RequestsTab.tsx` | журнал LLM-запросов: список + детализация (тело запроса) |
 
@@ -273,7 +282,8 @@ scripts/e2e_studio.py   # E2E smoke (prod-сервер + реальный GPusta
 | POST | `/api/dialogues/{id}/rename` | Переименовать диалог (`{title}`; 400 пустой, 404 не найден) |
 | POST | `/api/dialogues/{id}/activate` | Сделать диалог активным |
 | POST | `/api/memory/st/clear` | Очистить сообщения активного диалога |
-| GET | `/api/memory` | Статистика слоёв памяти + `active_id` |
+| GET | `/api/memory` | Статистика слоёв памяти + `active_id` + `toggles` |
+| GET / POST | `/api/memory/toggles` | Тумблеры слоёв: `{st, wm, lt: bool}` / `{layer, enabled}` (400 на неизвестный слой или не-bool) |
 | POST / DELETE | `/api/memory/working[/{key}]` | Заметки рабочей памяти (на диалог) |
 | POST | `/api/memory/working/clear` | Очистить рабочую память |
 | POST / DELETE | `/api/memory/longterm[/{key}]` | Глобальные заметки |
@@ -315,7 +325,7 @@ python -m uvicorn studio.backend.main:app --port 8000   # из корня реп
 ### Тесты
 
 ```bash
-cd studio/backend && python -m pytest -q     # 102 теста (офлайн)
+cd studio/backend && python -m pytest -q     # 113 тестов (офлайн)
 cd studio/frontend && npm test               # 72 теста (Vitest)
 python scripts/e2e_studio.py                 # E2E smoke (prod + реальный GPustack)
 ```
@@ -347,7 +357,7 @@ GPustack отдаёт в `/models` все модели без статуса д�
 
 ### Статус
 
-Бэкенд — 102 теста PASS; фронтенд — 72 теста PASS; E2E smoke — 12/12 PASS
+Бэкенд — 113 тестов PASS; фронтенд — 72 теста PASS; E2E smoke — 13/13 PASS
 (3 модели: qwen3.8-27b, deepseek-v4-flash, glm-5.3-flash).
 Ветка `day11-studio` (отдельный стек, не наследует дни 1–10).
 

@@ -35,11 +35,19 @@ export interface MemoryLayer {
   items: Record<string, string>
 }
 
+// Включения слоёв памяти в промпт (st/wm/lt, default true)
+export interface MemoryToggles {
+  st: boolean
+  wm: boolean
+  lt: boolean
+}
+
 export interface MemoryState {
   active_id: string | null
   dialogue: { message_count: number; tokens_est: number }
   working: MemoryLayer
   long_term: MemoryLayer
+  toggles: MemoryToggles
 }
 
 export interface TokenLast {
@@ -270,6 +278,7 @@ export interface StudioApi {
   updateConfig: (partial: Partial<Config>) => Promise<void>
   setShowRequests: (on: boolean) => void
   refreshMemory: () => Promise<void>
+  setMemoryToggle: (layer: 'st' | 'wm' | 'lt', on: boolean) => Promise<void>
   reloadDialogue: () => Promise<void>
   deleteDialogues: (ids: string[]) => Promise<void>
   renameDialogue: (id: string, title: string) => Promise<void>
@@ -439,6 +448,15 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'memory', memory: await apiGet<MemoryState>('/memory') })
   }, [])
 
+  // Включить/выключить слой памяти в промпте: POST /api/memory/toggles {layer, enabled}
+  const setMemoryToggle = useCallback(
+    async (layer: 'st' | 'wm' | 'lt', on: boolean) => {
+      await apiPost('/memory/toggles', { layer, enabled: on })
+      await refreshMemory()
+    },
+    [refreshMemory],
+  )
+
   // Удаление диалогов: для каждого id — DELETE /api/dialogues/{id}
   // (404 — логируем и продолжаем остальные), затем перечитываем список,
   // сообщения активного и память
@@ -489,6 +507,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     updateConfig,
     setShowRequests,
     refreshMemory,
+    setMemoryToggle,
     reloadDialogue,
     deleteDialogues,
     renameDialogue,

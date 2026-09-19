@@ -1145,3 +1145,46 @@ button {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Тумблер включения слоя памяти в промпт (switch в заголовке карточки) ── */
+
+.layer-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 30px;
+  height: 16px;
+  flex: none;
+  margin: 0;
+  border-radius: var(--r-pill);
+  background: var(--border);
+  position: relative;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background var(--t-fast) var(--ease);
+}
+.layer-toggle:checked {
+  background: var(--accent);
+}
+.layer-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text);
+  transition: transform var(--t-fast) var(--ease);
+}
+.layer-toggle:checked::after {
+  transform: translateX(14px);
+}
+
+/* Выключенный слой: тело карточки приглушено и недоступно, заголовок — как есть */
+.ctx-card.off > .msg-details,
+.ctx-card.off > .kv-list,
+.ctx-card.off > .kv-form,
+.ctx-card.off > .btn-clear {
+  opacity: 0.5;
+  pointer-events: none;
+}

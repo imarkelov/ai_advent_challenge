@@ -180,6 +180,89 @@ def test_ask_stream_success(data_dir):
     assert agent.last_usage() == USAGE
 
 
+# ---------- тумблеры слоёв памяти ----------
+
+def test_payload_st_off_sends_only_current_message(data_dir):
+    """ST выключен — в LLM уходит только ТЕКУЩЕЕ сообщение, история нет."""
+    seen = {}
+
+    def handler(request):
+        if "stream" in json.loads(request.content):
+            seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    list(agent.ask_stream(d["id"], "первое"))
+    list(agent.ask_stream(d["id"], "второе"))
+    agent.store.set_toggle("st", False)
+    list(agent.ask_stream(d["id"], "третье"))
+    roles = [m["role"] for m in seen["messages"]]
+    assert roles == ["system", "user"]
+    assert seen["messages"][-1]["content"] == "третье"
+    # включили обратно — история снова уходит
+    agent.store.set_toggle("st", True)
+    list(agent.ask_stream(d["id"], "четвёртое"))
+    # system + 3 хода (user+assistant: первое, второе, третье) + user (четвёртое)
+    assert len(seen["messages"]) == 8
+
+def test_payload_wm_lt_off_no_blocks_no_rule(data_dir):
+    """WM и LT выключены — блоков памяти и правила в system-промте нет."""
+    seen = {}
+
+    def handler(request):
+        if "stream" in json.loads(request.content):
+            seen["system"] = json.loads(request.content)["messages"][0]["content"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.wm_set(d["id"], "t", "задача")
+    agent.store.lt_set("u", "юзер")
+    agent.store.set_toggle("wm", False)
+    agent.store.set_toggle("lt", False)
+    list(agent.ask_stream(d["id"], "привет"))
+    assert "Текущая задача" not in seen["system"]
+    assert "Долговременная память" not in seen["system"]
+    assert "Правило памяти" not in seen["system"]
+
+
+def test_payload_wm_off_lt_on_keeps_rule(data_dir):
+    """WM off + LT on — блок LT и правило на месте, WM-блока нет."""
+    seen = {}
+
+    def handler(request):
+        if "stream" in json.loads(request.content):
+            seen["system"] = json.loads(request.content)["messages"][0]["content"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.wm_set(d["id"], "t", "задача")
+    agent.store.lt_set("u", "юзер")
+    agent.store.set_toggle("wm", False)
+    list(agent.ask_stream(d["id"], "привет"))
+    assert "Текущая задача" not in seen["system"]
+    assert "Долговременная память" in seen["system"]
+    assert "Правило памяти" in seen["system"]
+
+
+def test_guard_skips_disabled_layers(data_dir):
+    """Гард не смотрит отключённые слои."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    agent.store.wm_set(d["id"], "Источник", "Яндекс")
+    agent.store.lt_set("Стек", "Kotlin")
+    # оба включены — оба детектятся
+    hits = agent._detect_memory_conflict(d["id"], "Напиши ТЗ: источник гугл, стек питон")
+    assert {k for k, _ in hits} == {"Источник", "Стек"}
+    agent.store.set_toggle("wm", False)
+    hits = agent._detect_memory_conflict(d["id"], "Напиши ТЗ: источник гугл, стек питон")
+    assert [k for k, _ in hits] == ["Стек"]
+    agent.store.set_toggle("lt", False)
+    assert agent._detect_memory_conflict(d["id"], "Напиши ТЗ: источник гугл, стек питон") == []
+
+
 # ---------- server-side гард «запрос ↔ память» ----------
 
 def test_conflict_detection_key_verb_no_value(data_dir):

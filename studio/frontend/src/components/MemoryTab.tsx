@@ -10,9 +10,11 @@ import SystemPromptModal from './SystemPromptModal'
 // Карточка диалогового слоя: счётчик сообщений + tokens_est,
 // сворачиваемый список сообщений, [clear] → POST /api/memory/st/clear
 function DialogueCard() {
-  const { state, refreshMemory, reloadDialogue } = useStudio()
+  const { state, refreshMemory, reloadDialogue, setMemoryToggle } = useStudio()
   const [busy, setBusy] = useState(false)
   const d = state.memory?.dialogue
+  // Тумблер слоя st: нет поля toggles (старый бэкенд) → считаем включённым
+  const on = state.memory?.toggles?.st !== false
 
   const clear = async () => {
     setBusy(true)
@@ -28,10 +30,19 @@ function DialogueCard() {
   }
 
   return (
-    <section className="ctx-card" title="Short-Term Memory">
+    <section className={'ctx-card' + (on ? '' : ' off')} title="Short-Term Memory">
       <header className="ctx-card-head">
         <h3>Диалог</h3>
         <span className="ctx-count">{d ? `${d.message_count} сообщ. · ~${d.tokens_est} tok` : '—'}</span>
+        <input
+          type="checkbox"
+          className="layer-toggle"
+          role="switch"
+          aria-checked={on}
+          checked={on}
+          title={on ? 'Слой включён в промпт' : 'Слой выключен из промпта'}
+          onChange={(e) => void setMemoryToggle('st', e.target.checked)}
+        />
       </header>
       <details className="msg-details">
         <summary>Сообщения ({state.messages.length})</summary>
@@ -59,15 +70,19 @@ function LayerCard({
   title,
   base,
   layer,
+  toggleLayer,
 }: {
   label: string
   title: string
   base: 'working' | 'longterm'
   layer?: MemoryLayer
+  toggleLayer: 'wm' | 'lt'
 }) {
-  const { refreshMemory } = useStudio()
+  const { state, refreshMemory, setMemoryToggle } = useStudio()
   const [key, setKey] = useState('')
   const [value, setValue] = useState('')
+  // Тумблер слоя (wm/lt): нет поля toggles (старый бэкенд) → считаем включённым
+  const on = state.memory?.toggles?.[toggleLayer] !== false
 
   // Добавить запись: POST /api/memory/{base} {key, value}
   const add = () => {
@@ -111,10 +126,19 @@ function LayerCard({
   }
 
   return (
-    <section className="ctx-card" title={title}>
+    <section className={'ctx-card' + (on ? '' : ' off')} title={title}>
       <header className="ctx-card-head">
         <h3>{label}</h3>
         <span className="ctx-count">{layer ? `${layer.entries} · ~${layer.tokens_est} tok` : '—'}</span>
+        <input
+          type="checkbox"
+          className="layer-toggle"
+          role="switch"
+          aria-checked={on}
+          checked={on}
+          title={on ? 'Слой включён в промпт' : 'Слой выключен из промпта'}
+          onChange={(e) => void setMemoryToggle(toggleLayer, e.target.checked)}
+        />
       </header>
       <ul className="kv-list">
         {layer &&
@@ -170,12 +194,14 @@ export default function MemoryTab() {
         title="Working Memory"
         base="working"
         layer={state.memory?.working}
+        toggleLayer="wm"
       />
       <LayerCard
         label="Долговременная"
         title="Long-Term Memory"
         base="longterm"
         layer={state.memory?.long_term}
+        toggleLayer="lt"
       />
       {rulesOpen && <RulesModal onClose={() => setRulesOpen(false)} />}
       {promptOpen && <SystemPromptModal onClose={() => setPromptOpen(false)} />}

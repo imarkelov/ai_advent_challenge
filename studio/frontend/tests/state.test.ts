@@ -75,6 +75,7 @@ describe('reducer — чистые переходы состояния', () => {
       dialogue: { message_count: 2, tokens_est: 10 },
       working: { entries: 0, tokens_est: 0, items: {} },
       long_term: { entries: 0, tokens_est: 0, items: {} },
+      toggles: { st: true, wm: true, lt: true },
     }
     const tokens = { last: null, session: { prompt: 0, completion: 0, total: 0 }, context_limit: 32768 }
     expect(base.memory).toBeNull()

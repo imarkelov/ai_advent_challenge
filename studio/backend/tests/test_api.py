@@ -275,6 +275,23 @@ def test_memory_get(client, dialogue_id):
     assert m["long_term"]["items"] == {"lk": "lv"}
 
 
+def test_memory_toggles_routes(client, dialogue_id):
+    # по умолчанию всё включено (и в GET /api/memory, и в /api/memory/toggles)
+    assert client.get("/api/memory/toggles").json()["toggles"] == {"st": True, "wm": True, "lt": True}
+    assert client.get("/api/memory").json()["toggles"]["wm"] is True
+    # off/on в любой последовательности
+    assert client.post("/api/memory/toggles", json={"layer": "wm", "enabled": False}).status_code == 200
+    assert client.post("/api/memory/toggles", json={"layer": "st", "enabled": False}).json()["toggles"] == {"st": False, "wm": False, "lt": True}
+    assert client.get("/api/memory").json()["toggles"] == {"st": False, "wm": False, "lt": True}
+    assert client.post("/api/memory/toggles", json={"layer": "wm", "enabled": True}).json()["toggles"]["wm"] is True
+    # обратно всё вкл
+    assert client.post("/api/memory/toggles", json={"layer": "st", "enabled": True}).json()["toggles"]["st"] is True
+    # ошибки: неизвестный слой, не-bool, отсутствующее поле
+    assert client.post("/api/memory/toggles", json={"layer": "nope", "enabled": True}).status_code == 400
+    assert client.post("/api/memory/toggles", json={"layer": "wm", "enabled": "да"}).status_code == 400
+    assert client.post("/api/memory/toggles", json={"layer": "wm"}).status_code == 400
+
+
 def test_memory_working_routes(client):
     # нет активного диалога
     assert client.post("/api/memory/working", json={"key": "k", "value": "v"}).status_code == 400

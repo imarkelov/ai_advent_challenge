@@ -165,14 +165,24 @@ class StudioAgent:
     # ---------- построение запроса ----------
 
     def build_payload(self, dialogue_id: str) -> list:
-        """Список сообщений для LLM: [system (промпт + блоки памяти + правило
-        при наличии памяти)] + история диалога (только role/content — служебные
-        поля вроде model в API не уходят)."""
+        """Список сообщений для LLM: [system (промпт + блоки ВКЛЮЧЁННЫХ слоёв
+        памяти + правило при наличии памяти)] + история диалога (только
+        role/content — служебные поля вроде model в API не уходят).
+
+        Тумблеры слоёв (toggles.json): ст off — в LLM уходит только текущее
+        сообщение (история не шлётся, сообщения по-прежнему хранятся);
+        wm/lt off — их блоки не добавляются в system-промт."""
         cfg = self.get_config()
+        st_on = self.store.get_toggles()["st"]
         blocks = self.store.build_memory_blocks(dialogue_id)
         system = cfg["system_prompt"] + blocks + (MEMORY_RULE if blocks else "")
-        history = [{"role": m["role"], "content": m["content"]}
-                   for m in self.store.get_messages(dialogue_id)]
+        msgs = self.store.get_messages(dialogue_id)
+        if st_on:
+            history = [{"role": m["role"], "content": m["content"]} for m in msgs]
+        else:
+            # текущее сообщение — последнее в списке (уже дописано)
+            history = [{"role": "user", "content": msgs[-1]["content"]}
+                       if msgs else []]
         return [{"role": "system", "content": system}] + history
 
     # ---------- стриминг ответа ----------
@@ -371,7 +381,7 @@ class StudioAgent:
             self.set_config({"model": available[0]["id"]})
 
     def _detect_memory_conflict(self, dialogue_id: str, message: str) -> list:
-        """Пункты памяти (WM диалога + LT), потенциально противоречащие запросу.
+        """Пункты ВКЛЮЧЁННЫХ слоёв (WM диалога + LT), противоречащие запросу.
 
         Эвристика: ключ встречается в сообщении, значение НЕ встречается
         (пользователь называет другое), в сообщении есть глагол действия.
@@ -382,7 +392,12 @@ class StudioAgent:
         msg = message.lower()
         if not any(v in msg for v in CONFLICT_VERBS):
             return []
-        items = {**self.store.wm_items(dialogue_id), **self.store.lt_items()}
+        t = self.store.get_toggles()
+        items = {}
+        if t["wm"]:
+            items.update(self.store.wm_items(dialogue_id))
+        if t["lt"]:
+            items.update(self.store.lt_items())
         hits = []
         for key, value in items.items():
             k = str(key).lower().strip()

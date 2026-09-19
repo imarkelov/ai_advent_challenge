@@ -15,8 +15,10 @@ import httpx
 
 try:  # пакетный режим: uvicorn studio.backend.main:app из корня репозитория
     from .agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE, StudioAgent
+    from .memory import MemoryStore
 except ImportError:  # dev-режим: uvicorn main:app из studio/backend
     from agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE, StudioAgent
+    from memory import MemoryStore
 
 # Секреты/настройки — из .env в корне репозитория.
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
@@ -149,10 +151,27 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
 
     @app.get("/api/memory")
     def memory_get():
-        """Статистика слоёв памяти (по активному диалогу) + active_id."""
+        """Статистика слоёв памяти (по активному диалогу) + active_id + toggles."""
         stats = agent.store.layer_stats()
         stats["active_id"] = agent.store.active_id()
+        stats["toggles"] = agent.store.get_toggles()
         return stats
+
+    @app.get("/api/memory/toggles")
+    def memory_toggles_get():
+        """Тумблеры слоёв памяти: {st, wm, lt: bool}."""
+        return {"toggles": agent.store.get_toggles()}
+
+    @app.post("/api/memory/toggles")
+    def memory_toggles_set(body: dict):
+        """Включить/отключить слой памяти {layer: st|wm|lt, enabled: bool}."""
+        layer = body.get("layer")
+        enabled = body.get("enabled")
+        if not isinstance(layer, str) or layer not in MemoryStore.TOGGLE_LAYERS:
+            raise HTTPException(400, "layer должен быть одним из: st, wm, lt")
+        if not isinstance(enabled, bool):
+            raise HTTPException(400, "enabled должен быть bool (true/false)")
+        return {"toggles": agent.store.set_toggle(layer, enabled)}
 
     # ---------- память: WM ----------
 

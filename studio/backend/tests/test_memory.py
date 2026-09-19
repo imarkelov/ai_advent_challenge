@@ -256,3 +256,51 @@ def test_layer_stats_no_active_dialogue(store, data_dir):
     assert stats["dialogue"] == {"message_count": 0, "tokens_est": 0}
     assert stats["working"] == {"entries": 0, "tokens_est": 0, "items": {}}
     assert stats["long_term"]["entries"] == 1
+
+
+# ---------- тумблеры слоёв (toggles.json) ----------
+
+def test_toggles_default_all_on(store):
+    assert store.get_toggles() == {"st": True, "wm": True, "lt": True}
+
+
+def test_toggles_set_and_persist(store, data_dir):
+    store.set_toggle("wm", False)
+    store.set_toggle("st", False)
+    # любое сочетание: второй store видит то же самое
+    s2 = MemoryStore(str(data_dir))
+    assert s2.get_toggles() == {"st": False, "wm": False, "lt": True}
+
+
+def test_toggles_set_back_to_true(store):
+    store.set_toggle("lt", False)
+    store.set_toggle("lt", True)
+    assert store.get_toggles()["lt"] is True
+
+
+def test_toggles_invalid_layer(store):
+    with pytest.raises(ValueError):
+        store.set_toggle("nope", True)
+    with pytest.raises(ValueError):
+        store.set_toggle("wm", "не bool")
+
+
+def test_toggles_corrupted_file_defaults(data_dir):
+    p = data_dir / "toggles.json"
+    p.write_text("{битый json", encoding="utf-8")
+    store = MemoryStore(str(data_dir))
+    assert store.get_toggles() == {"st": True, "wm": True, "lt": True}
+
+
+def test_blocks_respect_toggles(store):
+    d = store.new_dialogue()
+    store.wm_set(d["id"], "t", "задача")
+    store.lt_set("u", "юзер")
+    store.set_toggle("wm", False)
+    assert store.build_memory_blocks(d["id"]) == "\n\nДолговременная память:\n- u: юзер"
+    store.set_toggle("lt", False)
+    assert store.build_memory_blocks(d["id"]) == ""
+    # обратно вкл — оба блока
+    store.set_toggle("wm", True)
+    store.set_toggle("lt", True)
+    assert store.build_memory_blocks(d["id"]).startswith("\n\nТекущая задача:")
