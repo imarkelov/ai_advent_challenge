@@ -127,6 +127,19 @@ def test_memory_rule_forbids_silent_compliance():
     assert "решени" in MEMORY_RULE
 
 
+def test_memory_rule_prioritizes_memory_over_history():
+    """Правило явно ставит память ВЫШЕ запросов диалога (вкл. последних)
+    и требует сверять запрос с КАЖДЫМ пунктом до ответа — иначе модель при
+    истории диалога трактует противоречащий запрос как «доработку» и
+    подчиняется (регрессия: ТЗ с «Источник: Яндекс» vs «напиши ТЗ, где
+    источник гугл»)."""
+    assert "приоритет" in MEMORY_RULE
+    assert "каждым пунктом" in MEMORY_RULE
+    # few-shot: без явного примера мелкие модели подчиняются свежему
+    # запросу, игнорируя правило (проверено на glm/deepseek/qwen)
+    assert "Пример:" in MEMORY_RULE
+
+
 # ---------- ask_stream: успех ----------
 
 def test_ask_stream_success(data_dir):
@@ -165,6 +178,80 @@ def test_ask_stream_success(data_dir):
     # сессионные токены
     assert agent.session_tokens() == {"prompt": 10, "completion": 5, "total": 15}
     assert agent.last_usage() == USAGE
+
+
+# ---------- server-side гард «запрос ↔ память» ----------
+
+def test_conflict_detection_key_verb_no_value(data_dir):
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    agent.store.wm_set(d["id"], "Источник", "Яндекс")
+    hits = agent._detect_memory_conflict(
+        d["id"], "Напиши ТЗ, где источник будет гугл")
+    assert hits == [("Источник", "Яндекс")]
+
+
+def test_conflict_detection_no_verb(data_dir):
+    """Вопрос про память — не конфликт."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    agent.store.wm_set(d["id"], "Источник", "Яндекс")
+    assert agent._detect_memory_conflict(d["id"], "Какой источник?") == []
+
+
+def test_conflict_detection_value_present(data_dir):
+    """Значение совпадает — конфликта нет."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    agent.store.wm_set(d["id"], "Источник", "Яндекс")
+    assert agent._detect_memory_conflict(
+        d["id"], "Напиши ТЗ, источник — яндекс") == []
+
+
+def test_conflict_detection_lt_and_short_key(data_dir):
+    """LT тоже проверяется; ключ короче 4 символов пропускается."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    agent.store.lt_set("Стек", "Kotlin")
+    agent.store.wm_set(d["id"], "ТЗ", "проект каталог")
+    hits = agent._detect_memory_conflict(d["id"], "Разработай код, стек — Python")
+    assert hits == [("Стек", "Kotlin")]
+    # без упоминания ключа в сообщении гард молчит (консервативно)
+    assert agent._detect_memory_conflict(d["id"], "Разработай код на Python") == []
+    # короткое ключ «ТЗ» в сообщении «Напиши ТЗ» не детектится
+    assert agent._detect_memory_conflict(d["id"], "Напиши ТЗ") == []
+
+
+def test_conflict_reminder_appended_to_payload(data_dir):
+    """Конфликт → system-напоминание в КОНЦЕ messages (после user)."""
+    seen = {}
+
+    def handler(request):
+        seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.wm_set(d["id"], "Источник", "Яндекс")
+    list(agent.ask_stream(d["id"], "Напиши ТЗ, источник — гугл"))
+    assert seen["messages"][-1]["role"] == "system"
+    assert "Источник: Яндекс" in seen["messages"][-1]["content"]
+    assert seen["messages"][-2]["role"] == "user"
+
+
+def test_no_conflict_reminder_without_conflict(data_dir):
+    seen = {}
+
+    def handler(request):
+        if "stream" in json.loads(request.content):
+            seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    agent.store.wm_set(d["id"], "Источник", "Яндекс")
+    list(agent.ask_stream(d["id"], "Расскажи анекдот"))
+    assert seen["messages"][-1]["role"] == "user"
 
 
 # ---------- ask_stream: авто-заголовок и model в сообщениях ----------
