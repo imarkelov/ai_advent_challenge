@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from memory import MemoryStore, new_profile
+from memory import MemoryStore, new_profile, new_task
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def test_list_dialogues_order_and_shape(store):
     assert [x["id"] for x in lst] == [a["id"], b["id"]]  # порядок создания
     assert lst[0] == {"id": a["id"], "title": a["title"],
                       "created": a["created"], "message_count": 1,
-                      "profile": new_profile()}
+                      "profile": new_profile(), "task": new_task()}
     assert lst[1]["message_count"] == 0
 
 
@@ -397,3 +397,136 @@ class TestProfile:
             json.dump(data, f, ensure_ascii=False)
         assert self.s.profile_get(d["id"])["status"] == "pending"
         assert self.s.get_dialogue(d["id"])["profile"]["status"] == "pending"
+
+
+class TestTaskStorage:
+    def setup_method(self):
+        import tempfile
+        self.d = tempfile.TemporaryDirectory()
+        self.s = MemoryStore(self.d.name)
+
+    def teardown_method(self):
+        self.d.cleanup()
+
+    def test_old_dialogue_task_inactive(self):
+        d = self.s.new_dialogue()
+        t = self.s.task_get(d["id"])
+        assert t["active"] is False
+        assert t["stage"] is None
+        assert self.s.get_dialogue(d["id"])["task"]["active"] is False
+
+    def test_task_new_sets_planning(self):
+        d = self.s.new_dialogue()
+        t = self.s.task_new(d["id"], "Сделай сайт")
+        assert t["active"] is True
+        assert t["stage"] == "planning"
+        assert t["paused"] is False
+        assert t["description"] == "Сделай сайт"
+        assert t["stages"] == {}
+        assert t["retries"] == 0
+
+    def test_task_new_rejects_active(self):
+        import pytest
+        d = self.s.new_dialogue()
+        self.s.task_new(d["id"], "Задача 1")
+        with pytest.raises(ValueError):
+            self.s.task_new(d["id"], "Задача 2")
+        assert self.s.task_get(d["id"])["description"] == "Задача 1"
+
+    def test_task_stage_done_advances_forward(self):
+        d = self.s.new_dialogue()
+        self.s.task_new(d["id"], "X")
+        t = self.s.task_stage_done(d["id"], "planning", "1. шаг")
+        assert t["stage"] == "execution"
+        assert t["stages"]["planning"]["output"] == "1. шаг"
+        t = self.s.task_stage_done(d["id"], "execution", "код")
+        assert t["stage"] == "validation"
+        assert t["stages"]["execution"]["attempts"] == 1
+        t = self.s.task_stage_done(d["id"], "validation", "ок", verdict="pass")
+        assert t["stage"] == "done"
+        assert t["stages"]["validation"]["verdict"] == "pass"
+
+    def test_task_stage_done_rejects_wrong_stage(self):
+        import pytest
+        d = self.s.new_dialogue()
+        self.s.task_new(d["id"], "X")
+        with pytest.raises(ValueError):
+            self.s.task_stage_done(d["id"], "execution", "прыжок")
+        assert self.s.task_get(d["id"])["stage"] == "planning"
+
+    def test_task_retry_execution(self):
+        import pytest
+        d = self.s.new_dialogue()
+        self.s.task_new(d["id"], "X")
+        self.s.task_stage_done(d["id"], "planning", "план")
+        self.s.task_stage_done(d["id"], "execution", "работа")
+        t = self.s.task_retry_execution(d["id"], "криво", "fail")
+        assert t["stage"] == "execution"
+        assert t["retries"] == 1
+        assert t["stages"]["validation"]["verdict"] == "fail"
+        with pytest.raises(ValueError):
+            self.s.task_retry_execution(d["id"], "снова", "fail")
+
+    def test_task_pause_resume(self):
+        import pytest
+        d = self.s.new_dialogue()
+        self.s.task_new(d["id"], "X")
+        with pytest.raises(ValueError):
+            self.s.task_resume(d["id"])  # resume без паузы — ошибка
+        assert self.s.task_pause(d["id"])["paused"] is True
+        assert self.s.task_resume(d["id"])["paused"] is False
+        self.s.task_reset(d["id"])
+        with pytest.raises(ValueError):
+            self.s.task_pause(d["id"])
+
+    def test_task_instruction_only_on_pause(self):
+        import pytest
+        d = self.s.new_dialogue()
+        self.s.task_new(d["id"], "X")
+        with pytest.raises(ValueError):
+            self.s.task_set_instruction(d["id"], "правка")
+        self.s.task_pause(d["id"])
+        assert self.s.task_set_instruction(d["id"], "правка")["instruction"] == "правка"
+        assert self.s.task_instruction_take(d["id"]) == "правка"
+        assert self.s.task_get(d["id"])["instruction"] == ""
+
+    def test_task_set_error_and_resume_clears(self):
+        d = self.s.new_dialogue()
+        self.s.task_new(d["id"], "X")
+        t = self.s.task_set_error(d["id"], "API down")
+        assert t["error"] == "API down"
+        assert t["paused"] is True
+        assert self.s.task_resume(d["id"])["error"] is None
+
+    def test_task_reset_clears_and_persists(self):
+        d = self.s.new_dialogue()
+        self.s.task_new(d["id"], "X")
+        self.s.task_stage_done(d["id"], "planning", "план")
+        t = self.s.task_reset(d["id"])
+        t.pop("updated")  # _task_mutate ставит updated — сверяем остальное
+        expected = new_task()
+        expected.pop("updated")
+        assert t == expected
+        s2 = MemoryStore(self.d.name)
+        assert s2.task_get(d["id"])["active"] is False
+
+    def test_task_in_get_and_list_dialogue(self):
+        d = self.s.new_dialogue()
+        self.s.task_new(d["id"], "X")
+        assert self.s.get_dialogue(d["id"])["task"]["stage"] == "planning"
+        assert self.s.list_dialogues()[0]["task"]["active"] is True
+
+    def test_task_get_unknown_dialogue(self):
+        import pytest
+        with pytest.raises(ValueError):
+            self.s.task_get("нет-такого")
+
+    def test_append_message_task_stage(self):
+        d = self.s.new_dialogue()
+        self.s.append_message(d["id"], "user", "привет")
+        self.s.append_message(d["id"], "assistant", "план", model="m1",
+                              task_stage="planning")
+        msgs = self.s.get_messages(d["id"])
+        assert msgs[0].get("task_stage") is None
+        assert msgs[1]["task_stage"] == "planning"
+        assert msgs[1]["model"] == "m1"

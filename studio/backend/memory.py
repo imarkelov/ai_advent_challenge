@@ -63,6 +63,18 @@ def new_profile() -> dict:
             "name": "", "role": "", "tone": "", "taboos": ""}
 
 
+# Состояние задачи (день 13): FSM per-диалог, поле «task» записи диалога.
+# Отсутствующее поле = неактивная задача (бэкворд-совместимость).
+TASK_STAGES = ("planning", "execution", "validation", "done")
+
+
+def new_task() -> dict:
+    """Свежее (неактивное) состояние задачи."""
+    return {"active": False, "stage": None, "paused": False,
+            "description": "", "instruction": "", "stages": {},
+            "retries": 0, "error": None, "updated": None}
+
+
 class MemoryStore:
     """Хранилище трёх слоёв памяти с файловым персистентным бэкендом."""
 
@@ -136,7 +148,8 @@ class MemoryStore:
             return [{"id": d["id"], "title": d.get("title", ""),
                      "created": d.get("created", ""),
                      "message_count": len(d.get("messages", [])),
-                     "profile": self._profile_of(d)}
+                     "profile": self._profile_of(d),
+                     "task": self._task_of(d)}
                     for d in data["dialogues"]]
 
     def get_dialogue(self, dialogue_id: str) -> dict | None:
@@ -149,7 +162,8 @@ class MemoryStore:
             return {"id": d["id"], "title": d.get("title", ""),
                     "created": d.get("created", ""),
                     "messages": list(d.get("messages", [])),
-                    "profile": self._profile_of(d)}
+                    "profile": self._profile_of(d),
+                    "task": self._task_of(d)}
 
     def get_messages(self, dialogue_id: str) -> list:
         """Сообщения диалога [{role,content}] ([] если диалог не найден)."""
@@ -197,11 +211,12 @@ class MemoryStore:
             self._write_dialogues(data)
 
     def append_message(self, dialogue_id: str, role: str, content: str,
-                       model: str | None = None) -> None:
+                       model: str | None = None,
+                       task_stage: str | None = None) -> None:
         """Добавить сообщение в диалог; ValueError, если диалог не существует.
 
-        model — необязательная метка (используется для assistant-сообщений:
-        какой моделью выполнен запрос).
+        model — метка модели (assistant); task_stage — стадия задачи,
+        которую выполнил stage-агент (день 13).
         """
         with self._lock:
             data = self._read_dialogues()
@@ -211,6 +226,8 @@ class MemoryStore:
             msg = {"role": role, "content": content}
             if model is not None:
                 msg["model"] = model
+            if task_stage is not None:
+                msg["task_stage"] = task_stage
             d.setdefault("messages", []).append(msg)
             self._write_dialogues(data)
 
@@ -289,6 +306,162 @@ class MemoryStore:
             d["profile"] = p
             self._write_dialogues(data)
             return d["profile"]
+
+    # ---------- состояние задачи: FSM (день 13, per-диалог) ----------
+
+    def _task_of(self, d: dict) -> dict:
+        """Состояние задачи записи диалога; отсутствие поля/битое значение —
+        неактивная задача."""
+        raw = d.get("task")
+        if not isinstance(raw, dict):
+            return new_task()
+        t = new_task()
+        for k in ("active", "stage", "paused", "description", "instruction",
+                  "retries", "error", "updated"):
+            if k in raw:
+                t[k] = raw[k]
+        stages = raw.get("stages")
+        t["stages"] = ({s: e for s, e in stages.items() if isinstance(e, dict)}
+                       if isinstance(stages, dict) else {})
+        return t
+
+    def _task_mutate(self, dialogue_id: str, fn) -> dict:
+        """Применить fn(task) к состоянию задачи диалога; запись атомарная.
+        fn бросает ValueError — состояние не меняется."""
+        with self._lock:
+            data = self._read_dialogues()
+            d = self._find(data, dialogue_id)
+            if d is None:
+                raise ValueError(f"Диалог «{dialogue_id}» не найден")
+            t = self._task_of(d)
+            fn(t)
+            t["updated"] = _now()
+            d["task"] = t
+            self._write_dialogues(data)
+            return t
+
+    def task_get(self, dialogue_id: str) -> dict:
+        """Состояние задачи диалога; ValueError, если диалог не существует.
+        Нет поля — неактивная задача (new_task)."""
+        with self._lock:
+            data = self._read_dialogues()
+            d = self._find(data, dialogue_id)
+            if d is None:
+                raise ValueError(f"Диалог «{dialogue_id}» не найден")
+            return self._task_of(d)
+
+    def task_new(self, dialogue_id: str, description: str) -> dict:
+        """Создать задачу (stage=planning). ValueError: диалог не найден;
+        задача уже активна (сначала reset)."""
+        def fn(t):
+            if t["active"]:
+                raise ValueError("Задача уже активна: завершите её (reset) перед новой")
+            t.update({"active": True, "stage": "planning", "paused": False,
+                      "description": description, "instruction": "",
+                      "stages": {}, "retries": 0, "error": None})
+        return self._task_mutate(dialogue_id, fn)
+
+    def task_stage_done(self, dialogue_id: str, stage: str, output: str,
+                        verdict: str | None = None) -> dict:
+        """Записать output завершённой стадии и перейти к следующей.
+        ValueError: задача не активна; стадия != текущей; stage «done»."""
+        def fn(t):
+            if not t["active"]:
+                raise ValueError("Задача не активна")
+            if stage not in TASK_STAGES or stage == "done":
+                raise ValueError(f"Неизвестная стадия: {stage}")
+            if t["stage"] != stage:
+                raise ValueError(f"Стадия не совпадает: текущая «{t['stage']}»")
+            entry = dict(t["stages"].get(stage) or {})
+            entry.update({"output": output, "ts": _now(), "verdict": verdict})
+            if stage == "execution":
+                entry["attempts"] = entry.get("attempts", 0) + 1
+            t["stages"][stage] = entry
+            t["stage"] = TASK_STAGES[TASK_STAGES.index(stage) + 1]
+            t["error"] = None
+        return self._task_mutate(dialogue_id, fn)
+
+    def task_retry_execution(self, dialogue_id: str, output: str,
+                             verdict: str) -> dict:
+        """Валидация не прошла: сохранить её output/вердикт и вернуться в
+        execution (единственный разрешённый «назад» переход). ValueError:
+        задача не активна; стадия != validation; ретраи исчерпаны."""
+        def fn(t):
+            if not t["active"]:
+                raise ValueError("Задача не активна")
+            if t["stage"] != "validation":
+                raise ValueError("Ретрай доступен только на стадии validation")
+            if t["retries"] >= 1:
+                raise ValueError("Повтор execution уже был")
+            t["stages"]["validation"] = {"output": output, "ts": _now(),
+                                         "verdict": verdict}
+            t["retries"] += 1
+            t["stage"] = "execution"
+            t["error"] = None
+        return self._task_mutate(dialogue_id, fn)
+
+    def task_pause(self, dialogue_id: str) -> dict:
+        """Поставить паузу (вступает на границе стадии). ValueError:
+        задача не активна."""
+        def fn(t):
+            if not t["active"]:
+                raise ValueError("Задача не активна")
+            t["paused"] = True
+        return self._task_mutate(dialogue_id, fn)
+
+    def task_resume(self, dialogue_id: str) -> dict:
+        """Снять паузу и очистить ошибку. ValueError: задача не активна;
+        задача не на паузе (resume без паузы — бессмысленное действие,
+        API отвечает 400)."""
+        def fn(t):
+            if not t["active"]:
+                raise ValueError("Задача не активна")
+            if not t["paused"]:
+                raise ValueError("Задача не на паузе")
+            t["paused"] = False
+            t["error"] = None
+        return self._task_mutate(dialogue_id, fn)
+
+    def task_set_instruction(self, dialogue_id: str, text: str) -> dict:
+        """Инструкция пользователя — только на паузе. ValueError: задача
+        не активна; пауза не установлена."""
+        def fn(t):
+            if not t["active"]:
+                raise ValueError("Задача не активна")
+            if not t["paused"]:
+                raise ValueError("Инструкция доступна только на паузе")
+            t["instruction"] = text
+        return self._task_mutate(dialogue_id, fn)
+
+    def task_instruction_take(self, dialogue_id: str) -> str:
+        """Вернуть instruction и очистить (вызывается перед запуском стадии)."""
+        out = {"text": ""}
+
+        def fn(t):
+            out["text"] = t["instruction"]
+            t["instruction"] = ""
+
+        self._task_mutate(dialogue_id, fn)
+        return out["text"]
+
+    def task_set_error(self, dialogue_id: str, message: str) -> dict:
+        """Ошибка LLM-вызова стадии: отметить и поставить паузу (повтор —
+        через resume). ValueError: задача не активна."""
+        def fn(t):
+            if not t["active"]:
+                raise ValueError("Задача не активна")
+            t["error"] = message
+            t["paused"] = True
+        return self._task_mutate(dialogue_id, fn)
+
+    def task_reset(self, dialogue_id: str) -> dict:
+        """Сбросить состояние задачи (новая задача готова). ValueError:
+        диалог не найден."""
+        def fn(t):
+            t.clear()
+            t.update(new_task())
+
+        return self._task_mutate(dialogue_id, fn)
 
     # ---------- WM (рабочая память, per-dialogue) ----------
 
