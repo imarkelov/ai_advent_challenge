@@ -1,0 +1,98 @@
+# Tasks: day12-user-profile
+
+## 1. Подготовка
+
+- [ ] 1.1 Создать ветку `day12-user-profile` от `day11-studio` (локально,
+  синхронизирована с origin) — проверить: `git branch --show-current` =
+  `day12-user-profile`, `git log -1` = последний коммит day11-studio.
+
+## 2. Бэкенд: хранилище профиля (memory.py)
+
+- [ ] 2.1 Добавить в `MemoryStore` методы профиля: `profile_get(dialogue_id)`
+  (отсутствие поля → `{"status":"pending",...пустые поля}`),
+  `profile_set(dialogue_id, name, role, tone, taboos)` (непустое →
+  `status="active"`), `profile_action(dialogue_id, action)`
+  (`interview`/`decline`/`reset`), атомарно под существующим `Lock` —
+  проверить: новые тесты в `tests/test_memory.py` (CRUD, бэкворд-
+  совместимость старого диалога, удаление профиля вместе с диалогом,
+  per-диалоговая изоляция) проходят: `python -m pytest tests/test_memory.py -q`.
+- [ ] 2.2 Включить `profile` в возвращаемые записи диалогов
+  (`get_dialogue`/`list_dialogues` не должны терять поле при записях
+  сообщений) — проверить: тест «profile переживает append_message и
+  list» в `tests/test_memory.py` проходит.
+
+## 3. Бэкенд: state machine + инъекция (agent.py)
+
+- [ ] 3.1 Добавить `build_profile_block(dialogue_id)` в `StudioAgent`
+  (строка блока «Профиль пользователя:» + поля + «Избегай:» при
+  непустых табутах; пусто для non-active/пустых полей) и подключить в
+  `build_payload` между базовым промптом и блоками памяти —
+  проверить: тесты `tests/test_agent.py`: active-профиль в system при
+  любом запросе; pending/declined — блока нет; блоки памяти и
+  MEMORY_RULE — как раньше (существующие тесты не сломаны).
+- [ ] 3.2 Реализовать state machine инициализации в `ask_stream`
+  (D2 design): `pending` → детерминированное приглашение (без LLM) на
+  первый ход; нераспознанный ответ → повторное приглашение;
+  «вручную» → указание на вкладку; `interview=True` → LLM-экстракт
+  ответа на 4 вопроса → `active` / сбой → просьба повторить; `decline`
+  → `declined` + обычные ответы — проверить: тесты `tests/test_agent.py`
+  на `httpx.MockTransport`: полный сценарий pending→interview→active,
+  pending→declined, сбой экстракта (не-JSON) не ломает диалог, reset →
+  повторное приглашение; существующие тесты агента не сломаны.
+- [ ] 3.3 LLM-экстракт профиля: нестриминговый вызов по паттерну
+  `_generate_title` (thinking-off, `max_tokens` ~400, JSON-парсинг с
+  fallback-вырезанием объекта), не пишется в `requests.json` —
+  проверить: тест-сценарий 3.2 с success/fail ветками проходит; в
+  `requests.json` служебных записей нет (тест).
+
+## 4. Бэкенд: API (main.py)
+
+- [ ] 4.1 Эндпоинты: `POST /api/profile` (4 str-поля → `profile_set`;
+  400 на не-str/лишние поля, 404 на диалог), `POST /api/profile/action`
+  (interview/decline/reset; 400 на неизвестное action, 404) —
+  проверить: тесты `tests/test_api.py` (200/400/404 по всем веткам)
+  проходят: `python -m pytest tests/test_api.py -q`.
+- [ ] 4.2 Профиль в выдаче диалогов (`GET /api/dialogues`,
+  `GET /api/dialogues/{id}`) и `profile_block`/`profile_status` в
+  `GET /api/rules` — проверить: тесты API: профиль возвращается в
+  обоих GET, `/api/rules` содержит `profile_block` при active.
+- [ ] 4.3 Полный прогон офлайн-тестов бэкенда — проверить:
+  `cd studio/backend && python -m pytest -q` зелёный (все старые + новые).
+
+## 5. Фронтенд: вкладка «Профили» + бейдж
+
+- [ ] 5.1 `api.ts` + `state.tsx`: хелперы `saveProfile`,
+  `profileAction`; типизация `profile` в данных диалога — проверить:
+  `npx tsc --noEmit` чистый.
+- [ ] 5.2 `ContextPanel.tsx`: 4-й таб «Профили» → `ProfileTab.tsx`
+  (каркас MemoryTab: карточка статуса, 4 поля, кнопки «Интервью» /
+  «Заполнить заново» / «Отказаться», обновление при переключении
+  диалога) — проверить: Vitest-тесты ProfileTab (статусы pending/
+  active/declined, сохранение полей, переключение диалога) проходят:
+  `cd studio/frontend && npm test`.
+- [ ] 5.3 `ChatPanel.tsx`: бейдж «Профиль не заполнен — после
+  инициализации ответы будут точнее и лучше» при `pending`/`declined`
+  активного диалога, действия → «Интервью» / «Вручную» (активировать
+  вкладку «Профили») — проверить: Vitest-тесты бейджа (появляется/
+  исчезает при смене статуса) проходят.
+
+## 6. Проверка задания (e2e + live)
+
+- [ ] 6.1 Расширить `scripts/e2e_studio.py` блоком «Профиль»: новый
+  диалог → приглашение → `interview` → ответ → `active` → запрос, JSON
+  (журнал) содержит блок профиля; SKIP-ветка при недоступном GPustack —
+  проверить: `python scripts/e2e_studio.py` exit 0 (PASS/SKIP).
+- [ ] 6.2 Live-проверка «разные профили → разные ответы»: два диалога с
+  разными `active`-профилями (тон/стоп-слово), один вопрос, ответы
+  различаются; табу-слово отсутствует в ответе диалога с табу —
+  проверить: live-прогон на 3 моделях (qwen/deepseek/glm) зафиксирован
+  в отчёте/выводе e2e.
+
+## 7. Финализация
+
+- [ ] 7.1 README: секция «День 12» (release notes, API-таблица
+  профилей, статус тестов) + строка дня 12 в таблице веток —
+  проверить: секция присутствует, команды запуска актуальны.
+- [ ] 7.2 Финальная верификация: бэкенд pytest + фронтенд npm test +
+  e2e exit 0 — проверить: все три зелёные, коммит(ы) на
+  `day12-user-profile` по конвенции репозитория.
