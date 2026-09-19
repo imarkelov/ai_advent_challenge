@@ -11,7 +11,10 @@ from datetime import datetime
 
 import httpx
 
-from memory import MemoryStore, atomic_write_json, read_json
+try:  # пакетный режим: studio.backend.agent
+    from .memory import MemoryStore, atomic_write_json, read_json
+except ImportError:  # dev-режим: импорт из studio/backend
+    from memory import MemoryStore, atomic_write_json, read_json
 
 # Ограничения контекста известных моделей; неизвестной — 32768.
 CONTEXT_LIMITS = {

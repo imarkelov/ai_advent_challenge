@@ -59,7 +59,7 @@ export type ChatEvent =
 // EventSource не умеет POST, поэтому — fetch + ReadableStream.
 // Буфер разбиваем по '\n\n' (кадр SSE), внутри ищем строки `data: {json}`.
 export async function chatStream(
-  dialogueId: number,
+  dialogueId: string,
   message: string,
   onEvent: (e: ChatEvent) => void,
 ): Promise<void> {

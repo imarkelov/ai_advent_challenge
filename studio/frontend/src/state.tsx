@@ -21,7 +21,7 @@ export interface Message {
 }
 
 export interface DialogueMeta {
-  id: number
+  id: string
   title: string
   created: string
   message_count: number
@@ -34,7 +34,7 @@ export interface MemoryLayer {
 }
 
 export interface MemoryState {
-  active_id: number | null
+  active_id: string | null
   dialogue: { message_count: number; tokens_est: number }
   working: MemoryLayer
   long_term: MemoryLayer
@@ -81,7 +81,7 @@ export interface StudioState {
   loaded: boolean
   config: Config | null
   dialogues: DialogueMeta[]
-  activeId: number | null
+  activeId: string | null
   messages: Message[]
   memory: MemoryState | null
   tokens: TokenState | null
@@ -141,14 +141,14 @@ export type StudioAction =
       type: 'loaded'
       config: Config
       dialogues: DialogueMeta[]
-      activeId: number | null
+      activeId: string | null
       memory: MemoryState
       tokens: TokenState
       requests: RequestSummary[]
     }
   | { type: 'messages'; messages: Message[] }
-  | { type: 'created'; dialogue: DialogueMeta; activeId: number }
-  | { type: 'activated'; activeId: number; dialogues: DialogueMeta[]; messages: Message[] }
+  | { type: 'created'; dialogue: DialogueMeta; activeId: string }
+  | { type: 'activated'; activeId: string; dialogues: DialogueMeta[]; messages: Message[] }
   | { type: 'user-message'; message: Message }
   | { type: 'delta'; text: string }
   | { type: 'done'; answer: string }
@@ -228,7 +228,7 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
 export interface StudioApi {
   state: StudioState
   newDialogue: () => Promise<void>
-  activateDialogue: (id: number) => Promise<void>
+  activateDialogue: (id: string) => Promise<void>
   sendMessage: (text: string) => Promise<void>
   setShowRequests: (on: boolean) => void
   refreshMemory: () => Promise<void>
@@ -245,7 +245,7 @@ export function useStudio(): StudioApi {
 }
 
 interface DialoguesResponse {
-  active_id: number | null
+  active_id: string | null
   dialogues: DialogueMeta[]
 }
 
@@ -307,15 +307,15 @@ export function StudioProvider({ children }: { children: ReactNode }) {
 
   // Новый диалог: POST /api/dialogues → 201 {dialogue, active_id}
   const newDialogue = useCallback(async () => {
-    const r = await apiPost<{ dialogue: DialogueMeta; active_id: number }>('/dialogues')
+    const r = await apiPost<{ dialogue: DialogueMeta; active_id: string }>('/dialogues')
     dispatch({ type: 'created', dialogue: r.dialogue, activeId: r.active_id })
     await refreshPanels()
   }, [refreshPanels])
 
   // Активация диалога: POST .../activate + загрузка его сообщений
-  const activateDialogue = useCallback(async (id: number) => {
+  const activateDialogue = useCallback(async (id: string) => {
     if (id === stateRef.current.activeId) return
-    await apiPost<{ active_id: number }>(`/dialogues/${id}/activate`)
+    await apiPost<{ active_id: string }>(`/dialogues/${id}/activate`)
     const [d, det] = await Promise.all([
       apiGet<DialoguesResponse>('/dialogues'),
       apiGet<DialogueDetailResponse>(`/dialogues/${id}`),

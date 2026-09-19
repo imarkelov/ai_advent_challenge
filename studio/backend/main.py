@@ -13,7 +13,10 @@ from fastapi.responses import StreamingResponse
 
 import httpx
 
-from agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, StudioAgent
+try:  # пакетный режим: uvicorn studio.backend.main:app из корня репозитория
+    from .agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, StudioAgent
+except ImportError:  # dev-режим: uvicorn main:app из studio/backend
+    from agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, StudioAgent
 
 # Секреты/настройки — из .env в корне репозитория.
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
@@ -240,3 +243,25 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
 
 
 app = create_app()
+
+# ---------- prod-режим: раздаём собранный фронтенд (studio/frontend/dist) ----------
+# Активен, если dist существует (после `npm run build`). Путь — от main.py,
+# не от CWD: работает и `uvicorn main:app` из studio/backend, и
+# `uvicorn studio.backend.main:app` из корня репозитория.
+_DIST = Path(__file__).resolve().parents[1] / "frontend" / "dist"
+if _DIST.is_dir():
+    from fastapi.responses import FileResponse
+    from fastapi.staticfiles import StaticFiles
+
+    if (_DIST / "assets").is_dir():
+        app.mount("/assets", StaticFiles(directory=_DIST / "assets"), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def spa_fallback(full_path: str):
+        """SPA-фолбэк: известные статические файлы — как есть, остальное — index.html.
+        Зарегистрирован после всех /api-роутов, те имеют приоритет."""
+        if full_path:
+            target = (_DIST / full_path).resolve()
+            if target.is_file() and str(target).startswith(str(_DIST.resolve())):
+                return FileResponse(target)
+        return FileResponse(_DIST / "index.html")
