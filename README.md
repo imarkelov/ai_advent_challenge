@@ -548,7 +548,7 @@ done → stage-сообщения в истории → гард чата → с
 
 ### Статус
 
-Бэкенд — 188 тестов PASS; фронтенд — 99 тестов PASS; typecheck (tsc) и
+Бэкенд — 191 тест PASS; фронтенд — 99 тестов PASS; typecheck (tsc) и
 синтаксис e2e-скрипта — clean; E2E — 19/19 PASS (prod-сервер + реальный
 GPustack: чат, персонализация, FSM-пайплайн задачи). Ветка
 `day13-task-state-machine` (от `day12-user-profile`).

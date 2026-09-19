@@ -118,8 +118,8 @@ Stage-outputs пишутся в `messages` диалога с меткой `task_
 | Метод | Путь | Тело | Результат |
 | --- | --- | --- | --- |
 | POST | `/api/task/start` | `{dialogue_id, description}` | задача: `active`, `stage=planning`; 400 — уже есть активная незавершённая |
-| POST | `/api/task/run` | `{dialogue_id}` | SSE-пайплайн (выше); 400 — задача неактивна |
-| POST | `/api/task/pause` | `{dialogue_id}` | stop-флаг + `paused` (между стадиями); 400 — нет активной задачи |
+| POST | `/api/task/run` | `{dialogue_id}` | SSE-пайплайн (выше); 400 — задача неактивна или завершена |
+| POST | `/api/task/pause` | `{dialogue_id}` | stop-флаг + `paused` (между стадиями); 400 — нет активной задачи или задача завершена |
 | POST | `/api/task/resume` | `{dialogue_id}` | снять паузу; 400 — нет паузы |
 | POST | `/api/task/instruction` | `{dialogue_id, text}` | instruction; 400 — не на паузе |
 | POST | `/api/task/reset` | `{dialogue_id}` | сброс состояния (новая задача готова) |
