@@ -123,8 +123,11 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
             raise HTTPException(400, "Не передан dialogue_id")
         if agent.store.get_dialogue(dialogue_id) is None:
             raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
-        if not agent.store.task_get(dialogue_id)["active"]:
+        t = agent.store.task_get(dialogue_id)
+        if not t["active"]:
             raise HTTPException(400, "Задача не активна")
+        if t["stage"] == "done":
+            raise HTTPException(400, "Задача завершена")
 
         def gen():
             for event in agent.task_run(dialogue_id):

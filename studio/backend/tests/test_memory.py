@@ -479,6 +479,17 @@ class TestTaskStorage:
         with pytest.raises(ValueError):
             self.s.task_pause(d["id"])
 
+    def test_task_pause_rejects_done(self):
+        import pytest
+        d = self.s.new_dialogue()
+        self.s.task_new(d["id"], "X")
+        self.s.task_stage_done(d["id"], "planning", "план")
+        self.s.task_stage_done(d["id"], "execution", "работа")
+        self.s.task_stage_done(d["id"], "validation", "ок", verdict="pass")
+        assert self.s.task_get(d["id"])["stage"] == "done"
+        with pytest.raises(ValueError, match="уже завершена"):
+            self.s.task_pause(d["id"])
+
     def test_task_instruction_only_on_pause(self):
         import pytest
         d = self.s.new_dialogue()

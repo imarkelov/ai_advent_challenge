@@ -538,6 +538,30 @@ def test_task_run_requires_active(client):
     assert r.status_code == 400
 
 
+def task_done_dialogue(client):
+    """Диалог с завершённой задачей (пайплайн доведён до task_done)."""
+    did = task_dialogue(client)
+    with client.stream("POST", "/api/task/run",
+                       json={"dialogue_id": did}) as resp:
+        events = parse_sse(list(resp.iter_lines()))
+    assert events[-1]["type"] == "task_done"
+    return did
+
+
+def test_task_run_rejects_done(client):
+    did = task_done_dialogue(client)
+    r = client.post("/api/task/run", json={"dialogue_id": did})
+    assert r.status_code == 400
+    assert r.json()["detail"] == "Задача завершена"
+
+
+def test_task_pause_rejects_done(client):
+    did = task_done_dialogue(client)
+    r = client.post("/api/task/pause", json={"dialogue_id": did})
+    assert r.status_code == 400
+    assert r.json()["detail"] == "Задача уже завершена"
+
+
 def test_task_pause_resume_instruction(client):
     did = task_dialogue(client)
     assert client.post("/api/task/resume",

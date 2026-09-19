@@ -402,10 +402,12 @@ class MemoryStore:
 
     def task_pause(self, dialogue_id: str) -> dict:
         """Поставить паузу (вступает на границе стадии). ValueError:
-        задача не активна."""
+        задача не активна; задача уже завершена."""
         def fn(t):
             if not t["active"]:
                 raise ValueError("Задача не активна")
+            if t["stage"] == "done":
+                raise ValueError("Задача уже завершена")
             t["paused"] = True
         return self._task_mutate(dialogue_id, fn)
 
