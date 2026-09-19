@@ -1254,3 +1254,37 @@ button {
   font-size: 13px;
   color: var(--accent);
 }
+
+/* ── День 13: задача (FSM) ─────────────────────────────────────────────── */
+.task-tab { display: flex; flex-direction: column; gap: 10px; }
+.task-label { font-size: 12px; opacity: .7; }
+.task-desc, .task-input { width: 100%; box-sizing: border-box; font: inherit; }
+.task-desc-text { margin: 2px 0 0; font-size: 14px; }
+.task-strip { display: flex; flex-wrap: wrap; gap: 6px; }
+.task-chip {
+  padding: 2px 8px; border-radius: 999px; font-size: 12px;
+  border: 1px solid rgba(128, 128, 128, .5);
+}
+.task-chip.done { border-color: #2e7d32; color: #2e7d32; }
+.task-chip.active { border-color: #1e88e5; color: #1e88e5; background: rgba(30, 136, 229, .12); }
+.task-chip.paused { border-color: #f9a825; color: #f9a825; }
+.task-actions { display: flex; gap: 8px; }
+.btn.danger { border-color: #c62828; color: #c62828; }
+.task-error { color: #e53935; font-size: 13px; margin: 0; }
+.task-instruction-row { display: flex; gap: 8px; }
+.task-instruction-current { font-size: 12px; opacity: .7; margin: 4px 0 0; }
+.task-output summary { cursor: pointer; font-size: 13px; }
+.task-verdict.pass { color: #2e7d32; }
+.task-verdict.fail { color: #e53935; }
+.task-attempts { opacity: .7; }
+.task-output-text {
+  white-space: pre-wrap; font-family: inherit; font-size: 13px;
+  max-height: 220px; overflow: auto; margin: 6px 0 0; padding: 6px;
+  border: 1px solid rgba(128, 128, 128, .3);
+}
+/* Чат: статус-строка стадий и чип stage-сообщений */
+.chat-task-strip { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 12px; }
+.msg-task-chip {
+  font-size: 11px; padding: 1px 6px; border-radius: 999px;
+  border: 1px solid rgba(128, 128, 128, .5); margin-left: 6px;
+}
