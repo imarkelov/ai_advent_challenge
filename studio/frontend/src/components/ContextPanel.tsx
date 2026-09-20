@@ -1,4 +1,4 @@
-// Правая панель «Контекст»: вкладки Память / Токены / Запрос / Профили / Задача
+// Правая панель «Контекст»: вкладки Память / Токены / Запрос / Профили
 // (активная вкладка подчёркнута). День 12: активная вкладка хранится в
 // общем состоянии StudioProvider — бейдж профиля в шапке чата открывает
 // вкладку «Профили» извне панели.
@@ -6,7 +6,6 @@ import MemoryTab from './MemoryTab'
 import TokensTab from './TokensTab'
 import RequestsTab from './RequestsTab'
 import ProfileTab from './ProfileTab'
-import TaskTab from './TaskTab'
 import { useStudio } from '../state'
 
 const TABS = [
@@ -14,7 +13,6 @@ const TABS = [
   { id: 'tokens', label: 'Токены' },
   { id: 'request', label: 'Запрос' },
   { id: 'profile', label: 'Профили' },
-  { id: 'task', label: 'Задача' },
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
@@ -44,7 +42,6 @@ export default function ContextPanel() {
         {tab === 'tokens' && <TokensTab />}
         {tab === 'request' && <RequestsTab />}
         {tab === 'profile' && <ProfileTab />}
-        {tab === 'task' && <TaskTab />}
       </div>
     </aside>
   )

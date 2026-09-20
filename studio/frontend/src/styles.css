@@ -1255,36 +1255,47 @@ button {
   color: var(--accent);
 }
 
-/* ── День 13: задача (FSM) ─────────────────────────────────────────────── */
-.task-tab { display: flex; flex-direction: column; gap: 10px; }
-.task-label { font-size: 12px; opacity: .7; }
-.task-desc, .task-input { width: 100%; box-sizing: border-box; font: inherit; }
-.task-desc-text { margin: 2px 0 0; font-size: 14px; }
-.task-strip { display: flex; flex-wrap: wrap; gap: 6px; }
-.task-chip {
-  padding: 2px 8px; border-radius: 999px; font-size: 12px;
-  border: 1px solid rgba(128, 128, 128, .5);
-}
-.task-chip.done { border-color: #2e7d32; color: #2e7d32; }
-.task-chip.active { border-color: #1e88e5; color: #1e88e5; background: rgba(30, 136, 229, .12); }
-.task-chip.paused { border-color: #f9a825; color: #f9a825; }
-.task-actions { display: flex; gap: 8px; }
+/* ── День 13b: задача (карточка процесса) ─────────────────────────────── */
 .btn.danger { border-color: #c62828; color: #c62828; }
-.task-error { color: #e53935; font-size: 13px; margin: 0; }
-.task-instruction-row { display: flex; gap: 8px; }
-.task-instruction-current { font-size: 12px; opacity: .7; margin: 4px 0 0; }
-.task-output summary { cursor: pointer; font-size: 13px; }
 .task-verdict.pass { color: #2e7d32; }
 .task-verdict.fail { color: #e53935; }
-.task-attempts { opacity: .7; }
-.task-output-text {
-  white-space: pre-wrap; font-family: inherit; font-size: 13px;
-  max-height: 220px; overflow: auto; margin: 6px 0 0; padding: 6px;
-  border: 1px solid rgba(128, 128, 128, .3);
-}
-/* Чат: статус-строка стадий и чип stage-сообщений */
-.chat-task-strip { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 12px; }
-.msg-task-chip {
-  font-size: 11px; padding: 1px 6px; border-radius: 999px;
-  border: 1px solid rgba(128, 128, 128, .5); margin-left: 6px;
-}
+
+/* ── Карточка процесса задачи (день 13b) ─────────────────────────── */
+.task-card { margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.task-card-head { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--panel-2); }
+.task-card-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.tc-badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
+.tc-badge.ok { color: #2e7d32; border-color: #2e7d32; }
+.tc-badge.warn { color: #b26a00; border-color: #b26a00; }
+.tc-badge.err { color: #c62828; border-color: #c62828; }
+.tc-badge.run { color: #1565c0; border-color: #1565c0; }
+.tc-btn { margin-left: auto; padding: 2px 10px; font-size: 12px; }
+.task-card-progress { display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-top: 1px solid var(--border); }
+.task-card-bar { flex: 1; height: 6px; border-radius: 3px; background: var(--panel-2); overflow: hidden; }
+.task-card-bar-fill { height: 100%; background: #1565c0; transition: width .3s; }
+.task-card-step { font-size: 12px; opacity: .8; white-space: nowrap; }
+.task-card-error { margin: 8px 12px; padding: 8px 10px; border: 1px solid #c62828; color: #c62828; border-radius: 8px; font-size: 13px; }
+.task-agent { border-top: 1px solid var(--border); }
+.task-agent summary { display: flex; align-items: center; gap: 8px; padding: 6px 12px; cursor: pointer; list-style: none; }
+.task-agent summary::-webkit-details-marker { display: none; }
+.task-agent-name { font-weight: 500; }
+.tc-chip { font-size: 11px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--border); opacity: .7; }
+.tc-chip.run { color: #1565c0; border-color: #1565c0; opacity: 1; }
+.tc-chip.ok { color: #2e7d32; border-color: #2e7d32; opacity: 1; }
+.task-agent-age { font-size: 11px; opacity: .6; margin-left: auto; }
+.task-agent-body { padding: 4px 12px 10px; }
+.task-agent-output { margin: 0; font-size: 13px; white-space: pre-wrap; word-break: break-word; opacity: .85; }
+.task-checklist { list-style: none; margin: 0; padding: 0; }
+.task-check { display: flex; flex-direction: column; padding: 3px 0; font-size: 13px; }
+.task-check-icon { display: inline-block; width: 18px; }
+.task-check.completed .task-check-name { opacity: .8; }
+.task-check.pending { opacity: .5; }
+.task-check-output { margin: 2px 0 4px 18px; font-size: 12px; white-space: pre-wrap; word-break: break-word; opacity: .75; }
+.task-live { margin: 4px 0 0 18px; font-size: 13px; border-left: 2px solid #1565c0; padding-left: 8px; white-space: pre-wrap; }
+.task-live-prompt { opacity: .5; }
+
+/* ── Тумблер режимов чат/задача (день 13b) ───────────────────────── */
+.mode-toggle { display: flex; gap: 4px; margin-bottom: 6px; }
+.mode-btn { flex: 1; padding: 4px 10px; font-size: 12px; border: 1px solid var(--border); background: transparent; border-radius: 8px; cursor: pointer; color: inherit; }
+.mode-btn.active { background: var(--panel-2); font-weight: 600; border-color: #1565c0; }
+.mode-btn:disabled { opacity: .5; cursor: not-allowed; }

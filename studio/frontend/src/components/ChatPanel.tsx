@@ -1,29 +1,53 @@
-// Центральная панель: шапка (название диалога + бейдж инициализации профиля
-// (день 12) + дропдаун модели), лента сообщений с авто-скроллом и
-// дописыванием дельт при стриминге, инпут-капсула.
-// Enter — отправить, Shift+Enter — перенос строки.
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+// Центральная панель: шапка (название + бейдж профиля + дропдаун модели),
+// лента сообщений (включая карточки процесса задачи, день 13b),
+// тумблер режимов чат/задача и инпут-капсула.
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { useStudio, type Message } from '../state'
-import { STAGE_LABELS, STAGE_ORDER } from './TaskTab'
-import type { TaskStage } from '../api'
+import TaskCard, { taskFromMarkers } from './TaskCard'
 import SaveMessageModal from './SaveMessageModal'
 
 export default function ChatPanel() {
   const {
     state, activeProfile, sendMessage, setModel, setContextTab,
-    activeTask, pauseTask, resumeTask,
+    activeTask, chatMode, setChatMode, sendTaskMessage,
   } = useStudio()
   const [draft, setDraft] = useState('')
   const [saveMsg, setSaveMsg] = useState<Message | null>(null)
   const feedRef = useRef<HTMLDivElement>(null)
   const active = state.dialogues.find((d) => d.id === state.activeId)
 
-  // День 13: активная задача — режим задачи в чате
+  // День 13b: живая задача активного диалога
   const task = activeTask && activeTask.active ? activeTask : null
-  const taskBusy = task != null && task.stage !== 'done' && !task.paused
+  const taskRunning = state.taskRunning
+  const taskBusy = task != null && taskRunning
+    && task.stage != null
+    && !['done', 'paused', 'failed'].includes(task.stage)
 
-  // Модели для дропдауна: список /api/models + гарантия, что текущая модель
-  // из конфига всегда в списке (API недоступен → только текущая).
+  // Карточки: каждое первое сообщение с данным task_id — якорь карточки
+  const cardTaskIds = useMemo(() => {
+    const seen = new Set<string>()
+    const out: { taskId: string; index: number }[] = []
+    state.messages.forEach((m, i) => {
+      if (m.task_id && !seen.has(m.task_id)) {
+        seen.add(m.task_id)
+        out.push({ taskId: m.task_id, index: i })
+      }
+    })
+    return out
+  }, [state.messages])
+  const cardAt = useMemo(() => {
+    const map = new Map<number, string>()
+    for (const c of cardTaskIds) map.set(c.index, c.taskId)
+    return map
+  }, [cardTaskIds])
+
+  // Данные карточки: live — record активного диалога (если task_id совпадает),
+  // иначе восстановление из маркеров (история задачи)
+  const cardData = (taskId: string) => {
+    if (task && task.task_id === taskId) return { t: task, live: true }
+    return { t: taskFromMarkers(state.messages, taskId), live: false }
+  }
+
   const currentModel = state.config?.model ?? ''
   const currentInList = state.models.some((m) => m.id === currentModel)
   const modelOptions = currentInList
@@ -32,17 +56,19 @@ export default function ChatPanel() {
       ? [{ id: currentModel, context_limit: 0 }, ...state.models]
       : state.models
 
-  // Авто-скролл вниз при новых сообщениях и дельтах стрима
   useEffect(() => {
     const el = feedRef.current
     if (el) el.scrollTop = el.scrollHeight
-  }, [state.messages, state.streaming])
+  }, [state.messages, state.streaming, state.taskLive])
 
-  const canSend = !state.streaming && state.activeId != null && draft.trim().length > 0 && !taskBusy
+  const canSend = !state.streaming && state.activeId != null
+    && draft.trim().length > 0 && !taskBusy
+  const toggleLocked = taskRunning
 
   const submit = () => {
     if (!canSend) return
-    void sendMessage(draft)
+    if (chatMode === 'task') void sendTaskMessage(draft)
+    else void sendMessage(draft)
     setDraft('')
   }
 
@@ -53,35 +79,24 @@ export default function ChatPanel() {
     }
   }
 
+  const placeholder =
+    state.activeId == null
+      ? 'Сначала создайте диалог (слева)'
+      : taskBusy
+        ? 'Задача выполняется…'
+        : chatMode === 'chat'
+          ? 'Сообщение… (Enter — отправить, Shift+Enter — перенос)'
+          : task?.stage === 'paused'
+            ? 'Инструкция для агентов… (Enter — сохранить)'
+            : task?.stage === 'failed'
+              ? 'Задача упала — «Повтор» в карточке'
+              : 'Опишите задачу… (Enter — запустить пайплайн)'
+
   return (
     <main className="panel chat">
       <header className="chat-head">
         <h1 className="chat-title">{active ? active.title : 'Нет активного диалога'}</h1>
         <div className="chat-head-actions">
-          {task && task.stage !== 'done' && (
-            <>
-              {taskBusy && state.taskRunning && (
-                <button
-                  type="button"
-                  className="btn danger"
-                  title="Остановить пайплайн (вступит на границе стадии)"
-                  onClick={() => void pauseTask()}
-                >
-                  Стоп
-                </button>
-              )}
-              {task.paused && !state.taskRunning && (
-                <button
-                  type="button"
-                  className="btn"
-                  title="Продолжить пайплайн задачи"
-                  onClick={() => void resumeTask()}
-                >
-                  Продолжить
-                </button>
-              )}
-            </>
-          )}
           {activeProfile && activeProfile.status !== 'active' && (
             <button
               type="button"
@@ -102,88 +117,92 @@ export default function ChatPanel() {
             onChange={(e) => void setModel(e.target.value)}
           >
             {modelOptions.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.id}
-              </option>
+              <option key={m.id} value={m.id}>{m.id}</option>
             ))}
           </select>
         </div>
       </header>
 
-      {task && task.stage !== 'done' && (
-        <div className="chat-task-strip" aria-label="Стадии задачи">
-          {STAGE_ORDER.map((s) => {
-            const cls = task.stages[s]?.output
-              ? 'task-chip done'
-              : state.taskCurrentStage === s || task.stage === s
-                ? 'task-chip active'
-                : 'task-chip'
-            return (
-              <span key={s} className={cls}>
-                {STAGE_LABELS[s]}
-              </span>
-            )
-          })}
-          {task.paused && <span className="task-chip paused">на паузе</span>}
-        </div>
-      )}
-
       <div className="chat-feed" ref={feedRef}>
         {state.messages.length === 0 && <p className="chat-empty">Отправьте первое сообщение…</p>}
         {state.messages.map((m, i) => {
           const isTail = i === state.messages.length - 1
+          // Stage/work-сообщения с task_stage рендерятся внутри карточки
+          if (m.task_stage) return null
           return (
-            <div key={i} className={m.role === 'user' ? 'msg user' : 'msg assistant'}>
-              <div className="msg-role">
-                {m.role === 'user' ? 'вы' : m.task_stage ? STAGE_LABELS[m.task_stage as TaskStage] : 'модель'}
-                {m.task_stage && (
-                  <span className="msg-task-chip" title="Сделано stage-агентом задачи">
-                    задача
+            <div key={i}>
+              <div className={m.role === 'user' ? 'msg user' : 'msg assistant'}>
+                <div className="msg-role">
+                  {m.role === 'user' ? 'вы' : 'модель'}
+                  <button
+                    type="button"
+                    className="btn-icon msg-save"
+                    title="Сохранить в память"
+                    onClick={() => setSaveMsg(m)}
+                  >
+                    в память
+                  </button>
+                </div>
+                <div className="msg-text">
+                  {m.content}
+                  {state.streaming && isTail && m.role === 'assistant' && (
+                    <span className="caret" aria-hidden />
+                  )}
+                </div>
+                {m.role === 'assistant' && m.model && (
+                  <span className="msg-model-chip" title="Модель, которой выполнен запрос">
+                    {m.model}
                   </span>
                 )}
-                <button
-                  type="button"
-                  className="btn-icon msg-save"
-                  title="Сохранить в память"
-                  onClick={() => setSaveMsg(m)}
-                >
-                  в память
-                </button>
               </div>
-              <div className="msg-text">
-                {m.content}
-                {state.streaming && isTail && m.role === 'assistant' && (
-                  <span className="caret" aria-hidden />
-                )}
-              </div>
-              {m.role === 'assistant' && m.model && (
-                <span className="msg-model-chip" title="Модель, которой выполнен запрос">
-                  {m.model}
-                </span>
-              )}
+              {cardAt.has(i) && (() => {
+                const { t, live } = cardData(cardAt.get(i) as string)
+                return <TaskCard task={t} live={live} />
+              })()}
             </div>
           )
         })}
+        {task && !cardAt.has(state.messages.findIndex((m) => m.task_id === task.task_id)) && (
+          // Живая задача, якорь ещё не в ленте (start в процессе) — карточка хвостом
+          <TaskCard task={task} live />
+        )}
       </div>
 
       <div className="chat-input">
+        <div className="mode-toggle" role="tablist" aria-label="Режим ввода">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={chatMode === 'chat'}
+            className={chatMode === 'chat' ? 'mode-btn active' : 'mode-btn'}
+            disabled={toggleLocked}
+            onClick={() => setChatMode('chat')}
+          >
+            Чат
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={chatMode === 'task'}
+            className={chatMode === 'task' ? 'mode-btn active' : 'mode-btn'}
+            disabled={toggleLocked}
+            onClick={() => setChatMode('task')}
+          >
+            Задача
+          </button>
+        </div>
         <textarea
           className="input-capsule"
           rows={2}
           value={draft}
-          placeholder={
-            state.activeId == null
-              ? 'Сначала создайте диалог (слева)'
-              : taskBusy
-                ? 'Задача выполняется — чат на паузе (кнопка «Стоп» в шапке)'
-                : 'Сообщение… (Enter — отправить, Shift+Enter — перенос)'
-          }
-          disabled={state.streaming || state.activeId == null || taskBusy}
+          placeholder={placeholder}
+          disabled={state.streaming || state.activeId == null || taskBusy
+            || (chatMode === 'task' && task?.stage === 'failed')}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={onKeyDown}
         />
         <button type="button" className="btn send" onClick={submit} disabled={!canSend}>
-          Отправить
+          {chatMode === 'chat' ? 'Отправить' : task?.stage === 'paused' ? 'Сохранить' : 'Запустить'}
         </button>
       </div>
 
