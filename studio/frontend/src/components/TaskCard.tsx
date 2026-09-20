@@ -2,9 +2,9 @@
 // Шапка (описание, статус, действия), прогресс, секции plan[]
 // (details/summary, время спавна), чек-лист work-шагов + живой бокс.
 // История задачи (record перезаписан новой) — из маркеров сообщений.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStudio, type Message } from '../state'
-import type { TaskPlanEntry, TaskPlanStatus, TaskState, TaskWorkStep } from '../api'
+import type { TaskPlanEntry, TaskPlanStatus, TaskState, TaskUsage, TaskWorkStep } from '../api'
 
 // Подписи стадий (6 — unified FSM; переезд из TaskTab)
 export const STAGE_LABELS: Record<string, string> = {
@@ -35,12 +35,66 @@ function useNow(active: boolean): number {
   return now
 }
 
+// 'YYYY-MM-DD HH:MM:SS' → ms (null — битый формат)
+function tsToMs(ts: string | null): number | null {
+  if (!ts) return null
+  const t = new Date(ts.replace(' ', 'T')).getTime()
+  return Number.isNaN(t) ? null : t
+}
+
 function spawnAge(spawnTs: string | null, now: number): string | null {
-  if (!spawnTs) return null
-  const t = new Date(spawnTs.replace(' ', 'T')).getTime()
-  if (Number.isNaN(t)) return null
+  const t = tsToMs(spawnTs)
+  if (t == null) return null
   const s = Math.max(0, Math.round((now - t) / 1000))
   return s < 90 ? `спавн ${s} с назад` : `спавн ${Math.round(s / 60)} мин назад`
+}
+
+// ── время работы и токены (день 13b) ────────────────────────────────────────
+const numFmt = new Intl.NumberFormat('ru-RU')
+
+// Длительность: < 60с — «45с», иначе — «М мин С с»
+export function fmtDuration(s: number): string {
+  const v = Math.max(0, Math.round(s))
+  if (v < 60) return `${v}с`
+  return `${Math.floor(v / 60)} мин ${v % 60} с`
+}
+
+// Токены LLM-вызова: «1 234 токенов» (ru-RU)
+export function fmtTokens(usage: TaskUsage): string {
+  return `${numFmt.format(usage.total)} токенов`
+}
+
+// Мета строки стадии: «спавн X назад · работа Nс · T токенов».
+// completed — duration_s/usage из записи; in_progress — live-время от spawn_ts;
+// без данных (старые задачи/маркеры) — null.
+function stageMeta(entry: TaskPlanEntry, now: number): string | null {
+  const parts: string[] = []
+  const age = spawnAge(entry.spawn_ts, now)
+  if (age) parts.push(age)
+  if (entry.status === 'completed') {
+    if (entry.duration_s != null) parts.push(`работа ${fmtDuration(entry.duration_s)}`)
+    if (entry.usage) parts.push(fmtTokens(entry.usage))
+  } else if (entry.status === 'in_progress') {
+    const t = tsToMs(entry.spawn_ts)
+    if (t != null) parts.push(`работа ${fmtDuration((now - t) / 1000)}`)
+  }
+  return parts.length ? parts.join(' · ') : null
+}
+
+// Мета строки work-шага: completed с usage → «45с · 812 токенов»;
+// in_progress → live-таймер (startMs — момент, когда карточка увидела шаг;
+// тикает с тем же useNow, что и «спавн N назад»).
+function stepMeta(ws: TaskWorkStep, startMs: number | null, now: number): string | null {
+  if (ws.status === 'completed') {
+    const parts: string[] = []
+    if (ws.duration_s != null) parts.push(fmtDuration(ws.duration_s))
+    if (ws.usage) parts.push(fmtTokens(ws.usage))
+    return parts.length ? parts.join(' · ') : null
+  }
+  if (ws.status === 'in_progress' && startMs != null) {
+    return fmtDuration((now - startMs) / 1000)
+  }
+  return null
 }
 
 // Иконки-агенты (inline SVG 14px, паттерн ProfileTab)
@@ -72,23 +126,39 @@ export function taskFromMarkers(messages: Message[], taskId: string): TaskState 
     status: 'completed',
     output: m.content,
     ts: null,
+    start_ts: null,
+    usage: m.task_usage ?? null,
+    duration_s: m.task_duration ?? null,
   }))
   const execOut = work_steps.map((w) => `## ${w.name}\n${w.output}`).join('\n\n')
   const hasDone = doneOut !== ''
-  const plan: TaskPlanEntry[] = PIPELINE.map((agent, i) => ({
-    step: i + 1,
-    agent,
-    status: (agent === 'planning' ? planOut('planning') : agent === 'execution' ? execOut : agent === 'validation' ? planOut('validation') : doneOut) ? 'completed' : 'pending',
-    output: agent === 'planning' ? planOut('planning') || null
-      : agent === 'execution' ? execOut || null
-      : agent === 'validation' ? planOut('validation') || null
-      : doneOut || null,
-    verdict: agent === 'validation'
-      ? /<verdict>\s*fail\s*<\/verdict>/i.test(planOut('validation')) ? 'fail' : 'pass'
-      : null,
-    spawn_ts: null,
-    ts: null,
-  }))
+  // Источник usage/duration стадии: planning/validation — их stage-сообщения,
+  // done — финальное сообщение (task_id без task_stage); execution — не
+  // восстанавливаем (маркер стадии нет, вывод собран из work-шагов)
+  const usageMsgOf = (agent: TaskPlanEntry['agent']): Message | undefined =>
+    agent === 'planning' ? msgs.find((m) => m.task_stage === 'planning' && m.role === 'assistant')
+      : agent === 'validation' ? msgs.find((m) => m.task_stage === 'validation' && m.role === 'assistant')
+        : agent === 'done' ? msgs.find((m) => m.role === 'assistant' && !m.task_stage)
+          : undefined
+  const plan: TaskPlanEntry[] = PIPELINE.map((agent, i) => {
+    const usageMsg = usageMsgOf(agent)
+    return {
+      step: i + 1,
+      agent,
+      status: (agent === 'planning' ? planOut('planning') : agent === 'execution' ? execOut : agent === 'validation' ? planOut('validation') : doneOut) ? 'completed' : 'pending',
+      output: agent === 'planning' ? planOut('planning') || null
+        : agent === 'execution' ? execOut || null
+        : agent === 'validation' ? planOut('validation') || null
+        : doneOut || null,
+      verdict: agent === 'validation'
+        ? /<verdict>\s*fail\s*<\/verdict>/i.test(planOut('validation')) ? 'fail' : 'pass'
+        : null,
+      spawn_ts: null,
+      ts: null,
+      usage: usageMsg?.task_usage ?? null,
+      duration_s: usageMsg?.task_duration ?? null,
+    }
+  })
   return {
     active: true,
     task_id: taskId,
@@ -117,6 +187,24 @@ export default function TaskCard({ task, live }: TaskCardProps) {
   const running = state.taskRunning && live
   const now = useNow(live)
   const liveStep = live ? state.taskLive : null
+
+  // Live-таймеры work-шагов: момент, когда карточка (re)увидела шаг в
+  // in_progress, по индексу шага. Шаг перестал быть in_progress — запись
+  // убирается (ретрай не наследует чужой старт).
+  const stepStart = useRef<Map<number, number>>(new Map())
+  useEffect(() => {
+    if (!live) {
+      stepStart.current.clear()
+      return
+    }
+    task.work_steps.forEach((ws, i) => {
+      if (ws.status === 'in_progress') {
+        if (!stepStart.current.has(i)) stepStart.current.set(i, Date.now())
+      } else if (stepStart.current.has(i)) {
+        stepStart.current.delete(i)
+      }
+    })
+  }, [live, task.work_steps])
 
   const completedCount = task.plan.filter((e) => e.status === 'completed').length
   const stageLabel = task.stage && STAGE_LABELS[task.stage]
@@ -181,7 +269,7 @@ export default function TaskCard({ task, live }: TaskCardProps) {
 
       {task.plan.map((entry) => {
         const chip = statusChip(entry.status)
-        const age = spawnAge(entry.spawn_ts, now)
+        const meta = stageMeta(entry, now)
         const open = entry === activeEntry || entry === failedEntry
         return (
           <details key={entry.agent + entry.status} className="task-agent" open={open}>
@@ -189,7 +277,7 @@ export default function TaskCard({ task, live }: TaskCardProps) {
               <AgentIcon agent={entry.agent} />
               <span className="task-agent-name">{STAGE_LABELS[entry.agent]}</span>
               <span className={chip.cls}>{chip.label}</span>
-              {age && <span className="task-agent-age">{age}</span>}
+              {meta && <span className="task-agent-age">{meta}</span>}
               {entry.verdict && (
                 <span className={`task-verdict ${entry.verdict}`}>
                   {entry.verdict === 'pass' ? 'прошла' : 'не прошла'}
@@ -199,13 +287,21 @@ export default function TaskCard({ task, live }: TaskCardProps) {
             <div className="task-agent-body">
               {entry.agent === 'execution' ? (
                 <ul className="task-checklist">
-                  {task.work_steps.map((ws, i) => (
-                    <li key={i} className={`task-check ${ws.status}`}>
-                      <span className="task-check-icon" aria-hidden>{stepIcon(ws.status)}</span>
-                      <span className="task-check-name">{ws.name}</span>
-                      {ws.output && <pre className="task-check-output">{ws.output}</pre>}
-                    </li>
-                  ))}
+                  {task.work_steps.map((ws, i) => {
+                    const smeta = stepMeta(
+                      ws,
+                      live ? stepStart.current.get(i) ?? null : null,
+                      now,
+                    )
+                    return (
+                      <li key={i} className={`task-check ${ws.status}`}>
+                        <span className="task-check-icon" aria-hidden>{stepIcon(ws.status)}</span>
+                        <span className="task-check-name">{ws.name}</span>
+                        {smeta && <span className="task-check-meta">{smeta}</span>}
+                        {ws.output && <pre className="task-check-output">{ws.output}</pre>}
+                      </li>
+                    )
+                  })}
                   {liveStep && entry.status === 'in_progress' && (
                     <div className="task-live">
                       <span className="task-live-prompt" aria-hidden>»</span>

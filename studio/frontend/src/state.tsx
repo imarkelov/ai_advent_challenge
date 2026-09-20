@@ -26,6 +26,8 @@ import {
   type TaskEvent,
   type TaskPlanStatus,
   type TaskState,
+  type TaskUsage,
+  type TaskWorkStep,
   type UserProfile,
 } from './api'
 
@@ -42,6 +44,10 @@ export interface Message {
   // Маркеры задачи (день 13b): id задачи + work-шаг (обычные — без полей)
   task_id?: string
   task_step?: string
+  // Токены/длительность LLM-вызова (день 13b): для восстановления карточки
+  // из маркеров после перезагрузки (старые сообщения — без полей)
+  task_usage?: TaskUsage
+  task_duration?: number
 }
 
 export interface DialogueMeta {
@@ -279,7 +285,7 @@ export type StudioAction =
   | { type: 'task-set'; id: string; task: TaskState }
   | { type: 'task-running'; on: boolean }
   | { type: 'chat-mode'; mode: 'chat' | 'task' }
-  | { type: 'task-step'; index: number; name: string; status: TaskPlanStatus; output?: string }
+  | { type: 'task-step'; index: number; name: string; status: TaskPlanStatus; output?: string; usage?: TaskUsage | null; duration_s?: number | null }
   | { type: 'task-step-delta'; index: number; text: string }
   | { type: 'models'; models: ModelInfo[] }
   | { type: 'config'; config: Config }
@@ -388,12 +394,18 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
       if (id == null) return state
       const task = state.tasks[id]
       if (!task) return state
-      const work_steps = task.work_steps.map((ws, j) =>
-        j === action.index
-          ? { ...ws, name: action.name, status: action.status,
-              output: action.output !== undefined ? action.output : ws.output }
-          : ws,
-      )
+      const work_steps = task.work_steps.map((ws, j) => {
+        if (j !== action.index) return ws
+        const next: TaskWorkStep = {
+          ...ws, name: action.name, status: action.status,
+          output: action.output !== undefined ? action.output : ws.output,
+        }
+        // usage/duration_s приходят только в step_updated «completed»;
+        // in_progress-событие их не несёт — старые значения не трогаем
+        if (action.usage !== undefined) next.usage = action.usage
+        if (action.duration_s !== undefined) next.duration_s = action.duration_s
+        return next
+      })
       return {
         ...state,
         tasks: { ...state.tasks, [id]: { ...task, work_steps } },
@@ -548,6 +560,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
           dispatch({
             type: 'task-step',
             index: e.index, name: e.name, status: e.status, output: e.output,
+            usage: e.usage, duration_s: e.duration_s,
           })
         } else if (e.type === 'step_delta') {
           dispatch({ type: 'task-step-delta', index: e.index, text: e.text })

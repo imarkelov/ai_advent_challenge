@@ -92,6 +92,9 @@ export type TaskStage =
 export type TaskPlanStatus = 'pending' | 'in_progress' | 'completed'
 export type TaskExpectedAction = 'agent_response' | 'resume_wait' | 'human_input'
 
+// Токены LLM-вызова (стадия / work-шаг): prompt/completion/total
+export type TaskUsage = { prompt: number; completion: number; total: number }
+
 export interface TaskPlanEntry {
   step: number
   agent: 'planning' | 'execution' | 'validation' | 'done'
@@ -100,6 +103,9 @@ export interface TaskPlanEntry {
   verdict: 'pass' | 'fail' | null
   spawn_ts: string | null
   ts: string | null
+  // Токены и длительность стадии (заполняются при stage_done; старые записи — без полей)
+  usage?: TaskUsage | null
+  duration_s?: number | null
 }
 
 export interface TaskWorkStep {
@@ -107,6 +113,10 @@ export interface TaskWorkStep {
   status: TaskPlanStatus
   output: string | null
   ts: string | null
+  // start_ts — старт шага (in_progress); usage/duration_s — при completed
+  start_ts?: string | null
+  usage?: TaskUsage | null
+  duration_s?: number | null
 }
 
 export interface TaskState {
@@ -128,9 +138,9 @@ export interface TaskState {
 
 export type TaskEvent =
   | { type: 'agent_spawned'; stage: TaskStage; agent: string }
-  | { type: 'step_updated'; index: number; name: string; status: TaskPlanStatus; output?: string }
+  | { type: 'step_updated'; index: number; name: string; status: TaskPlanStatus; output?: string; usage?: TaskUsage; duration_s?: number }
   | { type: 'step_delta'; index: number; text: string }
-  | { type: 'stage_done'; stage: TaskStage; output: string; verdict?: 'pass' | 'fail'; plan?: string[]; retry?: boolean }
+  | { type: 'stage_done'; stage: TaskStage; output: string; verdict?: 'pass' | 'fail'; plan?: string[]; retry?: boolean; usage?: TaskUsage }
   | { type: 'task_paused'; stage: string }
   | { type: 'task_resumed'; stage: TaskStage }
   | { type: 'task_done'; answer: string }

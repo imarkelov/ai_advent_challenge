@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { useEffect, useRef } from 'react'
+import { act, useEffect, useRef } from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { StudioProvider, useStudio } from '../src/state'
 import type { Message } from '../src/state'
@@ -514,6 +514,213 @@ describe('taskFromMarkers — восстановление истории из �
     )
     // карточка рендерится без краша; описание пустое
     expect(container.querySelector('.task-card-title')?.textContent).toBe('Задача: ')
+    expect(container.querySelectorAll('.task-agent')).toHaveLength(4)
+  })
+})
+
+describe('TaskCard — время работы и токены (день 13b)', () => {
+  const USAGE = { prompt: 1000, completion: 234, total: 1234 }
+
+  it('(a) completed-стадия: «спавн N с назад · работа Nс · T токенов»', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-09-20T12:00:00'))
+    try {
+      stubDefaultFetch()
+      render(
+        <StudioProvider>
+          <TaskCard
+            task={makeTask({
+              stage: 'done',
+              current_step: 4,
+              plan: [
+                entry(1, 'planning', 'completed', {
+                  output: 'п',
+                  spawn_ts: '2026-09-20 11:59:55',
+                  duration_s: 12,
+                  usage: USAGE,
+                }),
+                entry(2, 'execution', 'completed', { output: 'р' }),
+                entry(3, 'validation', 'completed', { output: 'в' }),
+                entry(4, 'done', 'completed', { output: 'ф' }),
+              ],
+            })}
+            live={false}
+          />
+        </StudioProvider>,
+      )
+      // ru-RU: группировка разрядов в DOM — NBSP, но RTL нормализует текст
+      // элемента, а строковый matcher сравнивается БЕЗ нормализации →
+      // в ожидаемой строке обычный пробел
+      expect(
+        screen.getByText('спавн 5 с назад · работа 12с · 1 234 токенов'),
+      ).toBeTruthy()
+    } finally {
+      vi.useRealTimers()
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('(a2) completed-стадия без spawn_ts (старые маркеры): без «спавн», ≥60с → «М мин С с»', () => {
+    stubDefaultFetch()
+    render(
+      <StudioProvider>
+        <TaskCard
+          task={makeTask({
+            stage: 'done',
+            current_step: 4,
+            plan: [
+              entry(1, 'planning', 'completed', {
+                output: 'п',
+                duration_s: 90,
+                usage: { prompt: 10, completion: 113, total: 123 },
+              }),
+              entry(2, 'execution', 'completed', { output: 'р' }),
+              entry(3, 'validation', 'completed', { output: 'в' }),
+              entry(4, 'done', 'completed', { output: 'ф' }),
+            ],
+          })}
+          live={false}
+        />
+      </StudioProvider>,
+    )
+    expect(screen.getByText('работа 1 мин 30 с · 123 токенов')).toBeTruthy()
+  })
+
+  it('(b) completed work-шаг: строка показывает «45с · 812 токенов»', async () => {
+    stubDefaultFetch()
+    const { container } = render(
+      <StudioProvider>
+        <TaskCard
+          task={makeTask({
+            work_steps: [
+              {
+                name: 'A', status: 'completed', output: 'рез A', ts: null,
+                duration_s: 45,
+                usage: { prompt: 100, completion: 712, total: 812 },
+              },
+              { name: 'B', status: 'in_progress', output: null, ts: null },
+            ],
+          })}
+          live={false}
+        />
+      </StudioProvider>,
+    )
+    await screen.findByText('Задача: Сделать кнопку')
+    const meta = container.querySelector('.task-check.completed .task-check-meta')
+    expect(meta?.textContent).toBe('45с · 812 токенов')
+  })
+
+  // act() в React 19 требует IS_REACT_ACT_ENVIRONMENT (флаг ставится локально)
+  it('(c) live-стадия: время работы от spawn_ts, тикает с useNow (fake timers)', () => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-09-20T12:00:00'))
+    try {
+      stubDefaultFetch()
+      const { container } = render(
+        <StudioProvider>
+          <TaskCard
+            task={makeTask({
+              stage: 'planning',
+              current_step: 1,
+              plan: [
+                entry(1, 'planning', 'in_progress', {
+                  spawn_ts: '2026-09-20 11:59:50',
+                }),
+                entry(2, 'execution', 'pending'),
+                entry(3, 'validation', 'pending'),
+                entry(4, 'done', 'pending'),
+              ],
+            })}
+            live
+          />
+        </StudioProvider>,
+      )
+      const age = container.querySelector('.task-agent-age')
+      expect(age?.textContent).toBe('спавн 10 с назад · работа 10с')
+      act(() => {
+        vi.advanceTimersByTime(5000)
+      })
+      expect(age?.textContent).toBe('спавн 15 с назад · работа 15с')
+    } finally {
+      vi.useRealTimers()
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('(c2) live work-шаг: локальный таймер с момента in_progress (fake timers)', () => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-09-20T12:00:00'))
+    try {
+      stubDefaultFetch()
+      const { container } = render(
+        <StudioProvider><TaskCard task={LIVE_TASK} live /></StudioProvider>,
+      )
+      // B (in_progress) — таймер запущен; A (completed, без usage) — метки нет
+      expect(container.querySelector('.task-check.completed .task-check-meta')).toBeNull()
+      act(() => {
+        vi.advanceTimersByTime(30000)
+      })
+      const meta = container.querySelector('.task-check.in_progress .task-check-meta')
+      expect(meta?.textContent).toBe('30с')
+    } finally {
+      vi.useRealTimers()
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('(d) taskFromMarkers: task_usage/task_duration → usage/duration_s, карточка их показывает', () => {
+    const msgs: Message[] = [
+      { role: 'user', content: 'Запрос', task_id: 't_9' },
+      {
+        role: 'assistant', content: 'план', model: 'm', task_id: 't_9',
+        task_stage: 'planning',
+        task_usage: { prompt: 10, completion: 20, total: 30 }, task_duration: 7,
+      },
+      {
+        role: 'assistant', content: 'рез A', model: 'm', task_id: 't_9',
+        task_stage: 'execution', task_step: 'A',
+        task_usage: { prompt: 100, completion: 200, total: 300 }, task_duration: 45,
+      },
+      {
+        role: 'assistant', content: 'всё ок', model: 'm', task_id: 't_9',
+        task_stage: 'validation',
+        task_usage: { prompt: 5, completion: 5, total: 10 }, task_duration: 3,
+      },
+      {
+        role: 'assistant', content: 'финал', model: 'm', task_id: 't_9',
+        task_usage: { prompt: 1, completion: 2, total: 3 }, task_duration: 2,
+      },
+    ]
+    const t = taskFromMarkers(msgs, 't_9')
+    // стадии: planning/validation — по своим сообщениям, done — по финальному
+    expect(t.plan[0].usage).toEqual({ prompt: 10, completion: 20, total: 30 })
+    expect(t.plan[0].duration_s).toBe(7)
+    expect(t.plan[2].usage).toEqual({ prompt: 5, completion: 5, total: 10 })
+    expect(t.plan[2].duration_s).toBe(3)
+    expect(t.plan[3].usage).toEqual({ prompt: 1, completion: 2, total: 3 })
+    expect(t.plan[3].duration_s).toBe(2)
+    // work-шаги — по execution-сообщениям с task_step
+    expect(t.work_steps[0].usage).toEqual({ prompt: 100, completion: 200, total: 300 })
+    expect(t.work_steps[0].duration_s).toBe(45)
+
+    // восстановленная карточка показывает время и токены
+    stubDefaultFetch()
+    render(<StudioProvider><TaskCard task={t} live={false} /></StudioProvider>)
+    expect(screen.getByText('работа 7с · 30 токенов')).toBeTruthy()
+    const doneRow = screen.getAllByText('работа 2с · 3 токенов')
+    expect(doneRow.length).toBe(1)
+  })
+
+  it('(e) legacy-задача без usage/duration/spawn_ts — рендер без меток и краха', async () => {
+    stubDefaultFetch()
+    const { container } = render(
+      <StudioProvider><TaskCard task={makeTask()} live={false} /></StudioProvider>,
+    )
+    await screen.findByText('Задача: Сделать кнопку')
+    expect(container.querySelectorAll('.task-check-meta')).toHaveLength(0)
+    expect(container.querySelectorAll('.task-agent-age')).toHaveLength(0)
     expect(container.querySelectorAll('.task-agent')).toHaveLength(4)
   })
 })
