@@ -59,6 +59,9 @@ export interface DialogueMeta {
   profile?: UserProfile
   // Состояние задачи (день 13): опционально — старые dialogues.json без поля
   task?: TaskState
+  // Задача в диалоге использовалась (день 13b): персистентный флаг —
+  // ставится при task/start, task/reset его не сбрасывает
+  used_task?: boolean
 }
 
 export interface MemoryLayer {

@@ -176,15 +176,17 @@ class MemoryStore:
             return d
 
     def list_dialogues(self) -> list:
-        """Список диалогов в порядке создания: {id,title,created,message_count}."""
+        """Список диалогов в порядке создания: {id,title,created,message_count}
+        + used_task (персистентный флаг: задача в диалоге использовалась)."""
         with self._lock:
             data = self._read_dialogues()
             return [{"id": d["id"], "title": d.get("title", ""),
-                     "created": d.get("created", ""),
-                     "message_count": len(d.get("messages", [])),
-                     "profile": self._profile_of(d),
-                     "task": self._task_of(d)}
-                    for d in data["dialogues"]]
+                      "created": d.get("created", ""),
+                      "message_count": len(d.get("messages", [])),
+                      "used_task": bool(d.get("used_task", False)),
+                      "profile": self._profile_of(d),
+                      "task": self._task_of(d)}
+                     for d in data["dialogues"]]
 
     def get_dialogue(self, dialogue_id: str) -> dict | None:
         """Полный диалог с сообщениями или None."""
@@ -377,9 +379,11 @@ class MemoryStore:
             t["context_snapshot"] = raw["context_snapshot"]
         return t
 
-    def _task_mutate(self, dialogue_id: str, fn) -> dict:
+    def _task_mutate(self, dialogue_id: str, fn, mark_used: bool = False) -> dict:
         """Применить fn(task) к состоянию задачи диалога; запись атомарная.
-        fn бросает ValueError — состояние не меняется."""
+        fn бросает ValueError — состояние не меняется. mark_used — отметить
+        запись диалога used_task=True (персистентный флаг «задача
+        использовалась»; task_reset его не сбрасывает)."""
         with self._lock:
             data = self._read_dialogues()
             d = self._find(data, dialogue_id)
@@ -389,6 +393,8 @@ class MemoryStore:
             fn(t)
             t["updated"] = _now()
             d["task"] = t
+            if mark_used:
+                d["used_task"] = True
             self._write_dialogues(data)
             return t
 
@@ -405,7 +411,8 @@ class MemoryStore:
     def task_new(self, dialogue_id: str, description: str) -> dict:
         """Создать задачу (stage=planning, новый task_id). ValueError: диалог
         не найден; задача активна и незавершена (done/failed). При завершённой
-        (done/failed) — новая задача, старая остаётся в истории сообщений."""
+        (done/failed) — новая задача, старая остаётся в истории сообщений.
+        Отмечает запись диалога used_task=True (персистентно)."""
         def fn(t):
             if t["active"] and t["stage"] not in ("done", "failed"):
                 raise ValueError("Задача уже активна: завершите её (reset) перед новой")
@@ -417,7 +424,7 @@ class MemoryStore:
                       "plan": new_plan(), "work_steps": [],
                       "context_snapshot": None, "description": description,
                       "instruction": "", "retries": 0, "error": None})
-        return self._task_mutate(dialogue_id, fn)
+        return self._task_mutate(dialogue_id, fn, mark_used=True)
 
     def task_spawn_stage(self, dialogue_id: str, stage: str) -> dict:
         """Отметить спавн stage-агента: запись плана in_progress + spawn_ts,

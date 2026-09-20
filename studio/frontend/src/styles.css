@@ -270,9 +270,19 @@ button {
 }
 
 .dialogue-title {
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Флаг «задача использовалась» (день 13b): иконка рядом со счётчиком */
+.dialogue-task-flag {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  opacity: .8;
+  flex-shrink: 0;
 }
 
 .dialogue-count {

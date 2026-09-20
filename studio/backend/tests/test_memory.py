@@ -36,6 +36,7 @@ def test_list_dialogues_order_and_shape(store):
     assert [x["id"] for x in lst] == [a["id"], b["id"]]  # порядок создания
     assert lst[0] == {"id": a["id"], "title": a["title"],
                       "created": a["created"], "message_count": 1,
+                      "used_task": False,
                       "profile": new_profile(), "task": new_task()}
     assert lst[1]["message_count"] == 0
 
@@ -497,6 +498,34 @@ class TestTaskStorage13b:
         # без параметров — маркеры не добавляются
         self.s.append_message(self.did, "user", "привет")
         assert "task_usage" not in self.s.get_messages(self.did)[1]
+
+    # ---- used_task: персистентный флаг «задача использовалась» ----
+
+    def _raw_dialogue(self, did):
+        with self.s._lock:
+            data = self.s._read_dialogues()
+            return self.s._find(data, did)
+
+    def test_task_new_sets_used_task_flag(self):
+        self.s.task_new(self.did, "X")
+        assert self._raw_dialogue(self.did).get("used_task") is True
+
+    def test_used_task_survives_task_reset(self):
+        self.s.task_new(self.did, "X")
+        self.s.task_reset(self.did)
+        assert self._raw_dialogue(self.did).get("used_task") is True
+        # при этом сама задача сброшена
+        assert self.s.task_get(self.did)["active"] is False
+
+    def test_dialogue_without_task_has_no_used_task(self):
+        assert "used_task" not in self._raw_dialogue(self.did)
+
+    def test_list_dialogues_includes_used_task(self):
+        d2 = self.s.new_dialogue()["id"]
+        self.s.task_new(self.did, "X")
+        lst = {x["id"]: x for x in self.s.list_dialogues()}
+        assert lst[self.did]["used_task"] is True
+        assert lst[d2]["used_task"] is False
 
     def test_task_new_after_done_is_new_task(self):
         t1 = self.s.task_new(self.did, "а")

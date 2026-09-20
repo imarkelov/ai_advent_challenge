@@ -67,6 +67,31 @@ function SelectModeIcon() {
   )
 }
 
+// «Задача использовалась» (день 13b): три связанных узла (flow) — 13px,
+// stroke-стиль как у иконок-действий
+function TaskUsedIcon() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="5" cy="6" r="2.5" />
+      <circle cx="19" cy="6" r="2.5" />
+      <circle cx="12" cy="18" r="2.5" />
+      <path d="M7.5 6h9" />
+      <path d="M6.7 8.2l4.1 7" />
+      <path d="M17.3 8.2l-4.1 7" />
+    </svg>
+  )
+}
+
 export default function Sidebar() {
   const { state, newDialogue, activateDialogue, deleteDialogues, renameDialogue } = useStudio()
   const { dialogues, activeId, memory } = state
@@ -190,6 +215,11 @@ export default function Sidebar() {
                     onClick={() => (selectMode ? toggleSelect(d.id) : void activateDialogue(d.id))}
                   >
                     <span className="dialogue-title">{d.title}</span>
+                    {d.used_task && (
+                      <span className="dialogue-task-flag" title="Задача использовалась">
+                        <TaskUsedIcon />
+                      </span>
+                    )}
                     <span className="dialogue-count">{d.message_count}</span>
                   </button>
                   {!selectMode && (

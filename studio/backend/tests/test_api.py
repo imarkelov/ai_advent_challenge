@@ -647,6 +647,21 @@ def test_task_in_dialogues_output(client, dialogue_id):
     assert d2["task"]["task_id"] == t["task_id"]
 
 
+def test_dialogues_list_used_task_flag(client, dialogue_id):
+    # до задачи — флаг False (все диалоги в списке несли его)
+    lst = client.get("/api/dialogues").json()["dialogues"]
+    assert all(d["used_task"] is False for d in lst)
+    # после task/start — True
+    client.post("/api/task/start",
+                json={"dialogue_id": dialogue_id, "description": "X"})
+    assert client.get("/api/dialogues").json()["dialogues"][0]["used_task"] is True
+    # флаг персистентный: reset задачу сбрасывает, а used_task — нет
+    client.post("/api/task/reset", json={"dialogue_id": dialogue_id})
+    assert client.get("/api/task",
+                      params={"dialogue_id": dialogue_id}).json()["task"]["active"] is False
+    assert client.get("/api/dialogues").json()["dialogues"][0]["used_task"] is True
+
+
 def test_task_reset(client):
     did = task_dialogue(client)
     assert client.post("/api/task/reset",

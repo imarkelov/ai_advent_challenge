@@ -247,6 +247,57 @@ describe('Sidebar — одиночное удаление по корзине', 
   })
 })
 
+describe('Sidebar — иконка used_task (задача использовалась)', () => {
+  function usedTaskFetchMock(dialogues: DialogueMeta[]) {
+    return vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = normalizeUrl(input)
+      const method = init?.method ?? 'GET'
+      if (method === 'POST' && url.endsWith('/activate')) {
+        return jsonResponse({ active_id: url.split('/')[3] })
+      }
+      if (method === 'GET' && url === '/api/dialogues') {
+        return jsonResponse({ active_id: dialogues[0]?.id ?? null, dialogues })
+      }
+      if (method === 'GET' && url.startsWith('/api/dialogues/')) {
+        return jsonResponse({ dialogue: { messages: [] } })
+      }
+      if (method === 'GET' && url === '/api/memory') {
+        return jsonResponse(memoryFor(dialogues[0]?.id ?? null, {}))
+      }
+      return jsonResponse(BASE_FIXTURES[url] ?? { ok: true })
+    })
+  }
+
+  it('used_task: true → иконка с title="Задача использовалась" в строке; без флага — нет', async () => {
+    const used: DialogueMeta = { ...d1, used_task: true }
+    vi.stubGlobal('fetch', usedTaskFetchMock([used, d2]))
+    render(
+      <StudioProvider>
+        <Sidebar />
+      </StudioProvider>,
+    )
+    await screen.findByText('Первый')
+    const icons = screen.getAllByTitle('Задача использовалась')
+    expect(icons).toHaveLength(1)
+    // иконка именно в строке «Первый», а не «Второй»
+    const usedRow = screen.getByRole('button', { name: /Первый/ }).closest('li')
+    expect(usedRow?.querySelector('[title="Задача использовалась"]')).toBeTruthy()
+    const otherRow = screen.getByRole('button', { name: /Второй/ }).closest('li')
+    expect(otherRow?.querySelector('[title="Задача использовалась"]')).toBeNull()
+  })
+
+  it('used_task отсутствует у всех — иконок нет', async () => {
+    vi.stubGlobal('fetch', usedTaskFetchMock([d1, d2]))
+    render(
+      <StudioProvider>
+        <Sidebar />
+      </StudioProvider>,
+    )
+    await screen.findByText('Первый')
+    expect(screen.queryByTitle('Задача использовалась')).toBeNull()
+  })
+})
+
 describe('Sidebar — режим выбора (чекбоксы)', () => {
   function selectFetchMock(
     server: { activeId: string | null; dialogues: DialogueMeta[]; deleted: string[] },
