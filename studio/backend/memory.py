@@ -46,6 +46,17 @@ def _now() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
+def _seconds_since(ts: str | None) -> int:
+    """Целое число секунд от ts до сейчас (0 — ts отсутствует/битый)."""
+    if not ts:
+        return 0
+    try:
+        start = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S")
+        return max(0, int((datetime.now() - start).total_seconds()))
+    except (TypeError, ValueError):
+        return 0
+
+
 def _tok_est(text: str) -> int:
     """Оценка токенов: ceil(сумма символов / 4)."""
     return math.ceil(len(text) / 4)
@@ -71,9 +82,12 @@ TASK_STAGES = ("planning", "execution", "validation", "done", "paused", "failed"
 
 
 def new_plan() -> list:
-    """План stage-агентов: 4 записи pending (порядок TASK_PIPELINE)."""
+    """План stage-агентов: 4 записи pending (порядок TASK_PIPELINE).
+    usage — токены LLM-вызова стадии {prompt, completion, total};
+    duration_s — длительность стадии в секундах (заполняется при done)."""
     return [{"step": i + 1, "agent": s, "status": "pending",
-             "output": None, "verdict": None, "spawn_ts": None, "ts": None}
+             "output": None, "verdict": None, "spawn_ts": None, "ts": None,
+             "usage": None, "duration_s": None}
             for i, s in enumerate(TASK_PIPELINE)]
 
 
@@ -234,11 +248,15 @@ class MemoryStore:
                        model: str | None = None,
                        task_stage: str | None = None,
                        task_id: str | None = None,
-                       task_step: str | None = None) -> None:
+                       task_step: str | None = None,
+                       task_usage: dict | None = None,
+                       task_duration: int | None = None) -> None:
         """Добавить сообщение в диалог; ValueError, если диалог не существует.
 
         model — метка модели (assistant); task_stage/task_id/task_step —
-        маркеры задачи (день 13b, в тело LLM-запроса не уходят).
+        маркеры задачи (день 13b, в тело LLM-запроса не уходят);
+        task_usage/task_duration — токены и длительность (с) LLM-вызова
+        для восстановления карточки после перезагрузки.
         """
         with self._lock:
             data = self._read_dialogues()
@@ -254,6 +272,10 @@ class MemoryStore:
                 msg["task_id"] = task_id
             if task_step is not None:
                 msg["task_step"] = task_step
+            if task_usage is not None:
+                msg["task_usage"] = task_usage
+            if task_duration is not None:
+                msg["task_duration"] = task_duration
             d.setdefault("messages", []).append(msg)
             self._write_dialogues(data)
 
@@ -425,13 +447,18 @@ class MemoryStore:
             if not t["active"]:
                 raise ValueError("Задача не активна")
             t["work_steps"] = [{"name": str(n), "status": "pending",
-                                "output": None, "ts": None} for n in names]
+                                "output": None, "ts": None, "start_ts": None,
+                                "usage": None, "duration_s": None}
+                               for n in names]
         return self._task_mutate(dialogue_id, fn)
 
     def task_work_step_set(self, dialogue_id: str, index: int, status: str,
-                           output: str | None = None) -> dict:
-        """Статус/output work-шага по индексу. ValueError: задача не активна;
-        индекс вне диапазона; статус неизвестен."""
+                           output: str | None = None,
+                           usage: dict | None = None) -> dict:
+        """Статус/output work-шага по индексу. in_progress — start_ts;
+        completed — usage (токены) + duration_s (start_ts → сейчас).
+        ValueError: задача не активна; индекс вне диапазона;
+        статус неизвестен."""
         if status not in ("pending", "in_progress", "completed"):
             raise ValueError(f"Неизвестный статус шага: {status}")
         def fn(t):
@@ -441,16 +468,25 @@ class MemoryStore:
                 raise ValueError(f"Индекс шага вне диапазона: {index}")
             ws = t["work_steps"][index]
             ws["status"] = status
+            if status == "in_progress":
+                ws["start_ts"] = _now()
+                ws["usage"] = None
+                ws["duration_s"] = None
             if output is not None:
                 ws["output"] = output
                 ws["ts"] = _now()
+                if usage is not None:
+                    ws["usage"] = usage
+                ws["duration_s"] = _seconds_since(ws.get("start_ts"))
         return self._task_mutate(dialogue_id, fn)
 
     def task_stage_done(self, dialogue_id: str, stage: str, output: str,
-                        verdict: str | None = None) -> dict:
-        """Отметить запись плана completed (+output, +verdict) и перейти к
-        следующей стадии pipeline (done — терминальная). ValueError: задача
-        не активна; стадия не в pipeline; стадия != текущей по плану."""
+                        verdict: str | None = None,
+                        usage: dict | None = None) -> dict:
+        """Отметить запись плана completed (+output, +verdict, +usage,
+        +duration_s = spawn_ts → сейчас) и перейти к следующей стадии
+        pipeline (done — терминальная). ValueError: задача не активна;
+        стадия не в pipeline; стадия != текущей по плану."""
         def fn(t):
             if not t["active"]:
                 raise ValueError("Задача не активна")
@@ -465,6 +501,9 @@ class MemoryStore:
                     e["ts"] = _now()
                     if verdict is not None:
                         e["verdict"] = verdict
+                    if usage is not None:
+                        e["usage"] = usage
+                    e["duration_s"] = _seconds_since(e.get("spawn_ts"))
             t["stage"] = "done" if stage == "done" \
                 else TASK_PIPELINE[TASK_PIPELINE.index(stage) + 1]
             # терминальная done — current_step = total_steps (4), не 5
@@ -474,9 +513,10 @@ class MemoryStore:
         return self._task_mutate(dialogue_id, fn)
 
     def task_retry_execution(self, dialogue_id: str, output: str,
-                             verdict: str) -> dict:
-        """Валидация не прошла: validation→completed (+verdict), запись
-        execution и work_steps → pending, retries+1, stage→execution.
+                             verdict: str, usage: dict | None = None) -> dict:
+        """Валидация не прошла: validation→in_progress (+verdict, +output,
+        +usage), запись execution и work_steps → pending (usage/duration/
+        start_ts сброшены), retries+1, stage→execution.
         ValueError: не активна; stage != validation; ретраи исчерпаны."""
         def fn(t):
             if not t["active"]:
@@ -494,15 +534,22 @@ class MemoryStore:
                     e["output"] = output
                     e["verdict"] = verdict
                     e["ts"] = _now()
+                    if usage is not None:
+                        e["usage"] = usage
                 if e["agent"] == "execution":
                     e["status"] = "pending"
                     e["output"] = None
                     e["spawn_ts"] = None
                     e["ts"] = None
+                    e["usage"] = None
+                    e["duration_s"] = None
             for ws in t["work_steps"]:
                 ws["status"] = "pending"
                 ws["output"] = None
                 ws["ts"] = None
+                ws["start_ts"] = None
+                ws["usage"] = None
+                ws["duration_s"] = None
             t["retries"] += 1
             t["stage"] = "execution"
             t["current_step"] = TASK_PIPELINE.index("execution") + 1

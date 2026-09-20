@@ -452,6 +452,52 @@ class TestTaskStorage13b:
         except ValueError as e:
             assert "уже активна" in str(e)
 
+    # ---- usage / длительность (токены и время работы) ----
+
+    def test_plan_and_work_steps_carry_usage_fields(self):
+        self.s.task_new(self.did, "X")
+        self.s.task_work_steps_set(self.did, ["A", "B"])
+        t = self.s.task_get(self.did)
+        assert all(e.get("usage") is None and e.get("duration_s") is None
+                   for e in t["plan"])
+        assert all(w.get("start_ts") is None and w.get("usage") is None
+                   and w.get("duration_s") is None for w in t["work_steps"])
+
+    def test_stage_done_stores_usage_and_duration(self):
+        self.s.task_new(self.did, "X")
+        self.s.task_spawn_stage(self.did, "planning")
+        t = self.s.task_stage_done(
+            self.did, "planning", "план",
+            usage={"prompt": 1, "completion": 2, "total": 3})
+        pe = t["plan"][0]
+        assert pe["usage"] == {"prompt": 1, "completion": 2, "total": 3}
+        assert isinstance(pe["duration_s"], int) and pe["duration_s"] >= 0
+
+    def test_work_step_start_ts_usage_duration(self):
+        self.s.task_new(self.did, "X")
+        self.s.task_work_steps_set(self.did, ["A"])
+        t1 = self.s.task_work_step_set(self.did, 0, "in_progress")
+        assert t1["work_steps"][0]["start_ts"]
+        t2 = self.s.task_work_step_set(
+            self.did, 0, "completed", "результат",
+            usage={"prompt": 4, "completion": 5, "total": 9})
+        ws = t2["work_steps"][0]
+        assert ws["usage"] == {"prompt": 4, "completion": 5, "total": 9}
+        assert isinstance(ws["duration_s"], int) and ws["duration_s"] >= 0
+
+    def test_append_message_task_usage_markers(self):
+        self.s.append_message(
+            self.did, "assistant", "вывод", model="m", task_id="t_1",
+            task_stage="planning",
+            task_usage={"prompt": 1, "completion": 2, "total": 3},
+            task_duration=7)
+        msg = self.s.get_messages(self.did)[0]
+        assert msg["task_usage"] == {"prompt": 1, "completion": 2, "total": 3}
+        assert msg["task_duration"] == 7
+        # без параметров — маркеры не добавляются
+        self.s.append_message(self.did, "user", "привет")
+        assert "task_usage" not in self.s.get_messages(self.did)[1]
+
     def test_task_new_after_done_is_new_task(self):
         t1 = self.s.task_new(self.did, "а")
         self.s.task_spawn_stage(self.did, "planning")

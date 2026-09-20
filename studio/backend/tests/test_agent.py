@@ -1167,11 +1167,16 @@ def make_task_handler(steps, step_outputs, verdict="pass",
             content = f"Заключение {state['val']}.\n<verdict>{v}</verdict>"
         else:  # Оркестратор
             content = done_output
+        usage = {"prompt_tokens": 11, "completion_tokens": 22,
+                 "total_tokens": 33}
         if body.get("stream"):
             frame = ("data: " + json.dumps({"choices": [{"delta": {"content": content}}]})
                      + "\n\n")
-            return httpx.Response(200, text=frame + "data: [DONE]\n\n")
-        return httpx.Response(200, json={"choices": [{"message": {"content": content}}]})
+            usage_frame = ("data: " + json.dumps({"choices": [], "usage": usage})
+                           + "\n\n")
+            return httpx.Response(200, text=frame + usage_frame + "data: [DONE]\n\n")
+        return httpx.Response(200, json={"choices": [{"message": {"content": content}}],
+                                         "usage": usage})
     return handler, calls
 
 
@@ -1198,34 +1203,82 @@ class TestTaskRun13b:
                                             "B": "Результат шага B"})
         agent, did = self._setup(data_dir, handler)
         events = self.run_all(agent, did)
-        assert events == [
+        # duration_s — wall-clock, из сравнения исключаем (проверяем отдельно)
+        norm = [{k: v for k, v in e.items() if k != "duration_s"}
+                for e in events]
+        u = {"prompt": 11, "completion": 22, "total": 33}
+        assert norm == [
             {"type": "agent_spawned", "stage": "planning", "agent": "Планировщик"},
             {"type": "stage_done", "stage": "planning",
-             "output": json.dumps(["A", "B"], ensure_ascii=False), "plan": ["A", "B"]},
+             "output": json.dumps(["A", "B"], ensure_ascii=False),
+             "plan": ["A", "B"], "usage": u},
             {"type": "agent_spawned", "stage": "execution", "agent": "Исполнитель"},
             {"type": "step_updated", "index": 0, "name": "A", "status": "in_progress"},
             {"type": "step_delta", "index": 0, "text": "Результат шага A"},
             {"type": "step_updated", "index": 0, "name": "A",
-             "status": "completed", "output": "Результат шага A"},
+             "status": "completed", "output": "Результат шага A", "usage": u},
             {"type": "step_updated", "index": 1, "name": "B", "status": "in_progress"},
             {"type": "step_delta", "index": 1, "text": "Результат шага B"},
             {"type": "step_updated", "index": 1, "name": "B",
-             "status": "completed", "output": "Результат шага B"},
+             "status": "completed", "output": "Результат шага B", "usage": u},
             {"type": "stage_done", "stage": "execution",
-             "output": "## A\nРезультат шага A\n\n## B\nРезультат шага B"},
+             "output": "## A\nРезультат шага A\n\n## B\nРезультат шага B",
+             "usage": {"prompt": 22, "completion": 44, "total": 66}},
             {"type": "agent_spawned", "stage": "validation", "agent": "Валидатор"},
             {"type": "stage_done", "stage": "validation",
-             "output": "Заключение 1.\n<verdict>pass</verdict>", "verdict": "pass"},
+             "output": "Заключение 1.\n<verdict>pass</verdict>", "verdict": "pass",
+             "usage": u},
             {"type": "agent_spawned", "stage": "done", "agent": "Оркестратор"},
-            {"type": "stage_done", "stage": "done", "output": "ФИНАЛЬНЫЙ ОТВЕТ"},
+            {"type": "stage_done", "stage": "done", "output": "ФИНАЛЬНЫЙ ОТВЕТ",
+             "usage": u},
             {"type": "task_done", "answer": "ФИНАЛЬНЫЙ ОТВЕТ"},
         ]
+        # duration_s — у step_updated(completed) (wall-clock, ≥ 0)
+        dur = [e["duration_s"] for e in events
+               if e["type"] == "step_updated"
+               and e.get("status") == "completed"]
+        assert dur and all(isinstance(x, int) and x >= 0 for x in dur)
         t = agent.store.task_get(did)
         assert t["stage"] == "done"
         assert all(e["status"] == "completed" for e in t["plan"])
         assert all(w["status"] == "completed" for w in t["work_steps"])
         assert t["work_steps"][0]["output"] == "Результат шага A"
         assert t["work_steps"][1]["output"] == "Результат шага B"
+
+    def test_usage_in_state_and_markers(self, data_dir):
+        """Токены и длительность: в состоянии (plan[]/work_steps[]) и в
+        маркерах сообщений (task_usage/task_duration — восстановление
+        карточки после перезагрузки)."""
+        handler, calls = make_task_handler(["A", "B"],
+                                           {"A": "Результат шага A",
+                                            "B": "Результат шага B"})
+        agent, did = self._setup(data_dir, handler)
+        self.run_all(agent, did)
+        t = agent.store.task_get(did)
+        u = {"prompt": 11, "completion": 22, "total": 33}
+        # plan: usage у каждой стадии, duration_s у завершённых
+        for e in t["plan"]:
+            if e["agent"] == "execution":
+                assert e["usage"] == {"prompt": 22, "completion": 44, "total": 66}
+            else:
+                assert e["usage"] == u
+            assert isinstance(e["duration_s"], int) and e["duration_s"] >= 0
+        # work-шаги: start_ts/usage/duration_s
+        for w in t["work_steps"]:
+            assert w["start_ts"]
+            assert w["usage"] == u
+            assert isinstance(w["duration_s"], int) and w["duration_s"] >= 0
+        # маркеры: planning / execution-шаги / validation — с токенами
+        msgs = [m for m in agent.store.get_messages(did)
+                if m.get("task_stage")]
+        assert len(msgs) == 4  # planning + 2 шага + validation
+        for m in msgs:
+            assert m["task_usage"] == u
+            assert isinstance(m["task_duration"], int) and m["task_duration"] >= 0
+        # финальный синтез — тоже маркер с токенами (без task_stage)
+        final = agent.store.get_messages(did)[-1]
+        assert final["task_id"] and not final.get("task_stage")
+        assert final["task_usage"] == u
 
     def test_planning_prompt_no_chat_history(self, data_dir):
         handler, calls = make_task_handler(["A"], {})
@@ -1286,8 +1339,10 @@ class TestTaskRun13b:
         # пауза на границе шага: после step_updated(0, completed)
         assert events1[-1] == {"type": "task_paused", "stage": "paused"}
         su = [e for e in events1 if e["type"] == "step_updated"]
-        assert su[-1] == {"type": "step_updated", "index": 0, "name": "A",
-                          "status": "completed", "output": "Результат шага A"}
+        assert {k: v for k, v in su[-1].items() if k != "duration_s"} == {
+            "type": "step_updated", "index": 0, "name": "A",
+            "status": "completed", "output": "Результат шага A",
+            "usage": {"prompt": 11, "completion": 22, "total": 33}}
         agent.store.task_set_instruction(did, "используй Kotlin")
         agent.store.task_resume(did)
         events2 = self.run_all(agent, did)

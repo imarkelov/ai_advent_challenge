@@ -621,10 +621,19 @@ class StudioAgent:
             lines.append(f"Инструкция пользователя (обязательно учти): {instruction}")
         return "\n".join(lines)
 
-    def _task_llm_call(self, cfg: dict, system: str, user: str) -> str:
+    @staticmethod
+    def _usage_of(usage) -> dict:
+        """usage LLM → {prompt, completion, total} (0 при отсутствии)."""
+        u = usage or {}
+        return {"prompt": u.get("prompt_tokens") or 0,
+                "completion": u.get("completion_tokens") or 0,
+                "total": u.get("total_tokens") or 0}
+
+    def _task_llm_call(self, cfg: dict, system: str, user: str) -> tuple:
         """Non-stream LLM-вызов stage-агента (не входит в requests.json).
-        Бросает исключение при ошибке (httpx.HTTPError, ValueError,
-        RuntimeError) — оркестратор превратит его в error-событие."""
+        Возвращает (content, usage). Бросает исключение при ошибке
+        (httpx.HTTPError, ValueError, RuntimeError) — оркестратор
+        превратит его в error-событие."""
         body = {
             "model": cfg["model"],
             "temperature": cfg["temperature"],
@@ -643,15 +652,18 @@ class StudioAgent:
         )
         if resp.status_code != 200:
             raise RuntimeError(f"Модель вернула ошибку HTTP {resp.status_code}")
-        content = (((resp.json().get("choices") or [{}])[0]
+        j = resp.json()
+        content = (((j.get("choices") or [{}])[0]
                     .get("message") or {}).get("content") or "").strip()
         if not content:
             raise RuntimeError("Пустой ответ модели")
-        return content
+        return content, self._usage_of(j.get("usage"))
 
     def _task_llm_stream(self, cfg: dict, system: str, user: str):
         """Streaming LLM-вызов work-шага Исполнителя (D6; не входит в
-        requests.json). Yield-ит дельты content; бросает исключение при
+        requests.json). Yield-ит кортежи: ("delta", текст) — фрагмент
+        content, затем ("usage", {prompt, completion, total}) из финального
+        кадра (stream_options.include_usage). Бросает исключение при
         ошибке (RuntimeError на HTTP != 200)."""
         body = {
             "model": cfg["model"],
@@ -672,6 +684,7 @@ class StudioAgent:
                 timeout=120) as resp:
             if resp.status_code != 200:
                 raise RuntimeError(f"Модель вернула ошибку HTTP {resp.status_code}")
+            usage = None
             for line in resp.iter_lines():
                 line = line.strip()
                 if not line.startswith("data:"):
@@ -680,10 +693,13 @@ class StudioAgent:
                 if data == "[DONE]":
                     break
                 chunk = json.loads(data)
+                if chunk.get("usage"):
+                    usage = chunk["usage"]
                 choices = chunk.get("choices") or [{}]
                 delta = (choices[0].get("delta") or {}).get("content")
                 if delta:
-                    yield delta
+                    yield ("delta", delta)
+            yield ("usage", self._usage_of(usage))
 
     @staticmethod
     def _parse_verdict(output: str) -> str:
@@ -738,11 +754,11 @@ class StudioAgent:
                        "agent": TASK_AGENT_NAMES["planning"]}
                 self.store.task_spawn_stage(dialogue_id, "planning")
                 try:
-                    output = self._task_llm_call(
+                    output, usage = self._task_llm_call(
                         cfg,
                         TASK_PLAN_PROMPT
                         + self.build_task_state_block(t, "planning",
-                                                      instruction=instruction),
+                                                       instruction=instruction),
                         TASK_STAGE_USER["planning"])
                 except Exception as e:
                     self.store.task_set_failed(dialogue_id,
@@ -752,12 +768,16 @@ class StudioAgent:
                     return
                 steps = parse_work_steps(output)
                 self.store.task_work_steps_set(dialogue_id, steps)
-                self.store.task_stage_done(dialogue_id, "planning", output)
+                t2 = self.store.task_stage_done(dialogue_id, "planning",
+                                                output, usage=usage)
+                pe = next(e for e in t2["plan"] if e["agent"] == "planning")
                 self.store.append_message(dialogue_id, "assistant", output,
                                           model=cfg["model"], task_id=tid,
-                                          task_stage="planning")
+                                          task_stage="planning",
+                                          task_usage=usage,
+                                          task_duration=pe["duration_s"])
                 yield {"type": "stage_done", "stage": "planning",
-                       "output": output, "plan": steps}
+                       "output": output, "plan": steps, "usage": usage}
             elif stage == "execution":
                 if t["plan"][1]["status"] != "in_progress":
                     yield {"type": "agent_spawned", "stage": "execution",
@@ -783,7 +803,8 @@ class StudioAgent:
                            "name": ws["name"], "status": "in_progress"}
                     try:
                         parts = []
-                        for delta in self._task_llm_stream(
+                        usage = None
+                        for kind, payload in self._task_llm_stream(
                                 cfg,
                                 TASK_EXEC_STEP_PROMPT.format(step=ws["name"])
                                 + self.build_task_state_block(
@@ -791,9 +812,12 @@ class StudioAgent:
                                     instruction=instruction,
                                     feedback=feedback),
                                 "Выполни шаг плана: " + ws["name"]):
-                            parts.append(delta)
-                            yield {"type": "step_delta", "index": i,
-                                   "text": delta}
+                            if kind == "delta":
+                                parts.append(payload)
+                                yield {"type": "step_delta", "index": i,
+                                       "text": payload}
+                            else:
+                                usage = payload
                         output = "".join(parts).strip()
                         if not output:
                             raise RuntimeError("Пустой ответ модели")
@@ -804,33 +828,42 @@ class StudioAgent:
                         yield {"type": "task_failed",
                                "message": f"Ошибка шага «{ws['name']}»: {e}"}
                         return
-                    self.store.task_work_step_set(dialogue_id, i,
-                                                  "completed", output)
+                    t2 = self.store.task_work_step_set(
+                        dialogue_id, i, "completed", output, usage=usage)
+                    ws2 = t2["work_steps"][i]
                     self.store.append_message(
                         dialogue_id, "assistant", output, model=cfg["model"],
                         task_id=tid, task_stage="execution",
-                        task_step=ws["name"])
+                        task_step=ws["name"], task_usage=usage,
+                        task_duration=ws2["duration_s"])
                     yield {"type": "step_updated", "index": i,
                            "name": ws["name"], "status": "completed",
-                           "output": output}
+                           "output": output, "usage": usage,
+                           "duration_s": ws2["duration_s"]}
                 t = self.store.task_get(dialogue_id)
                 exec_output = "\n\n".join(
                     f"## {ws['name']}\n{ws['output']}"
                     for ws in t["work_steps"])
+                # usage стадии = сумма usage work-шагов
+                su = [ws.get("usage") or {} for ws in t["work_steps"]]
+                exec_usage = {"prompt": sum(u.get("prompt", 0) for u in su),
+                              "completion": sum(u.get("completion", 0)
+                                                for u in su),
+                              "total": sum(u.get("total", 0) for u in su)}
                 self.store.task_stage_done(dialogue_id, "execution",
-                                           exec_output)
+                                           exec_output, usage=exec_usage)
                 yield {"type": "stage_done", "stage": "execution",
-                       "output": exec_output}
+                       "output": exec_output, "usage": exec_usage}
             elif stage == "validation":
                 yield {"type": "agent_spawned", "stage": "validation",
                        "agent": TASK_AGENT_NAMES["validation"]}
                 self.store.task_spawn_stage(dialogue_id, "validation")
                 try:
-                    output = self._task_llm_call(
+                    output, usage = self._task_llm_call(
                         cfg,
                         TASK_VALIDATION_PROMPT
                         + self.build_task_state_block(t, "validation",
-                                                      instruction=instruction),
+                                                       instruction=instruction),
                         TASK_STAGE_USER["validation"])
                 except Exception as e:
                     self.store.task_set_failed(dialogue_id,
@@ -840,33 +873,41 @@ class StudioAgent:
                     return
                 verdict = self._parse_verdict(output)
                 if verdict == "fail" and t["retries"] < MAX_TASK_RETRIES:
-                    self.store.task_retry_execution(dialogue_id, output,
-                                                    verdict)
+                    t2 = self.store.task_retry_execution(
+                        dialogue_id, output, verdict, usage=usage)
+                    ve = next(e for e in t2["plan"]
+                              if e["agent"] == "validation")
                     self.store.append_message(
                         dialogue_id, "assistant", output,
                         model=cfg["model"], task_id=tid,
-                        task_stage="validation")
+                        task_stage="validation", task_usage=usage,
+                        task_duration=ve.get("duration_s"))
                     yield {"type": "stage_done", "stage": "validation",
                            "output": output, "verdict": verdict,
-                           "retry": True}
+                           "retry": True, "usage": usage}
                     continue  # следующая итерация — execution с фидбэком
-                self.store.task_stage_done(dialogue_id, "validation",
-                                           output, verdict)
+                t2 = self.store.task_stage_done(dialogue_id, "validation",
+                                                output, verdict,
+                                                usage=usage)
+                ve = next(e for e in t2["plan"]
+                          if e["agent"] == "validation")
                 self.store.append_message(
                     dialogue_id, "assistant", output, model=cfg["model"],
-                    task_id=tid, task_stage="validation")
+                    task_id=tid, task_stage="validation", task_usage=usage,
+                    task_duration=ve["duration_s"])
                 yield {"type": "stage_done", "stage": "validation",
-                       "output": output, "verdict": verdict}
+                       "output": output, "verdict": verdict,
+                       "usage": usage}
             else:  # stage == "done"
                 yield {"type": "agent_spawned", "stage": "done",
                        "agent": TASK_AGENT_NAMES["done"]}
                 self.store.task_spawn_stage(dialogue_id, "done")
                 try:
-                    answer = self._task_llm_call(
+                    answer, usage = self._task_llm_call(
                         cfg,
                         TASK_DONE_PROMPT
                         + self.build_task_state_block(t, "done",
-                                                      instruction=instruction),
+                                                       instruction=instruction),
                         TASK_STAGE_USER["done"])
                 except Exception as e:
                     self.store.task_set_failed(dialogue_id,
@@ -874,13 +915,17 @@ class StudioAgent:
                     yield {"type": "task_failed",
                            "message": f"Ошибка финального синтеза: {e}"}
                     return
+                t2 = self.store.task_stage_done(dialogue_id, "done", answer,
+                                                usage=usage)
+                de = next(e for e in t2["plan"] if e["agent"] == "done")
                 # Финальный синтез — обычное assistant-сообщение (якорь —
                 # task_id без task_stage; в ленте — bubble под карточкой)
                 self.store.append_message(dialogue_id, "assistant", answer,
-                                          model=cfg["model"], task_id=tid)
-                self.store.task_stage_done(dialogue_id, "done", answer)
+                                          model=cfg["model"], task_id=tid,
+                                          task_usage=usage,
+                                          task_duration=de["duration_s"])
                 yield {"type": "stage_done", "stage": "done",
-                       "output": answer}
+                       "output": answer, "usage": usage}
                 yield {"type": "task_done", "answer": answer}
                 return
 
