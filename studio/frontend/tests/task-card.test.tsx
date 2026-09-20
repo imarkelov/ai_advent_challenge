@@ -284,8 +284,8 @@ describe('TaskCard — секции plan[]', () => {
   })
 })
 
-describe('TaskCard — авто-развёртывание секций', () => {
-  it('live-карточка: in_progress-запись развёрнута, остальные свёрнуты', async () => {
+describe('TaskCard — раскрытие секций', () => {
+  it('свернуто изначально: live-карточка — все секции свёрнуты (и in_progress)', async () => {
     stubDefaultFetch()
     const { container } = render(
       <StudioProvider>
@@ -305,11 +305,38 @@ describe('TaskCard — авто-развёртывание секций', () => 
       </StudioProvider>,
     )
     await screen.findByText('Задача: Сделать кнопку')
-    const sections = Array.from(container.querySelectorAll('.task-agent'))
-    expect(sections[0].open).toBe(true)
-    expect(sections[1].open).toBe(false)
-    expect(sections[2].open).toBe(false)
-    expect(sections[3].open).toBe(false)
+    for (const s of container.querySelectorAll('.task-agent')) {
+      expect(s.open).toBe(false)
+    }
+  })
+
+  it('клик по summary — секция раскрывается, повторный клик — сворачивается', async () => {
+    stubDefaultFetch()
+    const { container } = render(
+      <StudioProvider>
+        <TaskCard
+          task={makeTask({
+            stage: 'planning',
+            current_step: 1,
+            plan: [
+              entry(1, 'planning', 'in_progress', { output: 'план живёт тут' }),
+              entry(2, 'execution', 'pending'),
+              entry(3, 'validation', 'pending'),
+              entry(4, 'done', 'pending'),
+            ],
+          })}
+          live
+        />
+      </StudioProvider>,
+    )
+    await screen.findByText('Задача: Сделать кнопку')
+    const summary = container.querySelector('.task-agent summary')
+    expect(summary).toBeTruthy()
+    fireEvent.click(summary)
+    expect(container.querySelector('.task-agent').open).toBe(true)
+    expect(screen.getByText('план живёт тут')).toBeTruthy()
+    fireEvent.click(container.querySelector('.task-agent summary'))
+    expect(container.querySelector('.task-agent').open).toBe(false)
   })
 
   it('все completed (не live) — все секции свёрнуты', async () => {
@@ -360,6 +387,33 @@ describe('TaskCard — авто-развёртывание секций', () => 
     await screen.findByText('Задача: Сделать кнопку')
     const sections = Array.from(container.querySelectorAll('.task-agent'))
     expect(sections[1].open).toBe(true)
+  })
+
+  it('failed: пользователь может закрыть развёрнутую секцию', async () => {
+    stubDefaultFetch()
+    const { container } = render(
+      <StudioProvider>
+        <TaskCard
+          task={makeTask({
+            stage: 'failed',
+            current_step: 2,
+            error: 'сбой',
+            plan: [
+              entry(1, 'planning', 'completed', { output: 'п' }),
+              entry(2, 'execution', 'in_progress'),
+              entry(3, 'validation', 'pending'),
+              entry(4, 'done', 'pending'),
+            ],
+          })}
+          live
+        />
+      </StudioProvider>,
+    )
+    await screen.findByText('Задача: Сделать кнопку')
+    const sections = Array.from(container.querySelectorAll('.task-agent'))
+    expect(sections[1].open).toBe(true)
+    fireEvent.click(sections[1].querySelector('summary'))
+    expect(sections[1].open).toBe(false)
   })
 })
 

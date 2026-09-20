@@ -218,13 +218,15 @@ export default function TaskCard({ task, live }: TaskCardProps) {
     : running ? { cls: 'run', label: 'Выполняется' }
     : { cls: '', label: 'Готово к запуску' }
 
-  // Авто-развёртывание: live — активная запись; failed — упавшая; иная — всё свёрнуто
-  const activeEntry = live
-    ? task.plan.find((e) => e.status === 'in_progress')
-    : null
+  // Раскрытие секций: всё свёрнуто изначально — раскрывает клик по summary
+  // (userOpen). Исключение — failed: упавшая секция развёрнута изначально,
+  // пока пользователь не закроет её.
+  const [userOpen, setUserOpen] = useState<Record<string, boolean>>({})
   const failedEntry = task.stage === 'failed'
     ? task.plan.find((e) => e.status !== 'completed')
     : null
+  const isOpen = (agent: string) =>
+    userOpen[agent] ?? (failedEntry != null && failedEntry.agent === agent)
 
   const stepIcon = (st: TaskPlanStatus) =>
     st === 'completed' ? '✓' : st === 'in_progress' ? '⏳' : '○'
@@ -270,10 +272,13 @@ export default function TaskCard({ task, live }: TaskCardProps) {
       {task.plan.map((entry) => {
         const chip = statusChip(entry.status)
         const meta = stageMeta(entry, now)
-        const open = entry === activeEntry || entry === failedEntry
         return (
-          <details key={entry.agent + entry.status} className="task-agent" open={open}>
-            <summary>
+          <details key={entry.agent + entry.status} className="task-agent"
+                   open={isOpen(entry.agent)}>
+            <summary onClick={(e) => {
+              e.preventDefault()
+              setUserOpen((p) => ({ ...p, [entry.agent]: !isOpen(entry.agent) }))
+            }}>
               <AgentIcon agent={entry.agent} />
               <span className="task-agent-name">{STAGE_LABELS[entry.agent]}</span>
               <span className={chip.cls}>{chip.label}</span>
