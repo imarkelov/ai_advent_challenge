@@ -149,7 +149,7 @@ describe('ProfileTab — вкладка «Профили»', () => {
     const calls = await renderTab()
     fireEvent.change(screen.getByLabelText('Имя пользователя'), { target: { value: 'Мария' } })
     fireEvent.change(screen.getByLabelText('Роль и сфера'), { target: { value: 'дизайнер' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }))
+    fireEvent.click(screen.getByTitle('Сохранить'))
     await waitFor(() =>
       expect(calls).toContainEqual({
         url: '/api/profile',
@@ -162,7 +162,7 @@ describe('ProfileTab — вкладка «Профили»', () => {
 
   it('«Отказаться» → POST /api/profile/action {action: decline}, чип — «отказан»', async () => {
     const calls = await renderTab()
-    fireEvent.click(screen.getByRole('button', { name: 'Отказаться' }))
+    fireEvent.click(screen.getByTitle('Отказаться'))
     await waitFor(() =>
       expect(calls).toContainEqual({
         url: '/api/profile/action',
@@ -174,7 +174,7 @@ describe('ProfileTab — вкладка «Профили»', () => {
 
   it('«Провести интервью» → POST {action: interview} + подсказка в чат', async () => {
     const calls = await renderTab()
-    fireEvent.click(screen.getByRole('button', { name: 'Провести интервью' }))
+    fireEvent.click(screen.getByTitle('Провести интервью'))
     await waitFor(() =>
       expect(calls).toContainEqual({
         url: '/api/profile/action',
@@ -193,7 +193,7 @@ describe('ProfileTab — вкладка «Профили»', () => {
       tone: 'кратко',
       taboos: 'мат',
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Заполнить заново' }))
+    fireEvent.click(screen.getByTitle('Заполнить заново'))
     await waitFor(() =>
       expect(calls).toContainEqual({
         url: '/api/profile/action',
@@ -217,6 +217,6 @@ describe('ProfileTab — вкладка «Профили»', () => {
       </StudioProvider>,
     )
     expect(await screen.findByText(/нет активного диалога/i)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Сохранить' })).not.toBeInTheDocument()
+    expect(screen.queryByTitle('Сохранить')).not.toBeInTheDocument()
   })
 })
