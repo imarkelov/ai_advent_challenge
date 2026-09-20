@@ -771,8 +771,121 @@ class TestTaskStorage13b:
         m.append_message(self.did, "user", "запрос", task_id="t_1")
         m.append_message(self.did, "assistant", "план", model="m", task_id="t_1", task_stage="planning")
         m.append_message(self.did, "assistant", "шаг", model="m", task_id="t_1",
-                         task_stage="execution", task_step="Шаг A")
+                          task_stage="execution", task_step="Шаг A")
         msgs = m.get_messages(self.did)
         assert msgs[0]["task_id"] == "t_1" and "task_stage" not in msgs[0]
         assert msgs[1]["task_stage"] == "planning" and "task_step" not in msgs[1]
         assert msgs[2]["task_step"] == "Шаг A"
+
+
+# ---------- инварианты (день 14, глобальные) ----------
+
+def test_invariants_set_and_items(store):
+    r1 = store.invariants_set("Стек", "Kotlin")
+    r2 = store.invariants_set("Архитектура", "монолит")
+    assert r1["id"].startswith("inv_") and r2["id"].startswith("inv_")
+    assert r1["id"] != r2["id"]
+    assert store.invariants_items() == {
+        r1["id"]: {"key": "Стек", "value": "Kotlin"},
+        r2["id"]: {"key": "Архитектура", "value": "монолит"}}
+
+
+def test_invariants_update_by_key_keeps_id(store):
+    r1 = store.invariants_set("Стек", "Kotlin")
+    r2 = store.invariants_set("Стек", "Java")
+    assert r2["id"] == r1["id"]
+    assert store.invariants_items() == {
+        r1["id"]: {"key": "Стек", "value": "Java"}}
+
+
+def test_invariants_remove_and_clear(store):
+    r1 = store.invariants_set("k1", "v1")
+    r2 = store.invariants_set("k2", "v2")
+    assert store.invariants_remove(r1["id"]) is True
+    assert store.invariants_remove(r1["id"]) is False
+    assert store.invariants_remove("nope") is False
+    assert set(store.invariants_items()) == {r2["id"]}
+    store.invariants_clear()
+    assert store.invariants_items() == {}
+
+
+def test_invariants_missing_and_broken_file(data_dir):
+    # отсутствующий файл -> {}
+    assert MemoryStore(str(data_dir)).invariants_items() == {}
+    # битый файл -> {}, мутации работают
+    (data_dir / "invariants.json").write_text("{битый json", encoding="utf-8")
+    s = MemoryStore(str(data_dir))
+    assert s.invariants_items() == {}
+    s.invariants_set("k", "v")
+    assert len(s.invariants_items()) == 1
+    # частично битый файл: записи без str key/value отбрасываются
+    (data_dir / "invariants.json").write_text(
+        json.dumps({"inv_1": {"key": "К", "value": "В"},
+                    "inv_2": {"key": 5, "value": "V"},
+                    "inv_3": "мусор"}), encoding="utf-8")
+    s2 = MemoryStore(str(data_dir))
+    assert s2.invariants_items() == {"inv_1": {"key": "К", "value": "В"}}
+
+
+def test_invariants_set_rejects_empty_and_non_str(store):
+    with pytest.raises(ValueError):
+        store.invariants_set("", "v")
+    with pytest.raises(ValueError):
+        store.invariants_set("k", "   ")
+    with pytest.raises(ValueError):
+        store.invariants_set(5, "v")
+    with pytest.raises(ValueError):
+        store.invariants_set("k", None)
+    assert store.invariants_items() == {}
+
+
+def test_invariants_block_empty(store):
+    assert store.build_invariants_block() == ""
+
+
+def test_invariants_block_nonempty(store):
+    store.invariants_set("Стек", "Kotlin")
+    store.invariants_set("Тесты", "обязательны")
+    assert store.build_invariants_block() == (
+        "\n\nИнварианты (неукоснительно):\n- Стек: Kotlin\n- Тесты: обязательны")
+
+
+def test_invariants_isolated_from_wm_lt(store):
+    d = store.new_dialogue()
+    store.wm_set(d["id"], "Стек", "Python")
+    store.lt_set("Стек", "Go")
+    store.invariants_set("Стек", "Kotlin")
+    assert store.wm_items(d["id"]) == {"Стек": "Python"}
+    assert store.lt_items() == {"Стек": "Go"}
+    assert len(store.invariants_items()) == 1
+
+
+def test_invariants_persistence_across_instances(data_dir):
+    s1 = MemoryStore(str(data_dir))
+    r = s1.invariants_set("Стек", "Kotlin")
+    s2 = MemoryStore(str(data_dir))
+    assert s2.invariants_items() == {
+        r["id"]: {"key": "Стек", "value": "Kotlin"}}
+
+
+def test_invariants_not_affected_by_toggles(store):
+    """Инварианты глобальны: тумблеры слоёв памяти на них не действуют."""
+    store.invariants_set("Стек", "Kotlin")
+    store.set_toggle("wm", False)
+    store.set_toggle("lt", False)
+    assert store.build_invariants_block() == (
+        "\n\nИнварианты (неукоснительно):\n- Стек: Kotlin")
+
+
+def test_layer_stats_invariants(store):
+    store.new_dialogue()
+    stats = store.layer_stats()
+    assert stats["invariants"] == {"entries": 0, "tokens_est": 0, "items": {}}
+    store.invariants_set("Стек", "Kotlin")  # 10 символов
+    inv = store.invariants_items()
+    iid = next(iter(inv))
+    stats = store.layer_stats()
+    assert stats["invariants"]["entries"] == 1
+    assert stats["invariants"]["tokens_est"] == math.ceil(10 / 4)
+    assert stats["invariants"]["items"] == {
+        iid: {"key": "Стек", "value": "Kotlin"}}

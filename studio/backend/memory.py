@@ -4,6 +4,8 @@
 - ST (короткая память) — диалоги и их сообщения: `dialogues.json`;
 - WM (оперативная/рабочая память) — заметки по каждому диалогу: `working.json`;
 - LT (долговременная память) — глобальные заметки: `longterm.json`.
+Плюс инварианты (день 14) — жёсткие неизменяемые правила, глобально,
+отдельный файл `invariants.json`, вне слоёв и их тумблеров.
 
 Все мутации выполняются под единым threading.Lock, запись атомарная
 (tempfile.mkstemp + os.replace), чтение устойчиво к битым/отсутствующим файлам.
@@ -131,6 +133,7 @@ class MemoryStore:
         self._p_dialogues = os.path.join(data_dir, "dialogues.json")
         self._p_working = os.path.join(data_dir, "working.json")
         self._p_longterm = os.path.join(data_dir, "longterm.json")
+        self._p_invariants = os.path.join(data_dir, "invariants.json")
         self._p_toggles = os.path.join(data_dir, "toggles.json")
 
     # ---------- внутреннее чтение/запись ----------
@@ -162,6 +165,20 @@ class MemoryStore:
 
     def _write_longterm(self, l: dict) -> None:
         atomic_write_json(self._p_longterm, l)
+
+    def _read_invariants(self) -> dict:
+        """invariants.json {id: {key, value}}; битый/отсутствующий файл -> {}.
+        Записи без str key/value отбрасываются (битый файл)."""
+        v = read_json(self._p_invariants, None)
+        if not isinstance(v, dict):
+            return {}
+        return {i: e for i, e in v.items()
+                if isinstance(e, dict)
+                and isinstance(e.get("key"), str)
+                and isinstance(e.get("value"), str)}
+
+    def _write_invariants(self, v: dict) -> None:
+        atomic_write_json(self._p_invariants, v)
 
     def _find(self, data: dict, dialogue_id: str) -> dict | None:
         """Найти диалог по id в структуре dialogues.json."""
@@ -718,6 +735,62 @@ class MemoryStore:
         with self._lock:
             self._write_longterm({})
 
+    # ---------- инварианты (день 14, глобальная жёсткая память) ----------
+    # Жёсткие неизменяемые правила ассистента (архитектура, стек,
+    # бизнес-равила). Отдельный файл invariants.json, вне слоёв памяти
+    # и вне их тумблеров: ассистент не может их изменить/удалить,
+    # управляются только пользователем (CRUD — через API/UI).
+
+    def invariants_items(self) -> dict:
+        """Все инварианты {id: {"key":..., "value":...}} ({} если нет)."""
+        with self._lock:
+            return self._read_invariants()
+
+    def invariants_set(self, key: str, value: str) -> dict:
+        """Создать/обновить инвариант (обновление — по key, id сохраняется).
+        Возвращает запись {id, key, value}. ValueError: key/value не str
+        или пустые (после strip)."""
+        for v in (key, value):
+            if not isinstance(v, str) or not v.strip():
+                raise ValueError("Ключ и значение инварианта — непустые строки")
+        with self._lock:
+            v = self._read_invariants()
+            for iid, e in v.items():
+                if e["key"] == key:
+                    e["value"] = value
+                    self._write_invariants(v)
+                    return {"id": iid, "key": e["key"], "value": e["value"]}
+            iid = "inv_" + uuid.uuid4().hex[:8]
+            v[iid] = {"key": key, "value": value}
+            self._write_invariants(v)
+            return {"id": iid, "key": key, "value": value}
+
+    def invariants_remove(self, iid: str) -> bool:
+        """Удалить инвариант по id; True если запись была."""
+        with self._lock:
+            v = self._read_invariants()
+            if iid in v:
+                del v[iid]
+                self._write_invariants(v)
+                return True
+            return False
+
+    def invariants_clear(self) -> None:
+        """Очистить все инварианты."""
+        with self._lock:
+            self._write_invariants({})
+
+    def build_invariants_block(self) -> str:
+        """Блок инвариантов для system-промпта (глобальный, не зависит
+        от диалога и тумблеров слоёв). Пусто, если инвариантов нет:
+        «\\n\\nИнварианты (неукоснительно):\\n- key: value»."""
+        with self._lock:
+            v = self._read_invariants()
+        if not v:
+            return ""
+        return ("\n\nИнварианты (неукоснительно):\n"
+                + "\n".join(f"- {e['key']}: {e['value']}" for e in v.values()))
+
     # ---------- тумблеры слоёв памяти (toggles.json) ----------
 
     def _read_toggles(self) -> dict:
@@ -780,6 +853,7 @@ class MemoryStore:
             wm_raw = w.get(active) if active else None
             wm = wm_raw if isinstance(wm_raw, dict) else {}
             lt = self._read_longterm()
+            inv = self._read_invariants()
         msgs = d.get("messages", []) if d else []
         return {
             "dialogue": {"message_count": len(msgs),
@@ -788,6 +862,11 @@ class MemoryStore:
                         "tokens_est": _tok_est("".join(k + v for k, v in wm.items())),
                         "items": wm},
             "long_term": {"entries": len(lt),
-                          "tokens_est": _tok_est("".join(k + v for k, v in lt.items())),
-                          "items": lt},
+                           "tokens_est": _tok_est("".join(k + v for k, v in lt.items())),
+                           "items": lt},
+            "invariants": {"entries": len(inv),
+                            "tokens_est": _tok_est("".join(e["key"] + e["value"]
+                                                       for e in inv.values())),
+                            "items": {i: {"key": e["key"], "value": e["value"]}
+                                      for i, e in inv.items()}},
         }
