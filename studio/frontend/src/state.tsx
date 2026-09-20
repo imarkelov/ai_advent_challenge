@@ -31,6 +31,10 @@ import {
   type UserProfile,
 } from './api'
 
+// Таймаут ожидания освобождения run-слота: resume во время чужого run
+// не должен теряться (см. resumeTask / sendTaskMessage).
+const sleep = (ms: number) => new Promise<void>((r) => { setTimeout(r, ms) })
+
 // ── Типы по контракту API дня 11 ────────────────────────────────────────────
 export type Role = 'system' | 'user' | 'assistant'
 
@@ -502,6 +506,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   // Актуальное состояние для асинхронных замыканий (sendMessage)
   const stateRef = useRef(state)
   stateRef.current = state
+  // Защита от двойного продолжить/повтор (двойной клик по кнопке)
+  const resumeInFlight = useRef(false)
 
   // Профиль активного диалога (день 12) — вычисляется из state каждый рендер
   const activeProfile = activeProfileOf(state)
@@ -609,13 +615,32 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     }
   }, [reloadTask])
 
-  // Продолжить: POST /api/task/resume + повторный запуск пайплайна
+  // Продолжить: POST /api/task/resume + повторный запуск пайплайна.
+  // Слот run глобальный — если стримится run другого диалога (taskRunning),
+  // resume НЕ теряем: ждём освобождения слота и только затем резюмируем
+  // (иначе состояние бэкенда рассинхронизируется с фронтендом). Если после
+  // ожидания задача уже не в paused/failed (устаревшее фронтенд-состояние),
+  // 400-гард бэкенда отклонит resume — перечитываем авторитетную задачу.
   const resumeTask = useCallback(async () => {
-    const id = stateRef.current.activeId
-    if (id == null) return
-    await apiPostTaskResume(id)
-    await reloadTask()
-    await runTask()
+    if (resumeInFlight.current) return
+    resumeInFlight.current = true
+    try {
+      const id = stateRef.current.activeId
+      if (id == null) return
+      // Ждём, пока run-слот свободен (чужой run может стримиться долго)
+      while (stateRef.current.taskRunning) {
+        await sleep(400)
+      }
+      await apiPostTaskResume(id)
+      await reloadTask()
+      await runTask()
+    } catch (err) {
+      // Задача уже не resumable (400) — синхронизируем состояние с бэкендом
+      console.error('resumeTask:', err)
+      await reloadTask()
+    } finally {
+      resumeInFlight.current = false
+    }
   }, [reloadTask, runTask])
 
   // Инструкция на паузе: POST /api/task/instruction

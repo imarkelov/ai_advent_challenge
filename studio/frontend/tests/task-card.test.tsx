@@ -82,6 +82,18 @@ function openSse(frames: string[]): Response {
   return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } })
 }
 
+// SSE, который закрывается через closeDelayMs — run «заканчивается»
+function delayedSse(frames: string[], closeDelayMs: number): Response {
+  const enc = new TextEncoder()
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (const f of frames) controller.enqueue(enc.encode(f))
+      setTimeout(() => controller.close(), closeDelayMs)
+    },
+  })
+  return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } })
+}
+
 // Проба: запускает пайплайн, когда загрузился активный диалог
 // (SSE /api/task/run остаётся открытым — taskRunning true)
 function RunProbe() {
@@ -457,6 +469,89 @@ describe('TaskCard — кнопки действий', () => {
     const btn = await screen.findByRole('button', { name: 'Повтор' })
     fireEvent.click(btn)
     await waitFor(() => expect(record).toContain('resume'))
+  })
+
+  it('resume, пока стримится чужой run: ждать слот, затем resume + run (не терять)', async () => {
+    // Сценарий: run другого диалога стримится (SSE открыт) → клик «Продолжить»
+    // не должен теряться: после освобождения слота — POST resume + run.
+    const PAUSED = makeTask({ stage: 'paused' })
+    const record: string[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = normalizeUrl(input)
+        const method = init?.method ?? 'GET'
+        if (method === 'POST' && url === '/api/task/run') {
+          record.push('run')
+          // run «другого диалога»: SSE открыт 600 мс, потом закрывается
+          return delayedSse(
+            ['data: {"type":"step_updated","index":1,"name":"B","status":"in_progress"}\n\n'],
+            600,
+          )
+        }
+        if (method === 'POST' && url === '/api/task/resume') {
+          record.push('resume')
+          return jsonResponse({ task: PAUSED })
+        }
+        if (url.startsWith('/api/task?')) return jsonResponse({ task: PAUSED })
+        if (url === '/api/dialogues') {
+          return jsonResponse({
+            active_id: 'd1',
+            dialogues: [{ id: 'd1', title: 'Д', created: '', message_count: 0, task: PAUSED }],
+          })
+        }
+        if (url === '/api/dialogues/d1') return jsonResponse({ dialogue: { messages: [] } })
+        return jsonResponse(API_FIXTURES[url] ?? { ok: true })
+      }),
+    )
+    render(
+      <StudioProvider>
+        <RunProbe />
+        <TaskCard task={PAUSED} live />
+      </StudioProvider>,
+    )
+    // первый run запущен, слот занят
+    await waitFor(() => expect(record.filter((x) => x === 'run').length).toBe(1))
+    const btn = await screen.findByRole('button', { name: 'Продолжить' })
+    fireEvent.click(btn)
+    await waitFor(() => expect(record).toContain('resume'), { timeout: 5000 })
+    await waitFor(
+      () => expect(record.filter((x) => x === 'run').length).toBe(2),
+      { timeout: 5000 },
+    )
+  })
+
+  it('зависшее состояние (execution, run нет): «Продолжить» → POST /api/task/run', async () => {
+    const record: string[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = normalizeUrl(input)
+        const method = init?.method ?? 'GET'
+        if (method === 'POST' && url === '/api/task/run') {
+          record.push('run')
+          return openSse([])
+        }
+        if (url === '/api/dialogues') {
+          return jsonResponse({
+            active_id: 'd1',
+            dialogues: [{ id: 'd1', title: 'Д', created: '', message_count: 0, task: LIVE_TASK }],
+          })
+        }
+        if (url === '/api/dialogues/d1') return jsonResponse({ dialogue: { messages: [] } })
+        return jsonResponse(API_FIXTURES[url] ?? { ok: true })
+      }),
+    )
+    render(
+      <StudioProvider>
+        <TaskCard task={LIVE_TASK} live />
+      </StudioProvider>,
+    )
+    await screen.findByText('Задача: Сделать кнопку')
+    // не выполняется — бейдж «Готово к запуску», но есть кнопка восстановления
+    expect(screen.getByText('Готово к запуску')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Продолжить' }))
+    await waitFor(() => expect(record).toContain('run'))
   })
 
   it('done — кнопок нет', async () => {

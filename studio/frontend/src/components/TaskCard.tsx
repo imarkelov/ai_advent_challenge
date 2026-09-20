@@ -183,7 +183,7 @@ export interface TaskCardProps {
 }
 
 export default function TaskCard({ task, live }: TaskCardProps) {
-  const { state, pauseTask, resumeTask } = useStudio()
+  const { state, pauseTask, resumeTask, runTask } = useStudio()
   const running = state.taskRunning && live
   const now = useNow(live)
   const liveStep = live ? state.taskLive : null
@@ -253,6 +253,12 @@ export default function TaskCard({ task, live }: TaskCardProps) {
             Повтор
           </button>
         )}
+        {live && task.stage && task.stage !== 'paused' && task.stage !== 'failed' &&
+          task.stage !== 'done' && !running && (
+            <button type="button" className="btn tc-btn" onClick={() => void runTask()}>
+              Продолжить
+            </button>
+          )}
       </div>
 
       <div className="task-card-progress" aria-label="Прогресс задачи">

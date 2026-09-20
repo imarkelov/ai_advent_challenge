@@ -163,7 +163,7 @@ export default function Sidebar() {
 
   return (
     <aside className="panel sidebar">
-      <div className="brand">◆ День 11</div>
+      <div className="brand">◆ День 13</div>
 
       <section className="side-block">
         <div className="side-title-row">
