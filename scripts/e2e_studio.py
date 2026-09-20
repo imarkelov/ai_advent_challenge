@@ -182,7 +182,8 @@ def _try_dialogues():
         return 0, b"", {}
 
 
-def _cleanup(dialogue_ids: list[str | None], orig_model: str | None) -> None:
+def _cleanup(dialogue_ids: list[str | None], orig_model: str | None,
+             inv_ids: list[str | None] | None = None) -> None:
     """Убрать артефакты самого e2e (не трогая данные пользователя)."""
     try:
         # День 13: сброс задач ДО удаления диалогов (reset 404 на
@@ -195,6 +196,10 @@ def _cleanup(dialogue_ids: list[str | None], orig_model: str | None) -> None:
             if dialogue_id:
                 http("DELETE", f"/api/dialogues/{dialogue_id}", timeout=10)
         http("DELETE", "/api/memory/longterm/e2e", timeout=10)
+        # День 14: инварианты — глобальные, чистим свои по id.
+        for inv_id in (inv_ids or []):
+            if inv_id:
+                http("DELETE", f"/api/invariants/{inv_id}", timeout=10)
         if orig_model:
             http("POST", "/api/config", {"model": orig_model}, timeout=10)
     except Exception:
@@ -274,6 +279,7 @@ def main() -> int:
     dlg3_id: str | None = None
     dlg4_id: str | None = None
     task_dlg_id: str | None = None
+    inv_id: str | None = None
     orig_model: str | None = None
     try:
         if proc is None:
@@ -441,6 +447,86 @@ def main() -> int:
             record("API: профиль dialogue", "FAIL", f"code={code}")
             return 1
 
+        # 7d. Инварианты (день 14): детерминированные эндпоинты CRUD +
+        #     блок в /api/rules + статистика в /api/memory — без GPustack.
+        #     Глобальный слой; свой ключ «e2e-inv» всегда чистится после.
+        code, body, _ = http("GET", "/api/invariants")
+        inv_before = json.loads(body).get("invariants", []) if code == 200 else None
+        if code == 200:
+            record(f"API: invariants GET ({len(inv_before)} originals)", "PASS")
+        else:
+            record("API: invariants GET", "FAIL", f"code={code}")
+            return 1
+
+        code, body, _ = http("POST", "/api/invariants",
+                             {"key": "e2e-inv", "value": "Kotlin"})
+        inv = json.loads(body).get("invariant", {}) if code == 201 else {}
+        created_id = inv.get("id")
+        if code == 201 and created_id and inv.get("key") == "e2e-inv":
+            inv_id = created_id
+            record(f"API: invariants POST ({created_id})", "PASS")
+        else:
+            record("API: invariants POST", "FAIL",
+                   f"code={code} body={body[:120]!r}")
+            return 1
+
+        code, body, _ = http("GET", "/api/invariants")
+        inv_list = json.loads(body).get("invariants", []) if code == 200 else []
+        in_rules = any(inv.get("id") == inv_id for inv in inv_list
+                       if inv.get("key") == "e2e-inv")
+        if code == 200 and in_rules:
+            record("API: invariants GET содержит добавленный", "PASS")
+        else:
+            record("API: invariants GET содержит добавленный", "FAIL",
+                   f"code={code} found={in_rules}")
+            return 1
+
+        # /api/rules → invariants_block с key/value
+        code, body, _ = http("GET", "/api/rules")
+        rules = json.loads(body)
+        iblock = rules.get("invariants_block", "")
+        if code == 200 and "e2e-inv" in iblock and "Kotlin" in iblock:
+            record("API: invariants в /api/rules (block)", "PASS")
+        else:
+            record("API: invariants в /api/rules (block)", "FAIL",
+                   f"code={code} block={iblock!r}")
+            return 1
+
+        # /api/memory → invariants в layer_stats
+        code, body, _ = http("GET", "/api/memory")
+        inv_stats = json.loads(body).get("invariants", {})
+        if code == 200 and inv_stats.get("entries", 0) >= 1:
+            record(f"API: invariants в /api/memory (entries={inv_stats.get('entries')})",
+                   "PASS")
+        else:
+            record("API: invariants в /api/memory", "FAIL",
+                   f"code={code} stats={inv_stats}")
+            return 1
+
+        # Валидация 400: пустой value
+        code, _, _ = http("POST", "/api/invariants",
+                          {"key": "e2e-inv", "value": ""})
+        if code == 400:
+            record("API: invariants POST (пустое значение → 400)", "PASS")
+        else:
+            record("API: invariants POST (пустое значение → 400)", "FAIL",
+                   f"code={code}")
+            return 1
+
+        # Удаление существующего → 200; несуществующего → 404
+        code, _, _ = http("DELETE", f"/api/invariants/{inv_id}")
+        code2, body, _ = http("GET", "/api/invariants")
+        inv_after = json.loads(body).get("invariants", []) if code2 == 200 else []
+        gone = not any(inv.get("id") == inv_id for inv in inv_after)
+        code3, _, _ = http("DELETE", f"/api/invariants/{inv_id}")
+        if code == 200 and gone and code3 == 404:
+            record("API: invariants DELETE (200) + повтор (404)", "PASS")
+            inv_id = None
+        else:
+            record("API: invariants DELETE (200) + повтор (404)", "FAIL",
+                   f"del={code} gone={gone} del2={code3}")
+            return 1
+
         # 8. чат (SSE) — SKIP, если GPustack недоступен
         skip_reason = probe_gpustack()
         if skip_reason:
@@ -588,6 +674,50 @@ def main() -> int:
                        f"block3={ok3} block4={ok4} guard={okt} "
                        f"a3={a3[:40]!r} a4={a4[:40]!r}")
                 return 1
+
+            # 8c.2 Инварианты live (день 14): добавлен инвариант → запрос,
+            #     содержащий его ключ и противоречащее значение → server-side
+            #     гард добавляет system-напоминание в тело LLM-запроса
+            #     (детерминированно, до LLM). Само напоминание проверяется в
+            #     журнале — как у табу-гарда (8c) и конфликта памяти (день 11).
+            code, body, _ = http("POST", "/api/invariants",
+                                 {"key": "e2e-inv", "value": "Kotlin"})
+            live_inv = json.loads(body).get("invariant", {}) if code == 201 else {}
+            live_inv_id = live_inv.get("id")
+            if live_inv_id:
+                inv_id = live_inv_id
+            _, rawinv, _ = http("POST", "/api/chat",
+                                {"dialogue_id": dlg3_id,
+                                 "message":
+                                     "e2e-inv — напиши на Python"},
+                                timeout=CHAT_TIMEOUT)
+            dones_inv = parse_sse(rawinv)[1]
+            # журнал: найти последний запрос, в system-сообщениях которого
+            # есть напоминание об инварианте
+            code, body, _ = http("GET", "/api/requests")
+            inv_req_ids = [r["id"] for r in json.loads(body)
+                           .get("requests", [])][-2:]
+            inv_reminder = False
+            for rid in inv_req_ids:
+                code, body, _ = http("GET", f"/api/requests/{rid}")
+                if code != 200:
+                    continue
+                msgs = json.loads(body).get("request", {}).get("messages", [])
+                sys_txt = " ".join(m.get("content", "") for m in msgs
+                                   if m.get("role") == "system")
+                if "инвариант" in sys_txt and "e2e-inv" in sys_txt:
+                    inv_reminder = True
+                    break
+            if dones_inv and inv_reminder:
+                record("API: инварианты live (гард → system-напоминание)",
+                       "PASS")
+            else:
+                record("API: инварианты live (гард → system-напоминание)",
+                       "FAIL",
+                       f"dones={len(dones_inv)} reminder={inv_reminder}")
+                return 1
+            code, _, _ = http("DELETE", f"/api/invariants/{live_inv_id}")
+            inv_id = None
 
         # 8d. Задача (день 13b): пошаговый пайплайн — SKIP, если GPustack
         #     недоступен (задача ходит в LLM, как и чат).
@@ -975,7 +1105,7 @@ def main() -> int:
         return 1 if fails else 0
     finally:
         _cleanup([dlg_id, dlg2_id, prof_dlg_id, dlg3_id, dlg4_id,
-                  task_dlg_id], orig_model)
+                  task_dlg_id], orig_model, inv_ids=[inv_id])
         stop_server(proc)
 
 
