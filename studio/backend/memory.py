@@ -109,6 +109,14 @@ def _current_stage_of(t: dict) -> str | None:
     return None
 
 
+def _used_task_of(d: dict) -> bool:
+    """«Задача использовалась»: персистентный флаг used_task; для
+    legacy-записей (задача до появления флага) — наличие task_id."""
+    if d.get("used_task"):
+        return True
+    return bool((d.get("task") or {}).get("task_id"))
+
+
 class MemoryStore:
     """Хранилище трёх слоёв памяти с файловым персистентным бэкендом."""
 
@@ -183,7 +191,7 @@ class MemoryStore:
             return [{"id": d["id"], "title": d.get("title", ""),
                       "created": d.get("created", ""),
                       "message_count": len(d.get("messages", [])),
-                      "used_task": bool(d.get("used_task", False)),
+                      "used_task": _used_task_of(d),
                       "profile": self._profile_of(d),
                       "task": self._task_of(d)}
                      for d in data["dialogues"]]
@@ -198,6 +206,7 @@ class MemoryStore:
             return {"id": d["id"], "title": d.get("title", ""),
                     "created": d.get("created", ""),
                     "messages": list(d.get("messages", [])),
+                    "used_task": _used_task_of(d),
                     "profile": self._profile_of(d),
                     "task": self._task_of(d)}
 

@@ -527,6 +527,25 @@ class TestTaskStorage13b:
         assert lst[self.did]["used_task"] is True
         assert lst[d2]["used_task"] is False
 
+    def test_used_task_backfill_legacy_record(self):
+        """Legacy: задача создана до появления флага (в записи used_task
+        нет, но есть task_id) — в list и get флаг True (бэклокфилл)."""
+        with self.s._lock:
+            data = self.s._read_dialogues()
+            d = self.s._find(data, self.did)
+            d["task"] = {"active": True, "task_id": "t_abc123",
+                         "stage": "done", "current_step": 4,
+                         "total_steps": 4, "expected_action": None,
+                         "plan": [], "work_steps": [],
+                         "context_snapshot": None, "description": "x",
+                         "instruction": "", "retries": 0, "error": None,
+                         "updated": None}
+            self.s._write_dialogues(data)
+        assert "used_task" not in self._raw_dialogue(self.did)  # флаг не записан
+        lst = next(x for x in self.s.list_dialogues() if x["id"] == self.did)
+        assert lst["used_task"] is True
+        assert self.s.get_dialogue(self.did)["used_task"] is True
+
     def test_task_new_after_done_is_new_task(self):
         t1 = self.s.task_new(self.did, "а")
         self.s.task_spawn_stage(self.did, "planning")
