@@ -676,6 +676,19 @@ class StudioAgent:
 
     # ---------- задача: оркестратор stage-агентов (день 13) ----------
 
+    def _task_system(self, base: str) -> str:
+        """К системному промпту стадии задачи добавить блок инвариантов +
+        правило (день 14). Инварианты глобальны и должны действовать и в
+        task-режиме, не только в чате: stage-промпты берутся из состояния
+        задачи и в инвариантных ограничениях не нуждаются отдельно."""
+        inv = self.build_invariants_block()
+        if not inv:
+            return base
+        # Тот же порядок, что в chat build_payload: блок активных
+        # инвариантов → INVARIANTS_RULE в самом конце (наиболее влияет
+        # на ответ модели).
+        return base + "\n\n" + inv + INVARIANTS_RULE
+
     def build_task_state_block(self, t: dict, stage: str,
                                step: str | None = None,
                                instruction: str = "",
@@ -838,9 +851,10 @@ class StudioAgent:
                 try:
                     output, usage = self._task_llm_call(
                         cfg,
-                        TASK_PLAN_PROMPT
-                        + self.build_task_state_block(t, "planning",
-                                                       instruction=instruction),
+                        self._task_system(
+                            TASK_PLAN_PROMPT
+                            + self.build_task_state_block(t, "planning",
+                                                           instruction=instruction)),
                         TASK_STAGE_USER["planning"])
                 except Exception as e:
                     self.store.task_set_failed(dialogue_id,
@@ -888,11 +902,12 @@ class StudioAgent:
                         usage = None
                         for kind, payload in self._task_llm_stream(
                                 cfg,
-                                TASK_EXEC_STEP_PROMPT.format(step=ws["name"])
-                                + self.build_task_state_block(
-                                    t, "execution", step=ws["name"],
-                                    instruction=instruction,
-                                    feedback=feedback),
+                                self._task_system(
+                                    TASK_EXEC_STEP_PROMPT.format(step=ws["name"])
+                                    + self.build_task_state_block(
+                                        t, "execution", step=ws["name"],
+                                        instruction=instruction,
+                                        feedback=feedback)),
                                 "Выполни шаг плана: " + ws["name"]):
                             if kind == "delta":
                                 parts.append(payload)
@@ -943,9 +958,10 @@ class StudioAgent:
                 try:
                     output, usage = self._task_llm_call(
                         cfg,
-                        TASK_VALIDATION_PROMPT
-                        + self.build_task_state_block(t, "validation",
-                                                       instruction=instruction),
+                        self._task_system(
+                            TASK_VALIDATION_PROMPT
+                            + self.build_task_state_block(t, "validation",
+                                                           instruction=instruction)),
                         TASK_STAGE_USER["validation"])
                 except Exception as e:
                     self.store.task_set_failed(dialogue_id,
@@ -987,9 +1003,10 @@ class StudioAgent:
                 try:
                     answer, usage = self._task_llm_call(
                         cfg,
-                        TASK_DONE_PROMPT
-                        + self.build_task_state_block(t, "done",
-                                                       instruction=instruction),
+                        self._task_system(
+                            TASK_DONE_PROMPT
+                            + self.build_task_state_block(t, "done",
+                                                           instruction=instruction)),
                         TASK_STAGE_USER["done"])
                 except Exception as e:
                     self.store.task_set_failed(dialogue_id,
@@ -997,6 +1014,19 @@ class StudioAgent:
                     yield {"type": "task_failed",
                            "message": f"Ошибка финального синтеза: {e}"}
                     return
+                # День 14: post-guard (L1) на финальный синтез. Stage/шаги
+                # до него — тоже LLM-входы, но нарушение инварианта в них
+                # ловится на финальном ответе (то, что реально уходит в
+                # ленту как bubble): запрещённый паттерн заменяется отказом,
+                # перед task_done отдаётся invariant_violation.
+                hits = self._postcheck_invariants(answer)
+                violation = bool(hits)
+                if violation:
+                    answer = ("Не могу выполнить: это нарушит инвариант. "
+                              f"Нарушающее содержимое: {', '.join(hits)}. "
+                              "Инварианты — жёсткие неизменяемые правила, я "
+                              "обязан их соблюдать. Предложи альтернативу в "
+                              "рамках инвариантов.")
                 t2 = self.store.task_stage_done(dialogue_id, "done", answer,
                                                 usage=usage)
                 de = next(e for e in t2["plan"] if e["agent"] == "done")
@@ -1008,6 +1038,8 @@ class StudioAgent:
                                           task_duration=de["duration_s"])
                 yield {"type": "stage_done", "stage": "done",
                        "output": answer, "usage": usage}
+                if violation:
+                    yield {"type": "invariant_violation", "patterns": hits}
                 yield {"type": "task_done", "answer": answer}
                 return
 

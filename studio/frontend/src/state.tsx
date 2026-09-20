@@ -619,6 +619,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         } else if (e.type === 'stage_done' || e.type === 'task_paused'
             || e.type === 'task_resumed') {
           void reloadTask().catch((err) => console.error('reloadTask:', err))
+        } else if (e.type === 'invariant_violation') {
+          // нарушение активного инварианта (до task_done): бейдж в шапке чата
+          dispatch({ type: 'invariant-violation', patterns: e.patterns })
         } else if (e.type === 'task_done') {
           // Финальный ответ — НОВОЕ assistant-сообщение (bubble под карточкой)
           dispatch({

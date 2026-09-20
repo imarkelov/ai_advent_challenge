@@ -1731,3 +1731,68 @@ class TestTaskRun13b:
         assert calls  # и stage-вызовы, и stream-вызовы work-шага
         assert all(c["body"].get("chat_template_kwargs")
                    == {"enable_thinking": False} for c in calls)
+
+    def test_task_stages_inject_invariants_rule(self, data_dir):
+        """День 14: task-режим. Stage-промпты (planning/execution/
+        validation/done) получают блок инвариантов и INVARIANTS_RULE — как
+        чат build_payload. Инварианты глобальны (is_active), тумблеры слоёв
+        их не отключают."""
+        handler, calls = make_task_handler(["A"], {"A": "Результат шага A"})
+        agent, did = self._setup(data_dir, handler)
+        agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+        self.run_all(agent, did)
+        assert calls
+        # planning + execution(stream) + validation + done
+        assert len(calls) >= 4
+        for c in calls:
+            assert "Инварианты (неукоснительно):" in c["system"]
+            assert "- Стек: Kotlin" in c["system"]
+            assert INVARIANTS_RULE in c["system"]
+
+    def test_task_stages_skip_invariants_when_empty(
+            self, data_dir):
+        """День 14: без активных инвариантов task-промпты не содержат
+        ни блока, ни INVARIANTS_RULE (нет лишних токенов)."""
+        handler, calls = make_task_handler(["A"], {"A": "Результат шага A"})
+        agent, did = self._setup(data_dir, handler)
+        self.run_all(agent, did)
+        assert calls
+        assert all("Инварианты (неукоснительно):" not in c["system"]
+                   for c in calls)
+        assert all(INVARIANTS_RULE not in c["system"] for c in calls)
+
+    def test_task_done_postguard_replaces_violation(self, data_dir):
+        """День 14: финальный синтез (done) с forbidden-паттерном
+        активного инварианта заменяется отказом + событие
+        invariant_violation перед task_done (как чат ask_stream)."""
+        handler, calls = make_task_handler(
+            ["A"], {"A": "Результат шага A"},
+            done_output="Итог: используем python для всего.")
+        agent, did = self._setup(data_dir, handler)
+        agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+        events = self.run_all(agent, did)
+        types = self.event_types(events)
+        assert "invariant_violation" in types
+        viol = next(e for e in events if e["type"] == "invariant_violation")
+        assert viol["patterns"] == ["python"]
+        done = next(e for e in events if e["type"] == "task_done")
+        assert "нарушит инвариант" in done["answer"]
+        assert "python" in done["answer"]
+        # сохранённый маркер финального синтеза — ответ-отказ
+        msgs = agent.store.get_messages(did)
+        last = [m for m in msgs if not m.get("task_stage")][-1]
+        assert "нарушит инвариант" in last["content"]
+
+    def test_task_done_no_violation_when_inactive(self, data_dir):
+        """День 14: готовый ответ с forbidden-паттерном НЕ активного
+        инварианта (is_active=false) проходит без гарда."""
+        handler, calls = make_task_handler(
+            ["A"], {"A": "Результат шага A"},
+            done_output="Отлично, python — наше всё.")
+        agent, did = self._setup(data_dir, handler)
+        r = agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+        agent.store.invariants_set_active(r["id"], False)
+        events = self.run_all(agent, did)
+        assert "invariant_violation" not in self.event_types(events)
+        done = next(e for e in events if e["type"] == "task_done")
+        assert done["answer"] == "Отлично, python — наше всё."
