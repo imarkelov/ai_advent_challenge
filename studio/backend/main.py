@@ -99,7 +99,9 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
     @app.post("/api/task/start")
     def task_start(body: dict):
         """Создать задачу: {dialogue_id, description}. 400 — пустое описание
-        или уже есть активная задача; 404 — диалог."""
+        или уже есть незавершённая задача; 404 — диалог. User-сообщение-
+        запрос сохраняется с маркером task_id (якорь карточки процесса).
+        При завершённой задаче (done/failed) — новая задача."""
         dialogue_id = body.get("dialogue_id")
         description = body.get("description")
         if not isinstance(dialogue_id, str) or not dialogue_id:
@@ -110,6 +112,8 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
             raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
         try:
             t = agent.store.task_new(dialogue_id, description.strip())
+            agent.store.append_message(dialogue_id, "user",
+                                       description.strip(), task_id=t["task_id"])
         except ValueError as e:
             raise HTTPException(400, str(e))
         return {"task": t}

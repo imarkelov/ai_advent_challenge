@@ -473,10 +473,10 @@ def test_profile_action_unknown_dialogue_404(client):
     assert r.status_code == 404
 
 
-# ---------- задача: FSM + stage-агенты (день 13) ----------
+# ---------- задача: новая семантика start/run (день 13b) ----------
 
 def task_dialogue(client):
-    """Диалог с declined-профилем (день 12) и активной задачей."""
+    """Диалог с declined-профилем (день 12) и активной задачей (start)."""
     did = client.post("/api/dialogues").json()["dialogue"]["id"]
     client.post("/api/profile/action",
                 json={"dialogue_id": did, "action": "decline"})
@@ -486,105 +486,165 @@ def task_dialogue(client):
     return did
 
 
-def test_task_start_and_get(client):
-    r = client.post("/api/task/start",
-                    json={"dialogue_id": "nope", "description": "X"})
-    assert r.status_code == 404
-    r = client.post("/api/task/start",
-                    json={"dialogue_id": "x", "description": "  "})
-    assert r.status_code == 400
-    did = client.post("/api/dialogues").json()["dialogue"]["id"]
-    r = client.post("/api/task/start",
-                    json={"dialogue_id": did, "description": "Сделать кнопку"})
-    assert r.status_code == 200
-    assert r.json()["task"]["stage"] == "planning"
-    r = client.get("/api/task", params={"dialogue_id": did})
-    assert r.json()["task"]["description"] == "Сделать кнопку"
-    # task в выдаче диалогов
-    assert client.get("/api/dialogues").json()["dialogues"][0]["task"]["active"] is True
-    assert client.get(f"/api/dialogues/{did}").json()["dialogue"]["task"]["active"] is True
-
-
-def test_task_start_rejects_active(client):
-    did = task_dialogue(client)
-    r = client.post("/api/task/start",
-                    json={"dialogue_id": did, "description": "Ещё"})
-    assert r.status_code == 400
-
-
-def test_task_run_sse_cycle(client):
-    did = task_dialogue(client)
+def run_task(client, did):
+    """POST /api/task/run: разобрать SSE-кадры в список событий."""
     with client.stream("POST", "/api/task/run",
                        json={"dialogue_id": did}) as resp:
         assert resp.status_code == 200
-        lines = resp.iter_lines()
-        events = parse_sse(list(lines))
-    kinds = [(e["type"], e.get("stage")) for e in events]
-    assert ("stage", "planning") in kinds
-    assert ("stage", "execution") in kinds
-    assert ("stage", "validation") in kinds
-    assert events[-1]["type"] == "task_done"
-    t = client.get("/api/task", params={"dialogue_id": did}).json()["task"]
-    assert t["stage"] == "done"
-    # stage-сообщения с меткой в истории диалога
-    msgs = client.get(f"/api/dialogues/{did}").json()["dialogue"]["messages"]
-    assert [m["task_stage"] for m in msgs if m.get("task_stage")] == \
-        ["planning", "execution", "validation"]
-
-
-def test_task_run_requires_active(client):
-    did = client.post("/api/dialogues").json()["dialogue"]["id"]
-    r = client.post("/api/task/run", json={"dialogue_id": did})
-    assert r.status_code == 400
+        return parse_sse(list(resp.iter_lines()))
 
 
 def task_done_dialogue(client):
     """Диалог с завершённой задачей (пайплайн доведён до task_done)."""
     did = task_dialogue(client)
-    with client.stream("POST", "/api/task/run",
-                       json={"dialogue_id": did}) as resp:
-        events = parse_sse(list(resp.iter_lines()))
-    assert events[-1]["type"] == "task_done"
+    assert run_task(client, did)[-1]["type"] == "task_done"
     return did
 
 
-def test_task_run_rejects_done(client):
+def test_start_returns_task_with_id_and_user_message(client, dialogue_id):
+    r = client.post("/api/task/start",
+                    json={"dialogue_id": dialogue_id, "description": "Сделать кнопку"})
+    assert r.status_code == 200
+    t = r.json()["task"]
+    assert t["active"] is True
+    assert t["task_id"].startswith("t_")
+    assert t["stage"] == "planning"
+    assert len(t["plan"]) == 4
+    # user-сообщение-запрос — якорь карточки с маркером task_id
+    d = client.get(f"/api/dialogues/{dialogue_id}").json()["dialogue"]
+    first = d["messages"][0]
+    assert first["role"] == "user"
+    assert first["content"] == "Сделать кнопку"
+    assert first["task_id"] == t["task_id"]
+
+
+def test_start_rejects_active(client, dialogue_id):
+    client.post("/api/task/start",
+                json={"dialogue_id": dialogue_id, "description": "X"})
+    r = client.post("/api/task/start",
+                    json={"dialogue_id": dialogue_id, "description": "Y"})
+    assert r.status_code == 400
+    assert "уже активна" in r.json()["detail"]
+
+
+def test_start_after_done_is_new(client, dialogue_id):
+    did = task_dialogue(client)
+    tid1 = client.get("/api/task",
+                      params={"dialogue_id": did}).json()["task"]["task_id"]
+    assert run_task(client, did)[-1]["type"] == "task_done"
+    r = client.post("/api/task/start",
+                    json={"dialogue_id": did, "description": "Новая"})
+    assert r.status_code == 200
+    t2 = r.json()["task"]
+    assert t2["task_id"] != tid1
+    assert t2["stage"] == "planning"
+    # в диалоге — 2 user-сообщения с разными task_id
+    msgs = client.get(f"/api/dialogues/{did}").json()["dialogue"]["messages"]
+    user_tids = [m["task_id"] for m in msgs if m["role"] == "user"]
+    assert user_tids == [tid1, t2["task_id"]]
+
+
+def test_start_empty_description(client, dialogue_id):
+    r = client.post("/api/task/start",
+                    json={"dialogue_id": dialogue_id, "description": "  "})
+    assert r.status_code == 400
+    assert "не может быть пустым" in r.json()["detail"]
+
+
+def test_start_unknown_dialogue(client):
+    r = client.post("/api/task/start",
+                    json={"dialogue_id": "nope", "description": "X"})
+    assert r.status_code == 404
+    assert "не найден" in r.json()["detail"]
+
+
+def test_run_without_task(client, dialogue_id):
+    r = client.post("/api/task/run", json={"dialogue_id": dialogue_id})
+    assert r.status_code == 400
+    assert r.json()["detail"] == "Задача не активна"
+
+
+def test_run_on_done(client):
     did = task_done_dialogue(client)
     r = client.post("/api/task/run", json={"dialogue_id": did})
     assert r.status_code == 400
     assert r.json()["detail"] == "Задача завершена"
 
 
-def test_task_pause_rejects_done(client):
-    did = task_done_dialogue(client)
-    r = client.post("/api/task/pause", json={"dialogue_id": did})
-    assert r.status_code == 400
-    assert r.json()["detail"] == "Задача уже завершена"
-
-
-def test_task_pause_resume_instruction(client):
+def test_run_full_sse(client):
     did = task_dialogue(client)
-    assert client.post("/api/task/resume",
-                       json={"dialogue_id": did}).status_code == 400
-    # instruction вне паузы — 400
-    assert client.post("/api/task/instruction",
-                       json={"dialogue_id": did, "text": "x"}).status_code == 400
-    assert client.post("/api/task/pause",
-                       json={"dialogue_id": did}).status_code == 200
+    events = run_task(client, did)
+    seq = [(e["type"], e.get("stage")) for e in events]
+    assert seq[0] == ("agent_spawned", "planning")
+    assert ("stage_done", "planning") in seq
+    assert ("agent_spawned", "execution") in seq
+    assert ("step_updated", None) in seq
+    assert ("step_delta", None) in seq
+    assert ("agent_spawned", "validation") in seq
+    assert ("stage_done", "validation") in seq
+    assert ("agent_spawned", "done") in seq
+    assert ("stage_done", "done") in seq
+    assert events[-1]["type"] == "task_done"
+    # stage-сообщения с маркерами в истории диалога
+    msgs = client.get(f"/api/dialogues/{did}").json()["dialogue"]["messages"]
+    assert [m["task_stage"] for m in msgs if m.get("task_stage")] == \
+        ["planning", "execution", "validation"]
+    t = client.get("/api/task", params={"dialogue_id": did}).json()["task"]
+    assert t["stage"] == "done"
+
+
+def test_pause_resume(client, agent_env):
+    did = task_dialogue(client)
+    agent_env.store.task_pause(did)
+    events = run_task(client, did)
+    assert events[-1] == {"type": "task_paused", "stage": "paused"}
+    t = client.get("/api/task", params={"dialogue_id": did}).json()["task"]
+    assert t["stage"] == "paused"
     r = client.post("/api/task/instruction",
                     json={"dialogue_id": did, "text": "Используй Kotlin"})
     assert r.status_code == 200
     assert r.json()["task"]["instruction"] == "Используй Kotlin"
     assert client.post("/api/task/resume",
                        json={"dialogue_id": did}).status_code == 200
-    # run на паузе снята: пайплайн доходит до done
-    with client.stream("POST", "/api/task/run",
-                       json={"dialogue_id": did}) as resp:
-        events = parse_sse(list(resp.iter_lines()))
+    events = run_task(client, did)
     assert events[-1]["type"] == "task_done"
-    # instruction попала в planning-промпт (видна в body-запросах)
-    # и очищена
-    assert client.get("/api/task", params={"dialogue_id": did}).json()["task"]["instruction"] == ""
+    t = client.get("/api/task", params={"dialogue_id": did}).json()["task"]
+    assert t["stage"] == "done" and t["instruction"] == ""
+
+
+def test_instruction_rejected_outside_pause(client, dialogue_id):
+    did = task_dialogue(client)
+    r = client.post("/api/task/instruction",
+                    json={"dialogue_id": did, "text": "x"})
+    assert r.status_code == 400
+    assert "только на паузе" in r.json()["detail"]
+
+
+def test_chat_guard_during_run(client, agent_env):
+    did = task_dialogue(client)
+    r = client.post("/api/chat", json={"dialogue_id": did, "message": "привет"})
+    assert r.status_code == 200  # SSE; внутри — error-событие
+    assert "Задача выполняется" in r.text
+    # user-сообщение чата в диалог НЕ добавлено
+    msgs = client.get(f"/api/dialogues/{did}").json()["dialogue"]["messages"]
+    assert all(m.get("content") != "привет" for m in msgs)
+    # на paused — гард не срабатывает
+    agent_env.store.task_pause(did)
+    r2 = client.post("/api/chat", json={"dialogue_id": did, "message": "привет"})
+    assert '"type": "done"' in r2.text
+
+
+def test_task_in_dialogues_output(client, dialogue_id):
+    client.post("/api/task/start",
+                json={"dialogue_id": dialogue_id, "description": "X"})
+    d = client.get("/api/dialogues").json()["dialogues"][0]
+    t = d["task"]
+    assert t["active"] is True
+    assert t["task_id"].startswith("t_")
+    assert isinstance(t["plan"], list) and len(t["plan"]) == 4
+    assert isinstance(t["work_steps"], list)
+    d2 = client.get(f"/api/dialogues/{dialogue_id}").json()["dialogue"]
+    assert d2["task"]["task_id"] == t["task_id"]
 
 
 def test_task_reset(client):
@@ -592,7 +652,7 @@ def test_task_reset(client):
     assert client.post("/api/task/reset",
                        json={"dialogue_id": did}).status_code == 200
     t = client.get("/api/task", params={"dialogue_id": did}).json()["task"]
-    assert t["active"] is False
+    assert t["active"] is False and t["task_id"] is None
     # после reset — новая задача
     r = client.post("/api/task/start",
                     json={"dialogue_id": did, "description": "Новая"})
@@ -600,13 +660,52 @@ def test_task_reset(client):
     assert r.json()["task"]["description"] == "Новая"
 
 
-def test_chat_blocked_by_active_task(client):
-    did = task_dialogue(client)
-    r = client.post("/api/chat", json={"dialogue_id": did, "message": "привет"})
-    assert r.status_code == 200  # SSE; внутри — error-событие
-    text = r.text
-    assert "Задача выполняется" in text
-    # на паузе чат работает
-    client.post("/api/task/pause", json={"dialogue_id": did})
-    r2 = client.post("/api/chat", json={"dialogue_id": did, "message": "привет"})
-    assert '"type": "done"' in r2.text
+def test_run_on_failed_retries(tmp_path):
+    """500 на первом run (Исполнитель) → task_failed; повторный run
+    (mock healthy) → SSE: task_resumed → … → task_done."""
+    state = {"fail": True}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [{"id": "qwen3.8-27b"}]})
+        payload = json.loads(request.content)
+        if state["fail"]:
+            system = (payload["messages"][0] or {}).get("content", "")
+            if "Исполнитель" in system:
+                return httpx.Response(500, text="boom") \
+                    if payload.get("stream") \
+                    else httpx.Response(500, json={"error": "boom"})
+        if "stream" not in payload:
+            return httpx.Response(200, json={"choices": [
+                {"message": {"content": "OK"}}]})
+        body = sse_body([delta_chunk("Р"), usage_chunk(), "[DONE]"])
+        return httpx.Response(200, content=body.encode("utf-8"))
+
+    d = tmp_path / "d"
+    d.mkdir()
+    agent = StudioAgent(str(d), base_url="https://mock.local/v1",
+                        api_key="test-key",
+                        client=httpx.Client(transport=httpx.MockTransport(handler)))
+    from main import create_app
+    c = TestClient(create_app(agent))
+    did = c.post("/api/dialogues").json()["dialogue"]["id"]
+    c.post("/api/profile/action",
+           json={"dialogue_id": did, "action": "decline"})
+    r = c.post("/api/task/start",
+               json={"dialogue_id": did, "description": "Сделать кнопку"})
+    assert r.status_code == 200
+    with c.stream("POST", "/api/task/run",
+                  json={"dialogue_id": did}) as resp:
+        events = parse_sse(list(resp.iter_lines()))
+    assert events[-1]["type"] == "task_failed"
+    t = c.get("/api/task", params={"dialogue_id": did}).json()["task"]
+    assert t["stage"] == "failed" and t["error"]
+    # повтор: mock здоров
+    state["fail"] = False
+    with c.stream("POST", "/api/task/run",
+                  json={"dialogue_id": did}) as resp:
+        events = parse_sse(list(resp.iter_lines()))
+    assert events[0]["type"] == "task_resumed"
+    assert events[-1]["type"] == "task_done"
+    t = c.get("/api/task", params={"dialogue_id": did}).json()["task"]
+    assert t["stage"] == "done"
