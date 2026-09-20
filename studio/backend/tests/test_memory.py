@@ -399,145 +399,286 @@ class TestProfile:
         assert self.s.get_dialogue(d["id"])["profile"]["status"] == "pending"
 
 
-class TestTaskStorage:
+class TestTaskStorage13b:
     def setup_method(self):
         import tempfile
         self.d = tempfile.TemporaryDirectory()
         self.s = MemoryStore(self.d.name)
+        self.did = self.s.new_dialogue()["id"]
 
     def teardown_method(self):
         self.d.cleanup()
 
-    def test_old_dialogue_task_inactive(self):
-        d = self.s.new_dialogue()
-        t = self.s.task_get(d["id"])
-        assert t["active"] is False
-        assert t["stage"] is None
-        assert self.s.get_dialogue(d["id"])["task"]["active"] is False
+    # ---- бэкворд-совместимость ----
 
-    def test_task_new_sets_planning(self):
-        d = self.s.new_dialogue()
-        t = self.s.task_new(d["id"], "Сделай сайт")
+    def test_no_task_field_is_inactive(self):
+        t = self.s.task_get(self.did)
+        assert t["active"] is False
+        assert t["task_id"] is None
+        assert t["plan"] == []
+        assert t["stage"] is None
+
+    def test_old_schema_without_task_id_is_inactive(self):
+        # запись дня 13 (без task_id, со stages) читается как неактивная
+        with self.s._lock:
+            data = self.s._read_dialogues()
+            d = self.s._find(data, self.did)
+            d["task"] = {"active": True, "stage": "execution", "paused": False,
+                         "description": "old", "instruction": "",
+                         "stages": {"planning": {"output": "x", "ts": "…", "verdict": None}},
+                         "retries": 0, "error": None, "updated": None}
+            self.s._write_dialogues(data)
+        assert self.s.task_get(self.did)["active"] is False
+
+    # ---- task_new ----
+
+    def test_task_new_creates_planning(self):
+        t = self.s.task_new(self.did, "Сделать план")
         assert t["active"] is True
         assert t["stage"] == "planning"
-        assert t["paused"] is False
-        assert t["description"] == "Сделай сайт"
-        assert t["stages"] == {}
-        assert t["retries"] == 0
+        assert t["current_step"] == 1 and t["total_steps"] == 4
+        assert t["expected_action"] == "agent_response"
+        assert t["task_id"].startswith("t_")
+        assert [e["agent"] for e in t["plan"]] == ["planning", "execution", "validation", "done"]
+        assert all(e["status"] == "pending" for e in t["plan"])
+        assert t["work_steps"] == []
+        assert t["context_snapshot"] is None
 
     def test_task_new_rejects_active(self):
-        import pytest
-        d = self.s.new_dialogue()
-        self.s.task_new(d["id"], "Задача 1")
-        with pytest.raises(ValueError):
-            self.s.task_new(d["id"], "Задача 2")
-        assert self.s.task_get(d["id"])["description"] == "Задача 1"
+        self.s.task_new(self.did, "а")
+        try:
+            self.s.task_new(self.did, "б")
+            assert False, "ожидался ValueError"
+        except ValueError as e:
+            assert "уже активна" in str(e)
 
-    def test_task_stage_done_advances_forward(self):
-        d = self.s.new_dialogue()
-        self.s.task_new(d["id"], "X")
-        t = self.s.task_stage_done(d["id"], "planning", "1. шаг")
-        assert t["stage"] == "execution"
-        assert t["stages"]["planning"]["output"] == "1. шаг"
-        t = self.s.task_stage_done(d["id"], "execution", "код")
-        assert t["stage"] == "validation"
-        assert t["stages"]["execution"]["attempts"] == 1
-        t = self.s.task_stage_done(d["id"], "validation", "ок", verdict="pass")
-        assert t["stage"] == "done"
-        assert t["stages"]["validation"]["verdict"] == "pass"
+    def test_task_new_after_done_is_new_task(self):
+        t1 = self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        self.s.task_stage_done(self.did, "planning", "план")
+        self.s.task_spawn_stage(self.did, "execution")
+        self.s.task_stage_done(self.did, "execution", "работа")
+        self.s.task_spawn_stage(self.did, "validation")
+        self.s.task_stage_done(self.did, "validation", "ок", "pass")
+        self.s.task_spawn_stage(self.did, "done")
+        self.s.task_stage_done(self.did, "done", "итог")
+        assert self.s.task_get(self.did)["stage"] == "done"
+        t2 = self.s.task_new(self.did, "б")
+        assert t2["task_id"] != t1["task_id"]
+        assert t2["stage"] == "planning" and t2["description"] == "б"
 
-    def test_task_stage_done_rejects_wrong_stage(self):
-        import pytest
-        d = self.s.new_dialogue()
-        self.s.task_new(d["id"], "X")
-        with pytest.raises(ValueError):
-            self.s.task_stage_done(d["id"], "execution", "прыжок")
-        assert self.s.task_get(d["id"])["stage"] == "planning"
+    def test_task_new_after_failed_is_new_task(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        self.s.task_set_failed(self.did, "сбой")
+        t2 = self.s.task_new(self.did, "б")
+        assert t2["active"] is True and t2["stage"] == "planning"
 
-    def test_task_retry_execution(self):
-        import pytest
-        d = self.s.new_dialogue()
-        self.s.task_new(d["id"], "X")
-        self.s.task_stage_done(d["id"], "planning", "план")
-        self.s.task_stage_done(d["id"], "execution", "работа")
-        t = self.s.task_retry_execution(d["id"], "криво", "fail")
-        assert t["stage"] == "execution"
-        assert t["retries"] == 1
-        assert t["stages"]["validation"]["verdict"] == "fail"
-        with pytest.raises(ValueError):
-            self.s.task_retry_execution(d["id"], "снова", "fail")
+    def test_task_new_unknown_dialogue(self):
+        try:
+            self.s.task_new("nope", "а")
+            assert False, "ожидался ValueError"
+        except ValueError as e:
+            assert "не найден" in str(e)
 
-    def test_task_pause_resume(self):
-        import pytest
-        d = self.s.new_dialogue()
-        self.s.task_new(d["id"], "X")
-        with pytest.raises(ValueError):
-            self.s.task_resume(d["id"])  # resume без паузы — ошибка
-        assert self.s.task_pause(d["id"])["paused"] is True
-        assert self.s.task_resume(d["id"])["paused"] is False
-        self.s.task_reset(d["id"])
-        with pytest.raises(ValueError):
-            self.s.task_pause(d["id"])
+    # ---- spawn / stage_done ----
 
-    def test_task_pause_rejects_done(self):
-        import pytest
-        d = self.s.new_dialogue()
-        self.s.task_new(d["id"], "X")
-        self.s.task_stage_done(d["id"], "planning", "план")
-        self.s.task_stage_done(d["id"], "execution", "работа")
-        self.s.task_stage_done(d["id"], "validation", "ок", verdict="pass")
-        assert self.s.task_get(d["id"])["stage"] == "done"
-        with pytest.raises(ValueError, match="уже завершена"):
-            self.s.task_pause(d["id"])
+    def test_spawn_marks_in_progress(self):
+        self.s.task_new(self.did, "а")
+        t = self.s.task_spawn_stage(self.did, "planning")
+        e = t["plan"][0]
+        assert e["status"] == "in_progress" and e["spawn_ts"] is not None
+        assert t["stage"] == "planning" and t["expected_action"] == "agent_response"
 
-    def test_task_instruction_only_on_pause(self):
-        import pytest
-        d = self.s.new_dialogue()
-        self.s.task_new(d["id"], "X")
-        with pytest.raises(ValueError):
-            self.s.task_set_instruction(d["id"], "правка")
-        self.s.task_pause(d["id"])
-        assert self.s.task_set_instruction(d["id"], "правка")["instruction"] == "правка"
-        assert self.s.task_instruction_take(d["id"]) == "правка"
-        assert self.s.task_get(d["id"])["instruction"] == ""
+    def test_spawn_wrong_stage_rejected(self):
+        self.s.task_new(self.did, "а")
+        try:
+            self.s.task_spawn_stage(self.did, "validation")
+            assert False, "ожидался ValueError"
+        except ValueError as e:
+            assert "не совпадает" in str(e)
 
-    def test_task_set_error_and_resume_clears(self):
-        d = self.s.new_dialogue()
-        self.s.task_new(d["id"], "X")
-        t = self.s.task_set_error(d["id"], "API down")
-        assert t["error"] == "API down"
-        assert t["paused"] is True
-        assert self.s.task_resume(d["id"])["error"] is None
+    def test_stage_done_advances(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        t = self.s.task_stage_done(self.did, "planning", "план")
+        assert t["plan"][0]["status"] == "completed" and t["plan"][0]["output"] == "план"
+        assert t["stage"] == "execution" and t["current_step"] == 2
 
-    def test_task_reset_clears_and_persists(self):
-        d = self.s.new_dialogue()
-        self.s.task_new(d["id"], "X")
-        self.s.task_stage_done(d["id"], "planning", "план")
-        t = self.s.task_reset(d["id"])
-        t.pop("updated")  # _task_mutate ставит updated — сверяем остальное
-        expected = new_task()
-        expected.pop("updated")
-        assert t == expected
-        s2 = MemoryStore(self.d.name)
-        assert s2.task_get(d["id"])["active"] is False
+    def test_stage_done_wrong_stage_rejected(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        try:
+            self.s.task_stage_done(self.did, "execution", "х")
+            assert False, "ожидался ValueError"
+        except ValueError:
+            pass
 
-    def test_task_in_get_and_list_dialogue(self):
-        d = self.s.new_dialogue()
-        self.s.task_new(d["id"], "X")
-        assert self.s.get_dialogue(d["id"])["task"]["stage"] == "planning"
+    def test_stage_done_terminal(self):
+        self.s.task_new(self.did, "а")
+        for st, out in (("planning", "п"), ("execution", "р"), ("validation", "в")):
+            self.s.task_spawn_stage(self.did, st)
+            self.s.task_stage_done(self.did, st, out)
+        self.s.task_spawn_stage(self.did, "done")
+        t = self.s.task_stage_done(self.did, "done", "итог")
+        assert t["stage"] == "done" and t["current_step"] == 4
+
+    def test_verdict_stored_on_validation(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_spawn_stage(self.did, "execution")
+        self.s.task_stage_done(self.did, "execution", "р")
+        self.s.task_spawn_stage(self.did, "validation")
+        t = self.s.task_stage_done(self.did, "validation", "в", "fail")
+        assert t["plan"][2]["verdict"] == "fail"
+
+    # ---- work_steps ----
+
+    def test_work_steps_set(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        self.s.task_stage_done(self.did, "planning", "[1,2]")
+        t = self.s.task_work_steps_set(self.did, ["Шаг A", "Шаг B"])
+        assert [w["name"] for w in t["work_steps"]] == ["Шаг A", "Шаг B"]
+        assert all(w["status"] == "pending" for w in t["work_steps"])
+
+    def test_work_step_progress(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_work_steps_set(self.did, ["A", "B"])
+        self.s.task_spawn_stage(self.did, "execution")
+        t = self.s.task_work_step_set(self.did, 0, "in_progress")
+        assert t["work_steps"][0]["status"] == "in_progress"
+        t = self.s.task_work_step_set(self.did, 0, "completed", "выполнено")
+        assert t["work_steps"][0]["output"] == "выполнено"
+        assert t["work_steps"][0]["ts"] is not None
+
+    def test_work_step_bad_index(self):
+        self.s.task_new(self.did, "а")
+        try:
+            self.s.task_work_step_set(self.did, 3, "in_progress")
+            assert False, "ожидался ValueError"
+        except ValueError:
+            pass
+
+    # ---- retry ----
+
+    def test_retry_execution_resets_steps(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_work_steps_set(self.did, ["A", "B"])
+        self.s.task_spawn_stage(self.did, "execution")
+        self.s.task_work_step_set(self.did, 0, "completed", "A-ок")
+        self.s.task_stage_done(self.did, "execution", "раб")
+        self.s.task_spawn_stage(self.did, "validation")
+        t = self.s.task_retry_execution(self.did, "плохо", "fail")
+        assert t["stage"] == "execution" and t["retries"] == 1
+        assert t["plan"][2]["verdict"] == "fail"
+        assert all(w["status"] == "pending" for w in t["work_steps"])
+        assert t["plan"][1]["status"] == "pending"
+
+    def test_retry_rejected_outside_validation(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_spawn_stage(self.did, "execution")
+        try:
+            self.s.task_retry_execution(self.did, "x", "fail")
+            assert False, "ожидался ValueError"
+        except ValueError:
+            pass
+
+    # ---- pause / resume / failed ----
+
+    def test_pause_sets_stage_and_snapshot(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_work_steps_set(self.did, ["A", "B"])
+        self.s.task_spawn_stage(self.did, "execution")
+        self.s.task_work_step_set(self.did, 0, "completed", "A-ок")
+        t = self.s.task_pause(self.did)
+        assert t["stage"] == "paused" and t["expected_action"] == "resume_wait"
+        assert t["context_snapshot"]["description"] == "а"
+        assert len(t["context_snapshot"]["work_steps"]) == 2
+
+    def test_pause_rejected_on_done_and_failed(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        self.s.task_set_failed(self.did, "сбой")
+        try:
+            self.s.task_pause(self.did)
+            assert False, "ожидался ValueError"
+        except ValueError:
+            pass
+
+    def test_resume_restores_first_incomplete(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_spawn_stage(self.did, "execution")
+        self.s.task_pause(self.did)
+        t = self.s.task_resume(self.did)
+        assert t["stage"] == "execution" and t["expected_action"] == "agent_response"
+
+    def test_resume_without_pause_rejected(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        try:
+            self.s.task_resume(self.did)
+            assert False, "ожидался ValueError"
+        except ValueError:
+            pass
+
+    def test_failed_and_retry_via_resume(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_spawn_stage(self.did, "execution")
+        t = self.s.task_set_failed(self.did, "модель не ответила")
+        assert t["stage"] == "failed" and t["error"] == "модель не ответила"
+        assert t["expected_action"] == "resume_wait"
+        t = self.s.task_resume(self.did)
+        assert t["stage"] == "execution" and t["error"] is None
+
+    def test_instruction_only_on_pause(self):
+        self.s.task_new(self.did, "а")
+        self.s.task_spawn_stage(self.did, "planning")
+        try:
+            self.s.task_set_instruction(self.did, "текст")
+            assert False, "ожидался ValueError"
+        except ValueError as e:
+            assert "только на паузе" in str(e)
+        self.s.task_pause(self.did)
+        t = self.s.task_set_instruction(self.did, "текст")
+        assert t["instruction"] == "текст" and t["expected_action"] == "human_input"
+        assert self.s.task_instruction_take(self.did) == "текст"
+        assert self.s.task_get(self.did)["instruction"] == ""
+
+    # ---- reset / выдача ----
+
+    def test_reset(self):
+        self.s.task_new(self.did, "а")
+        t = self.s.task_reset(self.did)
+        assert t["active"] is False and t["task_id"] is None
+
+    def test_task_in_dialogue_outputs(self):
+        self.s.task_new(self.did, "а")
         assert self.s.list_dialogues()[0]["task"]["active"] is True
+        assert self.s.get_dialogue(self.did)["task"]["active"] is True
 
-    def test_task_get_unknown_dialogue(self):
-        import pytest
-        with pytest.raises(ValueError):
-            self.s.task_get("нет-такого")
+    # ---- маркеры сообщений ----
 
-    def test_append_message_task_stage(self):
-        d = self.s.new_dialogue()
-        self.s.append_message(d["id"], "user", "привет")
-        self.s.append_message(d["id"], "assistant", "план", model="m1",
-                              task_stage="planning")
-        msgs = self.s.get_messages(d["id"])
-        assert msgs[0].get("task_stage") is None
-        assert msgs[1]["task_stage"] == "planning"
-        assert msgs[1]["model"] == "m1"
+    def test_append_message_task_markers(self):
+        m = self.s
+        m.append_message(self.did, "user", "запрос", task_id="t_1")
+        m.append_message(self.did, "assistant", "план", model="m", task_id="t_1", task_stage="planning")
+        m.append_message(self.did, "assistant", "шаг", model="m", task_id="t_1",
+                         task_stage="execution", task_step="Шаг A")
+        msgs = m.get_messages(self.did)
+        assert msgs[0]["task_id"] == "t_1" and "task_stage" not in msgs[0]
+        assert msgs[1]["task_stage"] == "planning" and "task_step" not in msgs[1]
+        assert msgs[2]["task_step"] == "Шаг A"
