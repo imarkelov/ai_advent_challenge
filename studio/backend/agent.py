@@ -226,20 +226,27 @@ class StudioAgent:
     """Агент-обёртка над LLM API (OpenAI-совместимое) с памятью и журналом."""
 
     def __init__(self, data_dir: str, base_url: str = None, api_key: str = None,
-                 client=None, env=None):
+                 client=None, env=None, verify_ssl: bool = None):
         """Создаёт агента.
 
         data_dir — каталог данных (MemoryStore + config.json + requests.json);
         base_url/api_key — по умолчанию из окружения GPUSTACK_BASE_URL/GPUSTACK_API_KEY;
         client — httpx.Client (в тестах — с MockTransport);
-        env — словарь окружения для per-model ключей (тесты), по умолчанию os.environ.
+        env — словарь окружения для per-model ключей (тесты), по умолчанию os.environ;
+        verify_ssl — проверка TLS-сертификата LLM API. Если None — берётся из
+          GPUSTACK_VERIFY_SSL (\"1\"/\"true\"/\"yes\" -> True, прочее -> False).
+          По умолчанию False: внутренний GPustack отдаёт истёкший самоподписанный
+          сертификат, поэтому проверка отключена. Для продакшена верните True.
         """
         self.store = MemoryStore(data_dir)
         self.base_url = (base_url or os.environ.get("GPUSTACK_BASE_URL",
                         "https://gpustack.data.lmru.tech/v1")).rstrip("/")
         self.api_key = api_key if api_key is not None else os.environ.get("GPUSTACK_API_KEY", "")
         self._env = os.environ if env is None else env
-        self._client = client or httpx.Client(timeout=120)
+        if verify_ssl is None:
+            verify_ssl = str(os.environ.get("GPUSTACK_VERIFY_SSL", "0")).lower() in ("1", "true", "yes")
+        self.verify_ssl = verify_ssl
+        self._client = client or httpx.Client(timeout=120, verify=verify_ssl)
         self._lock = threading.Lock()  # только для журнала requests.json
         self._session = {"prompt": 0, "completion": 0, "total": 0}  # in-memory
         self._last_usage = None
