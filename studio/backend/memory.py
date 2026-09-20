@@ -487,7 +487,10 @@ class MemoryStore:
                 raise ValueError("Повтор execution уже был")
             for e in t["plan"]:
                 if e["agent"] == "validation":
-                    e["status"] = "completed"
+                    # in_progress (не completed): стадия будет выполнена
+                    # повторно; позиция resume/повтора — первая
+                    # невыполненная запись плана
+                    e["status"] = "in_progress"
                     e["output"] = output
                     e["verdict"] = verdict
                     e["ts"] = _now()
