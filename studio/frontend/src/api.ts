@@ -78,40 +78,63 @@ export function apiPostProfileAction(
   return apiPost('/profile/action', { dialogue_id, action })
 }
 
-// ── Состояние задачи (день 13): FSM per-диалог ─────────────────────────────
-// POST /api/task/start {dialogue_id, description} → {task}
-// POST /api/task/run {dialogue_id} → SSE: stage/stage_done/task_paused/
-//   task_done/error
+// ── Состояние задачи (день 13b): unified FSM per-диалог ────────────────────
+// POST /api/task/start {dialogue_id, description} → {task} (+ user-маркер)
+// POST /api/task/run {dialogue_id} → SSE: agent_spawned/step_updated/
+//   step_delta/stage_done/task_paused/task_resumed/task_done/task_failed/
+//   error
 // POST /api/task/pause|resume|reset {dialogue_id} → {task}
 // POST /api/task/instruction {dialogue_id, text} → {task} (только на паузе)
 // GET  /api/task?dialogue_id= → {task}
 
-export type TaskStage = 'planning' | 'execution' | 'validation' | 'done'
+export type TaskStage =
+  | 'planning' | 'execution' | 'validation' | 'done' | 'paused' | 'failed'
+export type TaskPlanStatus = 'pending' | 'in_progress' | 'completed'
+export type TaskExpectedAction = 'agent_response' | 'resume_wait' | 'human_input'
 
-export interface TaskStageEntry {
-  output: string
-  ts: string
+export interface TaskPlanEntry {
+  step: number
+  agent: 'planning' | 'execution' | 'validation' | 'done'
+  status: TaskPlanStatus
+  output: string | null
   verdict: 'pass' | 'fail' | null
-  attempts?: number
+  spawn_ts: string | null
+  ts: string | null
+}
+
+export interface TaskWorkStep {
+  name: string
+  status: TaskPlanStatus
+  output: string | null
+  ts: string | null
 }
 
 export interface TaskState {
   active: boolean
+  task_id: string | null
   stage: TaskStage | null
-  paused: boolean
+  current_step: number
+  total_steps: number
+  expected_action: TaskExpectedAction | null
+  plan: TaskPlanEntry[]
+  work_steps: TaskWorkStep[]
+  context_snapshot: { description: string; work_steps: TaskWorkStep[]; instruction: string } | null
   description: string
   instruction: string
-  stages: Record<string, TaskStageEntry>
   retries: number
   error: string | null
   updated: string | null
 }
 
 export type TaskEvent =
-  | { type: 'stage'; stage: TaskStage; agent: string }
-  | { type: 'stage_done'; stage: TaskStage; output: string; verdict?: 'pass' | 'fail'; retry?: boolean }
-  | { type: 'task_paused'; stage: TaskStage }
+  | { type: 'agent_spawned'; stage: TaskStage; agent: string }
+  | { type: 'step_updated'; index: number; name: string; status: TaskPlanStatus; output?: string }
+  | { type: 'step_delta'; index: number; text: string }
+  | { type: 'stage_done'; stage: TaskStage; output: string; verdict?: 'pass' | 'fail'; plan?: string[]; retry?: boolean }
+  | { type: 'task_paused'; stage: string }
+  | { type: 'task_resumed'; stage: TaskStage }
   | { type: 'task_done'; answer: string }
+  | { type: 'task_failed'; message: string }
   | { type: 'error'; message: string }
 
 export function apiPostTaskStart(

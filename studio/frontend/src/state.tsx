@@ -24,7 +24,7 @@ import {
   taskStream,
   type ChatEvent,
   type TaskEvent,
-  type TaskStage,
+  type TaskPlanStatus,
   type TaskState,
   type UserProfile,
 } from './api'
@@ -39,6 +39,9 @@ export interface Message {
   model?: string
   // Стадия задачи, выполненная stage-агентом (день 13; обычные сообщения — без поля)
   task_stage?: string
+  // Маркеры задачи (день 13b): id задачи + work-шаг (обычные — без полей)
+  task_id?: string
+  task_step?: string
 }
 
 export interface DialogueMeta {
@@ -117,7 +120,7 @@ export interface ModelInfo {
 
 // Активная вкладка правой панели «Контекст» (день 12: бейдж в шапке чата
 // открывает вкладку «Профили» извне панели)
-export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile' | 'task'
+export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile'
 
 export interface StudioState {
   loaded: boolean
@@ -129,8 +132,10 @@ export interface StudioState {
   tasks: Record<string, TaskState>
   // Пайплайн задачи выполняется прямо сейчас (SSE-стрим открыт)
   taskRunning: boolean
-  // Стадия, которую исполняет stage-агент прямо сейчас (из события «stage»)
-  taskCurrentStage: TaskStage | null
+  // Живой вывод текущего work-шага (step_delta; сбрасывается при смене шага)
+  taskLive: { index: number; text: string } | null
+  // Режим ввода (день 13b, D8): глобальный, persist в localStorage
+  chatMode: 'chat' | 'task'
   activeId: string | null
   messages: Message[]
   memory: MemoryState | null
@@ -147,6 +152,9 @@ export interface StudioState {
 // Ключ localStorage для тумблера «Показывать запросы»
 export const SHOW_REQUESTS_KEY = 'studio.showRequests'
 
+// Ключ localStorage для режима ввода (день 13b, D8)
+export const CHAT_MODE_KEY = 'studio.chatMode'
+
 // Начальное состояние (showRequests читается из localStorage, default true)
 export function initialState(): StudioState {
   let show = true
@@ -156,6 +164,13 @@ export function initialState(): StudioState {
   } catch {
     // нет localStorage (небраузерная среда) — держим default
   }
+  let mode: 'chat' | 'task' = 'chat'
+  try {
+    const v = localStorage.getItem(CHAT_MODE_KEY)
+    if (v === 'chat' || v === 'task') mode = v
+  } catch {
+    // нет localStorage — держим default
+  }
   return {
     loaded: false,
     config: null,
@@ -163,7 +178,8 @@ export function initialState(): StudioState {
     profiles: {},
     tasks: {},
     taskRunning: false,
-    taskCurrentStage: null,
+    taskLive: null,
+    chatMode: mode,
     activeId: null,
     messages: [],
     memory: null,
@@ -262,7 +278,9 @@ export type StudioAction =
   | { type: 'profile-set'; id: string; profile: UserProfile }
   | { type: 'task-set'; id: string; task: TaskState }
   | { type: 'task-running'; on: boolean }
-  | { type: 'task-current-stage'; stage: TaskStage | null }
+  | { type: 'chat-mode'; mode: 'chat' | 'task' }
+  | { type: 'task-step'; index: number; name: string; status: TaskPlanStatus; output?: string }
+  | { type: 'task-step-delta'; index: number; text: string }
   | { type: 'models'; models: ModelInfo[] }
   | { type: 'config'; config: Config }
   | { type: 'last-request'; detail: RequestDetail | null }
@@ -362,9 +380,40 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
     case 'task-set':
       return { ...state, tasks: { ...state.tasks, [action.id]: action.task } }
     case 'task-running':
-      return { ...state, taskRunning: action.on, taskCurrentStage: action.on ? state.taskCurrentStage : null }
-    case 'task-current-stage':
-      return { ...state, taskCurrentStage: action.stage }
+      return { ...state, taskRunning: action.on }
+    case 'chat-mode':
+      return { ...state, chatMode: action.mode }
+    case 'task-step': {
+      const id = state.activeId
+      if (id == null) return state
+      const task = state.tasks[id]
+      if (!task) return state
+      const work_steps = task.work_steps.map((ws, j) =>
+        j === action.index
+          ? { ...ws, name: action.name, status: action.status,
+              output: action.output !== undefined ? action.output : ws.output }
+          : ws,
+      )
+      return {
+        ...state,
+        tasks: { ...state.tasks, [id]: { ...task, work_steps } },
+        taskLive: action.status === 'in_progress'
+          ? { index: action.index, text: '' }
+          : action.status === 'completed'
+            ? null
+            : state.taskLive,
+      }
+    }
+    case 'task-step-delta':
+      return {
+        ...state,
+        taskLive: {
+          index: action.index,
+          text: (state.taskLive && state.taskLive.index === action.index
+            ? state.taskLive.text
+            : '') + action.text,
+        },
+      }
     case 'models':
       return { ...state, models: action.models }
     case 'config':
@@ -392,6 +441,11 @@ export interface StudioApi {
   resumeTask: () => Promise<void>
   sendTaskInstruction: (text: string) => Promise<void>
   resetTask: () => Promise<void>
+  // Режим ввода (день 13b): 'chat' | 'task', persist в localStorage
+  chatMode: 'chat' | 'task'
+  setChatMode: (mode: 'chat' | 'task') => void
+  // Режим «задача»: сообщение = инструкция на паузе / запуск задачи
+  sendTaskMessage: (text: string) => Promise<void>
   newDialogue: () => Promise<void>
   setProfile: (id: string, profile: UserProfile) => void
   activateDialogue: (id: string) => Promise<void>
@@ -467,32 +521,41 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'task-set', id, task })
   }, [])
 
-  // Пайплайн задачи: SSE-стрим POST /api/task/run.
-  // stage_done — stage-сообщение в чат + перечитать задачу;
-  // task_done — финальный ответ (как done чата); task_paused/error — стоп.
+  // Перечитать сообщения активного диалога (например, после /memory/st/clear;
+  // день 13b — после run: user-маркер + stage-сообщения с маркерами)
+  const reloadDialogue = useCallback(async () => {
+    const id = stateRef.current.activeId
+    if (id == null) return
+    const det = await apiGet<DialogueDetailResponse>(`/dialogues/${id}`)
+    dispatch({ type: 'messages', messages: det.dialogue.messages })
+  }, [])
+
+  // Пайплайн задачи: SSE-стрим POST /api/task/run (день 13b).
+  // agent_spawned/stage_done — авторитетное состояние из бэкенда (reloadTask);
+  // step_updated/step_delta — живой вывод work-шага (taskLive);
+  // task_done — финальный ответ (новое assistant-сообщение);
+  // task_paused/task_resumed — перечитать; task_failed/error — ошибка в чат.
   const runTask = useCallback(async () => {
     const id = stateRef.current.activeId
     if (id == null || stateRef.current.taskRunning) return
     dispatch({ type: 'task-running', on: true })
     try {
       await taskStream(id, (e: TaskEvent) => {
-        if (e.type === 'stage') {
-          dispatch({ type: 'task-current-stage', stage: e.stage })
-        } else if (e.type === 'stage_done') {
-          dispatch({ type: 'task-current-stage', stage: null })
-          // stage-output — в историю как assistant-сообщение с меткой стадии
+        if (e.type === 'agent_spawned') {
+          // план-запись in_progress + spawn_ts — авторитетно из бэкенда
+          void reloadTask().catch((err) => console.error('reloadTask:', err))
+        } else if (e.type === 'step_updated') {
           dispatch({
-            type: 'messages',
-            messages: [
-              ...stateRef.current.messages,
-              { role: 'assistant', content: e.output, task_stage: e.stage },
-            ],
+            type: 'task-step',
+            index: e.index, name: e.name, status: e.status, output: e.output,
           })
+        } else if (e.type === 'step_delta') {
+          dispatch({ type: 'task-step-delta', index: e.index, text: e.text })
+        } else if (e.type === 'stage_done' || e.type === 'task_paused'
+            || e.type === 'task_resumed') {
           void reloadTask().catch((err) => console.error('reloadTask:', err))
         } else if (e.type === 'task_done') {
-          // Финальный ответ — НОВОЕ assistant-сообщение. Не action «done»:
-          // finishAssistant перезаписал бы последнее сообщение (вывод
-          // стадии validation), а stage-история должна сохраниться.
+          // Финальный ответ — НОВОЕ assistant-сообщение (bubble под карточкой)
           dispatch({
             type: 'messages',
             messages: [
@@ -501,9 +564,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
             ],
           })
           void reloadTask().catch((err) => console.error('reloadTask:', err))
-        } else if (e.type === 'task_paused') {
-          void reloadTask().catch((err) => console.error('reloadTask:', err))
-        } else {
+        } else {  // task_failed | error
           dispatch({ type: 'error-message', text: `Ошибка: ${e.message}` })
           void reloadTask().catch((err) => console.error('reloadTask:', err))
         }
@@ -515,8 +576,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       })
     } finally {
       dispatch({ type: 'task-running', on: false })
+      void reloadDialogue().catch((err) => console.error('reloadDialogue:', err))
     }
-  }, [reloadTask])
+  }, [reloadTask, reloadDialogue])
 
   // Стоп: POST /api/task/pause (вступает на границе стадии)
   const pauseTask = useCallback(async () => {
@@ -547,6 +609,35 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     const { task } = await apiPostTaskInstruction(id, text)
     dispatch({ type: 'task-set', id, task })
   }, [])
+
+  // Режим ввода (день 13b, D8): persist + dispatch
+  const setChatMode = useCallback((mode: 'chat' | 'task') => {
+    try {
+      localStorage.setItem(CHAT_MODE_KEY, mode)
+    } catch {
+      // нет localStorage — переключатель просто не сохранится
+    }
+    dispatch({ type: 'chat-mode', mode })
+  }, [])
+
+  // Режим «задача»: сообщение = инструкция (paused) / запуск (иначе).
+  // На failed ввод заблокирован UI — повтор кнопкой «Повтор» в карточке.
+  const sendTaskMessage = useCallback(async (text: string) => {
+    const id = stateRef.current.activeId
+    const trimmed = text.trim()
+    if (id == null || !trimmed || stateRef.current.taskRunning) return
+    const task = stateRef.current.tasks[id]
+    if (task && task.active) {
+      if (task.stage === 'paused') {
+        await sendTaskInstruction(trimmed)
+        return
+      }
+      if (task.stage === 'failed' || task.stage === 'done') return
+    }
+    await startTask(trimmed)
+    await reloadDialogue()
+    await runTask()
+  }, [startTask, sendTaskInstruction, reloadTask, reloadDialogue])
 
   // Сброс: POST /api/task/reset
   const resetTask = useCallback(async () => {
@@ -744,14 +835,6 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Перечитать сообщения активного диалога (например, после /memory/st/clear)
-  const reloadDialogue = useCallback(async () => {
-    const id = stateRef.current.activeId
-    if (id == null) return
-    const det = await apiGet<DialogueDetailResponse>(`/dialogues/${id}`)
-    dispatch({ type: 'messages', messages: det.dialogue.messages })
-  }, [])
-
   const api: StudioApi = {
     state,
     activeProfile,
@@ -762,6 +845,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     resumeTask,
     sendTaskInstruction,
     resetTask,
+    chatMode: state.chatMode,
+    setChatMode,
+    sendTaskMessage,
     newDialogue,
     setProfile,
     activateDialogue,

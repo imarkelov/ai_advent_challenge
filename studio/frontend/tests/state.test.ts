@@ -232,12 +232,23 @@ describe('reducer — профиль пользователя (день 12)', ()
   })
 })
 
-// ── задача: tasksFrom / activeTaskOf (день 13) ──
+// ── задача: tasksFrom / activeTaskOf (день 13, схема дня 13b) ──
 
 const taskA: TaskState = {
-  active: true, stage: 'planning', paused: false,
-  description: 'Сделать кнопку', instruction: '', stages: {},
-  retries: 0, error: null, updated: null,
+  active: true,
+  task_id: 't_a1',
+  stage: 'planning',
+  current_step: 1,
+  total_steps: 4,
+  expected_action: 'agent_response',
+  plan: [],
+  work_steps: [],
+  context_snapshot: null,
+  description: 'Сделать кнопку',
+  instruction: '',
+  retries: 0,
+  error: null,
+  updated: null,
 }
 
 describe('tasksFrom', () => {
@@ -257,5 +268,89 @@ describe('activeTaskOf', () => {
     expect(activeTaskOf(st)).toEqual(taskA)
     expect(activeTaskOf({ activeId: 'b', tasks: { a: taskA } })).toBeNull()
     expect(activeTaskOf({ activeId: null, tasks: {} })).toBeNull()
+  })
+})
+
+// ── день 13b: режимы ввода (chatMode) + step-события (taskLive) ──
+
+describe('reducer — день 13b: chatMode, task-step, task-step-delta', () => {
+  const taskB: TaskState = {
+    active: true,
+    task_id: 't_1',
+    stage: 'execution',
+    current_step: 2,
+    total_steps: 4,
+    expected_action: 'agent_response',
+    plan: [
+      { step: 1, agent: 'planning', status: 'completed', output: 'план', verdict: null, spawn_ts: null, ts: null },
+      { step: 2, agent: 'execution', status: 'in_progress', output: null, verdict: null, spawn_ts: null, ts: null },
+      { step: 3, agent: 'validation', status: 'pending', output: null, verdict: null, spawn_ts: null, ts: null },
+      { step: 4, agent: 'done', status: 'pending', output: null, verdict: null, spawn_ts: null, ts: null },
+    ],
+    work_steps: [
+      { name: 'A', status: 'in_progress', output: null, ts: null },
+      { name: 'B', status: 'pending', output: null, ts: null },
+    ],
+    context_snapshot: null,
+    description: 'Сделать кнопку',
+    instruction: '',
+    retries: 0,
+    error: null,
+    updated: null,
+  }
+  const withTask: StudioState = { ...base, activeId: 'a', tasks: { a: taskB } }
+
+  it('chatMode: начальное значение — «chat», action меняет режим', () => {
+    expect(initialState().chatMode).toBe('chat')
+    expect(reducer(base, { type: 'chat-mode', mode: 'task' }).chatMode).toBe('task')
+    expect(reducer(base, { type: 'chat-mode', mode: 'chat' }).chatMode).toBe('chat')
+  })
+
+  it('task-step: in_progress — сбрасывает taskLive и обновляет шаг', () => {
+    const s = reducer(withTask, { type: 'task-step', index: 0, name: 'A', status: 'in_progress' })
+    expect(s.taskLive).toEqual({ index: 0, text: '' })
+    expect(s.tasks.a.work_steps[0].status).toBe('in_progress')
+  })
+
+  it('task-step: completed — taskLive null, output и статус записаны', () => {
+    const s1 = reducer(withTask, { type: 'task-step', index: 0, name: 'A', status: 'in_progress' })
+    const s2 = reducer(s1, { type: 'task-step', index: 0, name: 'A', status: 'completed', output: 'рез A' })
+    expect(s2.taskLive).toBeNull()
+    expect(s2.tasks.a.work_steps[0]).toEqual({ name: 'A', status: 'completed', output: 'рез A', ts: null })
+  })
+
+  it('task-step: чужой индекс — остальные шаги не трогает', () => {
+    const s = reducer(withTask, { type: 'task-step', index: 1, name: 'B', status: 'in_progress' })
+    expect(s.tasks.a.work_steps[0]).toEqual({ name: 'A', status: 'in_progress', output: null, ts: null })
+    expect(s.tasks.a.work_steps[1].status).toBe('in_progress')
+    expect(s.taskLive).toEqual({ index: 1, text: '' })
+  })
+
+  it('task-step: нет задачи у активного диалога — состояние не меняется', () => {
+    const s = reducer(
+      { ...withTask, activeId: 'x' },
+      { type: 'task-step', index: 0, name: 'A', status: 'in_progress' },
+    )
+    expect(s).toEqual({ ...withTask, activeId: 'x' })
+  })
+
+  it('task-step-delta: дописывает живой вывод по индексу', () => {
+    const s1 = reducer(withTask, { type: 'task-step', index: 0, name: 'A', status: 'in_progress' })
+    const s2 = reducer(s1, { type: 'task-step-delta', index: 0, text: 'ку' })
+    const s3 = reducer(s2, { type: 'task-step-delta', index: 0, text: 'сок' })
+    expect(s3.taskLive).toEqual({ index: 0, text: 'кусок' })
+  })
+
+  it('task-step-delta: чужой индекс — новый бокс (текст прежнего не смешивается)', () => {
+    const s1 = reducer(withTask, { type: 'task-step', index: 0, name: 'A', status: 'in_progress' })
+    const s2 = reducer(s1, { type: 'task-step-delta', index: 0, text: 'ку' })
+    const s3 = reducer(s2, { type: 'task-step-delta', index: 1, text: 'x' })
+    expect(s3.taskLive).toEqual({ index: 1, text: 'x' })
+  })
+
+  it('task-running: просто флаг (поле taskCurrentStage в схеме дня 13b нет)', () => {
+    const s = reducer(withTask, { type: 'task-running', on: true })
+    expect(s.taskRunning).toBe(true)
+    expect(s.taskLive).toBeNull()
   })
 })
