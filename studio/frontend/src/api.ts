@@ -78,6 +78,37 @@ export function apiPostProfileAction(
   return apiPost('/profile/action', { dialogue_id, action })
 }
 
+// ── Инварианты (день 14) ────────────────────────────────────────────────────
+// Жёсткие неизменяемые правила ассистента: всегда активны, не отключаемы
+// (в отличие от слоёв памяти — без тумблеров).
+// GET    /api/invariants          → {invariants: [{id, key, value}]}
+// POST   /api/invariants {key,value} → {invariant}
+// DELETE /api/invariants/{id}     → {ok}
+
+export interface Invariant {
+  id: string
+  key: string
+  value: string
+}
+
+// Список инвариантов (нет поля invariants — старый бэкенд → пустой список)
+export async function getInvariants(): Promise<Invariant[]> {
+  const r = await apiGet<{ invariants?: Invariant[] }>('/invariants')
+  return r.invariants ?? []
+}
+
+// Добавить инвариант: POST /api/invariants {key, value} → {invariant}
+export function addInvariant(key: string, value: string): Promise<Invariant> {
+  return apiPost<{ invariant: Invariant }>('/invariants', { key, value }).then(
+    (r) => r.invariant,
+  )
+}
+
+// Удалить инвариант: DELETE /api/invariants/{id}
+export async function deleteInvariant(id: string): Promise<void> {
+  await apiDelete<unknown>(`/invariants/${encodeURIComponent(id)}`)
+}
+
 // ── Состояние задачи (день 13b): unified FSM per-диалог ────────────────────
 // POST /api/task/start {dialogue_id, description} → {task} (+ user-маркер)
 // POST /api/task/run {dialogue_id} → SSE: agent_spawned/step_updated/

@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from 'react'
 import {
+  addInvariant as apiAddInvariant,
   apiDelete,
   apiGet,
   apiGetTask,
@@ -21,8 +22,11 @@ import {
   apiPostTaskResume,
   apiPostTaskStart,
   chatStream,
+  deleteInvariant as apiDeleteInvariant,
+  getInvariants,
   taskStream,
   type ChatEvent,
+  type Invariant,
   type TaskEvent,
   type TaskPlanStatus,
   type TaskState,
@@ -133,7 +137,7 @@ export interface ModelInfo {
 
 // Активная вкладка правой панели «Контекст» (день 12: бейдж в шапке чата
 // открывает вкладку «Профили» извне панели)
-export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile'
+export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile' | 'invariants'
 
 export interface StudioState {
   loaded: boolean
@@ -160,6 +164,8 @@ export interface StudioState {
   lastRequest: RequestDetail | null
   // Вкладка правой панели «Контекст» (день 12)
   contextTab: ContextTab
+  // Инварианты (день 14): неизменяемые правила, всегда активны
+  invariants: Invariant[]
 }
 
 // Ключ localStorage для тумблера «Показывать запросы»
@@ -203,6 +209,7 @@ export function initialState(): StudioState {
     streaming: false,
     lastRequest: null,
     contextTab: 'memory',
+    invariants: [],
   }
 }
 
@@ -299,6 +306,7 @@ export type StudioAction =
   | { type: 'last-request'; detail: RequestDetail | null }
   | { type: 'show-requests'; on: boolean }
   | { type: 'context-tab'; tab: ContextTab }
+  | { type: 'invariants'; invariants: Invariant[] }
 
 // Чистый reducer: все переходы состояния без побочных эффектов
 export function reducer(state: StudioState, action: StudioAction): StudioState {
@@ -443,6 +451,8 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
       return { ...state, showRequests: action.on }
     case 'context-tab':
       return { ...state, contextTab: action.tab }
+    case 'invariants':
+      return { ...state, invariants: action.invariants }
   }
 }
 
@@ -478,6 +488,11 @@ export interface StudioApi {
   setContextTab: (tab: ContextTab) => void
   refreshMemory: () => Promise<void>
   setMemoryToggle: (layer: 'st' | 'wm' | 'lt', on: boolean) => Promise<void>
+  // Инварианты (день 14): перечитать/добавить/удалить — все перечитывают
+  // список после ответа API (паттерн refreshMemory)
+  refreshInvariants: () => Promise<void>
+  addInvariant: (key: string, value: string) => Promise<void>
+  deleteInvariant: (id: string) => Promise<void>
   reloadDialogue: () => Promise<void>
   deleteDialogues: (ids: string[]) => Promise<void>
   renameDialogue: (id: string, title: string) => Promise<void>
@@ -732,6 +747,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     apiGet<{ models: ModelInfo[] }>('/models')
       .then((r) => dispatch({ type: 'models', models: r.models }))
       .catch((err) => console.error('models:', err))
+    // Инварианты (день 14) — отдельным запросом: недоступность эндпоинта
+    // (старый бэкенд) не ломает основную загрузку (паттерн models)
+    getInvariants()
+      .then((invariants) => dispatch({ type: 'invariants', invariants }))
+      .catch((err) => console.error('invariants:', err))
   }, [])
 
   useEffect(() => {
@@ -750,12 +770,14 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const activateDialogue = useCallback(async (id: string) => {
     if (id === stateRef.current.activeId) return
     await apiPost<{ active_id: string }>(`/dialogues/${id}/activate`)
-    const [d, det, memory] = await Promise.all([
+    const [d, det, memory, invariants] = await Promise.all([
       apiGet<DialoguesResponse>('/dialogues'),
       apiGet<DialogueDetailResponse>(`/dialogues/${id}`),
       // Панели памяти: WM читаем в том же батче — иначе после переключения
       // диалога «текущая задача» останется от прежнего
       apiGet<MemoryState>('/memory'),
+      // Инварианты (день 14): перечитываем при переключении диалога
+      getInvariants(),
     ])
     dispatch({
       type: 'activated',
@@ -764,6 +786,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       messages: det.dialogue.messages,
     })
     dispatch({ type: 'memory', memory })
+    dispatch({ type: 'invariants', invariants })
   }, [])
 
   // Отправка сообщения: дельты стримом в чат, done → обновление всех панелей,
@@ -834,6 +857,29 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'memory', memory: await apiGet<MemoryState>('/memory') })
   }, [])
 
+  // Перечитать инварианты (день 14)
+  const refreshInvariants = useCallback(async () => {
+    dispatch({ type: 'invariants', invariants: await getInvariants() })
+  }, [])
+
+  // Добавить инвариант: POST /api/invariants → перечитать список
+  const addInvariant = useCallback(
+    async (key: string, value: string) => {
+      await apiAddInvariant(key, value)
+      await refreshInvariants()
+    },
+    [refreshInvariants],
+  )
+
+  // Удалить инвариант: DELETE /api/invariants/{id} → перечитать список
+  const deleteInvariant = useCallback(
+    async (id: string) => {
+      await apiDeleteInvariant(id)
+      await refreshInvariants()
+    },
+    [refreshInvariants],
+  )
+
   // Включить/выключить слой памяти в промпте: POST /api/memory/toggles {layer, enabled}
   const setMemoryToggle = useCallback(
     async (layer: 'st' | 'wm' | 'lt', on: boolean) => {
@@ -900,6 +946,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setContextTab,
     refreshMemory,
     setMemoryToggle,
+    refreshInvariants,
+    addInvariant,
+    deleteInvariant,
     reloadDialogue,
     deleteDialogues,
     renameDialogue,
