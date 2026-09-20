@@ -97,6 +97,14 @@ export default function ChatPanel() {
       <header className="chat-head">
         <h1 className="chat-title">{active ? active.title : 'Нет активного диалога'}</h1>
         <div className="chat-head-actions">
+          {state.invariantViolation != null && state.invariantViolation.length > 0 && (
+            <span
+              className="invariant-badge"
+              title="Последний ответ противоречит активным инвариантам (день 14)"
+            >
+              ⚠ Нарушен инвариант: {state.invariantViolation.join(', ')}
+            </span>
+          )}
           {activeProfile && activeProfile.status !== 'active' && (
             <button
               type="button"

@@ -354,3 +354,25 @@ describe('reducer — день 13b: chatMode, task-step, task-step-delta', () =>
     expect(s.taskLive).toBeNull()
   })
 })
+
+describe('reducer — инварианты (день 14): флаг нарушения invariant_violation', () => {
+  it('invariant-violation: ставит transient-флаг с паттернами (default null)', () => {
+    expect(base.invariantViolation).toBeNull()
+    const s = reducer(base, { type: 'invariant-violation', patterns: ['lang', 'format'] })
+    expect(s.invariantViolation).toEqual(['lang', 'format'])
+  })
+
+  it('done: флаг сохраняется (событие приходит до done, бейдж виден после ответа)', () => {
+    const s1 = reducer(base, { type: 'user-message', message: { role: 'user', content: 'x' } })
+    const s2 = reducer(s1, { type: 'invariant-violation', patterns: ['lang'] })
+    const s3 = reducer(s2, { type: 'done', answer: 'Отказ…' })
+    expect(s3.invariantViolation).toEqual(['lang'])
+    expect(s3.streaming).toBe(false)
+  })
+
+  it('user-message: сбрасывает флаг (новая очередь)', () => {
+    const s1 = reducer(base, { type: 'invariant-violation', patterns: ['lang'] })
+    const s2 = reducer(s1, { type: 'user-message', message: { role: 'user', content: 'ещё' } })
+    expect(s2.invariantViolation).toBeNull()
+  })
+})

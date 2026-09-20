@@ -167,15 +167,33 @@ class MemoryStore:
         atomic_write_json(self._p_longterm, l)
 
     def _read_invariants(self) -> dict:
-        """invariants.json {id: {key, value}}; битый/отсутствующий файл -> {}.
-        Записи без str key/value отбрасываются (битый файл)."""
+        """invariants.json {id: {title, description, forbidden, is_active}};
+        битый/отсутствующий файл -> {}.
+
+        Бэкворд-совместимость: legacy-запись со старыми ключами {key, value}
+        мигрируется при чтении: title=key, description=value, forbidden=[],
+        is_active=True. Записи без непустого str title и description
+        отбрасываются (битый файл)."""
         v = read_json(self._p_invariants, None)
         if not isinstance(v, dict):
             return {}
-        return {i: e for i, e in v.items()
-                if isinstance(e, dict)
-                and isinstance(e.get("key"), str)
-                and isinstance(e.get("value"), str)}
+        out = {}
+        for i, e in v.items():
+            if not isinstance(e, dict):
+                continue
+            t = e.get("title", e.get("key"))
+            dsc = e.get("description", e.get("value"))
+            if not (isinstance(t, str) and t.strip()):
+                continue
+            if not (isinstance(dsc, str) and dsc.strip()):
+                continue
+            f = e.get("forbidden")
+            f = ([s.strip() for s in f
+                  if isinstance(s, str) and s.strip()]
+                 if isinstance(f, list) else [])
+            out[i] = {"title": t, "description": dsc, "forbidden": f,
+                      "is_active": bool(e.get("is_active", True))}
+        return out
 
     def _write_invariants(self, v: dict) -> None:
         atomic_write_json(self._p_invariants, v)
@@ -742,28 +760,62 @@ class MemoryStore:
     # управляются только пользователем (CRUD — через API/UI).
 
     def invariants_items(self) -> dict:
-        """Все инварианты {id: {"key":..., "value":...}} ({} если нет)."""
+        """Все инварианты {id: {title, description, forbidden, is_active}}
+        ({} если нет)."""
         with self._lock:
             return self._read_invariants()
 
-    def invariants_set(self, key: str, value: str) -> dict:
-        """Создать/обновить инвариант (обновление — по key, id сохраняется).
-        Возвращает запись {id, key, value}. ValueError: key/value не str
-        или пустые (после strip)."""
-        for v in (key, value):
+    def invariants_set(self, title: str, description: str,
+                       forbidden: list = None, is_active: bool = True) -> dict:
+        """Создать/обновить инвариант (обновление — по title, id сохраняется).
+        Возвращает запись {id, title, description, forbidden, is_active}.
+        ValueError: title/description не str или пустые (после strip);
+        forbidden не список str; is_active не bool."""
+        for v in (title, description):
             if not isinstance(v, str) or not v.strip():
-                raise ValueError("Ключ и значение инварианта — непустые строки")
+                raise ValueError("Название и описание инварианта — непустые строки")
+        if forbidden is None:
+            forbidden = []
+        if not isinstance(forbidden, list) or \
+                not all(isinstance(s, str) for s in forbidden):
+            raise ValueError("forbidden — список строк")
+        if not isinstance(is_active, bool):
+            raise ValueError("is_active должен быть bool (true/false)")
+        forbidden = [s.strip() for s in forbidden if s.strip()]
         with self._lock:
             v = self._read_invariants()
             for iid, e in v.items():
-                if e["key"] == key:
-                    e["value"] = value
+                if e["title"] == title:
+                    e["description"] = description
+                    e["forbidden"] = forbidden
+                    e["is_active"] = is_active
                     self._write_invariants(v)
-                    return {"id": iid, "key": e["key"], "value": e["value"]}
-            iid = "inv_" + uuid.uuid4().hex[:8]
-            v[iid] = {"key": key, "value": value}
+                    return {"id": iid, "title": e["title"],
+                            "description": e["description"],
+                            "forbidden": e["forbidden"],
+                            "is_active": e["is_active"]}
+            iid = "inv_" + uuid.uuid4().hex[:4]
+            v[iid] = {"title": title, "description": description,
+                      "forbidden": forbidden, "is_active": is_active}
             self._write_invariants(v)
-            return {"id": iid, "key": key, "value": value}
+            return {"id": iid, "title": title, "description": description,
+                    "forbidden": forbidden, "is_active": is_active}
+
+    def invariants_set_active(self, iid: str, active: bool) -> dict | None:
+        """Включить/отключить инвариант (is_active). Возвращает запись или
+        None, если id неизвестен. ValueError: active не bool."""
+        if not isinstance(active, bool):
+            raise ValueError("is_active должен быть bool (true/false)")
+        with self._lock:
+            v = self._read_invariants()
+            if iid not in v:
+                return None
+            v[iid]["is_active"] = active
+            self._write_invariants(v)
+            e = v[iid]
+            return {"id": iid, "title": e["title"],
+                    "description": e["description"], "forbidden": e["forbidden"],
+                    "is_active": e["is_active"]}
 
     def invariants_remove(self, iid: str) -> bool:
         """Удалить инвариант по id; True если запись была."""
@@ -782,14 +834,17 @@ class MemoryStore:
 
     def build_invariants_block(self) -> str:
         """Блок инвариантов для system-промпта (глобальный, не зависит
-        от диалога и тумблеров слоёв). Пусто, если инвариантов нет:
-        «\\n\\nИнварианты (неукоснительно):\\n- key: value»."""
+        от диалога и тумблеров слоёв памяти). Включает только АКТИВНЫЕ
+        (is_active=True) инварианты; пусто, если их нет:
+        «\\n\\nИнварианты (неукоснительно):\\n- title: description»."""
         with self._lock:
             v = self._read_invariants()
-        if not v:
+        active = [e for e in v.values() if e["is_active"] is True]
+        if not active:
             return ""
         return ("\n\nИнварианты (неукоснительно):\n"
-                + "\n".join(f"- {e['key']}: {e['value']}" for e in v.values()))
+                + "\n".join(f"- {e['title']}: {e['description']}"
+                            for e in active))
 
     # ---------- тумблеры слоёв памяти (toggles.json) ----------
 
@@ -865,8 +920,11 @@ class MemoryStore:
                            "tokens_est": _tok_est("".join(k + v for k, v in lt.items())),
                            "items": lt},
             "invariants": {"entries": len(inv),
-                            "tokens_est": _tok_est("".join(e["key"] + e["value"]
-                                                       for e in inv.values())),
-                            "items": {i: {"key": e["key"], "value": e["value"]}
-                                      for i, e in inv.items()}},
+                             "tokens_est": _tok_est("".join(e["title"] + e["description"]
+                                                        for e in inv.values())),
+                             "items": {i: {"title": e["title"],
+                                           "description": e["description"],
+                                           "forbidden": e["forbidden"],
+                                           "is_active": e["is_active"]}
+                                       for i, e in inv.items()}},
         }

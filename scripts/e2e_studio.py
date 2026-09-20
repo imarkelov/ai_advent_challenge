@@ -459,10 +459,11 @@ def main() -> int:
             return 1
 
         code, body, _ = http("POST", "/api/invariants",
-                             {"key": "e2e-inv", "value": "Kotlin"})
+                             {"title": "e2e-inv", "description": "Kotlin",
+                              "forbidden": ["python"], "is_active": True})
         inv = json.loads(body).get("invariant", {}) if code == 201 else {}
         created_id = inv.get("id")
-        if code == 201 and created_id and inv.get("key") == "e2e-inv":
+        if code == 201 and created_id and inv.get("title") == "e2e-inv":
             inv_id = created_id
             record(f"API: invariants POST ({created_id})", "PASS")
         else:
@@ -473,7 +474,7 @@ def main() -> int:
         code, body, _ = http("GET", "/api/invariants")
         inv_list = json.loads(body).get("invariants", []) if code == 200 else []
         in_rules = any(inv.get("id") == inv_id for inv in inv_list
-                       if inv.get("key") == "e2e-inv")
+                       if inv.get("title") == "e2e-inv")
         if code == 200 and in_rules:
             record("API: invariants GET содержит добавленный", "PASS")
         else:
@@ -481,7 +482,7 @@ def main() -> int:
                    f"code={code} found={in_rules}")
             return 1
 
-        # /api/rules → invariants_block с key/value
+        # /api/rules → invariants_block с title/description
         code, body, _ = http("GET", "/api/rules")
         rules = json.loads(body)
         iblock = rules.get("invariants_block", "")
@@ -503,9 +504,9 @@ def main() -> int:
                    f"code={code} stats={inv_stats}")
             return 1
 
-        # Валидация 400: пустой value
+        # Валидация 400: пустое описание
         code, _, _ = http("POST", "/api/invariants",
-                          {"key": "e2e-inv", "value": ""})
+                          {"title": "e2e-inv", "description": ""})
         if code == 400:
             record("API: invariants POST (пустое значение → 400)", "PASS")
         else:
@@ -681,7 +682,8 @@ def main() -> int:
             #     (детерминированно, до LLM). Само напоминание проверяется в
             #     журнале — как у табу-гарда (8c) и конфликта памяти (день 11).
             code, body, _ = http("POST", "/api/invariants",
-                                 {"key": "e2e-inv", "value": "Kotlin"})
+                                 {"title": "e2e-inv", "description": "Kotlin",
+                                  "forbidden": ["python"], "is_active": True})
             live_inv = json.loads(body).get("invariant", {}) if code == 201 else {}
             live_inv_id = live_inv.get("id")
             if live_inv_id:

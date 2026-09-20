@@ -383,25 +383,40 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
 
     @app.get("/api/invariants")
     def invariants_list():
-        """Список инвариантов: [{id, key, value}]."""
+        """Список инвариантов: [{id, title, description, forbidden, is_active}]."""
         items = agent.store.invariants_items()
-        return {"invariants": [{"id": i, "key": e["key"], "value": e["value"]}
-                                for i, e in items.items()]}
+        return {"invariants": [
+            {"id": i, "title": e["title"], "description": e["description"],
+             "forbidden": e["forbidden"], "is_active": e["is_active"]}
+            for i, e in items.items()]}
 
     @app.post("/api/invariants", status_code=201)
     def invariants_set(body: dict):
-        """Создать/обновить инвариант {key, value} (оба непустые строки).
-        400 — поле отсутствует, не строка или пустое."""
-        for k in ("key", "value"):
+        """Создать/обновить инвариант {title, description, forbidden?,
+        is_active?} (обновление — по title). 400 — поле отсутствует,
+        title/description не строка или пустые, forbidden не список str,
+        is_active не bool."""
+        for k in ("title", "description"):
             if k not in body:
                 raise HTTPException(400, f"Не указано поле «{k}»")
-        key = body["key"]
-        value = body["value"]
-        if not isinstance(key, str) or not key.strip():
-            raise HTTPException(400, "Ключ инварианта должен быть непустой строкой")
-        if not isinstance(value, str) or not value.strip():
-            raise HTTPException(400, "Значение инварианта должно быть непустой строкой")
-        rec = agent.store.invariants_set(key, value)
+        title = body["title"]
+        description = body["description"]
+        if not isinstance(title, str) or not title.strip():
+            raise HTTPException(400, "Название инварианта должно быть непустой строкой")
+        if not isinstance(description, str) or not description.strip():
+            raise HTTPException(400, "Описание инварианта должно быть непустой строкой")
+        forbidden = body.get("forbidden")
+        if forbidden is not None and (
+                not isinstance(forbidden, list)
+                or not all(isinstance(s, str) for s in forbidden)):
+            raise HTTPException(400, "forbidden должен быть списком строк")
+        if "is_active" in body and not isinstance(body["is_active"], bool):
+            raise HTTPException(400, "is_active должен быть bool (true/false)")
+        try:
+            rec = agent.store.invariants_set(title, description, forbidden,
+                                             body.get("is_active", True))
+        except ValueError as e:
+            raise HTTPException(400, str(e))
         return {"invariant": rec}
 
     @app.delete("/api/invariants/{iid}")
@@ -410,6 +425,26 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
         if not agent.store.invariants_remove(iid):
             raise HTTPException(404, f"Инвариант «{iid}» не найден")
         return {"ok": True}
+
+    @app.post("/api/invariants/{iid}/toggle")
+    def invariants_toggle(iid: str, body: dict | None = None):
+        """Включить/отключить инвариант: body {is_active} или flip
+        текущего значения (body опционально). 404 — не найден; 400 —
+        is_active не bool."""
+        items = agent.store.invariants_items()
+        if iid not in items:
+            raise HTTPException(404, f"Инвариант «{iid}» не найден")
+        body = body or {}
+        if "is_active" in body:
+            if not isinstance(body["is_active"], bool):
+                raise HTTPException(400, "is_active должен быть bool (true/false)")
+            active = body["is_active"]
+        else:
+            active = not items[iid]["is_active"]
+        rec = agent.store.invariants_set_active(iid, active)
+        if rec is None:
+            raise HTTPException(404, f"Инвариант «{iid}» не найден")
+        return {"invariant": rec}
 
     # ---------- токены ----------
 

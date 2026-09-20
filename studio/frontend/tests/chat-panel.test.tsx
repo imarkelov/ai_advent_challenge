@@ -224,6 +224,93 @@ describe('ChatPanel + Sidebar — перечитывание списка диа
   })
 })
 
+describe('ChatPanel — бейдж нарушения инварианта (день 14)', () => {
+  it('SSE invariant_violation (до done) → бейдж с паттернами в шапке чата', async () => {
+    // SSE-поток: дельта + invariant_violation + done (контракт дня 14)
+    const sse =
+      'data: {"type":"delta","text":"Отказ"}\n\n' +
+      'data: {"type":"invariant_violation","patterns":["lang","format"]}\n\n' +
+      'data: {"type":"done","answer":"Отказ","usage":null,"request_id":1}\n\n'
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = normalizeUrl(input)
+        const method = init?.method ?? 'GET'
+        if (method === 'POST' && url === '/api/chat') {
+          return new Response(sse, { headers: { 'Content-Type': 'text/event-stream' } })
+        }
+        if (method === 'GET' && url === '/api/dialogues') {
+          return jsonResponse({
+            active_id: 'd1',
+            dialogues: [{ id: 'd1', title: 'Диалог', created: '2026-09-19', message_count: 2 }],
+          })
+        }
+        if (method === 'GET' && url === '/api/dialogues/d1') {
+          return jsonResponse({ dialogue: { messages: [] } })
+        }
+        if (method === 'GET' && url === '/api/requests/1') {
+          return jsonResponse({ id: 1, ts: 't', model: 'qwen3.8-27b', request: {}, usage: null, error: null })
+        }
+        return jsonResponse(API_FIXTURES[url] ?? { ok: true })
+      }),
+    )
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+
+    // ждём, пока загрузится активный диалог (иначе placeholder «сначала создайте диалог»)
+    const input = await screen.findByPlaceholderText(/Сообщение…/)
+    fireEvent.change(input, { target: { value: 'напиши по-английски списком' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Отправить' }))
+
+    // ответ застримился, бейдж нарушения появился в шапке с паттернами
+    await screen.findByText('Отказ')
+    const badge = await screen.findByText(/Нарушен инвариант/)
+    expect(badge).toHaveTextContent('lang')
+    expect(badge).toHaveTextContent('format')
+  })
+
+  it('без события invariant_violation бейджа нет', async () => {
+    const sse =
+      'data: {"type":"delta","text":"Ок"}\n\ndata: {"type":"done","answer":"Ок","usage":null,"request_id":1}\n\n'
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = normalizeUrl(input)
+        const method = init?.method ?? 'GET'
+        if (method === 'POST' && url === '/api/chat') {
+          return new Response(sse, { headers: { 'Content-Type': 'text/event-stream' } })
+        }
+        if (method === 'GET' && url === '/api/dialogues') {
+          return jsonResponse({
+            active_id: 'd1',
+            dialogues: [{ id: 'd1', title: 'Диалог', created: '2026-09-19', message_count: 2 }],
+          })
+        }
+        if (method === 'GET' && url === '/api/dialogues/d1') {
+          return jsonResponse({ dialogue: { messages: [] } })
+        }
+        if (method === 'GET' && url === '/api/requests/1') {
+          return jsonResponse({ id: 1, ts: 't', model: 'qwen3.8-27b', request: {}, usage: null, error: null })
+        }
+        return jsonResponse(API_FIXTURES[url] ?? { ok: true })
+      }),
+    )
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const input = await screen.findByPlaceholderText(/Сообщение…/)
+    fireEvent.change(input, { target: { value: 'привет' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Отправить' }))
+    await screen.findByText('Ок')
+    expect(screen.queryByText(/Нарушен инвариант/)).toBeNull()
+  })
+})
+
 describe('ChatPanel — бейдж инициализации профиля в шапке (день 12)', () => {
   // Проба: ловит вкладку контекстной панели из состояния провайдера
   // (клик по бейджу должен установить её в «Профили»)

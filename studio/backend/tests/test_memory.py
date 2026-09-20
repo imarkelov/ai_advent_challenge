@@ -778,29 +778,56 @@ class TestTaskStorage13b:
         assert msgs[2]["task_step"] == "Шаг A"
 
 
-# ---------- инварианты (день 14, глобальные) ----------
+# ---------- инварианты (день 14, глобальные; схема {id, title, description,
+#            forbidden[], is_active}) ----------
 
 def test_invariants_set_and_items(store):
-    r1 = store.invariants_set("Стек", "Kotlin")
+    r1 = store.invariants_set("Стек", "Kotlin", forbidden=["python"])
     r2 = store.invariants_set("Архитектура", "монолит")
     assert r1["id"].startswith("inv_") and r2["id"].startswith("inv_")
     assert r1["id"] != r2["id"]
     assert store.invariants_items() == {
-        r1["id"]: {"key": "Стек", "value": "Kotlin"},
-        r2["id"]: {"key": "Архитектура", "value": "монолит"}}
+        r1["id"]: {"title": "Стек", "description": "Kotlin",
+                   "forbidden": ["python"], "is_active": True},
+        r2["id"]: {"title": "Архитектура", "description": "монолит",
+                   "forbidden": [], "is_active": True}}
 
 
-def test_invariants_update_by_key_keeps_id(store):
-    r1 = store.invariants_set("Стек", "Kotlin")
-    r2 = store.invariants_set("Стек", "Java")
+def test_invariants_update_by_title_keeps_id(store):
+    r1 = store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+    r2 = store.invariants_set("Стек", "Java", forbidden=["python", "go"],
+                              is_active=False)
     assert r2["id"] == r1["id"]
     assert store.invariants_items() == {
-        r1["id"]: {"key": "Стек", "value": "Java"}}
+        r1["id"]: {"title": "Стек", "description": "Java",
+                   "forbidden": ["python", "go"], "is_active": False}}
+
+
+def test_invariants_forbidden_strips_empty_and_none_is_empty_list(store):
+    r1 = store.invariants_set("Стек", "Kotlin",
+                              forbidden=[" python ", "", "   ", "go"])
+    assert r1["forbidden"] == ["python", "go"]
+    r2 = store.invariants_set("Архитектура", "монолит")
+    assert r2["forbidden"] == []
+    assert store.invariants_items()[r1["id"]]["forbidden"] == ["python", "go"]
+
+
+def test_invariants_set_active_toggle(store):
+    r1 = store.invariants_set("Стек", "Kotlin")
+    rec = store.invariants_set_active(r1["id"], False)
+    assert rec == {"id": r1["id"], "title": "Стек", "description": "Kotlin",
+                   "forbidden": [], "is_active": False}
+    assert store.invariants_set_active(r1["id"], True)["is_active"] is True
+    assert store.invariants_set_active("nope", True) is None
+    with pytest.raises(ValueError):
+        store.invariants_set_active(r1["id"], "yes")
+    with pytest.raises(ValueError):
+        store.invariants_set_active(r1["id"], 1)
 
 
 def test_invariants_remove_and_clear(store):
-    r1 = store.invariants_set("k1", "v1")
-    r2 = store.invariants_set("k2", "v2")
+    r1 = store.invariants_set("t1", "d1")
+    r2 = store.invariants_set("t2", "d2")
     assert store.invariants_remove(r1["id"]) is True
     assert store.invariants_remove(r1["id"]) is False
     assert store.invariants_remove("nope") is False
@@ -816,26 +843,46 @@ def test_invariants_missing_and_broken_file(data_dir):
     (data_dir / "invariants.json").write_text("{битый json", encoding="utf-8")
     s = MemoryStore(str(data_dir))
     assert s.invariants_items() == {}
-    s.invariants_set("k", "v")
+    s.invariants_set("t", "d")
     assert len(s.invariants_items()) == 1
-    # частично битый файл: записи без str key/value отбрасываются
+    # частично битый файл: записи без непустого str title/description
+    # отбрасываются
     (data_dir / "invariants.json").write_text(
-        json.dumps({"inv_1": {"key": "К", "value": "В"},
-                    "inv_2": {"key": 5, "value": "V"},
-                    "inv_3": "мусор"}), encoding="utf-8")
+        json.dumps({"inv_1": {"title": "К", "description": "В"},
+                    "inv_2": {"title": "", "description": "В"},
+                    "inv_3": {"title": "К", "description": None},
+                    "inv_4": "мусор"}), encoding="utf-8")
     s2 = MemoryStore(str(data_dir))
-    assert s2.invariants_items() == {"inv_1": {"key": "К", "value": "В"}}
+    assert s2.invariants_items() == {
+        "inv_1": {"title": "К", "description": "В",
+                  "forbidden": [], "is_active": True}}
+
+
+def test_invariants_backcompat_migration_from_key_value(data_dir):
+    """Legacy-схема {key, value} мигрируется при чтении в новую схему."""
+    (data_dir / "invariants.json").write_text(
+        json.dumps({"inv_a": {"key": "Стек", "value": "Kotlin"},
+                    "inv_b": {"key": 5, "value": "x"},
+                    "inv_c": "мусор"}), encoding="utf-8")
+    s = MemoryStore(str(data_dir))
+    assert s.invariants_items() == {
+        "inv_a": {"title": "Стек", "description": "Kotlin",
+                  "forbidden": [], "is_active": True}}
 
 
 def test_invariants_set_rejects_empty_and_non_str(store):
     with pytest.raises(ValueError):
         store.invariants_set("", "v")
     with pytest.raises(ValueError):
-        store.invariants_set("k", "   ")
+        store.invariants_set("t", "   ")
     with pytest.raises(ValueError):
         store.invariants_set(5, "v")
     with pytest.raises(ValueError):
-        store.invariants_set("k", None)
+        store.invariants_set("t", None)
+    with pytest.raises(ValueError):
+        store.invariants_set("t", "v", forbidden="python")
+    with pytest.raises(ValueError):
+        store.invariants_set("t", "v", forbidden=["p", 5])
     assert store.invariants_items() == {}
 
 
@@ -843,11 +890,17 @@ def test_invariants_block_empty(store):
     assert store.build_invariants_block() == ""
 
 
-def test_invariants_block_nonempty(store):
-    store.invariants_set("Стек", "Kotlin")
-    store.invariants_set("Тесты", "обязательны")
+def test_invariants_block_nonempty_and_excludes_inactive(store):
+    a = store.invariants_set("Стек", "Kotlin")
+    b = store.invariants_set("Тесты", "обязательны")
     assert store.build_invariants_block() == (
         "\n\nИнварианты (неукоснительно):\n- Стек: Kotlin\n- Тесты: обязательны")
+    # неактивные инварианты в блок не попадают
+    store.invariants_set_active(b["id"], False)
+    assert store.build_invariants_block() == (
+        "\n\nИнварианты (неукоснительно):\n- Стек: Kotlin")
+    store.invariants_set_active(a["id"], False)
+    assert store.build_invariants_block() == ""
 
 
 def test_invariants_isolated_from_wm_lt(store):
@@ -862,10 +915,12 @@ def test_invariants_isolated_from_wm_lt(store):
 
 def test_invariants_persistence_across_instances(data_dir):
     s1 = MemoryStore(str(data_dir))
-    r = s1.invariants_set("Стек", "Kotlin")
+    r = s1.invariants_set("Стек", "Kotlin", forbidden=["python"],
+                          is_active=False)
     s2 = MemoryStore(str(data_dir))
     assert s2.invariants_items() == {
-        r["id"]: {"key": "Стек", "value": "Kotlin"}}
+        r["id"]: {"title": "Стек", "description": "Kotlin",
+                  "forbidden": ["python"], "is_active": False}}
 
 
 def test_invariants_not_affected_by_toggles(store):
@@ -881,11 +936,12 @@ def test_layer_stats_invariants(store):
     store.new_dialogue()
     stats = store.layer_stats()
     assert stats["invariants"] == {"entries": 0, "tokens_est": 0, "items": {}}
-    store.invariants_set("Стек", "Kotlin")  # 10 символов
+    store.invariants_set("Стек", "Kotlin")  # title+description = 10 символов
     inv = store.invariants_items()
     iid = next(iter(inv))
     stats = store.layer_stats()
     assert stats["invariants"]["entries"] == 1
     assert stats["invariants"]["tokens_est"] == math.ceil(10 / 4)
     assert stats["invariants"]["items"] == {
-        iid: {"key": "Стек", "value": "Kotlin"}}
+        iid: {"title": "Стек", "description": "Kotlin",
+              "forbidden": [], "is_active": True}}

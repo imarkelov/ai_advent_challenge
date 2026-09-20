@@ -1326,10 +1326,126 @@ button {
   color: var(--accent);
 }
 .invariants-chip[title] { cursor: help; }
-/* Пояснение под заголовком: инварианты всегда активны, не отключаемы */
+/* Пояснение под заголовком: ассистент инварианты не меняет, пользователь — вкл/выкл */
 .invariants-note {
   margin: 0 0 var(--sp-2);
   font-size: 12px;
   line-height: 1.4;
   color: var(--muted);
+}
+
+/* ── День 14 (новая схема): строка инварианта ──────────────────────────── */
+/* title (жирный) + description + forbidden-чипы | статус-чип | свитч | [×] */
+.inv-list {
+  max-height: 220px;
+}
+.inv-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+}
+.inv-row:hover {
+  background: rgba(224, 123, 57, 0.07);
+}
+.inv-row.off {
+  opacity: .55;
+}
+.inv-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.inv-title {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.inv-desc {
+  font-size: 12px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.inv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.inv-chip {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--panel-2);
+  color: var(--danger);
+}
+/* Статус-чип строки: «активный» (в промпте) / «спит» (вне промпта) */
+.inv-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.inv-status.on {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+
+/* Форма добавления: [Название][Описание][Запрещённое] + [свитч][Добавить] */
+.inv-form {
+  display: grid;
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
+}
+.inv-form .input {
+  width: 100%;
+}
+.inv-desc-input {
+  resize: vertical;
+  min-height: 34px;
+}
+.inv-form-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.inv-form-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.inv-form-foot .btn-add {
+  flex: 1;
+}
+
+/* Бейдж нарушения инварианта в шапке чата (SSE invariant_violation) */
+.invariant-badge {
+  display: inline-block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  padding: 2px 10px;
+  border: 1px solid var(--danger);
+  border-radius: var(--r-pill);
+  background: var(--danger-soft);
+  color: var(--danger);
 }

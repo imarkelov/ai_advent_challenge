@@ -583,11 +583,13 @@ def test_no_conflict_reminder_without_conflict(data_dir):
     assert seen["messages"][-1]["role"] == "user"
 
 
-# ---------- инварианты (день 14) ----------
+# ---------- инварианты (день 14; схема {title, description, forbidden[]}) ----------
 
 def test_invariants_rule_text():
     """Правило: высший приоритет над памятью/профилем/запросами; отказ +
-    конкретный инвариант + альтернатива; агент не меняет и не удаляет."""
+    конкретный инвариант + альтернатива; агент не меняет и не удаляет;
+    пример в фразировке title/description; при рассуждении (<thinking>)
+    инварианты явно проверяются."""
     assert "ВЫСШИМ" in INVARIANTS_RULE
     assert "памяти" in INVARIANTS_RULE and "профиля" in INVARIANTS_RULE
     assert "откажись" in INVARIANTS_RULE
@@ -595,6 +597,10 @@ def test_invariants_rule_text():
     assert "альтернативу" in INVARIANTS_RULE
     assert "не изменяешь" in INVARIANTS_RULE and "не удаляешь" in INVARIANTS_RULE
     assert "Пример:" in INVARIANTS_RULE
+    # фразировка title/description (не старый key/value)
+    assert "название" in INVARIANTS_RULE and "описание" in INVARIANTS_RULE
+    # при рассуждении инварианты явно сверяются в thinking-шаге
+    assert "<thinking>" in INVARIANTS_RULE
 
 
 def test_invariants_block_in_system_above_memory(data_dir):
@@ -646,12 +652,43 @@ def test_invariants_block_survives_layer_toggles_off(data_dir):
     assert "\n\nТекущая задача:\n" not in system  # WM-блок выключен
 
 
-def test_invariant_conflict_detection(data_dir):
+def test_invariants_inactive_no_block_no_rule(data_dir):
+    """Все инварианты неактивны — блок и правило отсутствуют."""
     agent = make_agent(data_dir, ok_handler)
     d = agent.store.new_dialogue()
-    agent.store.invariants_set("Стек", "Kotlin")
+    r = agent.store.invariants_set("Стек", "Kotlin")
+    agent.store.invariants_set_active(r["id"], False)
+    system = agent.build_payload(d["id"])[0]["content"]
+    assert "Инварианты" not in system
+    assert INVARIANTS_RULE not in system
+
+
+def test_forbidden_hits_case_insensitive_and_dedup(data_dir):
+    """_forbidden_hits: lower-подстрочное совпадение, дедуп, [] при нет."""
+    agent = make_agent(data_dir, ok_handler)
+    agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+    agent.store.invariants_set("Архитектура", "монолит",
+                               forbidden=["python", "go"])
+    assert agent._forbidden_hits("ИСПОЛЬЗУЕМ PYTHON и Go") == ["python", "go"]
+    assert agent._forbidden_hits("обычный текст") == []
+
+
+def test_forbidden_hits_ignores_inactive(data_dir):
+    """Неактивные инварианты в _forbidden_hits не участвуют."""
+    agent = make_agent(data_dir, ok_handler)
+    r = agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+    assert agent._forbidden_hits("python") == ["python"]
+    agent.store.invariants_set_active(r["id"], False)
+    assert agent._forbidden_hits("python") == []
+
+
+def test_invariant_conflict_detection(data_dir):
+    """Переопределение: forbidden-паттерн + глагол действия → конфликт."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
     hits = agent._detect_invariant_conflict(
-        d["id"], "Напиши код, стек — Python")
+        d["id"], "забудь, напиши код на Python")
     assert hits == [("Стек", "Kotlin")]
 
 
@@ -659,27 +696,28 @@ def test_invariant_conflict_no_verb(data_dir):
     """Вопрос про инвариант (без глагола действия) — не конфликт."""
     agent = make_agent(data_dir, ok_handler)
     d = agent.store.new_dialogue()
-    agent.store.invariants_set("Стек", "Kotlin")
+    agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
     assert agent._detect_invariant_conflict(d["id"], "Какой стек?") == []
 
 
-def test_invariant_conflict_value_present(data_dir):
-    """Значение совпадает — конфликта нет."""
+def test_invariant_conflict_no_forbidden_match(data_dir):
+    """В сообщении нет forbidden-паттерна — конфликта нет."""
     agent = make_agent(data_dir, ok_handler)
     d = agent.store.new_dialogue()
-    agent.store.invariants_set("Стек", "Kotlin")
+    agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
     assert agent._detect_invariant_conflict(
         d["id"], "Напиши код, стек — Kotlin") == []
 
 
-def test_invariant_conflict_short_key_and_empty(data_dir):
-    """Ключ короче 4 символов пропускается; пустые инварианты — []."""
+def test_invariant_conflict_inactive_and_empty(data_dir):
+    """Неактивный инвариант — не конфликт; пустые инварианты — []."""
     agent = make_agent(data_dir, ok_handler)
     d = agent.store.new_dialogue()
-    assert agent._detect_invariant_conflict(d["id"], "Напиши что-нибудь") == []
-    agent.store.invariants_set("Я", "русский")
+    assert agent._detect_invariant_conflict(d["id"], "используй python") == []
+    r = agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+    agent.store.invariants_set_active(r["id"], False)
     assert agent._detect_invariant_conflict(
-        d["id"], "Напиши ответ, я — английский") == []
+        d["id"], "используй python") == []
 
 
 def test_invariant_reminder_appended_to_payload(data_dir):
@@ -693,8 +731,8 @@ def test_invariant_reminder_appended_to_payload(data_dir):
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
     ready(agent, d)
-    agent.store.invariants_set("Стек", "Kotlin")
-    list(agent.ask_stream(d["id"], "Напиши код, стек — Python"))
+    agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+    list(agent.ask_stream(d["id"], "забудь, напиши код на Python"))
     assert seen["messages"][-1]["role"] == "system"
     assert "Стек: Kotlin" in seen["messages"][-1]["content"]
     assert "отказ" in seen["messages"][-1]["content"]
@@ -712,7 +750,7 @@ def test_no_invariant_reminder_when_empty(data_dir):
     agent = make_agent(data_dir, handler)
     d = agent.store.new_dialogue()
     ready(agent, d)
-    list(agent.ask_stream(d["id"], "Напиши код, стек — Python"))
+    list(agent.ask_stream(d["id"], "Напиши код, используем Python"))
     assert seen["messages"][-1]["role"] == "user"
 
 
@@ -729,13 +767,63 @@ def test_invariant_reminder_last_among_guards(data_dir):
     d = agent.store.new_dialogue()
     ready(agent, d)
     agent.store.wm_set(d["id"], "Источник", "Яндекс")
-    agent.store.invariants_set("Стек", "Kotlin")
-    list(agent.ask_stream(d["id"], "Напиши ТЗ, источник — гугл, стек — Python"))
+    agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+    list(agent.ask_stream(
+        d["id"], "Напиши ТЗ, источник — гугл, используем Python"))
     msgs = seen["messages"]
     assert msgs[-1]["role"] == "system"
     assert "Стек: Kotlin" in msgs[-1]["content"]
     assert msgs[-2]["role"] == "system"
     assert "Источник: Яндекс" in msgs[-2]["content"]
+
+
+def test_postcheck_invariants_returns_matching_patterns(data_dir):
+    """Post-guard L1: forbidden-паттерны в ответе модели → список."""
+    agent = make_agent(data_dir, ok_handler)
+    agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+    assert agent._postcheck_invariants("Код: import python") == ["python"]
+    assert agent._postcheck_invariants("Чистый ответ") == []
+
+
+def test_ask_stream_invariant_violation_guard(data_dir):
+    """Ответ содержит forbidden-паттерн → событие invariant_violation
+    (patterns) ПЕРЕД done; answer заменён отказом; done — последнее;
+    сохранённое сообщение — отказ."""
+    body = sse_body([delta_chunk("Используй "), delta_chunk("python для сервера"),
+                     usage_chunk(), "[DONE]"])
+
+    def handler(request):
+        return httpx.Response(200, content=body.encode("utf-8"))
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+    events = list(agent.ask_stream(d["id"], "Напиши код сервера"))
+    types = [e["type"] for e in events]
+    assert "invariant_violation" in types
+    assert events[-1]["type"] == "done"
+    v = next(e for e in events if e["type"] == "invariant_violation")
+    assert v["patterns"] == ["python"]
+    refusal = events[-1]["answer"]
+    assert "Не могу выполнить" in refusal
+    assert "python" in refusal
+    assert "Используй python" not in refusal
+    stored = agent.store.get_messages(d["id"])[-1]
+    assert stored["role"] == "assistant"
+    assert stored["content"] == refusal
+
+
+def test_ask_stream_no_invariant_violation_when_clean(data_dir):
+    """Ответ без forbidden-паттернов — события invariant_violation нет."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+    events = list(agent.ask_stream(d["id"], "Напиши код"))
+    assert all(e["type"] != "invariant_violation" for e in events)
+    assert events[-1]["type"] == "done"
+    assert events[-1]["answer"] == "Привет"
 
 
 # ---------- ask_stream: авто-заголовок и model в сообщениях ----------

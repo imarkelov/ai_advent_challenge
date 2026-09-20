@@ -25,6 +25,7 @@ import {
   deleteInvariant as apiDeleteInvariant,
   getInvariants,
   taskStream,
+  toggleInvariant as apiToggleInvariant,
   type ChatEvent,
   type Invariant,
   type TaskEvent,
@@ -164,8 +165,12 @@ export interface StudioState {
   lastRequest: RequestDetail | null
   // Вкладка правой панели «Контекст» (день 12)
   contextTab: ContextTab
-  // Инварианты (день 14): неизменяемые правила, всегда активны
+  // Инварианты (день 14): жёсткие правила (ассистент не меняет, пользователь — вкл/выкл)
   invariants: Invariant[]
+  // Нарушение активного инварианта (SSE invariant_violation, день 14):
+  // паттерны последнего ответа с нарушением; transient — сбрасывается при
+  // новом сообщении (user-message) и при смене диалога; null — нарушения нет
+  invariantViolation: string[] | null
 }
 
 // Ключ localStorage для тумблера «Показывать запросы»
@@ -210,6 +215,7 @@ export function initialState(): StudioState {
     lastRequest: null,
     contextTab: 'memory',
     invariants: [],
+    invariantViolation: null,
   }
 }
 
@@ -307,6 +313,7 @@ export type StudioAction =
   | { type: 'show-requests'; on: boolean }
   | { type: 'context-tab'; tab: ContextTab }
   | { type: 'invariants'; invariants: Invariant[] }
+  | { type: 'invariant-violation'; patterns: string[] }
 
 // Чистый reducer: все переходы состояния без побочных эффектов
 export function reducer(state: StudioState, action: StudioAction): StudioState {
@@ -338,6 +345,8 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
           : state.tasks,
         activeId: action.activeId,
         messages: [],
+        // новый диалог — нарушение инварианта прежнего ответа не несём
+        invariantViolation: null,
       }
     case 'activated':
       return {
@@ -347,9 +356,17 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
         profiles: profilesFrom(action.dialogues),
         tasks: tasksFrom(action.dialogues),
         messages: action.messages,
+        // смена диалога — transient-флаг нарушения не пересекает границу
+        invariantViolation: null,
       }
     case 'user-message':
-      return { ...state, messages: [...state.messages, action.message], streaming: true }
+      // новая очередь — флаг нарушения предыдущего ответа сбрасывается
+      return {
+        ...state,
+        messages: [...state.messages, action.message],
+        streaming: true,
+        invariantViolation: null,
+      }
     case 'delta':
       return { ...state, messages: appendDelta(state.messages, action.text) }
     case 'done':
@@ -453,6 +470,9 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
       return { ...state, contextTab: action.tab }
     case 'invariants':
       return { ...state, invariants: action.invariants }
+    case 'invariant-violation':
+      // SSE invariant_violation (до done): бейдж нарушения в шапке чата
+      return { ...state, invariantViolation: action.patterns }
   }
 }
 
@@ -488,11 +508,19 @@ export interface StudioApi {
   setContextTab: (tab: ContextTab) => void
   refreshMemory: () => Promise<void>
   setMemoryToggle: (layer: 'st' | 'wm' | 'lt', on: boolean) => Promise<void>
-  // Инварианты (день 14): перечитать/добавить/удалить — все перечитывают
-  // список после ответа API (паттерн refreshMemory)
+  // Инварианты (день 14): перечитать/добавить/переключить/удалить — все
+  // перечитывают список после ответа API (паттерн refreshMemory)
   refreshInvariants: () => Promise<void>
-  addInvariant: (key: string, value: string) => Promise<void>
+  addInvariant: (
+    title: string,
+    description: string,
+    forbidden: string[],
+    is_active?: boolean,
+  ) => Promise<void>
+  toggleInvariant: (id: string) => Promise<void>
   deleteInvariant: (id: string) => Promise<void>
+  // Паттерны последнего ответа с нарушением активного инварианта (null — нет)
+  invariantViolation: string[] | null
   reloadDialogue: () => Promise<void>
   deleteDialogues: (ids: string[]) => Promise<void>
   renameDialogue: (id: string, title: string) => Promise<void>
@@ -801,6 +829,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         await chatStream(id, trimmed, (e: ChatEvent) => {
           if (e.type === 'delta') {
             dispatch({ type: 'delta', text: e.text })
+          } else if (e.type === 'invariant_violation') {
+            // нарушение активного инварианта (до done): бейдж в шапке чата
+            dispatch({ type: 'invariant-violation', patterns: e.patterns })
           } else if (e.type === 'done') {
             dispatch({ type: 'done', answer: e.answer })
             void refreshPanels(e.request_id).catch((err) => console.error('refreshPanels:', err))
@@ -862,10 +893,20 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'invariants', invariants: await getInvariants() })
   }, [])
 
-  // Добавить инвариант: POST /api/invariants → перечитать список
+  // Добавить инвариант: POST /api/invariants {title, description, forbidden, is_active}
+  // → перечитать список
   const addInvariant = useCallback(
-    async (key: string, value: string) => {
-      await apiAddInvariant(key, value)
+    async (title: string, description: string, forbidden: string[], is_active: boolean = true) => {
+      await apiAddInvariant(title, description, forbidden, is_active)
+      await refreshInvariants()
+    },
+    [refreshInvariants],
+  )
+
+  // Переключить инвариант: POST /api/invariants/{id}/toggle → перечитать список
+  const toggleInvariant = useCallback(
+    async (id: string) => {
+      await apiToggleInvariant(id)
       await refreshInvariants()
     },
     [refreshInvariants],
@@ -948,7 +989,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setMemoryToggle,
     refreshInvariants,
     addInvariant,
+    toggleInvariant,
     deleteInvariant,
+    invariantViolation: state.invariantViolation,
     reloadDialogue,
     deleteDialogues,
     renameDialogue,

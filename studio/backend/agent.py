@@ -86,14 +86,17 @@ INVARIANTS_RULE = (
     "другое значение для того же предмета) — откажись предлагать "
     "нарушающее решение: назови конкретный инвариант, объясни, почему "
     "нарушение невозможно, и предложи альтернативу в рамках "
-    "инвариантов. Не предлагай обходных путей, игнорирующих инвариант, "
-    "даже если пользователь настаивает или повторяет запрос. Инварианты "
-    "ты не изменяешь и не удаляешь — ими управляет только пользователь. "
-    "Пример: инвариант «Стек: Kotlin», запрос «напиши код на Python» → "
-    "ты: «Не могу: по инварианту «Стек» стек проекта — Kotlin, и менять "
-    "это я не вправе. Могу написать аналогичную логику на Kotlin — "
-    "сделать?» Если противоречия нет — отвечай как обычно, соблюдая "
-    "инварианты."
+    "инвариантов. При рассуждении (<thinking>) явно сверяй план ответа "
+    "с каждым инвариантом: нарушение, замеченное на шаге рассуждения, — "
+    "уже основание для отказа, дописывать такой ответ нельзя. Не "
+    "предлагай обходных путей, игнорирующих инвариант, даже если "
+    "пользователь настаивает или повторяет запрос. Инварианты ты не "
+    "изменяешь и не удаляешь — ими управляет только пользователь. "
+    "Пример: инвариант с названием «Стек» и описанием «Kotlin», запрос "
+    "«напиши код на Python» → ты: «Не могу: по инварианту «Стек» стек "
+    "проекта — Kotlin, и менять это я не вправе. Могу написать "
+    "аналогичную логику на Kotlin — сделать?» Если противоречия нет — "
+    "отвечай как обычно, соблюдая инварианты."
 )
 
 JOURNAL_CAP = 100  # максимум записей в журнале (FIFO)
@@ -500,6 +503,19 @@ class StudioAgent:
             return
 
         answer = "".join(parts)
+        # День 14: post-response гард (L1, детерминированный, без LLM):
+        # ответ с forbidden-паттерном активного инварианта заменяется
+        # отказом; L2 (вторичный LLM) — вне текущей области (см.
+        # _postcheck_invariants). Отказ сохраняется как assistant-сообщение
+        # и уходит в done (done — всегда последнее событие).
+        hits = self._postcheck_invariants(answer)
+        violation = bool(hits)
+        if violation:
+            answer = ("Не могу выполнить: это нарушит инвариант. "
+                      f"Нарушающее содержимое: {', '.join(hits)}. "
+                      "Инварианты — жёсткие неизменяемые правила, я "
+                      "обязан их соблюдать. Предложи альтернативу в "
+                      "рамках инвариантов.")
         self.store.append_message(dialogue_id, "assistant", answer,
                                   model=cfg["model"])
         if usage:
@@ -508,6 +524,8 @@ class StudioAgent:
             self._session["total"] += usage.get("total_tokens", 0)
             self._last_usage = usage
         rid = self._append_request_log(cfg["model"], body, usage, None)
+        if violation:
+            yield {"type": "invariant_violation", "patterns": hits}
         yield {"type": "done", "answer": answer, "usage": usage, "request_id": rid}
 
     # ---------- журнал запросов (requests.json) ----------
@@ -1035,27 +1053,51 @@ class StudioAgent:
                 hits.append((key, value))
         return hits
 
+    def _forbidden_hits(self, text: str) -> list:
+        """Forbidden-паттерны АКТИВНЫХ инвариантов, встречающиеся в text
+        (lower-подстрочное совпадение, без учёта регистра). Детерминировано,
+        LLM не участвует. Возвращает список совпавших паттернов (дедуп;
+        [] = ни один паттерн не встретился)."""
+        msg = text.lower()
+        found = []
+        for e in self.store.invariants_items().values():
+            if e["is_active"] is not True:
+                continue
+            for p in e["forbidden"]:
+                pl = p.lower().strip()
+                if pl and pl in msg and pl not in found:
+                    found.append(p)
+        return found
+
+    def _postcheck_invariants(self, answer: str) -> list:
+        """Post-response гард (день 14, уровень L1 — детерминированный,
+        без LLM): forbidden-паттерны активных инвариантов в ответе модели.
+        При срабатывании ask_stream заменяет ответ отказом.
+        Уровень L2 (семантическая сверка вторичным LLM) — будущее
+        расширение: результат L1 можно передать вторичной проверке, код
+        выстроен так, чтобы возвращать список L1."""
+        return self._forbidden_hits(answer)
+
     def _detect_invariant_conflict(self, dialogue_id: str,
                                    message: str) -> list:
         """Инварианты (день 14, глобальные), противоречащие запросу.
 
-        Зеркало _detect_memory_conflict: ключ встречается в сообщении,
-        значение НЕ встречается, в сообщении есть глагол действия; ключ
-        короче 4 символов пропускается. Инварианты глобальны и не
+        Попытка переопределения: в сообщении есть forbidden-паттерн
+        АКТИВНОГО инварианта (без учёта регистра) И глагол действия из
+        CONFLICT_VERBS (стиль memory-гарда: вопросы про инварианты без
+        глагола конфликтом не считаются). Инварианты глобальны и не
         подчиняются тумблерам слоёв (dialogue_id — для единообразия
-        сигнатуры с памятью). Возвращает список (key, value).
+        сигнатуры с памятью). Возвращает список (title, description).
         """
         msg = message.lower()
         if not any(v in msg for v in CONFLICT_VERBS):
             return []
         hits = []
         for e in self.store.invariants_items().values():
-            k = str(e["key"]).lower().strip()
-            v = str(e["value"]).lower().strip()
-            if len(k) < 4:
+            if e["is_active"] is not True:
                 continue
-            if k in msg and v and v not in msg:
-                hits.append((e["key"], e["value"]))
+            if any(p.lower() in msg for p in e["forbidden"]):
+                hits.append((e["title"], e["description"]))
         return hits
 
     def _extract_profile(self, model: str, answer: str) -> dict | None:

@@ -78,30 +78,69 @@ export function apiPostProfileAction(
   return apiPost('/profile/action', { dialogue_id, action })
 }
 
-// ── Инварианты (день 14) ────────────────────────────────────────────────────
-// Жёсткие неизменяемые правила ассистента: всегда активны, не отключаемы
-// (в отличие от слоёв памяти — без тумблеров).
-// GET    /api/invariants          → {invariants: [{id, key, value}]}
-// POST   /api/invariants {key,value} → {invariant}
-// DELETE /api/invariants/{id}     → {ok}
+// ── Инварианты (день 14, новая схема) ───────────────────────────────────────
+// Жёсткие правила ассистента: ассистент их не меняет и не удаляет
+// (неизменяемый слой), но пользователь включает/выключает каждый инвариант
+// (is_active; выключенный не уходит в промпт).
+// GET    /api/invariants                              → {invariants: [...]}
+// POST   /api/invariants {title,description,forbidden,is_active} → {invariant}
+// POST   /api/invariants/{id}/toggle                  → {invariant}
+// DELETE /api/invariants/{id}                         → {ok}
 
 export interface Invariant {
   id: string
-  key: string
-  value: string
+  title: string
+  description: string
+  forbidden: string[]
+  is_active: boolean
+}
+
+// Запись старой схемы (бэкенд не мигрирован): {id, key, value}
+type RawInvariant = {
+  id: string
+  title?: string
+  description?: string
+  forbidden?: string[]
+  is_active?: boolean
+  key?: string
+  value?: string
+}
+
+// Нормализация записи из API в новую схему: старые поля key/value
+// маппятся в title/description, отсутствие forbidden/is_active — по умолчанию
+function normalizeInvariant(raw: RawInvariant): Invariant {
+  return {
+    id: raw.id,
+    title: raw.title ?? raw.key ?? '',
+    description: raw.description ?? raw.value ?? '',
+    forbidden: raw.forbidden ?? [],
+    is_active: raw.is_active ?? true,
+  }
 }
 
 // Список инвариантов (нет поля invariants — старый бэкенд → пустой список)
 export async function getInvariants(): Promise<Invariant[]> {
-  const r = await apiGet<{ invariants?: Invariant[] }>('/invariants')
-  return r.invariants ?? []
+  const r = await apiGet<{ invariants?: RawInvariant[] }>('/invariants')
+  return (r.invariants ?? []).map(normalizeInvariant)
 }
 
-// Добавить инвариант: POST /api/invariants {key, value} → {invariant}
-export function addInvariant(key: string, value: string): Promise<Invariant> {
-  return apiPost<{ invariant: Invariant }>('/invariants', { key, value }).then(
-    (r) => r.invariant,
-  )
+// Добавить инвариант: POST /api/invariants {title, description, forbidden, is_active}
+// (is_active по умолчанию true) → {invariant}
+export function addInvariant(
+  title: string,
+  description: string,
+  forbidden: string[],
+  is_active: boolean = true,
+): Promise<Invariant> {
+  return apiPost<{ invariant: RawInvariant }>('/invariants', {
+    title, description, forbidden, is_active,
+  }).then((r) => normalizeInvariant(r.invariant))
+}
+
+// Переключить инвариант: POST /api/invariants/{id}/toggle → {invariant}
+export function toggleInvariant(id: string): Promise<Invariant> {
+  return apiPost<{ invariant: RawInvariant }>(`/invariants/${encodeURIComponent(id)}/toggle`)
+    .then((r) => normalizeInvariant(r.invariant))
 }
 
 // Удалить инвариант: DELETE /api/invariants/{id}
@@ -250,11 +289,14 @@ export async function taskStream(
 // ── SSE-контракт дня 11 ─────────────────────────────────────────────────────
 // POST /api/chat {dialogue_id, message} → поток кадров `data: {json}\n\n`:
 //   {"type":"delta","text"} — кусок ответа
+//   {"type":"invariant_violation","patterns"} — нарушен активный инвариант (до done, день 14)
 //   {"type":"done","answer","usage","request_id"} — готово
 //   {"type":"error","message"} — ошибка генерации
 
 export type ChatEvent =
   | { type: 'delta'; text: string }
+  // Нарушение активного инварианта: приходит ДО done (день 14)
+  | { type: 'invariant_violation'; patterns: string[] }
   | { type: 'done'; answer: string; usage: Record<string, unknown> | null; request_id: number }
   | { type: 'error'; message: string }
 

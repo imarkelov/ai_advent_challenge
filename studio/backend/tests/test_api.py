@@ -332,19 +332,26 @@ def test_invariants_crud_routes(client):
     r = client.get("/api/invariants")
     assert r.status_code == 200
     assert r.json() == {"invariants": []}
-    # создание
-    r = client.post("/api/invariants", json={"key": "Стек", "value": "Kotlin"})
+    # создание (новая схема)
+    r = client.post("/api/invariants", json={
+        "title": "Стек", "description": "Kotlin", "forbidden": ["python"]})
     assert r.status_code == 201
     rec = r.json()["invariant"]
-    assert rec["key"] == "Стек" and rec["value"] == "Kotlin"
     assert rec["id"].startswith("inv_")
+    assert {k: rec[k] for k in ("title", "description", "forbidden",
+                                "is_active")} == {
+        "title": "Стек", "description": "Kotlin",
+        "forbidden": ["python"], "is_active": True}
     # в списке
     assert client.get("/api/invariants").json()["invariants"] == [rec]
-    # обновление по key: id сохраняется, значение меняется
-    r2 = client.post("/api/invariants", json={"key": "Стек", "value": "Java"})
+    # обновление по title: id сохраняется, поля меняются
+    r2 = client.post("/api/invariants", json={
+        "title": "Стек", "description": "Java",
+        "forbidden": ["python", "go"], "is_active": False})
     assert r2.status_code == 201
     assert r2.json()["invariant"]["id"] == rec["id"]
-    assert r2.json()["invariant"]["value"] == "Java"
+    assert r2.json()["invariant"]["description"] == "Java"
+    assert r2.json()["invariant"]["is_active"] is False
     assert len(client.get("/api/invariants").json()["invariants"]) == 1
     # удаление
     assert client.delete(f"/api/invariants/{rec['id']}").json() == {"ok": True}
@@ -355,22 +362,51 @@ def test_invariants_crud_routes(client):
 
 def test_invariants_post_invalid_400(client):
     # отсутствует поле
-    assert client.post("/api/invariants", json={"key": "k"}).status_code == 400
-    assert client.post("/api/invariants", json={"value": "v"}).status_code == 400
+    assert client.post("/api/invariants", json={"title": "t"}).status_code == 400
+    assert client.post("/api/invariants", json={"description": "d"}).status_code == 400
     # пустое / не str
-    assert client.post("/api/invariants", json={"key": "", "value": "v"}).status_code == 400
-    assert client.post("/api/invariants", json={"key": "k", "value": "  "}).status_code == 400
-    assert client.post("/api/invariants", json={"key": 5, "value": "v"}).status_code == 400
-    assert client.post("/api/invariants", json={"key": "k", "value": 7}).status_code == 400
+    assert client.post("/api/invariants", json={"title": "", "description": "d"}).status_code == 400
+    assert client.post("/api/invariants", json={"title": "t", "description": "  "}).status_code == 400
+    assert client.post("/api/invariants", json={"title": 5, "description": "d"}).status_code == 400
+    assert client.post("/api/invariants", json={"title": "t", "description": 7}).status_code == 400
+    # forbidden не список строк
+    assert client.post("/api/invariants", json={"title": "t", "description": "d",
+                                                "forbidden": "python"}).status_code == 400
+    assert client.post("/api/invariants", json={"title": "t", "description": "d",
+                                                "forbidden": ["python", 5]}).status_code == 400
+    # is_active не bool
+    assert client.post("/api/invariants", json={"title": "t", "description": "d",
+                                                "is_active": "yes"}).status_code == 400
     # после ошибок инвариантов нет
     assert client.get("/api/invariants").json() == {"invariants": []}
+
+
+def test_invariants_toggle_route(client):
+    r = client.post("/api/invariants", json={"title": "Стек", "description": "Kotlin"})
+    assert r.status_code == 201
+    iid = r.json()["invariant"]["id"]
+    # flip (body опционально)
+    r2 = client.post(f"/api/invariants/{iid}/toggle")
+    assert r2.status_code == 200
+    assert r2.json()["invariant"]["is_active"] is False
+    assert r2.json()["invariant"]["title"] == "Стек"
+    # явное значение
+    r3 = client.post(f"/api/invariants/{iid}/toggle", json={"is_active": True})
+    assert r3.status_code == 200
+    assert r3.json()["invariant"]["is_active"] is True
+    # is_active не bool — 400
+    assert client.post(f"/api/invariants/{iid}/toggle",
+                       json={"is_active": "yes"}).status_code == 400
+    # не найден — 404
+    assert client.post("/api/invariants/nope/toggle").status_code == 404
+    assert "не найден" in client.post("/api/invariants/nope/toggle").json()["detail"]
 
 
 def test_rules_includes_invariants_block(client):
     r = client.get("/api/rules")
     assert r.status_code == 200
     assert r.json()["invariants_block"] == ""
-    client.post("/api/invariants", json={"key": "Стек", "value": "Kotlin"})
+    client.post("/api/invariants", json={"title": "Стек", "description": "Kotlin"})
     r2 = client.get("/api/rules")
     assert r2.json()["invariants_block"] == (
         "\n\nИнварианты (неукоснительно):\n- Стек: Kotlin")
@@ -379,13 +415,62 @@ def test_rules_includes_invariants_block(client):
 def test_memory_get_includes_invariants(client):
     m = client.get("/api/memory").json()
     assert m["invariants"] == {"entries": 0, "tokens_est": 0, "items": {}}
-    client.post("/api/invariants", json={"key": "Стек", "value": "Kotlin"})
+    client.post("/api/invariants", json={"title": "Стек", "description": "Kotlin"})
     m2 = client.get("/api/memory").json()
     assert m2["invariants"]["entries"] == 1
     items = m2["invariants"]["items"]
     assert len(items) == 1
-    assert all(set(v) == {"key", "value"} for v in items.values())
-    assert next(iter(items.values())) == {"key": "Стек", "value": "Kotlin"}
+    assert next(iter(items.values())) == {
+        "title": "Стек", "description": "Kotlin",
+        "forbidden": [], "is_active": True}
+
+
+def test_chat_invariant_violation_post_guard(tmp_path):
+    """Post-guard (L1): ответ содержит forbidden-паттерн → событие
+    invariant_violation (patterns) и done с отказом; done — последнее;
+    сохранённое сообщение — отказ. LLM — MockTransport."""
+    d = tmp_path / "data"
+    d.mkdir()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = json.loads(request.content)
+        # non-stream — авто-заголовок
+        if "stream" not in payload:
+            return httpx.Response(200, json={"choices": [
+                {"message": {"content": "E2E-название"}}]})
+        body = sse_body([delta_chunk("Используй python"), usage_chunk(), "[DONE]"])
+        return httpx.Response(200, content=body.encode("utf-8"))
+
+    from main import create_app
+    agent = StudioAgent(str(d), base_url="https://mock.local/v1",
+                        api_key="test-key",
+                        client=httpx.Client(transport=httpx.MockTransport(handler)))
+    client = TestClient(create_app(agent))
+    did = client.post("/api/dialogues").json()["dialogue"]["id"]
+    client.post("/api/profile/action", json={"dialogue_id": did,
+                                             "action": "decline"})
+    r = client.post("/api/invariants", json={"title": "Стек",
+                                             "description": "Kotlin",
+                                             "forbidden": ["python"]})
+    assert r.status_code == 201
+    with client.stream("POST", "/api/chat",
+                       json={"dialogue_id": did, "message": "Напиши код"}) as resp:
+        assert resp.status_code == 200
+        lines = list(resp.iter_lines())
+    events = parse_sse(lines)
+    types = [e["type"] for e in events]
+    assert "invariant_violation" in types
+    assert events[-1]["type"] == "done"
+    v = next(e for e in events if e["type"] == "invariant_violation")
+    assert v["patterns"] == ["python"]
+    done = events[-1]
+    assert "Не могу выполнить" in done["answer"]
+    assert "python" in done["answer"]
+    assert "Используй python" not in done["answer"]
+    # сохранённый ответ — отказ
+    msgs = client.get(f"/api/dialogues/{did}").json()["dialogue"]["messages"]
+    assert msgs[-1]["role"] == "assistant"
+    assert msgs[-1]["content"] == done["answer"]
 
 
 # ---------- /api/tokens ----------

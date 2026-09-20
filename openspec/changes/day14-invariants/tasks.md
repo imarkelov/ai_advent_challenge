@@ -137,3 +137,91 @@
 
 - [ ] **T8.1** Финальная верификация: `cd studio/backend && python -m pytest -q` (зелёный), `cd studio/frontend && npx tsc --noEmit && npm test` (зелёный), `python scripts/e2e_studio.py` exit 0 — проверить: все зелёные.
 - [ ] **T8.2** Коммит(ы) на `day14-invariants` по конвенции репозитория (проверить `git status`; застажить только нужные файлы: backend/frontend/e2e/README/openspec).
+
+---
+
+## Дополнение: миграция схемы инвариантов + пост-гард (реализовано)
+
+> Дополнение (ничего не удалено): исходный план описывал инвариант как
+> `{id, key, value}` без тумблера и без запрещённых паттернов. В ходе
+> реализации схема финализирована и расширена. Ниже — фактически
+> реализованные шаги, помеченные как выполненные; исходные пункты выше
+> остаются как история.
+
+### Обновление схемы и сервисный слой (memory.py)
+
+- [x] **U1.1** `invariants_set(title, description, forbidden=None, is_active=True)`
+  — валидация: title/description непустые str (`ValueError`), forbidden —
+  список str (отосечён от пробелов), is_active — bool; обновление по `title`
+  сохраняет прежний `id` (`"inv_" + 4 hex`).
+- [x] **U1.2** `invariants_set_active(iid, active)` — тумблер `is_active`
+  (True/False); `None`, если `id` не найден; `ValueError` на не-bool.
+- [x] **U1.3** `build_invariants_block()` → включает только **активные**
+  (`is_active is True`) инварианты, формат `- title: description`; `""` при
+  отсутствии активных.
+- [x] **U1.4** Обратная совместимость на чтении: старое представление
+  `{key, value}` → `{title:key, description:value, forbidden:[], is_active:true}`;
+  записи без непустых title/description отбрасываются.
+
+### Гарды (agent.py)
+
+- [x] **U2.1** `_forbidden_hits(text)` — forbidden-паттерны **активных**
+  инвариантов в тексте (lower-подстрочное, без учёта регистра, дедуп);
+  детерминировано, без LLM.
+- [x] **U2.2** `_detect_invariant_conflict(dialogue_id, message)` — попытка
+  переопределения: forbidden-паттерн активного инварианта в сообщении **И**
+  глагол из `CONFLICT_VERBS` (вопросы без глагола — не конфликт). Возвращает
+  список `(title, description)`.
+- [x] **U2.3** `_postcheck_invariants(answer)` — **пост-гард L1**
+  (детерминированный, без L2-LLM): forbidden-паттерны активных инвариантов в
+  ответе модели; при срабатывании `ask_stream` заменяет `answer` отказом и
+  перед `done` отдаёт SSE-событие `{"type":"invariant_violation",
+  "patterns":[...]}`.
+- [x] **U2.4** `INVARIANTS_RULE` — текст обновлён: инварианты высший приоритет,
+  обязательно называть конкретный инвариант, объяснить отказ, предложить
+  альтернативу в рамках инвариантов.
+- [x] **U2.5** Pre-guard в `ask_stream`: при срабатывании инвариантов в конец
+  `messages` system-напоминание «запрос противоречит инварианту X — откажись».
+
+### API (main.py)
+
+- [x] **U3.1** `POST /api/invariants` — новая схема `{title, description,
+  forbidden?, is_active?}`; 400 — пустой title/description, forbidden не список
+  строк, is_active не bool; 201 при успехе.
+- [x] **U3.2** `POST /api/invariants/{id}/toggle` — тумблер `is_active`
+  (200 / 404 не найден).
+- [x] **U3.3** `GET /api/rules` → + `invariants_block`; `GET /api/memory` → +
+  `invariants` в `layer_stats`.
+
+### Фронтенд (InvariantsTab / api.ts / state.tsx)
+
+- [x] **U4.1** Тип `Invariant {id, title, description, forbidden[], is_active}`;
+  `addInvariant(title, description, forbidden, is_active?)`,
+  `toggleInvariant(id)`; в `state.tsx` — экшены и флаг `invariantViolation`.
+- [x] **U4.2** Форма: поля title/description/forbidden (строки через запятую)
+  + свитч `is_active`; список с чипами паттернов, свитч вкл/выкл, удаление;
+  неактивный — видим, задиммлен.
+
+### E2E (scripts/e2e_studio.py)
+
+- [x] **U5.1** Блок «Инварианты»: GET 200 → POST 201 → GET содержит →
+  `GET /api/rules` `invariants_block` → `GET /api/memory` `invariants` entries
+  ≥ 1 → POST пустое → 400 → DELETE 200 → повтор DELETE 404. Прогон:
+
+  ```
+  22 PASS / 4 SKIP / 0 FAIL   (4 SKIP — истёкший SSL-сертификат GPustack;
+  все проверки инвариантов на новой схеме PASS)
+  ```
+
+### Верификация (выполнено)
+
+- [x] **U6.1** Бэкенд: `python -m pytest -q` → **262 passed** (2 безобидных
+  warnings), 10.81s.
+- [x] **U6.2** Фронтенд: `npx tsc --noEmit` → EXIT=0; `npm test` → **179 passed**
+  (15 файлов), 2.66s.
+- [x] **U6.3** Сборка: `npx vite build` → `index-C_H-Gtoy.js` (278.47 kB,
+  gzip 84.21 kB) + `index-CelcE2vd.css`.
+- [x] **U6.4** Live API (новая схема): POST 201 `{"id":"inv_e4b3",
+  "title":"e2e-inv","description":"Kotlin","forbidden":["python"],
+  "is_active":true}`; GET 200; toggle off → `is_active:false` + back;
+  400 на пустом `description`; DELETE 200 `{"ok":true}` + 404.
