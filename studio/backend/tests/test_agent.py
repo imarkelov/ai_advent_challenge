@@ -7,7 +7,7 @@ import json
 import httpx
 import pytest
 
-from agent import CONTEXT_LIMITS, MEMORY_RULE, StudioAgent
+from agent import CONTEXT_LIMITS, INVARIANTS_RULE, MEMORY_RULE, StudioAgent
 from conftest import USAGE, delta_chunk, sse_body, usage_chunk
 
 BASE = "https://mock.local/v1"
@@ -581,6 +581,161 @@ def test_no_conflict_reminder_without_conflict(data_dir):
     agent.store.wm_set(d["id"], "Источник", "Яндекс")
     list(agent.ask_stream(d["id"], "Расскажи анекдот"))
     assert seen["messages"][-1]["role"] == "user"
+
+
+# ---------- инварианты (день 14) ----------
+
+def test_invariants_rule_text():
+    """Правило: высший приоритет над памятью/профилем/запросами; отказ +
+    конкретный инвариант + альтернатива; агент не меняет и не удаляет."""
+    assert "ВЫСШИМ" in INVARIANTS_RULE
+    assert "памяти" in INVARIANTS_RULE and "профиля" in INVARIANTS_RULE
+    assert "откажись" in INVARIANTS_RULE
+    assert "конкретный инвариант" in INVARIANTS_RULE
+    assert "альтернативу" in INVARIANTS_RULE
+    assert "не изменяешь" in INVARIANTS_RULE and "не удаляешь" in INVARIANTS_RULE
+    assert "Пример:" in INVARIANTS_RULE
+
+
+def test_invariants_block_in_system_above_memory(data_dir):
+    """Порядок: базовый → профиль → инварианты → память → правило памяти;
+    INVARIANTS_RULE — в конце system."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    agent.store.profile_set(d["id"], "Иван", "роль", "тон", "")
+    agent.store.wm_set(d["id"], "t", "задача")
+    agent.store.lt_set("u", "юзер")
+    agent.store.invariants_set("Стек", "Kotlin")
+    base = agent.get_config()["system_prompt"]
+    expected = (base + "\n\nПрофиль пользователя:\n- Имя: Иван\n"
+                "- Роль и сфера: роль\n- Тон и стиль: тон"
+                + "\n\nИнварианты (неукоснительно):\n- Стек: Kotlin"
+                + "\n\nТекущая задача:\n- t: задача"
+                + "\n\nДолговременная память:\n- u: юзер"
+                + MEMORY_RULE + INVARIANTS_RULE)
+    assert agent.build_payload(d["id"])[0]["content"] == expected
+
+
+def test_invariants_empty_no_block_no_rule(data_dir):
+    """Пустые инварианты — блок и правило в system-промте отсутствуют."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    system = agent.build_payload(d["id"])[0]["content"]
+    assert "Инварианты" not in system
+    assert INVARIANTS_RULE not in system
+    # очистили — снова отсутствуют
+    agent.store.invariants_set("Стек", "Kotlin")
+    agent.store.invariants_clear()
+    system = agent.build_payload(d["id"])[0]["content"]
+    assert "Инварианты" not in system
+    assert INVARIANTS_RULE not in system
+
+
+def test_invariants_block_survives_layer_toggles_off(data_dir):
+    """Тумблеры слоёв памяти не затрагивают инварианты."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    agent.store.wm_set(d["id"], "t", "задача")
+    agent.store.invariants_set("Стек", "Kotlin")
+    agent.store.set_toggle("wm", False)
+    system = agent.build_payload(d["id"])[0]["content"]
+    assert "Инварианты (неукоснительно):\n- Стек: Kotlin" in system
+    assert INVARIANTS_RULE in system
+    assert "\n\nТекущая задача:\n" not in system  # WM-блок выключен
+
+
+def test_invariant_conflict_detection(data_dir):
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    agent.store.invariants_set("Стек", "Kotlin")
+    hits = agent._detect_invariant_conflict(
+        d["id"], "Напиши код, стек — Python")
+    assert hits == [("Стек", "Kotlin")]
+
+
+def test_invariant_conflict_no_verb(data_dir):
+    """Вопрос про инвариант (без глагола действия) — не конфликт."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    agent.store.invariants_set("Стек", "Kotlin")
+    assert agent._detect_invariant_conflict(d["id"], "Какой стек?") == []
+
+
+def test_invariant_conflict_value_present(data_dir):
+    """Значение совпадает — конфликта нет."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    agent.store.invariants_set("Стек", "Kotlin")
+    assert agent._detect_invariant_conflict(
+        d["id"], "Напиши код, стек — Kotlin") == []
+
+
+def test_invariant_conflict_short_key_and_empty(data_dir):
+    """Ключ короче 4 символов пропускается; пустые инварианты — []."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    assert agent._detect_invariant_conflict(d["id"], "Напиши что-нибудь") == []
+    agent.store.invariants_set("Я", "русский")
+    assert agent._detect_invariant_conflict(
+        d["id"], "Напиши ответ, я — английский") == []
+
+
+def test_invariant_reminder_appended_to_payload(data_dir):
+    """Конфликт → system-напоминание в КОНЦЕ messages (после user)."""
+    seen = {}
+
+    def handler(request):
+        seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    agent.store.invariants_set("Стек", "Kotlin")
+    list(agent.ask_stream(d["id"], "Напиши код, стек — Python"))
+    assert seen["messages"][-1]["role"] == "system"
+    assert "Стек: Kotlin" in seen["messages"][-1]["content"]
+    assert "отказ" in seen["messages"][-1]["content"]
+    assert seen["messages"][-2]["role"] == "user"
+
+
+def test_no_invariant_reminder_when_empty(data_dir):
+    """Пустые инварианты — напоминания нет."""
+    seen = {}
+
+    def handler(request):
+        seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    list(agent.ask_stream(d["id"], "Напиши код, стек — Python"))
+    assert seen["messages"][-1]["role"] == "user"
+
+
+def test_invariant_reminder_last_among_guards(data_dir):
+    """Инвариант + конфликт памяти: оба напоминания, инвариант ПОСЛЕДНИЙ
+    (высший приоритет — самое «свежее» место)."""
+    seen = {}
+
+    def handler(request):
+        seen["messages"] = json.loads(request.content)["messages"]
+        return ok_handler(request)
+
+    agent = make_agent(data_dir, handler)
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    agent.store.wm_set(d["id"], "Источник", "Яндекс")
+    agent.store.invariants_set("Стек", "Kotlin")
+    list(agent.ask_stream(d["id"], "Напиши ТЗ, источник — гугл, стек — Python"))
+    msgs = seen["messages"]
+    assert msgs[-1]["role"] == "system"
+    assert "Стек: Kotlin" in msgs[-1]["content"]
+    assert msgs[-2]["role"] == "system"
+    assert "Источник: Яндекс" in msgs[-2]["content"]
 
 
 # ---------- ask_stream: авто-заголовок и model в сообщениях ----------
