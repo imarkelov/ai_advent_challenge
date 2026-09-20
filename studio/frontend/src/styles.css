@@ -1310,3 +1310,26 @@ button {
 .mode-btn { flex: 1; padding: 4px 10px; font-size: 12px; border: 1px solid var(--border); background: transparent; border-radius: 8px; cursor: pointer; color: inherit; }
 .mode-btn.active { background: var(--panel-2); font-weight: 600; border-color: #1565c0; }
 .mode-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── День 14: инварианты (жёсткие правила) ───────────────────────── */
+/* Чип «неизменяемые» в заголовке карточки: тот же стиль, что .profile-chip */
+.invariants-chip {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--panel-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  color: var(--accent);
+}
+.invariants-chip[title] { cursor: help; }
+/* Пояснение под заголовком: инварианты всегда активны, не отключаемы */
+.invariants-note {
+  margin: 0 0 var(--sp-2);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+}
