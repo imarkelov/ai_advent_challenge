@@ -629,6 +629,10 @@ class StudioAgent:
             "model": cfg["model"],
             "temperature": cfg["temperature"],
             "max_tokens": cfg["max_tokens"],
+            # reasoning-модели (deepseek) по умолчанию «думают» и сжигают
+            # весь max_tokens-бюджет на размышления → пустой контент
+            # (паттерн _generate_title, день 11).
+            "chat_template_kwargs": {"enable_thinking": False},
             "messages": [{"role": "system", "content": system},
                          {"role": "user", "content": user}],
         }
@@ -653,6 +657,10 @@ class StudioAgent:
             "model": cfg["model"],
             "temperature": cfg["temperature"],
             "max_tokens": cfg["max_tokens"],
+            # reasoning-модели (deepseek) по умолчанию «думают» и сжигают
+            # весь max_tokens-бюджет на размышления → пустой контент
+            # (паттерн _generate_title, день 11).
+            "chat_template_kwargs": {"enable_thinking": False},
             "stream": True,
             "stream_options": {"include_usage": True},
             "messages": [{"role": "system", "content": system},

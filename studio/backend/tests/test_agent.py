@@ -1147,7 +1147,8 @@ def make_task_handler(steps, step_outputs, verdict="pass",
         body = json.loads(request.content)
         system = body["messages"][0]["content"]
         user = body["messages"][1]["content"]
-        calls.append({"system": system, "user": user, "stream": body.get("stream", False)})
+        calls.append({"system": system, "user": user,
+                      "stream": body.get("stream", False), "body": body})
         if fail_stage and fail_stage in system:
             return httpx.Response(500, text="boom") if body.get("stream") \
                 else httpx.Response(500, json={"error": "boom"})
@@ -1420,3 +1421,15 @@ class TestTaskRun13b:
         self.run_all(agent, d["id"])
         assert agent.store.task_get(d["id"])["stage"] == "done"
         assert list(agent.ask_stream(d["id"], "привет"))[-1]["type"] == "done"
+
+    def test_task_calls_disable_thinking(self, data_dir):
+        """Task-вызовы LLM: enable_thinking=False. Reasoning-модели
+        (deepseek) по умолчанию «думают» и сжигают весь max_tokens-бюджет
+        на размышления → контент-ответ пуст («Пустой ответ модели»).
+        Паттерн — авто-название дня 11 (_generate_title)."""
+        handler, calls = make_task_handler(["A"], {"A": "Результат шага A"})
+        agent, did = self._setup(data_dir, handler)
+        self.run_all(agent, did)
+        assert calls  # и stage-вызовы, и stream-вызовы work-шага
+        assert all(c["body"].get("chat_template_kwargs")
+                   == {"enable_thinking": False} for c in calls)
