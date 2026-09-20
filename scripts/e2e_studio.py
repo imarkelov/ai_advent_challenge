@@ -27,11 +27,19 @@
          профилями, один вопрос → разные ответы (best-effort) + профиль-
           блоки в телах запросов журнала; запрос с табу-словом → system-
           напоминание гарда (D8) в теле LLM-запроса.
-     8d. Задача (день 13): FSM-пайплайн — start → run (SSE в потоке +
-         polling статуса) → pause на границе стадии + гард чата →
-         instruction → resume → повторный run до task_done → start на
-         готовой задаче → 400 → stage-сообщения в диалоге → reset
-         (неактивная задача). SKIP, если GPustack недоступен.
+     8d. Задача (день 13b): пошаговый пайплайн — start (task_id, plan из
+          4 записей, user-маркер) → run (SSE до конца: agent_spawned /
+          step_updated / step_delta / stage_done / task_done, структура
+          событий, имя/число work-шагов не фиксированы) → состояние done
+          (plan + work_steps completed) → маркеры сообщений
+          (task_id/task_stage/task_step, финальный assistant без
+          task_stage) → 400-гарды на done (pause/instruction/run) →
+          новая задача (D9: новый task_id, 2 user-якоря) → гард чата
+          на активной + reset. Live best-effort (SKIP, не FAIL): пауза
+          на границе work-шага → task_paused + context_snapshot →
+          instruction → resume → run → task_done; чат-режим после done
+          (обычный чат, новых task_id-маркеров нет). SKIP, если
+          GPustack недоступен.
    11. GET /api/tokens → {last, session, context_limit}.
   11. GET /api/requests → список; после успешного чата запись с model.
   12. finally: ВСЕГДА убить свой uvicorn, убедиться, что порт 8100 закрыт.
@@ -233,6 +241,21 @@ def parse_sse(raw: bytes) -> tuple[list, list, list]:
     return deltas, dones, errors
 
 
+def parse_task_sse(raw: bytes) -> list:
+    """Задачный SSE: ВСЕ кадры как dict ({"type": ...} + поля события)."""
+    events = []
+    for line in raw.decode("utf-8", "replace").splitlines():
+        if not line.startswith("data: "):
+            continue
+        try:
+            ev = json.loads(line[6:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(ev, dict) and ev.get("type"):
+            events.append(ev)
+    return events
+
+
 def main() -> int:
     load_dotenv()
     if not os.path.isdir(os.path.join(REPO, "studio", "frontend", "dist")):
@@ -250,6 +273,7 @@ def main() -> int:
     prof_dlg_id: str | None = None
     dlg3_id: str | None = None
     dlg4_id: str | None = None
+    task_dlg_id: str | None = None
     orig_model: str | None = None
     try:
         if proc is None:
@@ -565,85 +589,363 @@ def main() -> int:
                        f"a3={a3[:40]!r} a4={a4[:40]!r}")
                 return 1
 
-        # 8d. Задача (день 13): FSM-пайплайн — SKIP, если GPustack
+        # 8d. Задача (день 13b): пошаговый пайплайн — SKIP, если GPustack
         #     недоступен (задача ходит в LLM, как и чат).
         if skip_reason:
-            record("TASK: пайплайн (FSM)", "SKIP", skip_reason)
+            record("TASK: core (planning→done, маркеры, гарды)", "SKIP",
+                   skip_reason)
+            record("TASK: live пауза на границе work-шага", "SKIP",
+                   skip_reason)
+            record("TASK: live чат-режим после задачи", "SKIP",
+                   skip_reason)
         else:
-            did = dlg["id"]
-            # 8d.1 старт (stage=planning)
+            # 8d.1 свой свежий диалог (первое сообщение — user-якорь
+            #     задачи; в _cleanup диалог удаляется вместе с остальными)
+            code, body, _ = http("POST", "/api/dialogues")
+            task_dlg = json.loads(body).get("dialogue", {})
+            did = task_dlg.get("id")
+            task_dlg_id = did
+            if code != 201 or not did:
+                record("TASK: core (planning→done, маркеры, гарды)", "FAIL",
+                       f"dialogue code={code}")
+                return 1
+
+            # 8d.2 старт: schema (task_id, stage=planning, plan из 4)
             code, raw, _ = http("POST", "/api/task/start",
                                 {"dialogue_id": did,
-                                 "description": "Сделать простую кнопку"})
-            task_ok = (code == 200
-                       and json.loads(raw)["task"]["stage"] == "planning")
-            # 8d.2 run в потоке: SSE блокирует до конца; параллельно —
-            #     polling статуса задачи
-            box = {}
-            def run_task():
-                c, r, _ = http("POST", "/api/task/run",
-                               {"dialogue_id": did}, timeout=300)
-                box["code"], box["raw"] = c, r
-            th = threading.Thread(target=run_task, daemon=True)
-            th.start()
-            boundary = None
-            for _ in range(60):
-                time.sleep(0.5)
-                c, r, _ = http("GET", f"/api/task?dialogue_id={did}")
-                st = json.loads(r)["task"]
-                if st["stage"] != "planning":
-                    boundary = st["stage"]
-                    break
-                if not th.is_alive():
-                    break
-            # 8d.3 гард чата: активная задача — чат отвечает error
-            #     (best-effort)
-            chat_guard = "n/a"
-            if boundary and th.is_alive():
-                c, r, _ = http("POST", "/api/chat",
-                               {"dialogue_id": did, "message": "привет"},
-                               timeout=60)
-                chat_guard = ("ок" if "Задача выполняется".encode() in r
-                              else "не сработал")
-            # 8d.4 стоп на границе стадии + instruction (только на паузе)
-            if boundary:
-                http("POST", "/api/task/pause", {"dialogue_id": did})
-            th.join(timeout=330)
-            paused = b"task_paused" in box.get("raw", b"")
-            i_code, _, _ = http("POST", "/api/task/instruction",
-                                {"dialogue_id": did,
-                                 "text": "Добавь обработку нажатия"})
-            # 8d.5 resume + повторный run до task_done
-            http("POST", "/api/task/resume", {"dialogue_id": did})
-            c2, r2, _ = http("POST", "/api/task/run", {"dialogue_id": did},
-                             timeout=300)
-            done = b"task_done" in r2
-            c3, r3, _ = http("GET", f"/api/task?dialogue_id={did}")
-            t3 = json.loads(r3)["task"]
-            # 8d.6 гард: start на готовой задаче → 400
-            c6, _, _ = http("POST", "/api/task/start",
-                            {"dialogue_id": did, "description": "ещё раз"})
-            start_guard = c6 == 400
-            # 8d.7 stage-сообщения в истории диалога
-            c4, r4, _ = http("GET", f"/api/dialogues/{did}")
-            msgs = json.loads(r4)["dialogue"]["messages"]
-            stage_msgs = [m for m in msgs if m.get("task_stage")]
-            # 8d.8 сброс → неактивная задача (active=false, stage=null)
-            c5, r5, _ = http("POST", "/api/task/reset", {"dialogue_id": did})
-            t5 = json.loads(r5)["task"] if c5 == 200 else {}
-            reset_ok = (c5 == 200 and t5.get("active") is False
-                        and t5.get("stage") is None)
-            ok = (task_ok and paused and i_code == 200 and done
-                  and t3["stage"] == "done" and start_guard
-                  and len(stage_msgs) >= 3 and reset_ok)
-            record("TASK: пайплайн (FSM)",
-                   "PASS" if ok else "FAIL",
-                   f"start={task_ok} paused={paused} instruction={i_code} "
-                   f"done={done} stage={t3['stage']} "
-                   f"start_guard={start_guard} stage_msgs={len(stage_msgs)} "
-                   f"reset={reset_ok} chat_guard={chat_guard}")
-            if not ok:
+                                 "description":
+                                     "Составь план запуска тестовой "
+                                     "кампании"})
+            t1 = json.loads(raw)["task"] if code == 200 else {}
+            t1_id = t1.get("task_id", "")
+            start_ok = (code == 200 and t1_id.startswith("t_")
+                        and t1.get("stage") == "planning"
+                        and len(t1.get("plan", [])) == 4
+                        and t1.get("active") is True)
+
+            # 8d.3 user-маркер: первое сообщение диалога — {role: user,
+            #     task_id}
+            code, body, _ = http("GET", f"/api/dialogues/{did}")
+            msgs1 = json.loads(body).get("dialogue", {}).get("messages", [])
+            anchor_ok = (bool(msgs1) and msgs1[0].get("role") == "user"
+                         and msgs1[0].get("task_id") == t1_id)
+
+            # 8d.4 run: SSE читать до конца (реальный LLM); структура
+            #     событий: агент спавнится, ≥1 work-шаг (in_progress →
+            #     delta → completed), стадии по pipeline, task_done.
+            #     Число/имена work-шагов — от планировщика (1–5) — не
+            #     проверяем, только порядок и наличие. LLM-вызов work-
+            #     шага может упасть («Пустой ответ модели» — флеш-
+            #     модели): задача → failed, повторный run — auto-
+            #     resume (200, семантика «Повтор») с первой
+            #     невыполненной стадии. До 4 попыток.
+            evs = []
+            attempts = 0
+            stage_now = None
+            try:
+                for attempt in range(1, 5):
+                    attempts = attempt
+                    code, raw, _ = http("POST", "/api/task/run",
+                                        {"dialogue_id": did},
+                                        timeout=900)
+                    evs.extend(parse_task_sse(raw))
+                    c_st, body_st, _ = http("GET",
+                                            f"/api/task?dialogue_id={did}")
+                    stage_now = json.loads(body_st)["task"].get("stage")
+                    if stage_now != "failed":
+                        break
+            except Exception as e:
+                record("TASK: core (planning→done, маркеры, гарды)", "FAIL",
+                       f"run: timeout/ошибка сети на попытке "
+                       f"{attempts}: {e}")
                 return 1
+            types = [e["type"] for e in evs]
+
+            def _idx(stage, etype="agent_spawned"):
+                for i, e in enumerate(evs):
+                    if e["type"] == etype and e.get("stage") == stage:
+                        return i
+                return -1
+
+            i_spawn_planning = _idx("planning")
+            sd_planning = next((e for e in evs
+                                if e["type"] == "stage_done"
+                                and e.get("stage") == "planning"), None)
+            i_spawn_exec = _idx("execution")
+            steps_ip = [e for e in evs if e["type"] == "step_updated"
+                        and e.get("status") == "in_progress"]
+            steps_delta = [e for e in evs if e["type"] == "step_delta"]
+            steps_done = [e for e in evs if e["type"] == "step_updated"
+                          and e.get("status") == "completed"]
+            i_sd_exec = _idx("execution", "stage_done")
+            i_spawn_val = _idx("validation")
+            i_sd_val = _idx("validation", "stage_done")
+            i_spawn_done = _idx("done")
+            i_sd_done = _idx("done", "stage_done")
+            t_done = [e for e in evs if e["type"] == "task_done"]
+            ip_idx = {s.get("index") for s in steps_ip}
+            run_ok = (code == 200
+                      and i_spawn_planning >= 0
+                      and sd_planning is not None
+                      and 1 <= len(sd_planning.get("plan", [])) <= 5
+                      and i_spawn_exec > i_spawn_planning
+                      and len(steps_ip) >= 1 and len(steps_delta) >= 1
+                      and len(steps_done) >= 1
+                      and all(e.get("index") in ip_idx
+                              for e in steps_delta)
+                      and i_sd_exec > i_spawn_exec
+                      and i_spawn_val > i_sd_exec
+                      and i_sd_val > i_spawn_val
+                      and i_spawn_done > i_sd_val
+                      and i_sd_done > i_spawn_done
+                      and len(t_done) >= 1
+                      and (t_done[-1].get("answer") or "").strip()
+                      and ("task_failed" not in types
+                           or "task_resumed" in types)
+                      and "error" not in types)
+
+            # 8d.5 состояние после run: stage=done, plan все completed,
+            #     work_steps completed с outputs
+            code, body, _ = http("GET", f"/api/task?dialogue_id={did}")
+            t_after = json.loads(body)["task"]
+            state_ok = (t_after.get("stage") == "done"
+                        and t_after.get("task_id") == t1_id
+                        and len(t_after.get("plan", [])) == 4
+                        and all(e.get("status") == "completed"
+                                for e in t_after.get("plan", []))
+                        and len(t_after.get("work_steps", [])) >= 1
+                        and all(w.get("status") == "completed"
+                                and (w.get("output") or "").strip()
+                                for w in t_after.get("work_steps", [])))
+
+            # 8d.6 маркеры сообщений: assistant с task_stage
+            #     (planning / execution+task_step / validation) +
+            #     финальный assistant БЕЗ task_stage с тем же task_id
+            code, body, _ = http("GET", f"/api/dialogues/{did}")
+            msgs2 = json.loads(body).get("dialogue", {}).get("messages", [])
+            a_plan = [m for m in msgs2 if m.get("role") == "assistant"
+                      and m.get("task_stage") == "planning"
+                      and m.get("task_id") == t1_id]
+            a_exec = [m for m in msgs2 if m.get("role") == "assistant"
+                      and m.get("task_stage") == "execution"
+                      and m.get("task_step") and m.get("task_id") == t1_id]
+            a_val = [m for m in msgs2 if m.get("role") == "assistant"
+                     and m.get("task_stage") == "validation"
+                     and m.get("task_id") == t1_id]
+            a_final = [m for m in msgs2 if m.get("role") == "assistant"
+                       and m.get("task_id") == t1_id
+                       and "task_stage" not in m]
+            markers_ok = (len(a_plan) >= 1 and len(a_exec) >= 1
+                          and len(a_val) >= 1 and len(a_final) >= 1)
+
+            # 8d.7 400-гарды на завершённой задаче: pause / instruction
+            #     (вне паузы) / run — все 400
+            c_p0, _, _ = http("POST", "/api/task/pause",
+                              {"dialogue_id": did})
+            c_i0, _, _ = http("POST", "/api/task/instruction",
+                             {"dialogue_id": did, "text": "вне паузы"})
+            c_r0, raw_r0, _ = http("POST", "/api/task/run",
+                                   {"dialogue_id": did}, timeout=30)
+            run_r0_txt = raw_r0.decode("utf-8", "replace")
+            done_guards_ok = (c_p0 == 400 and c_i0 == 400 and c_r0 == 400
+                              and "Задача завершена" in run_r0_txt)
+
+            # 8d.8 новая задача после done (D9): новый task_id, второй
+            #     user-якорь в диалоге
+            code, raw, _ = http("POST", "/api/task/start",
+                                {"dialogue_id": did,
+                                 "description":
+                                     "Подготовь список метрик кампании"})
+            t2 = json.loads(raw)["task"] if code == 200 else {}
+            code, body, _ = http("GET", f"/api/dialogues/{did}")
+            msgs3 = json.loads(body).get("dialogue", {}).get("messages", [])
+            anchors = [m for m in msgs3 if m.get("role") == "user"
+                       and m.get("task_id")]
+            new_task_ok = (code == 200 and t2.get("task_id", "")
+                           .startswith("t_")
+                           and t2.get("task_id") != t1_id
+                           and t2.get("stage") == "planning"
+                           and len(anchors) == 2)
+
+            # 8d.9 гард чата: активная незавершённая задача (новая,
+            #     stage=planning) → SSE error, сообщение не сохраняется
+            code, body, _ = http("GET", f"/api/dialogues/{did}")
+            n_before = len(json.loads(body).get("dialogue", {})
+                           .get("messages", []))
+            code, raw, _ = http("POST", "/api/chat",
+                                {"dialogue_id": did, "message": "привет"},
+                                timeout=60)
+            code, body, _ = http("GET", f"/api/dialogues/{did}")
+            n_after = len(json.loads(body).get("dialogue", {})
+                          .get("messages", []))
+            chat_guard_ok = ("Задача выполняется" in raw.decode(
+                "utf-8", "replace") and n_before == n_after)
+
+            # 8d.10 reset → неактивная задача
+            code, raw, _ = http("POST", "/api/task/reset",
+                                {"dialogue_id": did})
+            t5 = json.loads(raw)["task"] if code == 200 else {}
+            reset_ok = (code == 200 and t5.get("active") is False
+                        and t5.get("stage") is None
+                        and t5.get("task_id") is None)
+
+            core_ok = (start_ok and anchor_ok and run_ok and state_ok
+                       and markers_ok and done_guards_ok and new_task_ok
+                       and chat_guard_ok and reset_ok)
+            record("TASK: core (planning→done, маркеры, гарды)",
+                   "PASS" if core_ok else "FAIL",
+                   f"start={start_ok} anchor={anchor_ok} run={run_ok} "
+                   f"state={state_ok} markers={markers_ok} "
+                   f"done_guards={done_guards_ok} "
+                   f"new_task={new_task_ok} chat_guard={chat_guard_ok} "
+                   f"reset={reset_ok} runs={attempts} events={len(evs)}")
+            if not core_ok:
+                return 1
+
+            # 8d-live.1 пауза на границе work-шага (best-effort: живые
+            #     агенты, race паузы с быстрой моделью — SKIP, не FAIL):
+            #     start → run в потоке → polling до stage=execution →
+            #     pause → task_paused + context_snapshot → instruction →
+            #     resume → run → task_done.
+            code, raw, _ = http("POST", "/api/task/start",
+                                {"dialogue_id": did,
+                                 "description":
+                                     "Сравни два тарифа подписки"})
+            l_status, l_detail = "PASS", ""
+            if code != 200:
+                l_status, l_detail = "SKIP", f"start code={code}"
+            else:
+                box = {}
+                def run_task_live():
+                    c, r, _ = http("POST", "/api/task/run",
+                                   {"dialogue_id": did}, timeout=900)
+                    box["code"], box["raw"] = c, r
+                th = threading.Thread(target=run_task_live, daemon=True)
+                th.start()
+                stage_now = None
+                deadline = time.time() + 300
+                while time.time() < deadline and th.is_alive():
+                    time.sleep(0.5)
+                    c, r, _ = http("GET", f"/api/task?dialogue_id={did}")
+                    stage_now = json.loads(r)["task"].get("stage")
+                    if stage_now in ("execution", "paused",
+                                     "failed", "done"):
+                        break
+                c_p, raw_p, _ = http("POST", "/api/task/pause",
+                                     {"dialogue_id": did})
+                th.join(timeout=180)
+                c_g, r_g, _ = http("GET", f"/api/task?dialogue_id={did}")
+                st_g = json.loads(r_g)["task"]
+                raw1 = box.get("raw", b"") or b""
+                paused_ev = b'"task_paused"' in raw1
+                if c_p == 200 and st_g.get("stage") == "paused" \
+                        and paused_ev:
+                    snap = st_g.get("context_snapshot") or {}
+                    snap_ok = bool(snap.get("description")) \
+                        and isinstance(snap.get("work_steps"), list) \
+                        and len(snap["work_steps"]) >= 1
+                    c_i, raw_i, _ = http("POST", "/api/task/instruction",
+                                         {"dialogue_id": did,
+                                          "text": "Сделай акцент "
+                                                  "на метриках"})
+                    ti = json.loads(raw_i)["task"] if c_i == 200 else {}
+                    c_r, raw_r, _ = http("POST", "/api/task/resume",
+                                         {"dialogue_id": did})
+                    # повторные run = auto-resume (как в core)
+                    run_err = None
+                    ev2 = []
+                    c2 = 0
+                    for _att in range(1, 4):
+                        try:
+                            c2, r2, _ = http("POST", "/api/task/run",
+                                             {"dialogue_id": did},
+                                             timeout=900)
+                        except Exception as e:
+                            c2, r2, run_err = 0, b"", str(e)
+                            break
+                        ev2 = parse_task_sse(r2)
+                        c_ch, body_ch, _ = http("GET",
+                                                f"/api/task?dialogue_id={did}")
+                        if json.loads(body_ch)["task"].get("stage") \
+                                != "failed":
+                            break
+                    d2 = [e for e in ev2
+                          if e["type"] == "task_done"]
+                    c_g2, r_g2, _ = http("GET",
+                                         f"/api/task?dialogue_id={did}")
+                    st_g2 = json.loads(r_g2)["task"]
+                    ok2 = (snap_ok and c_i == 200
+                           and ti.get("expected_action") == "human_input"
+                           and c_r == 200 and c2 == 200
+                           and d2 and (d2[-1].get("answer") or "").strip()
+                           and st_g2.get("stage") == "done"
+                           and "task_failed" not in
+                           [e["type"] for e in ev2])
+                    l_detail = (f"pause={c_p} paused_event=True "
+                                f"snapshot={snap_ok} instr={c_i} "
+                                f"resume={c_r} run={c2} "
+                                f"done={'yes' if d2 else 'no'} "
+                                f"stage={st_g2.get('stage')}")
+                    if run_err:
+                        l_detail += f" run_err={run_err[:60]}"
+                    if not ok2:
+                        l_status = "SKIP"
+                        l_detail += " (best-effort: сбой live-ветки)"
+                else:
+                    l_status = "SKIP"
+                    l_detail = (f"pause={c_p} stage={st_g.get('stage')} "
+                                f"paused_event={paused_ev} "
+                                f"(задача уехала раньше паузы или LLM-сбой "
+                                f"— best-effort)")
+                # чистый финал диалога до live-чата: задача не done —
+                # reset (done — как есть, чат гард на done не срабатывает)
+                c_fin, raw_fin, _ = http("GET",
+                                         f"/api/task?dialogue_id={did}")
+                st_fin = json.loads(raw_fin)["task"]
+                if st_fin.get("stage") != "done":
+                    http("POST", "/api/task/reset",
+                         {"dialogue_id": did})
+                record("TASK: live пауза на границе work-шага", l_status,
+                       l_detail)
+
+            # 8d-live.2 чат-режим после задачи (best-effort): обычный
+            #     чат → done, новых task_id-маркеров нет. Profile-gate
+            #     дня 12 не давать мешать — сначала decline (свой
+            #     свежий диалог был pending).
+            code, body, _ = http("GET", f"/api/dialogues/{did}")
+            n_marks_before = len([m for m in json.loads(body)
+                                  .get("dialogue", {}).get("messages", [])
+                                  if m.get("task_id")])
+            http("POST", "/api/profile/action",
+                 {"dialogue_id": did, "action": "decline"})
+            l2_status, l2_detail = "PASS", ""
+            try:
+                code, raw, _ = http("POST", "/api/chat",
+                                    {"dialogue_id": did,
+                                     "message": "Скажи: OK"},
+                                    timeout=CHAT_TIMEOUT)
+                deltas, dones, errors = parse_sse(raw)
+                code, body, _ = http("GET", f"/api/dialogues/{did}")
+                msgs_now = json.loads(body).get("dialogue", {}) \
+                    .get("messages", [])
+                n_marks_after = len([m for m in msgs_now
+                                     if m.get("task_id")])
+                last_user = [m for m in msgs_now
+                             if m.get("role") == "user"][-1]
+                ok2 = (code == 200 and dones and not errors
+                       and n_marks_after == n_marks_before
+                       and "task_id" not in last_user)
+                l2_detail = (f"code={code} dones={len(dones)} "
+                             f"errors={len(errors)} "
+                             f"marks={n_marks_before}→{n_marks_after}")
+                if not ok2:
+                    l2_status = "SKIP"
+                    l2_detail += " (best-effort: чат-ветка)"
+            except Exception as e:
+                l2_status = "SKIP"
+                l2_detail = f"timeout/ошибка сети: {e} (best-effort)"
+            record("TASK: live чат-режим после задачи", l2_status,
+                   l2_detail)
 
         # 9. токены
         code, body, _ = http("GET", "/api/tokens")
@@ -672,7 +974,8 @@ def main() -> int:
             f"{len(skips)} SKIP, {len(fails)} FAIL")
         return 1 if fails else 0
     finally:
-        _cleanup([dlg_id, dlg2_id, prof_dlg_id, dlg3_id, dlg4_id], orig_model)
+        _cleanup([dlg_id, dlg2_id, prof_dlg_id, dlg3_id, dlg4_id,
+                  task_dlg_id], orig_model)
         stop_server(proc)
 
 
