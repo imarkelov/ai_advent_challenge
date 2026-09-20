@@ -379,6 +379,38 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
         agent.store.lt_clear()
         return {"ok": True}
 
+    # ---------- инварианты (день 14, глобальные) ----------
+
+    @app.get("/api/invariants")
+    def invariants_list():
+        """Список инвариантов: [{id, key, value}]."""
+        items = agent.store.invariants_items()
+        return {"invariants": [{"id": i, "key": e["key"], "value": e["value"]}
+                                for i, e in items.items()]}
+
+    @app.post("/api/invariants", status_code=201)
+    def invariants_set(body: dict):
+        """Создать/обновить инвариант {key, value} (оба непустые строки).
+        400 — поле отсутствует, не строка или пустое."""
+        for k in ("key", "value"):
+            if k not in body:
+                raise HTTPException(400, f"Не указано поле «{k}»")
+        key = body["key"]
+        value = body["value"]
+        if not isinstance(key, str) or not key.strip():
+            raise HTTPException(400, "Ключ инварианта должен быть непустой строкой")
+        if not isinstance(value, str) or not value.strip():
+            raise HTTPException(400, "Значение инварианта должно быть непустой строкой")
+        rec = agent.store.invariants_set(key, value)
+        return {"invariant": rec}
+
+    @app.delete("/api/invariants/{iid}")
+    def invariants_delete(iid: str):
+        """Удалить инвариант по id; 404 — не найден."""
+        if not agent.store.invariants_remove(iid):
+            raise HTTPException(404, f"Инвариант «{iid}» не найден")
+        return {"ok": True}
+
     # ---------- токены ----------
 
     @app.get("/api/tokens")
@@ -412,7 +444,8 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
                 "memory_rule": MEMORY_RULE,
                 "rule_active": bool(blocks),
                 "profile_block": agent.build_profile_block(did) if did else "",
-                "profile_status": profile["status"]}
+                "profile_status": profile["status"],
+                "invariants_block": agent.build_invariants_block()}
 
     # ---------- журнал запросов ----------
 

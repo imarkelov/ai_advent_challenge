@@ -325,6 +325,69 @@ def test_memory_longterm_routes(client):
     assert client.get("/api/memory").json()["long_term"]["items"] == {}
 
 
+# ---------- инварианты (день 14) ----------
+
+def test_invariants_crud_routes(client):
+    # пустой список
+    r = client.get("/api/invariants")
+    assert r.status_code == 200
+    assert r.json() == {"invariants": []}
+    # создание
+    r = client.post("/api/invariants", json={"key": "Стек", "value": "Kotlin"})
+    assert r.status_code == 201
+    rec = r.json()["invariant"]
+    assert rec["key"] == "Стек" and rec["value"] == "Kotlin"
+    assert rec["id"].startswith("inv_")
+    # в списке
+    assert client.get("/api/invariants").json()["invariants"] == [rec]
+    # обновление по key: id сохраняется, значение меняется
+    r2 = client.post("/api/invariants", json={"key": "Стек", "value": "Java"})
+    assert r2.status_code == 201
+    assert r2.json()["invariant"]["id"] == rec["id"]
+    assert r2.json()["invariant"]["value"] == "Java"
+    assert len(client.get("/api/invariants").json()["invariants"]) == 1
+    # удаление
+    assert client.delete(f"/api/invariants/{rec['id']}").json() == {"ok": True}
+    assert client.get("/api/invariants").json() == {"invariants": []}
+    assert client.delete(f"/api/invariants/{rec['id']}").status_code == 404
+    assert "не найден" in client.delete("/api/invariants/nope").json()["detail"]
+
+
+def test_invariants_post_invalid_400(client):
+    # отсутствует поле
+    assert client.post("/api/invariants", json={"key": "k"}).status_code == 400
+    assert client.post("/api/invariants", json={"value": "v"}).status_code == 400
+    # пустое / не str
+    assert client.post("/api/invariants", json={"key": "", "value": "v"}).status_code == 400
+    assert client.post("/api/invariants", json={"key": "k", "value": "  "}).status_code == 400
+    assert client.post("/api/invariants", json={"key": 5, "value": "v"}).status_code == 400
+    assert client.post("/api/invariants", json={"key": "k", "value": 7}).status_code == 400
+    # после ошибок инвариантов нет
+    assert client.get("/api/invariants").json() == {"invariants": []}
+
+
+def test_rules_includes_invariants_block(client):
+    r = client.get("/api/rules")
+    assert r.status_code == 200
+    assert r.json()["invariants_block"] == ""
+    client.post("/api/invariants", json={"key": "Стек", "value": "Kotlin"})
+    r2 = client.get("/api/rules")
+    assert r2.json()["invariants_block"] == (
+        "\n\nИнварианты (неукоснительно):\n- Стек: Kotlin")
+
+
+def test_memory_get_includes_invariants(client):
+    m = client.get("/api/memory").json()
+    assert m["invariants"] == {"entries": 0, "tokens_est": 0, "items": {}}
+    client.post("/api/invariants", json={"key": "Стек", "value": "Kotlin"})
+    m2 = client.get("/api/memory").json()
+    assert m2["invariants"]["entries"] == 1
+    items = m2["invariants"]["items"]
+    assert len(items) == 1
+    assert all(set(v) == {"key", "value"} for v in items.values())
+    assert next(iter(items.values())) == {"key": "Стек", "value": "Kotlin"}
+
+
 # ---------- /api/tokens ----------
 
 def test_tokens_before_chat(client):
