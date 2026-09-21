@@ -213,6 +213,7 @@ export type TaskEvent =
   | { type: 'stage_done'; stage: TaskStage; output: string; verdict?: 'pass' | 'fail'; plan?: string[]; retry?: boolean; usage?: TaskUsage }
   | { type: 'task_paused'; stage: string }
   | { type: 'task_resumed'; stage: TaskStage }
+  | { type: 'invariant_violation'; patterns: string[] }
   | { type: 'task_done'; answer: string }
   | { type: 'task_failed'; message: string }
   | { type: 'error'; message: string }

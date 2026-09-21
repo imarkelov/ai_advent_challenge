@@ -870,6 +870,34 @@ def test_invariants_backcompat_migration_from_key_value(data_dir):
                   "forbidden": [], "is_active": True}}
 
 
+def test_invariants_is_active_string_values(data_dir):
+    """Строковые is_active ("false"/"0") трактуются как неактивные (баг №1)."""
+    (data_dir / "invariants.json").write_text(
+        json.dumps({"inv_a": {"title": "Стек", "description": "Kotlin",
+                              "is_active": "false"},
+                    "inv_b": {"title": "Арх", "description": "монолит",
+                              "is_active": "0"},
+                    "inv_c": {"title": "Тон", "description": "кратко",
+                              "is_active": "true"},
+                    "inv_d": {"title": "Темп", "description": "быстро",
+                              "is_active": 1},
+                    "inv_e": {"title": "Цвет", "description": "тёмный",
+                              "is_active": False},
+                    "inv_f": {"title": "Риск", "description": "низкий"}}),
+        encoding="utf-8")
+    s = MemoryStore(str(data_dir))
+    items = s.invariants_items()
+    assert items["inv_a"]["is_active"] is False  # строка "false"
+    assert items["inv_b"]["is_active"] is False  # строка "0"
+    assert items["inv_c"]["is_active"] is True   # строка "true"
+    assert items["inv_d"]["is_active"] is True   # число 1
+    assert items["inv_e"]["is_active"] is False  # bool False
+    assert items["inv_f"]["is_active"] is True   # отсутствие -> default True
+    # неактивные исключены из готового блока
+    assert "Kotlin" not in s.build_invariants_block()
+    assert "монолит" not in s.build_invariants_block()
+
+
 def test_invariants_set_rejects_empty_and_non_str(store):
     with pytest.raises(ValueError):
         store.invariants_set("", "v")

@@ -48,6 +48,22 @@ def _now() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
+def _parse_active(value) -> bool:
+    """Надёжно интерпретировать is_active.
+
+    Инвариант может прийти с фронтенда не только как bool, но и как строка
+    ("false"/"true"/"0"/"1"). bool("false") == True — известная ловушка.
+    true-интерпретации: bool True, строки true/1/yes/да/on (без учёта
+    регистра). Остальное (None, "", "false", "0", "no", "off", 0) — False.
+    Отсутствие значения обрабатывает вызывающий код (default True).
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"true", "1", "yes", "да", "on"}
+    return bool(value)
+
+
 def _seconds_since(ts: str | None) -> int:
     """Целое число секунд от ts до сейчас (0 — ts отсутствует/битый)."""
     if not ts:
@@ -192,7 +208,7 @@ class MemoryStore:
                   if isinstance(s, str) and s.strip()]
                  if isinstance(f, list) else [])
             out[i] = {"title": t, "description": dsc, "forbidden": f,
-                      "is_active": bool(e.get("is_active", True))}
+                      "is_active": _parse_active(e.get("is_active", True))}
         return out
 
     def _write_invariants(self, v: dict) -> None:
@@ -560,6 +576,28 @@ class MemoryStore:
             # терминальная done — current_step = total_steps (4), не 5
             t["current_step"] = min(TASK_PIPELINE.index(stage) + 2,
                                     len(TASK_PIPELINE))
+            t["error"] = None
+        return self._task_mutate(dialogue_id, fn)
+
+    def task_refuse(self, dialogue_id: str, answer: str) -> dict:
+        """Отказ на стадии планирования (день 14, pre-guard): постановка
+        задачи (description) нарушает активный инвариант — запись planning
+        отмечается completed с output=answer, задача терминальна
+        (stage=done, current_step=total_steps). Остальные стадии
+        (execution/validation/done) НЕ выполняются — агенты не спавнились,
+        их записи остаются pending. ValueError: задача не активна."""
+        def fn(t):
+            if not t["active"]:
+                raise ValueError("Задача не активна")
+            for e in t["plan"]:
+                if e["agent"] == "planning":
+                    e["status"] = "completed"
+                    e["output"] = answer
+                    e["ts"] = _now()
+                    e["duration_s"] = _seconds_since(e.get("spawn_ts"))
+            t["stage"] = "done"
+            t["current_step"] = len(TASK_PIPELINE)
+            t["expected_action"] = "agent_response"
             t["error"] = None
         return self._task_mutate(dialogue_id, fn)
 

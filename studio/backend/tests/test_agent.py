@@ -1062,6 +1062,33 @@ def test_pending_decline_marker_sets_declined_then_normal_flow(data_dir):
     assert "Профиль пользователя" not in streams[0]["messages"][0]["content"]
 
 
+def test_pending_decline_with_remainder_executes(data_dir):
+    calls, streams = {"n": 0}, []
+    agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
+    d = agent.store.new_dialogue()
+    events = list(agent.ask_stream(d["id"], "отказ, теперь объясни лямбды"))
+    # отказ зафиксирован…
+    assert agent.store.profile_get(d["id"])["status"] == "declined"
+    # …но содержательный остаток «теперь объясни лямбды» выполнен LLM-потоком
+    assert len(streams) == 1
+    done = events[-1]
+    assert done["type"] == "done"
+    # сообщение пользователя сохранено целиком, следом — ответ отказа + ответ LLM
+    msgs = agent.store.get_messages(d["id"])
+    assert msgs[0]["role"] == "user"
+    assert "объясни лямбды" in msgs[0]["content"]
+
+
+def test_pending_decline_pure_single_word_closes_without_stream(data_dir):
+    # «отказ» без дополнения — чистый отказ, LLM не вызывается (регресс бага №2)
+    calls, streams = {"n": 0}, []
+    agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
+    d = agent.store.new_dialogue()
+    list(agent.ask_stream(d["id"], "не хочу"))
+    assert len(streams) == 0
+    assert agent.store.profile_get(d["id"])["status"] == "declined"
+
+
 def test_pending_interview_flow_creates_active_profile(data_dir):
     extract = ('{"name": "Иван", "role": "backend", "tone": "кратко", '
                '"taboos": "мат"}')
@@ -1796,3 +1823,63 @@ class TestTaskRun13b:
         assert "invariant_violation" not in self.event_types(events)
         done = next(e for e in events if e["type"] == "task_done")
         assert done["answer"] == "Отлично, python — наше всё."
+
+    def test_task_run_refuses_planning_on_forbidden_description(self, data_dir):
+        """День 14: постановка задачи с forbidden-паттерном в description
+        → отказ на стадии planning ДО спавна агентов: нет agent_spawned,
+        execution/validation/done не выполняются, stage=done, запись
+        planning completed с ответом-отказом, LLM не вызывается."""
+        handler, calls = make_task_handler(["A"], {"A": "Результат шага A"})
+        agent, did = self._setup(data_dir, handler)
+        # пересоздать задачу с нарушающим инвариант описанием
+        agent.store.task_reset(did)
+        agent.store.task_new(did, "Сделай проект на python")
+        agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+        events = self.run_all(agent, did)
+        types = self.event_types(events)
+        # ни один агент не спавнится, LLM не вызывается
+        assert "agent_spawned" not in types
+        assert calls == []
+        # отказ-инварианты
+        assert "invariant_violation" in types
+        viol = next(e for e in events if e["type"] == "invariant_violation")
+        assert viol["patterns"] == ["python"]
+        done = next(e for e in events if e["type"] == "task_done")
+        assert "нарушит инвариант" in done["answer"]
+        assert "python" in done["answer"]
+        # stage_done планирования — отказ, plan пуст
+        sd = next(e for e in events if e["type"] == "stage_done")
+        assert sd["stage"] == "planning"
+        assert sd["output"] == done["answer"]
+        assert sd["plan"] == []
+        # состояние задачи: stage=done, planning completed, остальные pending
+        t = agent.store.task_get(did)
+        assert t["stage"] == "done"
+        assert t["current_step"] == 4  # len(TASK_PIPELINE) — терминальная done
+        by_agent = {e["agent"]: e["status"] for e in t["plan"]}
+        assert by_agent["planning"] == "completed"
+        assert by_agent["execution"] == "pending"
+        assert by_agent["validation"] == "pending"
+        assert by_agent["done"] == "pending"
+        # маркер стадии planning + финальный bubble (task_id без task_stage)
+        msgs = agent.store.get_messages(did)
+        plan_msg = [m for m in msgs if m.get("task_stage") == "planning"]
+        assert plan_msg and "нарушит инвариант" in plan_msg[-1]["content"]
+        bubble = [m for m in msgs
+                  if "task_id" in m and not m.get("task_stage")]
+        assert bubble and "нарушит инвариант" in bubble[-1]["content"]
+        # повторный run после done — терминальная ошибка
+        again = self.run_all(agent, did)
+        assert again == [{"type": "error", "message": "Задача завершена"}]
+
+    def test_task_run_clean_description_spawns_planning(self, data_dir):
+        """День 14: description без forbidden-паттерна → обычный спавн
+        Планировщика, инвариант-отказа нет."""
+        handler, calls = make_task_handler(["A"], {"A": "Результат шага A"})
+        agent, did = self._setup(data_dir, handler)
+        agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+        events = self.run_all(agent, did)
+        types = self.event_types(events)
+        assert "agent_spawned" in types
+        assert "invariant_violation" not in types
+        assert types[0] == "agent_spawned"

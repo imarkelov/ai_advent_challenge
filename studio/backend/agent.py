@@ -410,12 +410,17 @@ class StudioAgent:
         # (приглашение/интервью/отказ); первый запрос не выполняется.
         profile = self.store.profile_get(dialogue_id)
         if profile["status"] == "pending":
-            answer = self._profile_init_turn(dialogue_id, message,
-                                             cfg["model"])
+            answer, remainder = self._profile_init_turn(dialogue_id, message,
+                                                        cfg["model"])
             self.store.append_message(dialogue_id, "assistant", answer)
-            yield {"type": "done", "answer": answer,
-                   "usage": None, "request_id": None}
-            return
+            if remainder is None:
+                # приглашение/интервью/чистый отказ: LLM не вызывается
+                yield {"type": "done", "answer": answer,
+                       "usage": None, "request_id": None}
+                return
+            # отказ + содержательное дополнение (баг №2): подтверждаем отказ,
+            # затем выполняем остаток запроса обычным chat-потоком.
+            message = remainder
         messages = self.build_payload(dialogue_id)
         # Server-side гард: мелкие модели при истории диалога подчиняются
         # свежему противоречащему запросу, игнорируя правило в system-промте.
@@ -518,11 +523,7 @@ class StudioAgent:
         hits = self._postcheck_invariants(answer)
         violation = bool(hits)
         if violation:
-            answer = ("Не могу выполнить: это нарушит инвариант. "
-                      f"Нарушающее содержимое: {', '.join(hits)}. "
-                      "Инварианты — жёсткие неизменяемые правила, я "
-                      "обязан их соблюдать. Предложи альтернативу в "
-                      "рамках инвариантов.")
+            answer = self._invariant_refusal(hits)
         self.store.append_message(dialogue_id, "assistant", answer,
                                   model=cfg["model"])
         if usage:
@@ -636,11 +637,37 @@ class StudioAgent:
         if self.get_config()["model"] not in {m["id"] for m in available}:
             self.set_config({"model": available[0]["id"]})
 
+    @staticmethod
+    def _decline_remainder(message: str) -> str | None:
+        """Остаток сообщения после снятия маркеров отказа (день 14, баг №2).
+
+        «отказ, теперь объясни лямбды» → «теперь объясни лямбды»;
+        «отказ» / «не хочу» → None (чистый отказ: продолжать нечего).
+        Подстрока «не хоч» в «не хочу» вырезается, но остаток «у» — мусор,
+        поэтому возвращаем текст только если в нём есть осмысленные слова.
+        """
+        if not message:
+            return None
+        rest = message
+        for m in PROFILE_DECLINE_MARKERS:
+            idx = rest.lower().find(m)
+            if idx != -1:
+                rest = rest[:idx] + rest[idx + len(m):]
+        rest = re.sub(r"^[\s,;:.!?—–-]+", "", rest)
+        rest = re.sub(r"[\s,;:.!?—–-]+$", "", rest)
+        words = re.findall(r"[а-яёa-z0-9]{3,}", rest.lower())
+        if not words:
+            return None
+        return rest
+
     def _profile_init_turn(self, dialogue_id: str, message: str,
-                           model: str) -> str:
+                           model: str) -> tuple[str, str | None]:
         """Ход служебного потока инициализации профиля (pending-диалог).
 
-        Возвращает текст ответа; меняет статус профиля:
+        Возвращает (текст ответа, остаток для продолжения). Второй элемент —
+        непустой остаток запроса после отказа инициализации (баг №2: «отказ,
+        теперь объясни лямбды» должен продолжить выполняться), иначе None.
+        Меняет статус профиля:
         - interview-флаг: ответ трактуется как анкета → LLM-экстракт;
           успех → active + подтверждение, сбой → просьба повторить;
         - маркеры в сообщении: интервью/вручную/отказ;
@@ -659,20 +686,20 @@ class StudioAgent:
                             extracted["name"] or "—",
                             extracted["role"] or "—",
                             extracted["tone"] or "—",
-                            extracted["taboos"] or "—"))
+                            extracted["taboos"] or "—")), None
             return ("Не смог разобрать ответ по всем вопросам анкеты. "
                     "Повторите, пожалуйста, одним сообщением: имя, роль и "
-                    "сфера, тон и стиль общения, стоп-слова/табу.")
+                    "сфера, тон и стиль общения, стоп-слова/табу."), None
         low = message.lower()
         if any(m in low for m in PROFILE_INTERVIEW_MARKERS):
             self.store.profile_action(dialogue_id, "interview")
-            return PROFILE_INTERVIEW_TEXT
+            return PROFILE_INTERVIEW_TEXT, None
         if any(m in low for m in PROFILE_MANUAL_MARKERS):
-            return PROFILE_MANUAL_TEXT
+            return PROFILE_MANUAL_TEXT, None
         if any(m in low for m in PROFILE_DECLINE_MARKERS):
             self.store.profile_action(dialogue_id, "decline")
-            return PROFILE_DECLINED_TEXT
-        return PROFILE_INVITE_TEXT
+            return PROFILE_DECLINED_TEXT, self._decline_remainder(message)
+        return PROFILE_INVITE_TEXT, None
 
     # ---------- задача: оркестратор stage-агентов (день 13) ----------
 
@@ -837,14 +864,42 @@ class StudioAgent:
                        "stage": self.store.task_get(dialogue_id)["stage"]}
                 continue
             stage = t["stage"]
-            if stage == "done" and next(
-                    (e for e in t["plan"] if e["agent"] == "done"),
-                    {}).get("status") == "completed":
-                # задача уже завершена (повторный run после done)
-                yield {"type": "error", "message": "Задача завершена"}
-                return
+            if stage == "done":
+                done_e = next((e for e in t["plan"] if e["agent"] == "done"),
+                              {})
+                exec_e = next((e for e in t["plan"]
+                               if e["agent"] == "execution"), {})
+                if done_e.get("status") == "completed" or \
+                        exec_e.get("status") == "pending":
+                    # задача завершена: либо оркестратор отработал (done
+                    # completed), либо это отказ на planning (execution не
+                    # запускался) — повторный run терминален.
+                    yield {"type": "error", "message": "Задача завершена"}
+                    return
             instruction = self.store.task_instruction_take(dialogue_id)
             if stage == "planning":
+                # День 14: pre-guard — постановка задачи (description)
+                # нарушает активный инвариант → отказ на первой стадии,
+                # агенты execution/validation/done НЕ спавнятся.
+                hits = self._postcheck_invariants(t["description"])
+                if hits:
+                    answer = self._invariant_refusal(hits)
+                    t2 = self.store.task_refuse(dialogue_id, answer)
+                    pe = next(e for e in t2["plan"] if e["agent"] == "planning")
+                    # маркер стадии planning (для восстановления карточки)
+                    self.store.append_message(dialogue_id, "assistant", answer,
+                                              model=cfg["model"], task_id=tid,
+                                              task_stage="planning",
+                                              task_duration=pe["duration_s"])
+                    # финальный bubble (task_id без task_stage → doneOut)
+                    self.store.append_message(dialogue_id, "assistant", answer,
+                                              model=cfg["model"], task_id=tid,
+                                              task_duration=pe["duration_s"])
+                    yield {"type": "stage_done", "stage": "planning",
+                           "output": answer, "plan": []}
+                    yield {"type": "invariant_violation", "patterns": hits}
+                    yield {"type": "task_done", "answer": answer}
+                    return
                 yield {"type": "agent_spawned", "stage": "planning",
                        "agent": TASK_AGENT_NAMES["planning"]}
                 self.store.task_spawn_stage(dialogue_id, "planning")
@@ -1022,11 +1077,7 @@ class StudioAgent:
                 hits = self._postcheck_invariants(answer)
                 violation = bool(hits)
                 if violation:
-                    answer = ("Не могу выполнить: это нарушит инвариант. "
-                              f"Нарушающее содержимое: {', '.join(hits)}. "
-                              "Инварианты — жёсткие неизменяемые правила, я "
-                              "обязан их соблюдать. Предложи альтернативу в "
-                              "рамках инвариантов.")
+                    answer = self._invariant_refusal(hits)
                 t2 = self.store.task_stage_done(dialogue_id, "done", answer,
                                                 usage=usage)
                 de = next(e for e in t2["plan"] if e["agent"] == "done")
@@ -1116,6 +1167,18 @@ class StudioAgent:
         расширение: результат L1 можно передать вторичной проверке, код
         выстроен так, чтобы возвращать список L1."""
         return self._forbidden_hits(answer)
+
+    def _invariant_refusal(self, hits: list) -> str:
+        """Текст отказа при нарушении инварианта (день 14): называет
+        нарушающее содержимое, объясняет, что инварианты — жёсткие
+        неизменяемые правила, и предлагает альтернативу в рамках
+        инвариантов. Единый текст для chat-гарда (post-guard) и
+        task-pre-guard (отказ на стадии планирования)."""
+        return ("Не могу выполнить: это нарушит инвариант. "
+                f"Нарушающее содержимое: {', '.join(hits)}. "
+                "Инварианты — жёсткие неизменяемые правила, я "
+                "обязан их соблюдать. Предложи альтернативу в "
+                "рамках инвариантов.")
 
     def _detect_invariant_conflict(self, dialogue_id: str,
                                    message: str) -> list:
