@@ -95,8 +95,16 @@ def new_profile() -> dict:
 # Состояние задачи (день 13b): unified FSM per-диалог, план stage-агентов,
 # work-шаги, снапшот контекста. Поле «task» записи диалога; отсутствующее
 # поле (или старая схема без task_id) = неактивная задача.
+# TASK_PIPELINE — записи plan[] (LLM stage-агенты, 4 записи). plan_review —
+# человеческая стадия (НЕ агент, НЕ в plan[]): gate одобрения плана (день 15).
 TASK_PIPELINE = ("planning", "execution", "validation", "done")
 TASK_STAGES = ("planning", "execution", "validation", "done", "paused", "failed")
+
+# Полный FLOW стадий (с human-стадией plan_review) для current_step/total_steps.
+TASK_FLOW = ("planning", "plan_review", "execution", "validation", "done")
+_TASK_NEXT = {"planning": "plan_review", "plan_review": "execution",
+              "execution": "validation", "validation": "done", "done": "done"}
+_TASK_STAGE_NUM = {s: i + 1 for i, s in enumerate(TASK_FLOW)}
 
 
 def new_plan() -> list:
@@ -112,16 +120,23 @@ def new_plan() -> list:
 def new_task() -> dict:
     """Свежее (неактивное) состояние задачи (схема дня 13b)."""
     return {"active": False, "task_id": None, "stage": None,
-            "current_step": 0, "total_steps": len(TASK_PIPELINE),
+            "current_step": 0, "total_steps": len(TASK_FLOW),
             "expected_action": None, "plan": [], "work_steps": [],
             "context_snapshot": None, "description": "", "instruction": "",
+            "plan_approved": False, "constraints": [], "alternative": "",
             "retries": 0, "error": None, "updated": None}
 
 
 def _current_stage_of(t: dict) -> str | None:
     """Первая невыполненная стадия плана (позиция при resume/повторе);
-    всё выполнено — None."""
-    for e in t.get("plan") or []:
+    всё выполнено — None. День 15: если planning выполнен, но план НЕ
+    одобрен пользователем — текущая стадия plan_review (human-гейт)."""
+    plan = t.get("plan") or []
+    plan_e = next((e for e in plan if e.get("agent") == "planning"), None)
+    if plan_e and plan_e.get("status") == "completed" \
+            and not t.get("plan_approved"):
+        return "plan_review"
+    for e in plan:
         if e.get("status") != "completed":
             return e.get("agent")
     return None
@@ -428,6 +443,7 @@ class MemoryStore:
         t = new_task()
         for k in ("active", "task_id", "stage", "current_step", "total_steps",
                   "expected_action", "description", "instruction",
+                  "plan_approved", "constraints", "alternative",
                   "retries", "error", "updated"):
             if k in raw:
                 t[k] = raw[k]
@@ -479,11 +495,13 @@ class MemoryStore:
             t.update({"active": True,
                       "task_id": "t_" + uuid.uuid4().hex[:12],
                       "stage": "planning", "current_step": 1,
-                      "total_steps": len(TASK_PIPELINE),
+                      "total_steps": len(TASK_FLOW),
                       "expected_action": "agent_response",
                       "plan": new_plan(), "work_steps": [],
                       "context_snapshot": None, "description": description,
-                      "instruction": "", "retries": 0, "error": None})
+                      "plan_approved": False, "constraints": [],
+                      "alternative": "", "instruction": "",
+                      "retries": 0, "error": None})
         return self._task_mutate(dialogue_id, fn, mark_used=True)
 
     def task_spawn_stage(self, dialogue_id: str, stage: str) -> dict:
@@ -503,7 +521,7 @@ class MemoryStore:
                     e["status"] = "in_progress"
                     e["spawn_ts"] = _now()
             t["stage"] = stage
-            t["current_step"] = TASK_PIPELINE.index(stage) + 1
+            t["current_step"] = _TASK_STAGE_NUM[stage]
             t["expected_action"] = "agent_response"
             t["error"] = None
         return self._task_mutate(dialogue_id, fn)
@@ -571,11 +589,11 @@ class MemoryStore:
                     if usage is not None:
                         e["usage"] = usage
                     e["duration_s"] = _seconds_since(e.get("spawn_ts"))
-            t["stage"] = "done" if stage == "done" \
-                else TASK_PIPELINE[TASK_PIPELINE.index(stage) + 1]
-            # терминальная done — current_step = total_steps (4), не 5
-            t["current_step"] = min(TASK_PIPELINE.index(stage) + 2,
-                                    len(TASK_PIPELINE))
+            t["stage"] = _TASK_NEXT.get(stage, stage)
+            # plan_review — человеческая стадия: ждём решения пользователя.
+            t["expected_action"] = "human_input" if t["stage"] == "plan_review" \
+                else "agent_response"
+            t["current_step"] = _TASK_STAGE_NUM[t["stage"]]
             t["error"] = None
         return self._task_mutate(dialogue_id, fn)
 
@@ -596,7 +614,7 @@ class MemoryStore:
                     e["ts"] = _now()
                     e["duration_s"] = _seconds_since(e.get("spawn_ts"))
             t["stage"] = "done"
-            t["current_step"] = len(TASK_PIPELINE)
+            t["current_step"] = len(TASK_FLOW)
             t["expected_action"] = "agent_response"
             t["error"] = None
         return self._task_mutate(dialogue_id, fn)
@@ -641,8 +659,10 @@ class MemoryStore:
                 ws["duration_s"] = None
             t["retries"] += 1
             t["stage"] = "execution"
-            t["current_step"] = TASK_PIPELINE.index("execution") + 1
+            t["current_step"] = _TASK_STAGE_NUM["execution"]
+            t["expected_action"] = "agent_response"
             t["error"] = None
+            t["plan_approved"] = True
         return self._task_mutate(dialogue_id, fn)
 
     def task_pause(self, dialogue_id: str) -> dict:
@@ -676,8 +696,9 @@ class MemoryStore:
             if cur is None:
                 raise ValueError("Все стадии плана выполнены")
             t["stage"] = cur
-            t["current_step"] = TASK_PIPELINE.index(cur) + 1
-            t["expected_action"] = "agent_response"
+            t["current_step"] = _TASK_STAGE_NUM[cur]
+            t["expected_action"] = "human_input" if cur == "plan_review" \
+                else "agent_response"
             t["error"] = None
         return self._task_mutate(dialogue_id, fn)
 
@@ -714,6 +735,58 @@ class MemoryStore:
 
         self._task_mutate(dialogue_id, fn)
         return out["text"]
+
+    def task_approve(self, dialogue_id: str) -> dict:
+        """Одобрение плана пользователем (день 15): plan_review → execution.
+        ValueError: не активна; stage != plan_review."""
+        def fn(t):
+            if not t["active"]:
+                raise ValueError("Задача не активна")
+            if t["stage"] != "plan_review":
+                raise ValueError("Одобрение доступно только на стадии plan_review")
+            t["plan_approved"] = True
+            t["stage"] = "execution"
+            t["current_step"] = _TASK_STAGE_NUM["execution"]
+            t["expected_action"] = "agent_response"
+            t["error"] = None
+        return self._task_mutate(dialogue_id, fn)
+
+    def task_reject(self, dialogue_id: str, note: str = "") -> dict:
+        """Отклонение плана пользователем (день 15): plan_review → planning,
+        запись planning сбрасывается в pending (повторный прогон планировщика),
+        plan_approved=False. note — причина отклонения (фидбэк в instruction).
+        ValueError: не активна; stage != plan_review."""
+        def fn(t):
+            if not t["active"]:
+                raise ValueError("Задача не активна")
+            if t["stage"] != "plan_review":
+                raise ValueError("Отклонение доступно только на стадии plan_review")
+            for e in t["plan"]:
+                if e["agent"] == "planning":
+                    e["status"] = "pending"
+                    e["output"] = None
+                    e["ts"] = None
+                    e["usage"] = None
+                    e["duration_s"] = None
+            t["plan_approved"] = False
+            t["stage"] = "planning"
+            t["current_step"] = _TASK_STAGE_NUM["planning"]
+            t["expected_action"] = "agent_response"
+            t["error"] = None
+            if note:
+                t["instruction"] = note
+        return self._task_mutate(dialogue_id, fn)
+
+    def task_set_constraints(self, dialogue_id: str, constraints: list,
+                             alternative: str) -> dict:
+        """Зафиксировать ограничения плана и альтернативный вариант (день 15):
+        показываются на plan_review. ValueError: не активна."""
+        def fn(t):
+            if not t["active"]:
+                raise ValueError("Задача не активна")
+            t["constraints"] = list(constraints or [])
+            t["alternative"] = alternative or ""
+        return self._task_mutate(dialogue_id, fn)
 
     def task_reset(self, dialogue_id: str) -> dict:
         """Сбросить состояние задачи (новая задача готова). ValueError:

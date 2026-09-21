@@ -158,7 +158,7 @@ export async function deleteInvariant(id: string): Promise<void> {
 // GET  /api/task?dialogue_id= → {task}
 
 export type TaskStage =
-  | 'planning' | 'execution' | 'validation' | 'done' | 'paused' | 'failed'
+  | 'planning' | 'plan_review' | 'execution' | 'validation' | 'done' | 'paused' | 'failed'
 export type TaskPlanStatus = 'pending' | 'in_progress' | 'completed'
 export type TaskExpectedAction = 'agent_response' | 'resume_wait' | 'human_input'
 
@@ -201,6 +201,9 @@ export interface TaskState {
   context_snapshot: { description: string; work_steps: TaskWorkStep[]; instruction: string } | null
   description: string
   instruction: string
+  plan_approved: boolean
+  constraints: string[]
+  alternative: string
   retries: number
   error: string | null
   updated: string | null
@@ -211,6 +214,7 @@ export type TaskEvent =
   | { type: 'step_updated'; index: number; name: string; status: TaskPlanStatus; output?: string; usage?: TaskUsage; duration_s?: number }
   | { type: 'step_delta'; index: number; text: string }
   | { type: 'stage_done'; stage: TaskStage; output: string; verdict?: 'pass' | 'fail'; plan?: string[]; retry?: boolean; usage?: TaskUsage }
+  | { type: 'plan_review'; stage: 'plan_review'; constraints: string[]; alternative: string }
   | { type: 'task_paused'; stage: string }
   | { type: 'task_resumed'; stage: TaskStage }
   | { type: 'invariant_violation'; patterns: string[] }
@@ -246,6 +250,16 @@ export function apiPostTaskReset(dialogue_id: string): Promise<{ task: TaskState
 
 export function apiGetTask(dialogue_id: string): Promise<{ task: TaskState }> {
   return apiGet(`/task?dialogue_id=${encodeURIComponent(dialogue_id)}`)
+}
+
+// Утвердить план после plan_review: POST /api/task/approve {dialogue_id} → {task}
+export function apiPostTaskApprove(dialogue_id: string): Promise<{ task: TaskState }> {
+  return apiPost('/task/approve', { dialogue_id })
+}
+
+// Отклонить план (возврат на planning): POST /api/task/reject {dialogue_id, note?} → {task}
+export function apiPostTaskReject(dialogue_id: string, note?: string): Promise<{ task: TaskState }> {
+  return apiPost('/task/reject', { dialogue_id, note })
 }
 
 // SSE POST /api/task/run — тот же паттерн, что chatStream (fetch + ReadableStream)

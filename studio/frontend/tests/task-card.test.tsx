@@ -64,6 +64,8 @@ function makeTask(partial: Partial<TaskState> = {}): TaskState {
     retries: 0,
     error: null,
     updated: null,
+    constraints: [],
+    alternative: '',
     ...partial,
   }
 }
@@ -293,6 +295,77 @@ describe('TaskCard — секции plan[]', () => {
     expect(await screen.findByText('ок, план выполнен')).toBeTruthy()
     expect(screen.getByText('прошла')).toBeTruthy()
     expect(screen.getByText('финал')).toBeTruthy()
+  })
+})
+
+describe('TaskCard — block плана на plan_review', () => {
+  it('сворачиваемый блок «План»: свёрнут, показывает число шагов, шаги внутри', async () => {
+    stubDefaultFetch()
+    const { container } = render(
+      <StudioProvider>
+        <TaskCard
+          task={makeTask({
+            stage: 'plan_review',
+            current_step: 2,
+            plan: [
+              entry(1, 'planning', 'completed', { output: '["A","B"]' }),
+              entry(2, 'execution', 'pending'),
+              entry(3, 'validation', 'pending'),
+              entry(4, 'done', 'pending'),
+            ],
+            work_steps: [
+              { name: 'A', status: 'pending', output: null, ts: null },
+              { name: 'B', status: 'pending', output: null, ts: null },
+            ],
+            constraints: ['не менять стек'],
+          })}
+          live={false}
+        />
+      </StudioProvider>,
+    )
+    await screen.findByText('Задача: Сделать кнопку')
+    const plan = container.querySelector('.task-plan')
+    expect(plan).toBeTruthy()
+    // по умолчанию свёрнут
+    expect(plan?.hasAttribute('open')).toBe(false)
+    // заголовок сводки: «План» + число шагов
+    expect(screen.getByText('План')).toBeTruthy()
+    expect(screen.getByText('2 шага')).toBeTruthy()
+    // шаги плана внутри details (строго в .task-plan-steps,
+    // т.к. «A»/«B» также встречаются в чек-листе execution-секции)
+    const steps = plan?.querySelectorAll('.task-plan-steps li') ?? []
+    expect(steps).toHaveLength(2)
+    expect(plan?.querySelector('.task-plan-steps')?.textContent).toContain('A')
+    expect(plan?.querySelector('.task-plan-steps')?.textContent).toContain('B')
+  })
+
+  it('фолбэк: нет work_steps — шаги берутся из JSON-плана (planning.output)', async () => {
+    stubDefaultFetch()
+    const { container } = render(
+      <StudioProvider>
+        <TaskCard
+          task={makeTask({
+            stage: 'plan_review',
+            current_step: 2,
+            plan: [
+              entry(1, 'planning', 'completed', { output: '["Шаг 1","Шаг 2"]' }),
+              entry(2, 'execution', 'pending'),
+              entry(3, 'validation', 'pending'),
+              entry(4, 'done', 'pending'),
+            ],
+            work_steps: [],
+          })}
+          live={false}
+        />
+      </StudioProvider>,
+    )
+    await screen.findByText('Задача: Сделать кнопку')
+    const plan = container.querySelector('.task-plan')
+    expect(plan).toBeTruthy()
+    expect(screen.getByText('План')).toBeTruthy()
+    expect(screen.getByText('2 шага')).toBeTruthy()
+    expect(screen.getByText('Шаг 1')).toBeTruthy()
+    expect(screen.getByText('Шаг 2')).toBeTruthy()
   })
 })
 
@@ -874,10 +947,11 @@ describe('TaskCard — время работы и токены (день 13b)', 
   })
 })
 
-describe('STAGE_LABELS — 6 стадий unified FSM', () => {
-  it('все 6 подписей на месте', () => {
+describe('STAGE_LABELS — 7 стадий unified FSM', () => {
+  it('все 7 подписей на месте', () => {
     expect(STAGE_LABELS).toEqual({
       planning: 'Планирование',
+      plan_review: 'Проверка плана',
       execution: 'Исполнение',
       validation: 'Валидация',
       done: 'Завершение',

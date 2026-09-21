@@ -90,7 +90,9 @@ export default function ChatPanel() {
             ? 'Инструкция для агентов… (Enter — сохранить)'
             : task?.stage === 'failed'
               ? 'Задача упала — «Повтор» в карточке'
-              : 'Опишите задачу… (Enter — запустить пайплайн)'
+              : task?.stage === 'plan_review'
+                ? 'Ожидание одобрения плана — кнопки в карточке'
+                : 'Опишите задачу… (Enter — запустить пайплайн)'
 
   return (
     <main className="panel chat">

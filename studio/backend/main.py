@@ -134,8 +134,14 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
             raise HTTPException(400, "Задача завершена")
 
         def gen():
-            for event in agent.task_run(dialogue_id):
-                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+            try:
+                for event in agent.task_run(dialogue_id):
+                    yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+            except Exception as e:
+                # День 15: непойманное исключение внутри task_run (напр. ValueError
+                # из task_retry_execution при паузе во время валидации) раньше
+                # убивало SSE-поток. Теперь отдаём error-кадр, а не падение.
+                yield f"data: {json.dumps({'type': 'error', 'message': str(e)}, ensure_ascii=False)}\n\n"
 
         return StreamingResponse(gen(), media_type="text/event-stream")
 
@@ -193,6 +199,40 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
         if agent.store.get_dialogue(dialogue_id) is None:
             raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
         t = agent.store.task_reset(dialogue_id)
+        return {"task": t}
+
+    @app.post("/api/task/approve")
+    def task_approve(body: dict):
+        """День 15: одобрить план (plan_review → execution).
+        Body: {dialogue_id}."""
+        dialogue_id = body.get("dialogue_id")
+        if not isinstance(dialogue_id, str) or not dialogue_id:
+            raise HTTPException(400, "Не передан dialogue_id")
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        try:
+            t = agent.store.task_approve(dialogue_id)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        return {"task": t}
+
+    @app.post("/api/task/reject")
+    def task_reject(body: dict):
+        """День 15: отклонить план (plan_review → planning, запись planning
+        сбрасывается, повторный прогон планировщика).
+        Body: {dialogue_id, note?}."""
+        dialogue_id = body.get("dialogue_id")
+        if not isinstance(dialogue_id, str) or not dialogue_id:
+            raise HTTPException(400, "Не передан dialogue_id")
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        note = body.get("note", "")
+        if not isinstance(note, str):
+            raise HTTPException(400, "note должен быть строкой")
+        try:
+            t = agent.store.task_reject(dialogue_id, note.strip())
+        except ValueError as e:
+            raise HTTPException(400, str(e))
         return {"task": t}
 
     @app.get("/api/task")

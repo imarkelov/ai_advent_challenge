@@ -1304,6 +1304,13 @@ button {
 .task-check-output { margin: 2px 0 4px 18px; font-size: 12px; white-space: pre-wrap; word-break: break-word; opacity: .75; }
 .task-live { margin: 4px 0 0 18px; font-size: 13px; border-left: 2px solid #1565c0; padding-left: 8px; white-space: pre-wrap; }
 .task-live-prompt { opacity: .5; }
+.task-plan { border: 1px solid var(--border); border-radius: 8px; margin: 6px 0; }
+.task-plan summary { display: flex; align-items: center; gap: 8px; padding: 6px 12px; cursor: pointer; list-style: none; }
+.task-plan summary::-webkit-details-marker { display: none; }
+.task-plan-title { font-weight: 600; }
+.task-plan-count { font-size: 11px; opacity: .6; }
+.task-plan-steps { margin: 0; padding: 4px 12px 10px 32px; font-size: 13px; }
+.task-plan-steps li { padding: 2px 0; }
 
 /* ── Тумблер режимов чат/задача (день 13b) ───────────────────────── */
 .mode-toggle { display: flex; gap: 4px; margin-bottom: 6px; }

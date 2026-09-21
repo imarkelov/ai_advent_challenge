@@ -877,6 +877,16 @@ class StudioAgent:
                     yield {"type": "error", "message": "Задача завершена"}
                     return
             instruction = self.store.task_instruction_take(dialogue_id)
+            if stage == "plan_review":
+                # День 15: человеческий гейт перед execution. Задача на
+                # plan_review — планировщик отработал, план НЕ одобрен.
+                # Run на этой стадии не запускает агентов: yield-им событие
+                # plan_review (ограничения + альтернатива) и ждём решения
+                # пользователя (approve/reject).
+                yield {"type": "plan_review", "stage": "plan_review",
+                       "constraints": t.get("constraints") or [],
+                       "alternative": t.get("alternative") or ""}
+                return
             if stage == "planning":
                 # День 14: pre-guard — постановка задачи (description)
                 # нарушает активный инвариант → отказ на первой стадии,
@@ -919,6 +929,13 @@ class StudioAgent:
                     return
                 steps = parse_work_steps(output)
                 self.store.task_work_steps_set(dialogue_id, steps)
+                # День 15: проверка плана на ограничения (инварианты,
+                # память, табу). Если есть — фиксируем и предлагаем
+                # альтернативу на plan_review.
+                constraints, alternative = self._task_plan_constraints(
+                    dialogue_id, output)
+                self.store.task_set_constraints(dialogue_id, constraints,
+                                                alternative)
                 t2 = self.store.task_stage_done(dialogue_id, "planning",
                                                 output, usage=usage)
                 pe = next(e for e in t2["plan"] if e["agent"] == "planning")
@@ -1025,6 +1042,13 @@ class StudioAgent:
                            "message": f"Ошибка Валидатора: {e}"}
                     return
                 verdict = self._parse_verdict(output)
+                # День 15: пауза могла прийти ВО ВРЕМЯ LLM-вызова валидатора
+                # (store уже stage="paused", а генератор этого не видел).
+                # Перечитываем состояние и, если пауза вступила, уважаем её.
+                t = self.store.task_get(dialogue_id)
+                if t["stage"] == "paused":
+                    yield {"type": "task_paused", "stage": "paused"}
+                    return
                 if verdict == "fail" and t["retries"] < MAX_TASK_RETRIES:
                     t2 = self.store.task_retry_execution(
                         dialogue_id, output, verdict, usage=usage)
@@ -1069,12 +1093,42 @@ class StudioAgent:
                     yield {"type": "task_failed",
                            "message": f"Ошибка финального синтеза: {e}"}
                     return
+                # День 15: пауза могла прийти ВО ВРЕМЯ финального LLM-вызова
+                # (store уже stage="paused"). Перечитываем состояние.
+                t = self.store.task_get(dialogue_id)
+                if t["stage"] == "paused":
+                    yield {"type": "task_paused", "stage": "paused"}
+                    return
                 # День 14: post-guard (L1) на финальный синтез. Stage/шаги
                 # до него — тоже LLM-входы, но нарушение инварианта в них
                 # ловится на финальном ответе (то, что реально уходит в
                 # ленту как bubble): запрещённый паттерн заменяется отказом,
                 # перед task_done отдаётся invariant_violation.
                 hits = self._postcheck_invariants(answer)
+                # День 15: если план одобрен пользователем (plan_review →
+                # execution), forbidden-паттерны, уже встретившиеся в
+                # согласованном контексте задачи (description + план +
+                # выводы work-шагов), легитимны: исполнитель/оркестратор
+                # объясняют отказ от запрета словами из forbidden (напр.
+                # "Python запрещён, поэтому TypeScript"). На финальном
+                # синтезе они НЕ считаются нарушением — иначе объяснение
+                # согласованной альтернативы рубится гардом. Убираем их из
+                # hits; реальное нарушение (паттерн вне контекста задачи)
+                # по-прежнему режется.
+                if t.get("plan_approved"):
+                    ctx_parts = [t.get("description") or ""]
+                    plan_e = next((e for e in t["plan"]
+                                   if e["agent"] == "planning"), {})
+                    if plan_e.get("output"):
+                        ctx_parts.append(plan_e["output"])
+                    for ws in t.get("work_steps") or []:
+                        if ws.get("output"):
+                            ctx_parts.append(ws["output"])
+                    approved_hits: set[str] = set()
+                    for part in ctx_parts:
+                        approved_hits.update(
+                            self._postcheck_invariants(part))
+                    hits = [h for h in hits if h not in approved_hits]
                 violation = bool(hits)
                 if violation:
                     answer = self._invariant_refusal(hits)
@@ -1167,6 +1221,32 @@ class StudioAgent:
         расширение: результат L1 можно передать вторичной проверке, код
         выстроен так, чтобы возвращать список L1."""
         return self._forbidden_hits(answer)
+
+    def _task_plan_constraints(self, dialogue_id: str, plan: str) -> tuple:
+        """День 15: ограничения плана — инварианты, память, табу.
+        Возвращает (constraints, alternative): список найденных ограничений и
+        текст альтернативного варианта ("" — ограничений нет). Детерминировано,
+        LLM не участвует."""
+        constraints: list[str] = []
+        rules: list[str] = []
+        inv = self._postcheck_invariants(plan)
+        if inv:
+            constraints.append("Инварианты: " + ", ".join(inv))
+            rules.append("инварианты")
+        mem = self._detect_memory_conflict(dialogue_id, plan)
+        if mem:
+            constraints.append(
+                "Память (WM/LT): " + "; ".join(f"{k} → {v}" for k, v in mem))
+            rules.append("память")
+        taboo = self._detect_taboo(dialogue_id, plan)
+        if taboo:
+            constraints.append("Табу профиля: " + ", ".join(taboo))
+            rules.append("профиль")
+        alternative = ""
+        if constraints:
+            alternative = ("Предложение: переработаю план в рамках "
+                           "ограничений — " + ", ".join(rules) + ".")
+        return constraints, alternative
 
     def _invariant_refusal(self, hits: list) -> str:
         """Текст отказа при нарушении инварианта (день 14): называет

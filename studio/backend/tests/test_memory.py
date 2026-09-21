@@ -437,7 +437,7 @@ class TestTaskStorage13b:
         t = self.s.task_new(self.did, "Сделать план")
         assert t["active"] is True
         assert t["stage"] == "planning"
-        assert t["current_step"] == 1 and t["total_steps"] == 4
+        assert t["current_step"] == 1 and t["total_steps"] == 5
         assert t["expected_action"] == "agent_response"
         assert t["task_id"].startswith("t_")
         assert [e["agent"] for e in t["plan"]] == ["planning", "execution", "validation", "done"]
@@ -550,6 +550,7 @@ class TestTaskStorage13b:
         t1 = self.s.task_new(self.did, "а")
         self.s.task_spawn_stage(self.did, "planning")
         self.s.task_stage_done(self.did, "planning", "план")
+        self.s.task_approve(self.did)
         self.s.task_spawn_stage(self.did, "execution")
         self.s.task_stage_done(self.did, "execution", "работа")
         self.s.task_spawn_stage(self.did, "validation")
@@ -597,7 +598,8 @@ class TestTaskStorage13b:
         self.s.task_spawn_stage(self.did, "planning")
         t = self.s.task_stage_done(self.did, "planning", "план")
         assert t["plan"][0]["status"] == "completed" and t["plan"][0]["output"] == "план"
-        assert t["stage"] == "execution" and t["current_step"] == 2
+        assert t["stage"] == "plan_review" and t["current_step"] == 2
+        assert t["expected_action"] == "human_input"
 
     def test_stage_done_wrong_stage_rejected(self):
         self.s.task_new(self.did, "а")
@@ -610,17 +612,21 @@ class TestTaskStorage13b:
 
     def test_stage_done_terminal(self):
         self.s.task_new(self.did, "а")
-        for st, out in (("planning", "п"), ("execution", "р"), ("validation", "в")):
+        self.s.task_spawn_stage(self.did, "planning")
+        self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_approve(self.did)
+        for st, out in (("execution", "р"), ("validation", "в")):
             self.s.task_spawn_stage(self.did, st)
             self.s.task_stage_done(self.did, st, out)
         self.s.task_spawn_stage(self.did, "done")
         t = self.s.task_stage_done(self.did, "done", "итог")
-        assert t["stage"] == "done" and t["current_step"] == 4
+        assert t["stage"] == "done" and t["current_step"] == 5
 
     def test_verdict_stored_on_validation(self):
         self.s.task_new(self.did, "а")
         self.s.task_spawn_stage(self.did, "planning")
         self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_approve(self.did)
         self.s.task_spawn_stage(self.did, "execution")
         self.s.task_stage_done(self.did, "execution", "р")
         self.s.task_spawn_stage(self.did, "validation")
@@ -641,6 +647,7 @@ class TestTaskStorage13b:
         self.s.task_new(self.did, "а")
         self.s.task_spawn_stage(self.did, "planning")
         self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_approve(self.did)
         self.s.task_work_steps_set(self.did, ["A", "B"])
         self.s.task_spawn_stage(self.did, "execution")
         t = self.s.task_work_step_set(self.did, 0, "in_progress")
@@ -663,6 +670,7 @@ class TestTaskStorage13b:
         self.s.task_new(self.did, "а")
         self.s.task_spawn_stage(self.did, "planning")
         self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_approve(self.did)
         self.s.task_work_steps_set(self.did, ["A", "B"])
         self.s.task_spawn_stage(self.did, "execution")
         self.s.task_work_step_set(self.did, 0, "completed", "A-ок")
@@ -678,6 +686,7 @@ class TestTaskStorage13b:
         self.s.task_new(self.did, "а")
         self.s.task_spawn_stage(self.did, "planning")
         self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_approve(self.did)
         self.s.task_spawn_stage(self.did, "execution")
         try:
             self.s.task_retry_execution(self.did, "x", "fail")
@@ -691,6 +700,7 @@ class TestTaskStorage13b:
         self.s.task_new(self.did, "а")
         self.s.task_spawn_stage(self.did, "planning")
         self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_approve(self.did)
         self.s.task_work_steps_set(self.did, ["A", "B"])
         self.s.task_spawn_stage(self.did, "execution")
         self.s.task_work_step_set(self.did, 0, "completed", "A-ок")
@@ -713,6 +723,7 @@ class TestTaskStorage13b:
         self.s.task_new(self.did, "а")
         self.s.task_spawn_stage(self.did, "planning")
         self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_approve(self.did)
         self.s.task_spawn_stage(self.did, "execution")
         self.s.task_pause(self.did)
         t = self.s.task_resume(self.did)
@@ -731,6 +742,7 @@ class TestTaskStorage13b:
         self.s.task_new(self.did, "а")
         self.s.task_spawn_stage(self.did, "planning")
         self.s.task_stage_done(self.did, "planning", "п")
+        self.s.task_approve(self.did)
         self.s.task_spawn_stage(self.did, "execution")
         t = self.s.task_set_failed(self.did, "модель не ответила")
         assert t["stage"] == "failed" and t["error"] == "модель не ответила"

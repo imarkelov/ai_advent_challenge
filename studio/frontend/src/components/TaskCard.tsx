@@ -6,9 +6,10 @@ import { useEffect, useRef, useState } from 'react'
 import { useStudio, type Message } from '../state'
 import type { TaskPlanEntry, TaskPlanStatus, TaskState, TaskUsage, TaskWorkStep } from '../api'
 
-// Подписи стадий (6 — unified FSM; переезд из TaskTab)
+// Подписи стадий (день 15: +plan_review — человеческий гейт одобрения плана)
 export const STAGE_LABELS: Record<string, string> = {
   planning: 'Планирование',
+  plan_review: 'Проверка плана',
   execution: 'Исполнение',
   validation: 'Валидация',
   done: 'Завершение',
@@ -16,7 +17,10 @@ export const STAGE_LABELS: Record<string, string> = {
   failed: 'Ошибка',
 }
 
+// Пайплайн stage-агентов (записи plan[]; plan_review — не агент, не в plan[])
 const PIPELINE: TaskPlanEntry['agent'][] = ['planning', 'execution', 'validation', 'done']
+// Полный порядок стадий для fallback-лейбла (current_step → label)
+const DISPLAY_PIPELINE: string[] = ['planning', 'plan_review', 'execution', 'validation', 'done']
 
 function statusChip(status: TaskPlanStatus): { cls: string; label: string } {
   if (status === 'completed') return { cls: 'tc-chip ok', label: 'готово' }
@@ -79,6 +83,37 @@ function stageMeta(entry: TaskPlanEntry, now: number): string | null {
     if (t != null) parts.push(`работа ${fmtDuration((now - t) / 1000)}`)
   }
   return parts.length ? parts.join(' · ') : null
+}
+
+// Имена шагов плана для блока plan_review: работающие work_steps уже на месте
+// (заполнены на стадии planning); фолбэк — JSON-план из записи planning
+// (сырые шаги). Пусто — [].
+function planStepNames(task: TaskState): string[] {
+  const fromSteps = task.work_steps.map((w) => w.name).filter((n) => n)
+  if (fromSteps.length) return fromSteps
+  const raw = task.plan.find((e) => e.agent === 'planning')?.output
+  if (!raw) return []
+  const m = raw.match(/\[[\s\S]*\]/)
+  if (m) {
+    try {
+      const arr = JSON.parse(m[0])
+      if (Array.isArray(arr)) {
+        return arr.map((s) => String(s)).filter((s) => s.trim()).slice(0, 5)
+      }
+    } catch {
+      /* не-JSON — уходим ниже */
+    }
+  }
+  return [raw]
+}
+
+// Склонение «шаг/шага/шагов» по числу (ru-RU)
+function stepWord(n: number): string {
+  const n10 = n % 10
+  const n100 = n % 100
+  if (n10 === 1 && n100 !== 11) return 'шаг'
+  if (n10 >= 2 && n10 <= 4 && !(n100 >= 12 && n100 <= 14)) return 'шага'
+  return 'шагов'
 }
 
 // Мета строки work-шага: completed с usage → «45с · 812 токенов»;
@@ -171,6 +206,9 @@ export function taskFromMarkers(messages: Message[], taskId: string): TaskState 
     context_snapshot: null,
     description: msgs.find((m) => m.role === 'user')?.content ?? '',
     instruction: '',
+    plan_approved: true,
+    constraints: [],
+    alternative: '',
     retries: 0,
     error: null,
     updated: null,
@@ -183,7 +221,7 @@ export interface TaskCardProps {
 }
 
 export default function TaskCard({ task, live }: TaskCardProps) {
-  const { state, pauseTask, resumeTask, runTask } = useStudio()
+  const { state, pauseTask, resumeTask, runTask, approveTask, rejectTask } = useStudio()
   const running = state.taskRunning && live
   const now = useNow(live)
   const liveStep = live ? state.taskLive : null
@@ -209,12 +247,13 @@ export default function TaskCard({ task, live }: TaskCardProps) {
   const completedCount = task.plan.filter((e) => e.status === 'completed').length
   const stageLabel = task.stage && STAGE_LABELS[task.stage]
     ? STAGE_LABELS[task.stage]
-    : STAGE_LABELS[PIPELINE[task.current_step - 1] ?? 'planning']
+    : STAGE_LABELS[DISPLAY_PIPELINE[task.current_step - 1] ?? 'planning']
   const badge = !task.active
     ? { cls: '', label: '' }
     : task.stage === 'done' ? { cls: 'ok', label: 'Готово' }
     : task.stage === 'paused' ? { cls: 'warn', label: 'Пауза' }
     : task.stage === 'failed' ? { cls: 'err', label: 'Ошибка' }
+    : task.stage === 'plan_review' ? { cls: 'warn', label: 'Ожидает одобрения' }
     : running ? { cls: 'run', label: 'Выполняется' }
     : { cls: '', label: 'Готово к запуску' }
 
@@ -253,6 +292,18 @@ export default function TaskCard({ task, live }: TaskCardProps) {
             Повтор
           </button>
         )}
+        {live && task.stage === 'plan_review' && (
+          <>
+            <button type="button" className="btn tc-btn"
+                    onClick={() => void approveTask()}>
+              Одобрить
+            </button>
+            <button type="button" className="btn danger tc-btn"
+                    onClick={() => void rejectTask()}>
+              Отклонить
+            </button>
+          </>
+        )}
         {live && task.stage && task.stage !== 'paused' && task.stage !== 'failed' &&
           task.stage !== 'done' && !running && (
             <button type="button" className="btn tc-btn" onClick={() => void runTask()}>
@@ -273,6 +324,35 @@ export default function TaskCard({ task, live }: TaskCardProps) {
 
       {task.error && task.stage === 'failed' && (
         <div className="task-card-error">{task.error}</div>
+      )}
+
+      {task.stage === 'plan_review' && (
+        <div className="task-card-plan">
+          <p className="task-card-plan-hint">План сформирован. Проверьте шаги плана и ограничения, затем утвердите или отклоните.</p>
+          <details className="task-plan" open={false}>
+            <summary className="task-plan-summary">
+              <span className="task-plan-title">План</span>
+              {planStepNames(task).length > 0 && (
+                <span className="task-plan-count">{planStepNames(task).length} {stepWord(planStepNames(task).length)}</span>
+              )}
+            </summary>
+            <ol className="task-plan-steps">
+              {planStepNames(task).map((s, i) => <li key={i}>{s}</li>)}
+            </ol>
+          </details>
+          {task.constraints.length > 0 && (
+            <div className="task-card-constraints">
+              <span className="task-card-constraints-title">Ограничения (инварианты / память / профиль):</span>
+              <ul>{task.constraints.map((c, i) => <li key={i}>{c}</li>)}</ul>
+            </div>
+          )}
+          {task.alternative && (
+            <div className="task-card-alternative">
+              <span className="task-card-alternative-title">Предложен альтернативный вариант:</span>
+              <p>{task.alternative}</p>
+            </div>
+          )}
+        </div>
       )}
 
       {task.plan.map((entry) => {

@@ -1462,7 +1462,18 @@ class TestTaskRun13b:
         return agent, d["id"]
 
     def run_all(self, agent, did):
-        return list(agent.task_run(did))
+        """Прогнать пайплайн до конца. День 15: plan_review — человеческий
+        гейт, task_run на нём yield-ит plan_review и возвращается. Для
+        тестов полного цикла авто-одобряем и продолжаем."""
+        events = []
+        while True:
+            batch = list(agent.task_run(did))
+            events.extend(batch)
+            if any(e["type"] == "plan_review" for e in batch):
+                agent.store.task_approve(did)
+                continue
+            break
+        return events
 
     def event_types(self, events):
         return [e["type"] for e in events]
@@ -1482,6 +1493,8 @@ class TestTaskRun13b:
             {"type": "stage_done", "stage": "planning",
              "output": json.dumps(["A", "B"], ensure_ascii=False),
              "plan": ["A", "B"], "usage": u},
+            {"type": "plan_review", "stage": "plan_review",
+             "constraints": [], "alternative": ""},
             {"type": "agent_spawned", "stage": "execution", "agent": "Исполнитель"},
             {"type": "step_updated", "index": 0, "name": "A", "status": "in_progress"},
             {"type": "step_delta", "index": 0, "text": "Результат шага A"},
@@ -1605,7 +1618,7 @@ class TestTaskRun13b:
         agent, did = self._setup(data_dir, handler)
         box["store"] = agent.store
         box["did"] = did
-        events1 = list(agent.task_run(did))
+        events1 = self.run_all(agent, did)
         # пауза на границе шага: после step_updated(0, completed)
         assert events1[-1] == {"type": "task_paused", "stage": "paused"}
         su = [e for e in events1 if e["type"] == "step_updated"]
@@ -1693,7 +1706,7 @@ class TestTaskRun13b:
     def test_llm_error_marks_failed(self, data_dir):
         handler, calls = make_task_handler(["A"], {}, fail_stage="Исполнитель")
         agent, did = self._setup(data_dir, handler)
-        events = list(agent.task_run(did))
+        events = self.run_all(agent, did)
         assert events[-1]["type"] == "task_failed"
         assert "A" in events[-1]["message"]
         su = [e for e in events if e["type"] == "step_updated"]
@@ -1726,6 +1739,7 @@ class TestTaskRun13b:
         agent.store.task_new(d["id"], "Задача X")
         agent.store.task_spawn_stage(d["id"], "planning")
         agent.store.task_stage_done(d["id"], "planning", "план")
+        agent.store.task_approve(d["id"])
         assert agent.store.task_get(d["id"])["stage"] == "execution"
         # активная непаузанная незавершённая — гард, сообщение не сохраняется
         events = list(agent.ask_stream(d["id"], "привет"))
@@ -1824,6 +1838,53 @@ class TestTaskRun13b:
         done = next(e for e in events if e["type"] == "task_done")
         assert done["answer"] == "Отлично, python — наше всё."
 
+    def test_task_done_approved_plan_mentions_forbidden(self, data_dir):
+        """День 15 (фикс): план содержит forbidden-паттерн, пользователь
+        одобрил (plan_review → execution), и финальный синтез легитимно
+        называет этот паттерн, объясняя согласованную альтернативу. Пост-гард
+        НЕ должен рубить ответ: паттерны из одобренного плана не считаются
+        нарушением. (Без фикса — ложное invariant_violation + отказ.)"""
+        handler, calls = make_task_handler(
+            ["A", "B"],
+            {"A": "Результат шага A", "B": "Результат шага B"},
+            planning_output='["A", "B"]\n(не используем python — иначе инвариант)',
+            done_output="Итог: реализовано на Kotlin вместо Python.")
+        agent, did = self._setup(data_dir, handler)
+        agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+        events = self.run_all(agent, did)
+        types = self.event_types(events)
+        # план нарушает инвариант → человеческий гейт plan_review
+        assert "plan_review" in types
+        # одобрили → пайплайн дошёл до done (без ложного отказа)
+        assert "task_done" in types
+        assert "invariant_violation" not in types
+        done = next(e for e in events if e["type"] == "task_done")
+        assert done["answer"] == "Итог: реализовано на Kotlin вместо Python."
+
+    def test_task_done_approved_workstep_mentions_forbidden(self, data_dir):
+        """День 15 (фикс, живой сценарий): forbidden-паттерн НЕ в плане,
+        а в выводе work-шага Исполнителя (исполнитель объясняет отказ от
+        запрета — «Python запрещён, поэтому TypeScript»). Пользователь
+        одобрил план (plan_approved), финальный синтез легитимно называет
+        паттерн. Пост-гард НЕ должен рубить ответ: паттерны из
+        согласованного контекста задачи (описание + план + выводы
+        work-шагов) не считаются нарушением. (Без фикса — ложный отказ.)"""
+        handler, calls = make_task_handler(
+            ["A", "B"],
+            {"A": "Реализовано на Kotlin. Python запрещён инвариантом, "
+                  "поэтому TypeScript.",
+             "B": "Результат шага B"},
+            planning_output='["A", "B"]',
+            done_output="Итог: реализовано на Kotlin вместо Python.")
+        agent, did = self._setup(data_dir, handler)
+        agent.store.invariants_set("Стек", "Kotlin", forbidden=["python"])
+        events = self.run_all(agent, did)
+        types = self.event_types(events)
+        assert "task_done" in types
+        assert "invariant_violation" not in types
+        done = next(e for e in events if e["type"] == "task_done")
+        assert done["answer"] == "Итог: реализовано на Kotlin вместо Python."
+
     def test_task_run_refuses_planning_on_forbidden_description(self, data_dir):
         """День 14: постановка задачи с forbidden-паттерном в description
         → отказ на стадии planning ДО спавна агентов: нет agent_spawned,
@@ -1855,7 +1916,7 @@ class TestTaskRun13b:
         # состояние задачи: stage=done, planning completed, остальные pending
         t = agent.store.task_get(did)
         assert t["stage"] == "done"
-        assert t["current_step"] == 4  # len(TASK_PIPELINE) — терминальная done
+        assert t["current_step"] == 5  # len(TASK_FLOW) — терминальная done
         by_agent = {e["agent"]: e["status"] for e in t["plan"]}
         assert by_agent["planning"] == "completed"
         assert by_agent["execution"] == "pending"

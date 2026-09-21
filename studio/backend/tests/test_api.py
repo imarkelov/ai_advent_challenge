@@ -5,7 +5,7 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from agent import StudioAgent
+from agent import StudioAgent, TASK_STAGE_USER
 from conftest import delta_chunk, sse_body, usage_chunk
 
 
@@ -634,12 +634,28 @@ def task_dialogue(client):
     return did
 
 
+
 def run_task(client, did):
-    """POST /api/task/run: разобрать SSE-кадры в список событий."""
-    with client.stream("POST", "/api/task/run",
-                       json={"dialogue_id": did}) as resp:
-        assert resp.status_code == 200
-        return parse_sse(list(resp.iter_lines()))
+    """POST /api/task/run: разобрать SSE-кадры в список событий.
+    День 15: поток останавливается на plan_review — авто-одобряем и
+    продолжаем, пока задача не дойдёт до терминального события."""
+    events = []
+    while True:
+        with client.stream("POST", "/api/task/run",
+                           json={"dialogue_id": did}) as resp:
+            assert resp.status_code == 200
+            batch = parse_sse(list(resp.iter_lines()))
+        events.extend(batch)
+        if batch and batch[-1]["type"] == "plan_review":
+            r = client.post("/api/task/approve",
+                            json={"dialogue_id": did})
+            assert r.status_code == 200
+            continue
+        break
+    return events
+
+
+
 
 
 def task_done_dialogue(client):
@@ -857,6 +873,14 @@ def test_run_on_failed_retries(tmp_path):
     r = c.post("/api/task/start",
                json={"dialogue_id": did, "description": "Сделать кнопку"})
     assert r.status_code == 200
+    # первый проход: планировщик(non-stream) — ok; поток останавливается на
+    # plan_review; одобряем план и запускаем исполнение → Исполнитель 500.
+    with c.stream("POST", "/api/task/run",
+                  json={"dialogue_id": did}) as resp:
+        events = parse_sse(list(resp.iter_lines()))
+    assert events[-1]["type"] == "plan_review"
+    assert c.post("/api/task/approve",
+                  json={"dialogue_id": did}).status_code == 200
     with c.stream("POST", "/api/task/run",
                   json={"dialogue_id": did}) as resp:
         events = parse_sse(list(resp.iter_lines()))
@@ -872,3 +896,65 @@ def test_run_on_failed_retries(tmp_path):
     assert events[-1]["type"] == "task_done"
     t = c.get("/api/task", params={"dialogue_id": did}).json()["task"]
     assert t["stage"] == "done"
+
+
+def test_pause_during_validation_verdict_fail(tmp_path):
+    """День 15: пауза нажата ВО ВРЕМЯ LLM-вызова валидатора, вердикт = fail.
+
+    Раньше: stage уже "paused" (task_pause перевёл store), а генератор в ветке
+    validation этого не видел -> task_retry_execution бросал ValueError -> SSE
+    умирал, событие task_paused не выходило, задача застревала на паузе.
+    Теперь: pause-гард в ветке validation отдаёт task_paused и завершает поток
+    без падения."""
+    holder = {"agent": None, "did": None}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith("/models"):
+            return httpx.Response(200, json={"data": [{"id": "qwen3.8-27b"}]})
+        payload = json.loads(request.content)
+        user = payload["messages"][-1]["content"]
+        if user == TASK_STAGE_USER["planning"]:
+            return httpx.Response(200, json={"choices": [
+                {"message": {"content": '["Сделать кнопку", "Подписать её"]'}}]})
+        if user == TASK_STAGE_USER["validation"]:
+            # имитируем нажатие паузы ВО ВРЕМЯ этого вызова (до возврата вердикта)
+            holder["agent"].store.task_pause(holder["did"])
+            return httpx.Response(200, json={"choices": [
+                {"message": {"content": "работа не по плану\n<verdict>fail</verdict>"}}]})
+        if user == TASK_STAGE_USER["done"]:
+            return httpx.Response(200, json={"choices": [
+                {"message": {"content": "Готово"}}]})
+        body = sse_body([delta_chunk("Р"), usage_chunk(), "[DONE]"])
+        return httpx.Response(200, content=body.encode("utf-8"))
+
+    d = tmp_path / "d"
+    d.mkdir()
+    agent = StudioAgent(str(d), base_url="https://mock.local/v1",
+                        api_key="test-key",
+                        client=httpx.Client(transport=httpx.MockTransport(handler)))
+    holder["agent"] = agent
+    from main import create_app
+    c = TestClient(create_app(agent))
+    did = c.post("/api/dialogues").json()["dialogue"]["id"]
+    holder["did"] = did
+    c.post("/api/profile/action",
+           json={"dialogue_id": did, "action": "decline"})
+    r = c.post("/api/task/start",
+               json={"dialogue_id": did, "description": "Сделать кнопку"})
+    assert r.status_code == 200
+
+    # планирование -> plan_review, одобряем план
+    with c.stream("POST", "/api/task/run",
+                  json={"dialogue_id": did}) as resp:
+        events = parse_sse(list(resp.iter_lines()))
+    assert events[-1]["type"] == "plan_review"
+    assert c.post("/api/task/approve",
+                  json={"dialogue_id": did}).status_code == 200
+
+    # исполнение (стрим) -> валидация (пауза + fail) -> task_paused
+    with c.stream("POST", "/api/task/run",
+                  json={"dialogue_id": did}) as resp:
+        events = parse_sse(list(resp.iter_lines()))
+    assert events[-1] == {"type": "task_paused", "stage": "paused"}
+    t = c.get("/api/task", params={"dialogue_id": did}).json()["task"]
+    assert t["stage"] == "paused"

@@ -21,6 +21,8 @@ import {
   apiPostTaskReset,
   apiPostTaskResume,
   apiPostTaskStart,
+  apiPostTaskApprove,
+  apiPostTaskReject,
   chatStream,
   deleteInvariant as apiDeleteInvariant,
   getInvariants,
@@ -489,6 +491,8 @@ export interface StudioApi {
   pauseTask: () => Promise<void>
   resumeTask: () => Promise<void>
   sendTaskInstruction: (text: string) => Promise<void>
+  approveTask: () => Promise<void>
+  rejectTask: (note?: string) => Promise<void>
   resetTask: () => Promise<void>
   // Режим ввода (день 13b): 'chat' | 'task', persist в localStorage
   chatMode: 'chat' | 'task'
@@ -616,8 +620,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
           })
         } else if (e.type === 'step_delta') {
           dispatch({ type: 'task-step-delta', index: e.index, text: e.text })
-        } else if (e.type === 'stage_done' || e.type === 'task_paused'
+        } else if (e.type === 'stage_done' || e.type === 'plan_review'
+            || e.type === 'task_paused'
             || e.type === 'task_resumed') {
+          // plan_review (день 15): стадия ждёт одобрения плана — перечитать
+          // авторитетное состояние (constraints/alternative придут из бэкенда)
           void reloadTask().catch((err) => console.error('reloadTask:', err))
         } else if (e.type === 'invariant_violation') {
           // нарушение активного инварианта (до task_done): бейдж в шапке чата
@@ -719,6 +726,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         await sendTaskInstruction(trimmed)
         return
       }
+      // День 15: на plan_review (ожидание одобрения плана) ввод новой задачи
+      // исключён — решение принимается кнопками «Одобрить»/«Отклонить»
+      if (task.stage === 'plan_review') return
       if (task.stage === 'failed' || task.stage === 'done') return
     }
     await startTask(trimmed)
@@ -733,6 +743,35 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     const { task } = await apiPostTaskReset(id)
     dispatch({ type: 'task-set', id, task })
   }, [])
+
+  // Одобрить план (день 15): POST /api/task/approve → plan_review → execution
+  const approveTask = useCallback(async () => {
+    const id = stateRef.current.activeId
+    if (id == null) return
+    try {
+      const { task } = await apiPostTaskApprove(id)
+      dispatch({ type: 'task-set', id, task })
+      await runTask()
+    } catch (err) {
+      console.error('approveTask:', err)
+      await reloadTask()
+    }
+  }, [runTask, reloadTask])
+
+  // Отклонить план (день 15): POST /api/task/reject {note} → plan_review → planning.
+  // После отклонения планировщик переиграет план с учётом замечания.
+  const rejectTask = useCallback(async (note?: string) => {
+    const id = stateRef.current.activeId
+    if (id == null) return
+    try {
+      const { task } = await apiPostTaskReject(id, note)
+      dispatch({ type: 'task-set', id, task })
+      await runTask()
+    } catch (err) {
+      console.error('rejectTask:', err)
+      await reloadTask()
+    }
+  }, [runTask, reloadTask])
 
   // Обновление боковых панелей после действий: memory/tokens/requests (+ lastRequest)
   const refreshPanels = useCallback(async (lastId?: number) => {
@@ -975,6 +1014,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     pauseTask,
     resumeTask,
     sendTaskInstruction,
+    approveTask,
+    rejectTask,
     resetTask,
     chatMode: state.chatMode,
     setChatMode,

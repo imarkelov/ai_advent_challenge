@@ -276,7 +276,7 @@ describe('InvariantsTab — удаление', () => {
 })
 
 describe('ContextPanel — вкладка «Инварианты»', () => {
-  it('5-й таб «Инварианты» отображается и открывает вкладку', async () => {
+  it('3-й таб «Инварианты» отображается и открывает вкладку', async () => {
     vi.stubGlobal('fetch', stubFetch([
       { id: 'inv-1', title: 'Язык', description: 'русский', forbidden: [], is_active: true },
     ]))
@@ -285,8 +285,8 @@ describe('ContextPanel — вкладка «Инварианты»', () => {
         <ContextPanel />
       </StudioProvider>,
     )
-    // все 5 табов панели «Контекст»
-    for (const label of ['Память', 'Токены', 'Запрос', 'Профили', 'Инварианты']) {
+    // все 3 таба панели «Контекст» (Токены/Запрос перенесены в сайдбар)
+    for (const label of ['Память', 'Профили', 'Инварианты']) {
       expect(screen.getByRole('tab', { name: label })).toBeTruthy()
     }
     const tab = screen.getByRole('tab', { name: 'Инварианты' })
