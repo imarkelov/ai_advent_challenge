@@ -19,7 +19,7 @@
 | День 12 | [`day12-user-profile`](https://github.com/imarkelov/ai_advent_challenge/tree/day12-user-profile) | Персонализация: профиль пользователя per-диалог (имя, роль, тон, стоп-слова), инициализация (интервью / вручную / отказ), автоинъекция в system-промпт, UI: вкладка «Профили» + бейдж в чате |
 | День 13b | [`day13-task-state-machine`](https://github.com/imarkelov/ai_advent_challenge/tree/day13-task-state-machine) | Задача = запрос в режиме «задача» (тумблер чат/задача), карточка процесса в чате (спавн stage-агентов, чек-лист work-шагов, живой вывод), unified FSM planning/execution/validation/done/paused/failed, пошаговое исполнение (1 LLM-вызов на шаг), пауза на границе шага + инструкция |
 | День 14 | [`day14-invariants`](https://github.com/imarkelov/ai_advent_challenge/tree/day14-invariants) | Инварианты: глобальные жёсткие ограничения (архитектура, техрешения, стек, бизнес-правила), хранятся отдельно от диалога, всегда активны, инжектятся в system-промпт + правило конфликтов + server-side гард (отказ при противоречии), вкладка «Инварианты» + тесты конкурса/объяснения отказа |
-| День 15 | [`day14-invariants`](https://github.com/imarkelov/ai_advent_challenge/tree/day14-invariants) | Проверка плана (plan_review): человеческий гейт одобрения плана между planning и execution (кнопки «Одобрить»/«Отклонить», детект ограничений плана — инварианты/память/табу + альтернатива), фикс done-пост-гарда для согласованного контекста (запрет из одобренного контекста задачи не рубит объяснение альтернативы), пауза во время LLM-вызова валидатора/синтеза, move вкладок Токены/Запрос в сайдбар |
+| День 15 | [`day15-plan-review`](https://github.com/imarkelov/ai_advent_challenge/tree/day15-plan-review) | Проверка плана (plan_review): человеческий гейт одобрения плана между planning и execution (кнопки «Одобрить»/«Отклонить», детект ограничений плана — инварианты/память/табу + альтернатива), фикс done-пост-гарда для согласованного контекста (запрет из одобренного контекста задачи не рубит объяснение альтернативы), пауза во время LLM-вызова валидатора/синтеза, move вкладок Токены/Запрос в сайдбар |
 
 ## День 7: как работает сервис
 
@@ -768,4 +768,4 @@ post-guard заменяет его отказом + SSE `invariant_violation`. �
 forbidden `python` — пайплайн прошёл `planning → plan_review (одобрено) →
 execution → validation → done`, финальный ответ — решение на TypeScript без
 баннера «Нарушен инвариант» и с явным объяснением (без Python).
-Ветка `day14-invariants` (от `day13-task-state-machine`).
+Ветка `day15-plan-review` (от `day14-invariants`).
