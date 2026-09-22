@@ -530,3 +530,83 @@ def test_registry_close_all_resets_runtime(tmp_path):
     assert reg.tools() == []
     # реестр на диске не тронут
     assert _store(tmp_path).mcp_servers_items()
+
+
+# ---------- Mock Task Manager (день 17): реальный subprocess ----------
+# Файл сервера сам deliverable — поэтому launcher реальный
+# (python studio/mcp_servers/task_manager.py), fake-процесс не используем.
+
+TASK_MANAGER_PATH = os.path.abspath(os.path.join(
+    os.path.dirname(__file__), "..", "..", "mcp_servers",
+    "task_manager.py"))
+
+
+def _task_manager_client() -> MCPClient:
+    """Клиент на реальный stdio-процесс task_manager.py."""
+    server = {"id": "mcp_tm", "name": "Task Manager", "type": "stdio",
+              "command": [sys.executable, TASK_MANAGER_PATH], "url": "",
+              "env": {}, "enabled": True}
+    return MCPClient(server)
+
+
+def test_task_manager_connect_real_subprocess():
+    client = _task_manager_client()
+    try:
+        tools = client.connect()
+    finally:
+        client.close()
+    assert [t["name"] for t in tools] == \
+        ["get_task_details", "create_task"]
+    assert all(t["input_schema"]["type"] == "object" for t in tools)
+    assert all(t["description"] for t in tools)
+
+
+def test_task_manager_get_task_found():
+    client = _task_manager_client()
+    client.connect()
+    try:
+        result = client.call_tool("get_task_details",
+                                  {"task_id": "TASK-42"})
+    finally:
+        client.close()
+    assert result["isError"] is False
+    text = result["content"][0]["text"]
+    assert "in_progress" in text
+    assert "TASK-42" in text
+
+
+def test_task_manager_get_task_not_found():
+    client = _task_manager_client()
+    client.connect()
+    try:
+        result = client.call_tool("get_task_details",
+                                  {"task_id": "TASK-999"})
+    finally:
+        client.close()
+    assert result["isError"] is True
+    assert "не найдена" in result["content"][0]["text"].lower()
+
+
+def test_task_manager_get_task_missing_argument():
+    client = _task_manager_client()
+    client.connect()
+    try:
+        result = client.call_tool("get_task_details", {})
+    finally:
+        client.close()
+    assert result["isError"] is True
+    assert "не найдена" in result["content"][0]["text"].lower()
+
+
+def test_task_manager_create_task():
+    client = _task_manager_client()
+    client.connect()
+    try:
+        result = client.call_tool("create_task", {"title": "E2E-тест"})
+    finally:
+        client.close()
+    assert result["isError"] is False
+    task = json.loads(result["content"][0]["text"])
+    assert task["id"].startswith("TASK-")
+    assert task["status"] == "todo"
+    assert task["title"] == "E2E-тест"
