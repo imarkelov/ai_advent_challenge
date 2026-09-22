@@ -9,6 +9,9 @@ import pytest
 
 from agent import CONTEXT_LIMITS, INVARIANTS_RULE, MEMORY_RULE, StudioAgent
 from conftest import USAGE, delta_chunk, sse_body, usage_chunk
+from mcp import MCPRegistry
+from memory import MemoryStore
+from tests.test_mcp import make_fake_launcher
 
 BASE = "https://mock.local/v1"
 
@@ -1944,3 +1947,154 @@ class TestTaskRun13b:
         assert "agent_spawned" in types
         assert "invariant_violation" not in types
         assert types[0] == "agent_spawned"
+
+
+# ---------- tool-loop LLM-driven (день 17) ----------
+
+def _tool_loop_agent(data_dir, handler):
+    """Агент с офлайн MCPRegistry: fake stdio-процесс (mock_echo/mock_ping,
+    call_tool — эхо str(args)), MockTransport для LLM."""
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    store = MemoryStore(str(data_dir))
+    reg = MCPRegistry(store, launcher=make_fake_launcher())
+    agent = StudioAgent(str(data_dir), base_url=BASE, api_key="test-key",
+                        client=client, mcp=reg)
+    return agent, reg
+
+
+def _tool_loop_handler(tool_name="mock_echo", always_tool_calls=False):
+    """Fake-LLM: non-stream (авто-название) — JSON; в messages НЕТ
+    role "tool" — SSE с tool-call чанком (mock_echo/mock_ping/"nope");
+    role "tool" ЕСТЬ — SSE «Готово: <текст tool>» (+ usage + [DONE])."""
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = json.loads(request.content)
+        if "stream" not in payload:
+            return httpx.Response(200, json={"choices": [
+                {"message": {"content": "E2E"}}]})
+        msgs = payload.get("messages") or []
+        if not always_tool_calls and any(m.get("role") == "tool"
+                                         for m in msgs):
+            tool_text = next(m["content"] for m in msgs
+                             if m.get("role") == "tool")
+            body = sse_body([delta_chunk("Готово: " + tool_text),
+                             usage_chunk(), "[DONE]"])
+            return httpx.Response(200, content=body.encode("utf-8"))
+        tc = {"index": 0, "id": "call_1", "type": "function",
+              "function": {"name": tool_name,
+                           "arguments": '{"x": "TASK-42"}'}}
+        body = sse_body([
+            {"choices": [{"index": 0, "delta": {"tool_calls": [tc]},
+                          "finish_reason": None}]},
+            {"choices": [{"index": 0, "delta": {},
+                          "finish_reason": "tool_calls"}],
+             "usage": USAGE},
+            "[DONE]",
+        ])
+        return httpx.Response(200, content=body.encode("utf-8"))
+    return handler
+
+
+def test_tool_loop_happy_path(data_dir):
+    """Подключённый сервер: tools в body, LLM решает вызвать mock_echo,
+    результат (role tool) возвращается модели, финальный done с ответом."""
+    agent, reg = _tool_loop_agent(data_dir, _tool_loop_handler())
+    try:
+        d = agent.store.new_dialogue()
+        ready(agent, d)
+        sid = reg.servers()[0]["id"]
+        assert reg.connect(sid)["status"] == "connected"
+        events = list(agent.ask_stream(d["id"], "Каков статус задачи TASK-42?"))
+        assert events[-1]["type"] == "done"
+        assert "TASK-42" in events[-1]["answer"]
+        msgs = agent.store.get_messages(d["id"])
+        # ровно один assistant с tool_calls (реальное имя, args — JSON)
+        asst_tc = [m for m in msgs
+                   if m["role"] == "assistant" and m.get("tool_calls")]
+        assert len(asst_tc) == 1
+        tc = asst_tc[0]["tool_calls"][0]
+        assert tc["id"] == "call_1"
+        assert tc["function"]["name"] == "mock_echo"
+        assert json.loads(tc["function"]["arguments"]) == {"x": "TASK-42"}
+        # ровно один tool-ответ (эхо fake-процесса)
+        tool_msgs = [m for m in msgs if m["role"] == "tool"]
+        assert len(tool_msgs) == 1
+        assert tool_msgs[0]["tool_call_id"] == "call_1"
+        assert tool_msgs[0]["content"] == "{'x': 'TASK-42'}"
+        # журнал: 2 записи LLM; в первой tools содержит mock_echo
+        rl = agent.requests_list()
+        assert len(rl) == 2
+        first = agent.requests_get(rl[0]["id"])
+        assert "tools" in first["request"]
+        names = [t["function"]["name"] for t in first["request"]["tools"]]
+        assert "mock_echo" in names and "mock_ping" in names
+    finally:
+        reg.close_all()
+
+
+def test_tool_loop_no_tools_without_connected_servers(data_dir):
+    """Без подключённых серверов в body НЕТ tools, ответ — обычный
+    delta-путь (регрессия дня 16 на уровне агента)."""
+    seen = {}
+
+    def handler(request):
+        payload = json.loads(request.content)
+        if "stream" not in payload:
+            return httpx.Response(200, json={"choices": [
+                {"message": {"content": "E2E"}}]})
+        seen["payload"] = payload
+        return ok_handler(request)
+
+    agent, reg = _tool_loop_agent(data_dir, handler)
+    try:
+        d = agent.store.new_dialogue()
+        ready(agent, d)
+        events = list(agent.ask_stream(d["id"], "привет"))
+        assert events[-1]["type"] == "done"
+        assert "Привет" in events[-1]["answer"]
+        assert "tools" not in seen["payload"]
+    finally:
+        reg.close_all()
+
+
+def test_tool_loop_iteration_cap(data_dir):
+    """LLM ВСЕГДА отдаёт tool_calls → кап 5 итераций: events заканчиваются
+    error «превышен лимит итераций», LLM-вызовов (записей журнала) ровно 5."""
+    agent, reg = _tool_loop_agent(
+        data_dir, _tool_loop_handler(always_tool_calls=True))
+    try:
+        d = agent.store.new_dialogue()
+        ready(agent, d)
+        sid = reg.servers()[0]["id"]
+        assert reg.connect(sid)["status"] == "connected"
+        events = list(agent.ask_stream(d["id"], "статус TASK-42?"))
+        assert events[-1]["type"] == "error"
+        assert "превышен лимит итераций" in events[-1]["message"]
+        assert len(agent.requests_list()) == 5
+    finally:
+        reg.close_all()
+
+
+def test_tool_error_becomes_tool_message(data_dir):
+    """Scripted tool_call «nope» (нет в fake-тулах) → MCPError →
+    tool-сообщение с текстом ошибки; второй LLM-вызов видит role tool
+    → done."""
+    agent, reg = _tool_loop_agent(
+        data_dir, _tool_loop_handler(tool_name="nope"))
+    try:
+        d = agent.store.new_dialogue()
+        ready(agent, d)
+        sid = reg.servers()[0]["id"]
+        assert reg.connect(sid)["status"] == "connected"
+        events = list(agent.ask_stream(d["id"], "вызови инструмент nope"))
+        assert events[-1]["type"] == "done"
+        msgs = agent.store.get_messages(d["id"])
+        tool_msgs = [m for m in msgs if m["role"] == "tool"]
+        assert len(tool_msgs) == 1
+        assert "не найден" in tool_msgs[0]["content"]
+        assert tool_msgs[0]["tool_call_id"] == "call_1"
+        asst_tc = [m for m in msgs
+                   if m["role"] == "assistant" and m.get("tool_calls")]
+        assert len(asst_tc) == 1
+        assert asst_tc[0]["tool_calls"][0]["function"]["name"] == "nope"
+    finally:
+        reg.close_all()

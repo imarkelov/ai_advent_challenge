@@ -15,10 +15,10 @@ import httpx
 
 try:  # пакетный режим: studio.backend.agent
     from .memory import MemoryStore, atomic_write_json, read_json
-    from .mcp import MCPRegistry
+    from .mcp import MCPRegistry, MCPError
 except ImportError:  # dev-режим: импорт из studio/backend
     from memory import MemoryStore, atomic_write_json, read_json
-    from mcp import MCPRegistry
+    from mcp import MCPRegistry, MCPError
 
 # Ограничения контекста известных моделей; неизвестной — 32768.
 CONTEXT_LIMITS = {
@@ -340,8 +340,9 @@ class StudioAgent:
     def build_payload(self, dialogue_id: str) -> list:
         """Список сообщений для LLM: [system (промпт + профиль + инварианты
         + блоки ВКЛЮЧЁННЫХ слоёв памяти + правила при наличии)] + история
-        диалога (только role/content — служебные поля вроде model в API
-        не уходят).
+        диалога (role/content; служебные поля вроде model в API не уходят,
+        исключение — день 17: tool_calls у assistant и tool_call_id у
+        role tool проходят в payload для tool-loop).
 
         Тумблеры слоёв (toggles.json): ст off — в LLM уходит только текущее
         сообщение (история не шлётся, сообщения по-прежнему хранятся);
@@ -373,12 +374,72 @@ class StudioAgent:
             system += INVARIANTS_RULE
         msgs = self.store.get_messages(dialogue_id)
         if st_on:
-            history = [{"role": m["role"], "content": m["content"]} for m in msgs]
+            history = []
+            for m in msgs:
+                hm = {"role": m["role"], "content": m["content"]}
+                # День 17: tool-поля истории проходят в payload без
+                # изменений (assistant — tool_calls, role tool —
+                # tool_call_id): LLM нужна пара «вызов → результат» для
+                # tool-loop. Остальные служебные поля (model и пр.) — нет.
+                if isinstance(m.get("tool_calls"), list) and m["tool_calls"]:
+                    hm["tool_calls"] = m["tool_calls"]
+                if m["role"] == "tool" and m.get("tool_call_id"):
+                    hm["tool_call_id"] = m["tool_call_id"]
+                history.append(hm)
         else:
             # текущее сообщение — последнее в списке (уже дописано)
             history = [{"role": "user", "content": msgs[-1]["content"]}
                        if msgs else []]
         return [{"role": "system", "content": system}] + history
+
+    def _llm_tools(self) -> tuple:
+        """Инструменты для LLM (день 17): OpenAI-формат из подключённых
+        MCP-серверов. Возвращает (tools, tool_map): tools — список
+        {"type": "function", "function": {"name", "description",
+        "parameters"}} (None, если подключённых тулов нет), tool_map —
+        {llm_name: (server_id, real_name)}. Коллизии имён тулов между
+        серверами: первое вхождение забирает обычное имя, следующие —
+        префикс "{server_id}__"."""
+        raw = self.mcp.tools()
+        if not raw:
+            return None, {}
+        used = set()
+        tools = []
+        tool_map = {}
+        for t in raw:
+            name, server_id = t["name"], t["server"]
+            llm_name = name if name not in used else f"{server_id}__{name}"
+            while llm_name in used:  # страховка от двойной коллизии
+                llm_name += "_"
+            used.add(llm_name)
+            tools.append({
+                "type": "function",
+                "function": {
+                    "name": llm_name,
+                    "description": t.get("description") or "",
+                    "parameters": t.get("input_schema") or {"type": "object"},
+                },
+            })
+            tool_map[llm_name] = (server_id, name)
+        return tools, tool_map
+
+    def _append_message_ex(self, dialogue_id: str, role: str, content: str,
+                           **extra) -> None:
+        """Добавить сообщение с дополнительными полями (день 17:
+        tool_calls у assistant, tool_call_id/name у role tool).
+        MemoryStore.append_message эти поля не принимает, поэтому
+        дописываем сообщение через собственные приватные доступы
+        хранилища: общий lock + атомарная запись (те же, что в
+        append_message)."""
+        with self.store._lock:
+            data = self.store._read_dialogues()
+            d = self.store._find(data, dialogue_id)
+            if d is None:
+                raise ValueError(f"Диалог «{dialogue_id}» не найден")
+            msg = {"role": role, "content": content}
+            msg.update(extra)
+            d.setdefault("messages", []).append(msg)
+            self.store._write_dialogues(data)
 
     # ---------- стриминг ответа ----------
 
@@ -388,6 +449,12 @@ class StudioAgent:
         События: {"type": "delta", "text"}, затем {"type": "done", "answer",
         "usage", "request_id"}; при любой ошибке — {"type": "error", "message"}
         (исключение наружу не бросается).
+
+        День 17: tool-loop — если в тело уходят MCP-инструменты (ключ
+        tools), модель может ответить tool_calls: агент вызывает каждый
+        инструмент на MCP-сервере, результат дописывает в диалог
+        (role "tool") и повторяет запрос; кап — 5 итераций (превышение
+        — error-событие «Tool-loop: превышен лимит итераций (5)»).
         """
         d = self.store.get_dialogue(dialogue_id)
         # День 13b: активная незавершённая непаузанная задача — чат
@@ -426,11 +493,198 @@ class StudioAgent:
             # отказ + содержательное дополнение (баг №2): подтверждаем отказ,
             # затем выполняем остаток запроса обычным chat-потоком.
             message = remainder
-        messages = self.build_payload(dialogue_id)
-        # Server-side гард: мелкие модели при истории диалога подчиняются
-        # свежему противоречащему запросу, игнорируя правило в system-промте.
-        # Детектированный конфликт → явное system-напоминание в самом конце
-        # списка: последние сообщения влияют на ответ сильнее.
+        # День 17: tool-loop. Инструменты подключённых MCP-серверов
+        # (OpenAI-формат) и карта llm_name -> (server_id, real_name);
+        # вычисляем один раз — за ход состав подключённых серверов
+        # не меняется.
+        llm_tools, tool_map = self._llm_tools()
+        for iteration in range(5):
+            # Каждая итерация: пересобираем пейлоад (в истории появились
+            # новые tool-сообщения) и повторно применяем три server-side
+            # гарда по исходному пользовательскому сообщению.
+            messages = self._apply_guards(self.build_payload(dialogue_id),
+                                          dialogue_id, message)
+            body = {
+                "model": cfg["model"],
+                "temperature": cfg["temperature"],
+                "max_tokens": cfg["max_tokens"],
+                "stream": True,
+                "stream_options": {"include_usage": True},
+                "messages": messages,
+            }
+            if llm_tools is not None:
+                body["tools"] = llm_tools
+            usage = None
+            parts = []
+            # Агрегация tool_calls из SSE-чанков (GPustack: фрагменты
+            # delta.tool_calls — id/name могут прийти в любом чанке,
+            # arguments — конкатенация строк-фрагментов JSON)
+            tc_slots = {}
+            error = None
+            try:
+                with self._client.stream(
+                    "POST", self.base_url + "/chat/completions", json=body,
+                    headers={"Authorization": "Bearer " + self._key_for(cfg["model"])}) as resp:
+                    if resp.status_code != 200:
+                        error = f"Модель вернула ошибку HTTP {resp.status_code}"
+                    else:
+                        for line in resp.iter_lines():
+                            line = line.strip()
+                            if not line.startswith("data:"):
+                                continue
+                            data = line[len("data:"):].strip()
+                            if data == "[DONE]":
+                                break
+                            chunk = json.loads(data)
+                            choices = chunk.get("choices") or [{}]
+                            delta = choices[0].get("delta") or {}
+                            content = delta.get("content")
+                            if content:
+                                parts.append(content)
+                                yield {"type": "delta", "text": content}
+                            for tc in (delta.get("tool_calls") or []):
+                                if not isinstance(tc, dict):
+                                    continue
+                                idx = tc.get("index")
+                                if not isinstance(idx, int):
+                                    continue
+                                slot = tc_slots.setdefault(
+                                    idx, {"id": None, "name": None,
+                                          "args": []})
+                                if tc.get("id"):
+                                    slot["id"] = tc["id"]
+                                fn = tc.get("function") or {}
+                                if fn.get("name"):
+                                    slot["name"] = fn["name"]
+                                if isinstance(fn.get("arguments"), str):
+                                    slot["args"].append(fn["arguments"])
+                            if isinstance(chunk.get("usage"), dict):
+                                usage = chunk["usage"]
+            except httpx.HTTPError as e:
+                error = f"Ошибка обращения к модели: {e}"
+            except Exception as e:  # битый JSON чанка и пр.
+                error = f"Непредвиденная ошибка стрима: {e}"
+
+            if error is not None:
+                # Ошибка во время стрима — тот же путь, что раньше:
+                # журнал (retry-цикла нет) + SSE error.
+                self._append_request_log(cfg["model"], body, None, error)
+                yield {"type": "error", "message": error}
+                return
+
+            # usage суммируется по итерациям; _last_usage — последний
+            # ненулевой.
+            if usage:
+                self._session["prompt"] += usage.get("prompt_tokens", 0)
+                self._session["completion"] += usage.get(
+                    "completion_tokens", 0)
+                self._session["total"] += usage.get("total_tokens", 0)
+                self._last_usage = usage
+            # Журнал — каждая итерация (каждый LLM-вызов); request_id
+            # в done — последний залогированный.
+            rid = self._append_request_log(cfg["model"], body, usage, None)
+
+            tool_calls = [
+                {"id": s["id"] or f"call_{idx}",
+                 "name": s["name"] or "",
+                 "arguments": "".join(s["args"])}
+                for idx, s in sorted(tc_slots.items())]
+
+            if not tool_calls:
+                # tool_calls нет — финальный текстовый ответ (существующий
+                # done-путь).
+                answer = "".join(parts)
+                # День 14: post-response гард (L1, детерминированный,
+                # без LLM): ответ с forbidden-паттерном активного
+                # инварианта заменяется отказом; L2 (вторичный LLM) —
+                # вне текущей области (см. _postcheck_invariants).
+                # Отказ сохраняется как assistant-сообщение и уходит в
+                # done (done — всегда последнее событие).
+                hits = self._postcheck_invariants(answer)
+                violation = bool(hits)
+                if violation:
+                    answer = self._invariant_refusal(hits)
+                self.store.append_message(dialogue_id, "assistant", answer,
+                                          model=cfg["model"])
+                print("[Final Response] " + answer[:200], flush=True)
+                if violation:
+                    yield {"type": "invariant_violation", "patterns": hits}
+                yield {"type": "done", "answer": answer, "usage": usage,
+                       "request_id": rid}
+                return
+
+            # Модель решила вызвать инструменты: логируем решение,
+            # сохраняем assistant-сообщение с tool_calls (реальные имена
+            # тулов — не llm_name) и вызываем каждый инструмент;
+            # результаты (role "tool") дописываем в диалог — в следующей
+            # итерации модель видит их и строит финальный ответ.
+            calls = []
+            for call in tool_calls:
+                print("[LLM Decision] " + call["name"] + " " +
+                      call["arguments"], flush=True)
+                mapped = tool_map.get(call["name"])
+                if mapped is not None:
+                    sid, real_name = mapped
+                else:
+                    # Имя не из реестра (галлюцинация модели): реальное
+                    # имя — оно же, сервер — первый подключённый.
+                    real_name = call["name"]
+                    sid = next((t["server"] for t in self.mcp.tools()),
+                               "")
+                calls.append((call, sid, real_name))
+            self._append_message_ex(
+                dialogue_id, "assistant", "".join(parts),
+                tool_calls=[{"id": c["id"], "type": "function",
+                              "function": {"name": rn,
+                                           "arguments": c["arguments"]}}
+                             for c, _, rn in calls])
+            for call, sid, real_name in calls:
+                try:
+                    args = json.loads(call["arguments"])
+                except ValueError as e:
+                    # Аргументы не разбираются — ошибка идёт в результат
+                    # тула (модель поправит их в следующей итерации).
+                    text = ('{"error": "Некорректные аргументы: '
+                            + str(e) + '"}')
+                else:
+                    if not sid:
+                        text = "Ошибка инструмента: сервер не подключён"
+                    else:
+                        try:
+                            result = self.mcp.call_tool(sid, real_name,
+                                                        args)
+                        except MCPError as e:
+                            text = f"Ошибка инструмента: {e}"
+                        else:
+                            text = "".join(
+                                c.get("text", "")
+                                for c in (result.get("content") or [])
+                                if isinstance(c, dict)
+                                and c.get("type") == "text")
+                print("[MCP Response] " + real_name + " " + text[:200],
+                      flush=True)
+                self._append_message_ex(dialogue_id, "tool", text,
+                                        tool_call_id=call["id"],
+                                        name=real_name)
+            if iteration == 4:
+                # 5-я итерация снова вернула tool_calls — лимит исчерпан
+                # (assistant-сообщения с tool_calls уже в диалоге).
+                yield {"type": "error",
+                       "message": "Tool-loop: превышен лимит итераций (5)"}
+                return
+
+    def _apply_guards(self, messages: list, dialogue_id: str,
+                      message: str) -> list:
+        """Server-side гарды: конфликты с памятью / табу профиля /
+        инварианты — при срабатывании добавляют system-напоминание в
+        КОНЕЦ messages (самое «свежее» место в контексте: последние
+        сообщения влияют на ответ сильнее). Вызывается на КАЖДОЙ
+        итерации tool-loop (день 17) по исходному пользовательскому
+        сообщению. Порядок напоминаний: память → табу → инварианты
+        (приоритет инварианта выше обоих гардов)."""
+        # Гард конфликтов памяти: мелкие модели при истории диалога
+        # подчиняются свежему противоречащему запросу, игнорируя правило
+        # в system-промте.
         conflicts = self._detect_memory_conflict(dialogue_id, message)
         if conflicts:
             items = "; ".join(f"{k}: {v}" for k, v in conflicts)
@@ -444,9 +698,9 @@ class StudioAgent:
                             "пункт) и сообщить, что принято решение "
                             "действовать по памяти."),
             })
-        # День 12 (D8): табу-слова активного профиля в запросе — system-
-        # напоминание (тот же паттерн, что конфликт-гард). Профиль —
-        # предпочтения, детект детерминированный, LLM не участвует.
+        # День 12 (D8): табу-слова активного профиля в запросе (тот же
+        # паттерн, что конфликт-гард; профиль — предпочтения, детект
+        # детерминированный, LLM не участвует).
         taboo_hits = self._detect_taboo(dialogue_id, message)
         if taboo_hits:
             items = "; ".join(f"«{t}»" for t in taboo_hits)
@@ -461,8 +715,7 @@ class StudioAgent:
                             "действовать по профилю пользователя."),
             })
         # День 14: инварианты — высший приоритет над памятью и профилем,
-        # поэтому напоминание добавляется ПОСЛЕ остальных (самое «свежее»
-        # место в messages): приоритет инварианта сильнее обоих гардов.
+        # поэтому напоминание добавляется ПОСЛЕ остальных.
         inv_conflicts = self._detect_invariant_conflict(dialogue_id, message)
         if inv_conflicts:
             items = "; ".join(f"{k}: {v}" for k, v in inv_conflicts)
@@ -476,70 +729,7 @@ class StudioAgent:
                             "альтернативу в рамках инвариантов. Инварианты "
                             "ты не изменяешь и не удаляешь."),
             })
-        body = {
-            "model": cfg["model"],
-            "temperature": cfg["temperature"],
-            "max_tokens": cfg["max_tokens"],
-            "stream": True,
-            "stream_options": {"include_usage": True},
-            "messages": messages,
-        }
-        usage = None
-        parts = []
-        error = None
-        try:
-            with self._client.stream(
-                "POST", self.base_url + "/chat/completions", json=body,
-                headers={"Authorization": "Bearer " + self._key_for(cfg["model"])}) as resp:
-                if resp.status_code != 200:
-                    error = f"Модель вернула ошибку HTTP {resp.status_code}"
-                else:
-                    for line in resp.iter_lines():
-                        line = line.strip()
-                        if not line.startswith("data:"):
-                            continue
-                        data = line[len("data:"):].strip()
-                        if data == "[DONE]":
-                            break
-                        chunk = json.loads(data)
-                        choices = chunk.get("choices") or [{}]
-                        delta = (choices[0].get("delta") or {}).get("content")
-                        if delta:
-                            parts.append(delta)
-                            yield {"type": "delta", "text": delta}
-                        if isinstance(chunk.get("usage"), dict):
-                            usage = chunk["usage"]
-        except httpx.HTTPError as e:
-            error = f"Ошибка обращения к модели: {e}"
-        except Exception as e:  # битый JSON чанка и пр.
-            error = f"Непредвиденная ошибка стрима: {e}"
-
-        if error is not None:
-            self._append_request_log(cfg["model"], body, None, error)
-            yield {"type": "error", "message": error}
-            return
-
-        answer = "".join(parts)
-        # День 14: post-response гард (L1, детерминированный, без LLM):
-        # ответ с forbidden-паттерном активного инварианта заменяется
-        # отказом; L2 (вторичный LLM) — вне текущей области (см.
-        # _postcheck_invariants). Отказ сохраняется как assistant-сообщение
-        # и уходит в done (done — всегда последнее событие).
-        hits = self._postcheck_invariants(answer)
-        violation = bool(hits)
-        if violation:
-            answer = self._invariant_refusal(hits)
-        self.store.append_message(dialogue_id, "assistant", answer,
-                                  model=cfg["model"])
-        if usage:
-            self._session["prompt"] += usage.get("prompt_tokens", 0)
-            self._session["completion"] += usage.get("completion_tokens", 0)
-            self._session["total"] += usage.get("total_tokens", 0)
-            self._last_usage = usage
-        rid = self._append_request_log(cfg["model"], body, usage, None)
-        if violation:
-            yield {"type": "invariant_violation", "patterns": hits}
-        yield {"type": "done", "answer": answer, "usage": usage, "request_id": rid}
+        return messages
 
     # ---------- журнал запросов (requests.json) ----------
 
