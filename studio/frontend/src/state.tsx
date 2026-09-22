@@ -12,6 +12,7 @@ import {
 } from 'react'
 import {
   addInvariant as apiAddInvariant,
+  addMcpServer as apiAddMcpServer,
   apiDelete,
   apiGet,
   apiGetTask,
@@ -24,12 +25,19 @@ import {
   apiPostTaskApprove,
   apiPostTaskReject,
   chatStream,
+  connectMcpServer as apiConnectMcpServer,
   deleteInvariant as apiDeleteInvariant,
+  deleteMcpServer as apiDeleteMcpServer,
   getInvariants,
+  getMcpServers,
+  getMcpTools,
   taskStream,
   toggleInvariant as apiToggleInvariant,
   type ChatEvent,
   type Invariant,
+  type McpServer,
+  type McpServerType,
+  type McpTool,
   type TaskEvent,
   type TaskPlanStatus,
   type TaskState,
@@ -140,7 +148,7 @@ export interface ModelInfo {
 
 // Активная вкладка правой панели «Контекст» (день 12: бейдж в шапке чата
 // открывает вкладку «Профили» извне панели)
-export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile' | 'invariants'
+export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile' | 'invariants' | 'mcp'
 
 export interface StudioState {
   loaded: boolean
@@ -173,6 +181,9 @@ export interface StudioState {
   // паттерны последнего ответа с нарушением; transient — сбрасывается при
   // новом сообщении (user-message) и при смене диалога; null — нарушения нет
   invariantViolation: string[] | null
+  // MCP-серверы (день 16): реестр с runtime-статусом + инструменты
+  mcpServers: McpServer[]
+  mcpTools: McpTool[]
 }
 
 // Ключ localStorage для тумблера «Показывать запросы»
@@ -218,6 +229,8 @@ export function initialState(): StudioState {
     contextTab: 'memory',
     invariants: [],
     invariantViolation: null,
+    mcpServers: [],
+    mcpTools: [],
   }
 }
 
@@ -316,6 +329,7 @@ export type StudioAction =
   | { type: 'context-tab'; tab: ContextTab }
   | { type: 'invariants'; invariants: Invariant[] }
   | { type: 'invariant-violation'; patterns: string[] }
+  | { type: 'mcp'; mcpServers: McpServer[]; mcpTools: McpTool[] }
 
 // Чистый reducer: все переходы состояния без побочных эффектов
 export function reducer(state: StudioState, action: StudioAction): StudioState {
@@ -472,6 +486,8 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
       return { ...state, contextTab: action.tab }
     case 'invariants':
       return { ...state, invariants: action.invariants }
+    case 'mcp':
+      return { ...state, mcpServers: action.mcpServers, mcpTools: action.mcpTools }
     case 'invariant-violation':
       // SSE invariant_violation (до done): бейдж нарушения в шапке чата
       return { ...state, invariantViolation: action.patterns }
@@ -523,6 +539,19 @@ export interface StudioApi {
   ) => Promise<void>
   toggleInvariant: (id: string) => Promise<void>
   deleteInvariant: (id: string) => Promise<void>
+  // MCP (день 16): перечитать (серверы + инструменты), добавить,
+  // удалить, подключить — все перечитывают после ответа API (паттерн invariants)
+  refreshMcp: () => Promise<void>
+  addMcpServer: (
+    name: string,
+    type: McpServerType,
+    command?: string[],
+    url?: string,
+    env?: Record<string, string>,
+    enabled?: boolean,
+  ) => Promise<void>
+  deleteMcpServer: (id: string) => Promise<void>
+  connectMcpServer: (id: string) => Promise<void>
   // Паттерны последнего ответа с нарушением активного инварианта (null — нет)
   invariantViolation: string[] | null
   reloadDialogue: () => Promise<void>
@@ -822,6 +851,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     getInvariants()
       .then((invariants) => dispatch({ type: 'invariants', invariants }))
       .catch((err) => console.error('invariants:', err))
+    // MCP (день 16) — отдельным запросом: недоступность эндпоинта
+    // (старый бэкенд) не ломает основную загрузку (паттерн models)
+    Promise.all([getMcpServers(), getMcpTools()])
+      .then(([mcpServers, mcpTools]) => dispatch({ type: 'mcp', mcpServers, mcpTools }))
+      .catch((err) => console.error('mcp:', err))
   }, [])
 
   useEffect(() => {
@@ -963,6 +997,47 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     [refreshInvariants],
   )
 
+  // Перечитать MCP-серверы и инструменты (день 16)
+  const refreshMcp = useCallback(async () => {
+    const [mcpServers, mcpTools] = await Promise.all([getMcpServers(), getMcpTools()])
+    dispatch({ type: 'mcp', mcpServers, mcpTools })
+  }, [])
+
+  // Добавить MCP-сервер: POST /api/mcp/servers → перечитать
+  const addMcpServer = useCallback(
+    async (
+      name: string,
+      type: McpServerType,
+      command: string[] = [],
+      url: string = '',
+      env: Record<string, string> = {},
+      enabled: boolean = true,
+    ) => {
+      await apiAddMcpServer(name, type, command, url, env, enabled)
+      await refreshMcp()
+    },
+    [refreshMcp],
+  )
+
+  // Удалить MCP-сервер: DELETE /api/mcp/servers/{id} → перечитать
+  const deleteMcpServer = useCallback(
+    async (id: string) => {
+      await apiDeleteMcpServer(id)
+      await refreshMcp()
+    },
+    [refreshMcp],
+  )
+
+  // Подключить MCP-сервер: POST /api/mcp/servers/{id}/connect → перечитать
+  // (статус error — не исключение: виден в чипе статуса)
+  const connectMcpServer = useCallback(
+    async (id: string) => {
+      await apiConnectMcpServer(id)
+      await refreshMcp()
+    },
+    [refreshMcp],
+  )
+
   // Включить/выключить слой памяти в промпте: POST /api/memory/toggles {layer, enabled}
   const setMemoryToggle = useCallback(
     async (layer: 'st' | 'wm' | 'lt', on: boolean) => {
@@ -1035,6 +1110,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     addInvariant,
     toggleInvariant,
     deleteInvariant,
+    refreshMcp,
+    addMcpServer,
+    deleteMcpServer,
+    connectMcpServer,
     invariantViolation: state.invariantViolation,
     reloadDialogue,
     deleteDialogues,

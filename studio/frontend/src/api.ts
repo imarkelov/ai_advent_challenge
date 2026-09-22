@@ -148,6 +148,105 @@ export async function deleteInvariant(id: string): Promise<void> {
   await apiDelete<unknown>(`/invariants/${encodeURIComponent(id)}`)
 }
 
+// ── MCP-серверы (день 16) ────────────────────────────────────────────────────
+// Реестр внешних Model Context Protocol серверов (stdio-процесс или
+// streamable-http). Сценарий дня 16: подключить + показать инструменты;
+// вызов инструментов (tool-loop) — задел, в UI не реализуется.
+// GET    /api/mcp/servers                              → {servers: [...]}
+// POST   /api/mcp/servers {name,type,command?,url?,env?,enabled?} → {server}
+// DELETE /api/mcp/servers/{id}                         → {ok}
+// POST   /api/mcp/servers/{id}/connect                 → {server} (status)
+// GET    /api/mcp/tools                                → {tools: [...]}
+
+export type McpServerType = 'stdio' | 'http'
+export type McpServerStatus = 'idle' | 'connected' | 'error'
+
+export interface McpServer {
+  id: string
+  name: string
+  type: McpServerType
+  command: string[]
+  url: string
+  env: Record<string, string>
+  enabled: boolean
+  status: McpServerStatus
+  error: string | null
+  tools_count: number
+}
+
+export interface McpTool {
+  server: string
+  name: string
+  description: string
+  input_schema: Record<string, unknown>
+}
+
+// Запись из API (опциональные поля — старый/чужой бэкенд; нормализуем)
+type RawMcpServer = {
+  id: string
+  name?: string
+  type?: string
+  command?: string[]
+  url?: string
+  env?: Record<string, string>
+  enabled?: boolean
+  status?: string
+  error?: string | null
+  tools_count?: number
+}
+
+function normalizeMcpServer(raw: RawMcpServer): McpServer {
+  return {
+    id: raw.id,
+    name: raw.name ?? '',
+    type: raw.type === 'http' ? 'http' : 'stdio',
+    command: raw.command ?? [],
+    url: raw.url ?? '',
+    env: raw.env ?? {},
+    enabled: raw.enabled ?? true,
+    status: raw.status === 'connected' || raw.status === 'error' ? raw.status : 'idle',
+    error: raw.error ?? null,
+    tools_count: raw.tools_count ?? 0,
+  }
+}
+
+// Реестр серверов (нет поля servers → пустой список)
+export async function getMcpServers(): Promise<McpServer[]> {
+  const r = await apiGet<{ servers?: RawMcpServer[] }>('/mcp/servers')
+  return (r.servers ?? []).map(normalizeMcpServer)
+}
+
+// Добавить сервер: POST /api/mcp/servers (201) → {server}
+export function addMcpServer(
+  name: string,
+  type: McpServerType,
+  command: string[] = [],
+  url: string = '',
+  env: Record<string, string> = {},
+  enabled: boolean = true,
+): Promise<McpServer> {
+  return apiPost<{ server: RawMcpServer }>('/mcp/servers', { name, type, command, url, env, enabled })
+    .then((r) => normalizeMcpServer(r.server))
+}
+
+// Удалить сервер: DELETE /api/mcp/servers/{id} → {ok}
+export async function deleteMcpServer(id: string): Promise<void> {
+  await apiDelete<unknown>(`/mcp/servers/${encodeURIComponent(id)}`)
+}
+
+// Подключить: POST /api/mcp/servers/{id}/connect → {server}
+// (status: connected | error — ошибка не бросает, видна в статусе)
+export function connectMcpServer(id: string): Promise<McpServer> {
+  return apiPost<{ server: RawMcpServer }>(`/mcp/servers/${encodeURIComponent(id)}/connect`)
+    .then((r) => normalizeMcpServer(r.server))
+}
+
+// Инструменты подключённых серверов: GET /api/mcp/tools → {tools}
+export async function getMcpTools(): Promise<McpTool[]> {
+  const r = await apiGet<{ tools?: McpTool[] }>('/mcp/tools')
+  return r.tools ?? []
+}
+
 // ── Состояние задачи (день 13b): unified FSM per-диалог ────────────────────
 // POST /api/task/start {dialogue_id, description} → {task} (+ user-маркер)
 // POST /api/task/run {dialogue_id} → SSE: agent_spawned/step_updated/
