@@ -20,7 +20,7 @@
 | День 13b | [`day13-task-state-machine`](https://github.com/imarkelov/ai_advent_challenge/tree/day13-task-state-machine) | Задача = запрос в режиме «задача» (тумблер чат/задача), карточка процесса в чате (спавн stage-агентов, чек-лист work-шагов, живой вывод), unified FSM planning/execution/validation/done/paused/failed, пошаговое исполнение (1 LLM-вызов на шаг), пауза на границе шага + инструкция |
 | День 14 | [`day14-invariants`](https://github.com/imarkelov/ai_advent_challenge/tree/day14-invariants) | Инварианты: глобальные жёсткие ограничения (архитектура, техрешения, стек, бизнес-правила), хранятся отдельно от диалога, всегда активны, инжектятся в system-промпт + правило конфликтов + server-side гард (отказ при противоречии), вкладка «Инварианты» + тесты конкурса/объяснения отказа |
 | День 15 | [`day15-plan-review`](https://github.com/imarkelov/ai_advent_challenge/tree/day15-plan-review) | Проверка плана (plan_review): человеческий гейт одобрения плана между planning и execution (кнопки «Одобрить»/«Отклонить», детект ограничений плана — инварианты/память/табу + альтернатива), фикс done-пост-гарда для согласованного контекста (запрет из одобренного контекста задачи не рубит объяснение альтернативы), пауза во время LLM-вызова валидатора/синтеза, move вкладок Токены/Запрос в сайдбар |
-| День 16 | [`day16-mcp-connect`](https://github.com/imarkelov/ai_advent_challenge/tree/day16-mcp-connect) | Подключение MCP: реестр MCP-серверов (stdio/http) в `mcp_servers.json`, клиент JSON-RPC (`mcp.py`), REST `/api/mcp/*` (список/добавить/удалить/подключить/инструменты), вкладка «MCP» в панели «Контекст» (статусы, инструменты подключённых серверов, форма добавления), дефолты: Context7, Firecrawl, Git; вызов инструментов (tool-loop) — задел |
+| День 16 | [`day16-mcp-connect`](https://github.com/imarkelov/ai_advent_challenge/tree/day16-mcp-connect) | Подключение MCP: реестр MCP-серверов (stdio/http) в `mcp_servers.json`, клиент JSON-RPC (`mcp.py`), REST `/api/mcp/*` (список/удалить/подключить/инструменты), вкладка «MCP» в настройках (кнопка «⚙» в шапке чата; статусы, инструменты подключённых серверов), дефолты: Firecrawl, Git; вызов инструментов (tool-loop) — задел |
 
 ## День 7: как работает сервис
 
@@ -776,11 +776,13 @@ execution → validation → done`, финальный ответ — решен
 ### Что это
 
 Подключение внешних **Model Context Protocol (MCP)** серверов к Студии:
-пользователь добавляет сервер (stdio-процесс на `npx` или удалённый
-streamable-http), нажимает «Подключить» — и видит инструменты сервера
-в вкладке «MCP» панели «Контекст». Сценарий дня 16 — **подключение и
-просмотр**: вызов инструментов агентом (tool-loop) не реализуется,
-архитектурный задел — сделан.
+реестр стартует с фиксированным набором (Firecrawl — web-поиск, Git —
+репозиторий; stdio-процессы на `npx`, поддерживается и удалённый
+streamable-http), пользователь нажимает «Подключить» — и видит инструменты
+сервера во вкладке «MCP» настроек (кнопка «⚙» в шапке чата, панель
+выезжает справа). Сценарий дня 16 — **подключение и просмотр**: вызов
+инструментов агентом (tool-loop) не реализуется, архитектурный задел —
+сделан.
 
 ### Архитектура
 
@@ -799,10 +801,9 @@ streamable-http), нажимает «Подключить» — и видит и
     `connect`/`tools`/`close_all`. Сбой подключения — `status: error` +
     текст ошибки, агент не падает; повторный connect разрешён (self-heal).
 - **`memory.py`** — CRUD реестра: `mcp_servers.json` рядом с
-  `longterm.json`; при первом обращении создаются дефолты
-  **Context7** (`npx -y @upstash/context7-mcp`, env
-  `MCP_CONTEXT7_API_KEY={MCP_CONTEXT7_API_KEY}`), **Firecrawl**
-  (`npx -y firecrawl-mcp`) и **Git** (`npx -y @modelcontextprotocol/server-git`).
+  `longterm.json`; при первом обращении создаются дефолты **Firecrawl**
+  (`npx -y firecrawl-mcp`) и **Git**
+  (`npx -y @cyanheads/git-mcp-server@latest`).
 - **`agent.py`** — принимает опциональный `mcp` (DI для тестов) или
   строит `MCPRegistry` сам; `MCPRegistry.close_all()` — shutdown-хук.
 - **Таймауты** — из `.env`: `MCP_CONNECT_TIMEOUT` (дефолт 30 c).
@@ -819,31 +820,33 @@ streamable-http), нажимает «Подключить» — и видит и
 
 ### UI
 
-Вкладка «MCP» (4-я в панели «Контекст», `McpTab.tsx`):
+Вкладка «MCP» в настройках (`McpTab.tsx`); панель настроек (Память /
+Профили / Инварианты / MCP) открывается кнопкой «⚙» в шапке чата и
+выезжает справа (`SettingsOverlay`):
 
 - строка сервера — имя / чип типа (`stdio`/`http`) / статус-чип
   (не подключён / подключён / ошибка, при ошибке — текст) / число
   инструментов / кнопка «Подключить» / «×» (удалить);
 - секция «Инструменты подключённых серверов» — name + description
   каждого инструмента;
-- форма добавления: имя, тип (stdio → command; http → url), переменные
-  окружения `KEY=VALUE` по строкам, «Добавить».
+- добавления в UI нет — реестр фиксирован (дефолты); API `POST
+  /api/mcp/servers` остаётся (на нём держится детерминированный e2e).
 
 ### Безопасность
 
-Секреты — только в `.env` (корень репозитория): например
-`MCP_CONTEXT7_API_KEY`. В `mcp_servers.json` хранится плейсхолдер
-`{MCP_CONTEXT7_API_KEY}` — расширение происходит в памяти при запуске
-процесса.
+Секреты — только в `.env` (корень репозитория). В `mcp_servers.json`
+для переменных окружения хранятся плейсхолдеры `{VAR}` — расширение
+происходит в памяти при запуске процесса, значения в файл не пишутся.
 
 ### Проверка задания
 
-Бэкенд — 304 теста PASS (включая stdio-транспорт на fake-процессе,
+Бэкенд — 305 тестов PASS (включая stdio-транспорт на fake-процессе,
 http-транспорт на `httpx.MockTransport` (JSON + SSE + session-id +
 ошибки), реестр, API-роуты, **регресс: tools MCP НЕ уходят в LLM-payload**
-— задел на tool-loop). Фронтенд — 189 тестов PASS (включая 8 на вкладку
-«MCP»). E2E — 29 PASS, 5 SKIP, 0 FAIL: MCP-блок детерминированный
-(mock stdio-сервер на `python -c` без сети: POST 201 → connect → 2 tools →
-404 → DELETE 200/404), live Context7 — best-effort SKIP, если
-npx/`MCP_CONTEXT7_API_KEY` недоступны. Ветка `day16-mcp-connect`
+— задел на tool-loop, launcher: `npx.cmd` резолвится через
+`shutil.which`). Фронтенд — 194 теста PASS (включая 5 на вкладку «MCP»
+и overlay настроек). E2E — 29 PASS, 5 SKIP, 0 FAIL: MCP-блок
+детерминированный (mock stdio-сервер на `python -c` без сети: POST 201 →
+connect → 2 tools → 404 → DELETE 200/404), live Firecrawl — best-effort
+SKIP, если npx недоступен. Ветка `day16-mcp-connect`
 (от `day15-plan-review`).
