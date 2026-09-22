@@ -41,12 +41,12 @@
            instruction → resume → run → task_done; чат-режим после done
            (обычный чат, новых task_id-маркеров нет). SKIP, если
            GPustack недоступен.
-    7e. MCP (день 16): дефолты в реестре (Context7/Firecrawl/Git) → 400-
-         валидация → mock stdio-сервер (python -c, без сети): POST (201) →
-         connect (200, status connected, 2 tools) → /api/mcp/tools содержит
-         mock_echo/mock_ping → connect неизвестного id (404) → DELETE (200 +
-         повтор 404). Live: connect Context7 — best-effort, SKIP (не FAIL),
-         если npx/MCP_CONTEXT7_API_KEY недоступны.
+     7e. MCP (день 16): дефолты в реестре (Firecrawl/Git) → 400-
+          валидация → mock stdio-сервер (python -c, без сети): POST (201) →
+          connect (200, status connected, 2 tools) → /api/mcp/tools содержит
+          mock_echo/mock_ping → connect неизвестного id (404) → DELETE (200 +
+          повтор 404). Live: connect Firecrawl — best-effort, SKIP (не FAIL),
+          если npx недоступен.
     11. GET /api/tokens → {last, session, context_limit}.
   11. GET /api/requests → список; после успешного чата запись с model.
   12. finally: ВСЕГДА убить свой uvicorn, убедиться, что порт 8100 закрыт.
@@ -575,10 +575,10 @@ def main() -> int:
             return 1
 
         # 7e. MCP (день 16): реестр + connect на локальном mock stdio-сервере
-        # (детерминировано, без сети); live-context7 — best-effort SKIP.
+        # (детерминировано, без сети); live Firecrawl — best-effort SKIP.
         code, body, _ = http("GET", "/api/mcp/servers")
         mcp_servers = json.loads(body).get("servers", []) if code == 200 else []
-        if code == 200 and {"Context7", "Firecrawl", "Git"} <= {s["name"] for s in mcp_servers}:
+        if code == 200 and {"Firecrawl", "Git"} <= {s["name"] for s in mcp_servers}:
             record(f"MCP: дефолты в реестре ({len(mcp_servers)} серверов)", "PASS")
         else:
             record("MCP: дефолты в реестре", "FAIL", f"code={code}")
@@ -620,19 +620,19 @@ def main() -> int:
             record("MCP: mock connect (connected, 2 tools в /api/mcp/tools)",
                    "FAIL", "mock-сервер не создан (нет 201)")
 
-        # Live: connect Context7 — best-effort (npx / MCP_CONTEXT7_API_KEY
-        # могут быть недоступны — SKIP, не FAIL)
-        ctx = next((s for s in mcp_servers if s["name"] == "Context7"), None)
-        if ctx:
-            code, body, _ = http("POST", f"/api/mcp/servers/{ctx['id']}/connect", timeout=180)
+        # Live: connect Firecrawl — best-effort (npx может быть недоступен —
+        # SKIP, не FAIL); детерминированное ядро — mock-блок выше
+        fc = next((s for s in mcp_servers if s["name"] == "Firecrawl"), None)
+        if fc:
+            code, body, _ = http("POST", f"/api/mcp/servers/{fc['id']}/connect", timeout=180)
             view = json.loads(body).get("server", {}) if code == 200 else {}
             if code == 200 and view.get("status") == "connected":
-                record(f"MCP: live Context7 (connected, {view.get('tools_count')} tools)", "PASS")
+                record(f"MCP: live Firecrawl (connected, {view.get('tools_count')} tools)", "PASS")
             else:
-                record("MCP: live Context7", "SKIP",
-                       f"npx/ключ недоступны ({view.get('error') or code})")
+                record("MCP: live Firecrawl", "SKIP",
+                       f"npx недоступен ({view.get('error') or code})")
         else:
-            record("MCP: live Context7", "SKIP", "Context7 нет в реестре")
+            record("MCP: live Firecrawl", "SKIP", "Firecrawl нет в реестре")
 
         # 8. чат (SSE) — SKIP, если GPustack недоступен
         skip_reason = probe_gpustack()

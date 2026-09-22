@@ -995,14 +995,14 @@ def test_mcp_servers_missing_and_broken_file(data_dir):
 
 
 def test_mcp_servers_crud(store):
-    rec = store.mcp_servers_set("mcp_a1", "Context7", "stdio",
-                                command=["npx", "-y", "@upstash/context7-mcp"])
-    assert rec == {"id": "mcp_a1", "name": "Context7", "type": "stdio",
-                   "command": ["npx", "-y", "@upstash/context7-mcp"],
+    rec = store.mcp_servers_set("mcp_a1", "TestSrv", "stdio",
+                                command=["npx", "-y", "test-mcp"])
+    assert rec == {"id": "mcp_a1", "name": "TestSrv", "type": "stdio",
+                   "command": ["npx", "-y", "test-mcp"],
                    "url": "", "env": {}, "enabled": True}
-    assert store.mcp_servers_items()["mcp_a1"]["name"] == "Context7"
+    assert store.mcp_servers_items()["mcp_a1"]["name"] == "TestSrv"
     # обновление по id сохраняет id
-    rec2 = store.mcp_servers_set("mcp_a1", "Context7", "stdio", command=["npx"])
+    rec2 = store.mcp_servers_set("mcp_a1", "TestSrv", "stdio", command=["npx"])
     assert rec2["id"] == "mcp_a1" and rec2["command"] == ["npx"]
     # http-сервер: command пуст, url задан
     rec3 = store.mcp_servers_set("mcp_b2", "Yandex", "http",

@@ -971,12 +971,8 @@ def _mcp_launcher(command, env):
 
 
 def _mcp_agent(agent_env):
-    """Подменить реестр на офлайн-версию (fake-процесс вместо npx).
-    env с MCP_CONTEXT7_API_KEY: плейсхолдер у дефолта Context7
-    должен разворачиваться (fake-процесс его не видит)."""
-    agent_env.mcp = MCPRegistry(agent_env.store, launcher=_mcp_launcher,
-                                env={**os.environ,
-                                     "MCP_CONTEXT7_API_KEY": "test"})
+    """Подменить реестр на офлайн-версию (fake-процесс вместо npx)."""
+    agent_env.mcp = MCPRegistry(agent_env.store, launcher=_mcp_launcher)
     return agent_env.mcp
 
 
@@ -985,7 +981,7 @@ def test_mcp_api_servers_list(client, agent_env):
     r = client.get("/api/mcp/servers")
     assert r.status_code == 200
     servers = r.json()["servers"]
-    assert [s["name"] for s in servers] == ["Context7", "Firecrawl", "Git"]
+    assert [s["name"] for s in servers] == ["Firecrawl", "Git"]
     assert all(s["status"] == "idle" for s in servers)
     assert all(s["tools_count"] == 0 for s in servers)
 

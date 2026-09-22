@@ -9,7 +9,7 @@ import time
 import httpx
 import pytest
 
-from mcp import MCPClient, MCPError
+from mcp import MCPClient, MCPError, _default_launcher
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from memory import MemoryStore  # noqa: E402
@@ -130,6 +130,15 @@ def test_stdio_call_tool_before_connect():
     client = MCPClient(STDIO_SERVER, launcher=make_fake_launcher())
     with pytest.raises(MCPError):
         client.call_tool("mock_echo")
+
+
+def test_default_launcher_missing_executable_is_mcp_error():
+    # command[0] резолвится через PATH; нет имени — понятная MCPError,
+    # а не [WinError 2] «The specified file was not found»
+    with pytest.raises(MCPError, match="Не найден исполняемый файл"):
+        _default_launcher(
+            ["definitely_not_a_real_executable_xyz", "--flag"],
+            dict(os.environ))
 
 
 def test_stdio_launch_failure_is_mcp_error():
@@ -327,7 +336,7 @@ def test_registry_seeds_defaults_once(tmp_path):
     reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
     try:
         names1 = [s["name"] for s in reg.servers()]
-        assert names1 == ["Context7", "Firecrawl", "Git"]
+        assert names1 == ["Firecrawl", "Git"]
         assert all(s["status"] == "idle" for s in reg.servers())
         # повторный вызов не дублирует
         assert [s["name"] for s in reg.servers()] == names1
@@ -341,9 +350,6 @@ def test_registry_defaults_env(tmp_path):
     reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
     try:
         servers = {s["name"]: s for s in reg.servers()}
-        assert servers["Context7"]["command"] == [
-            "npx", "-y", "@upstash/context7-mcp",
-            "--api-key", "{MCP_CONTEXT7_API_KEY}"]
         assert servers["Firecrawl"]["env"]["FIRECRAWL_API_URL"] == \
             "https://firecrawl.data.lmru.tech/"
         git_env = servers["Git"]["env"]
@@ -354,14 +360,8 @@ def test_registry_defaults_env(tmp_path):
         reg.close_all()
 
 
-# env для тестов: плейсхолдер {MCP_CONTEXT7_API_KEY} у дефолта Context7
-# должен разворачиваться (fake-процесс его не видит).
-TEST_ENV = {**os.environ, "MCP_CONTEXT7_API_KEY": "test-key"}
-
-
 def test_registry_connect_and_tools(tmp_path):
-    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher(),
-                      env=TEST_ENV)
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
     try:
         sid = reg.servers()[0]["id"]
         view = reg.connect(sid)
@@ -425,19 +425,18 @@ def test_registry_add_remove(tmp_path):
 
 
 def test_registry_disabled_server_not_in_tools(tmp_path):
-    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher(),
-                      env=TEST_ENV)
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
     try:
         sid = reg.servers()[0]["id"]
         rec = reg._store.mcp_servers_set(
-            sid, "Context7", "stdio",
+            sid, "TestSrv", "stdio",
             command=reg._store.mcp_servers_items()[sid]["command"],
             enabled=False)
         reg.connect(sid)
         view = next(s for s in reg.servers() if s["id"] == sid)
         assert view["enabled"] is False
         assert reg.tools() == []
-        reg._store.mcp_servers_set(sid, "Context7", "stdio",
+        reg._store.mcp_servers_set(sid, "TestSrv", "stdio",
                                    command=rec["command"], enabled=True)
         assert len(reg.tools()) == 2
     finally:
@@ -445,8 +444,7 @@ def test_registry_disabled_server_not_in_tools(tmp_path):
 
 
 def test_registry_close_all_resets_runtime(tmp_path):
-    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher(),
-                      env=TEST_ENV)
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
     sid = reg.servers()[0]["id"]
     reg.connect(sid)
     reg.close_all()

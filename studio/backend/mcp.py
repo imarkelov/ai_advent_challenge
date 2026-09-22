@@ -14,6 +14,7 @@ import json
 import os
 import queue
 import re
+import shutil
 import subprocess
 import threading
 import uuid
@@ -70,8 +71,13 @@ def _normalize_tools(raw) -> list:
 
 
 def _default_launcher(command: list, env: dict):
-    """Запустить stdio-сервер: stdout-пайп на строки, stderr — в никуда."""
-    return subprocess.Popen(command, stdin=subprocess.PIPE,
+    """Запустить stdio-сервер: stdout-пайп на строки, stderr — в никуда.
+    command[0] резолвим через PATH (Windows: npx = npx.cmd — CreateProcess
+    имя без расширения не резолвит); не найден → MCPError с понятным текстом."""
+    exe = shutil.which(command[0])
+    if not exe:
+        raise MCPError(f"Не найден исполняемый файл: {command[0]} (нет в PATH)")
+    return subprocess.Popen([exe, *command[1:]], stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                             env=env, text=True, bufsize=1)
 
@@ -331,14 +337,10 @@ class MCPRegistry:
         self._runtime = {}  # sid -> {status, tools, error, client}
 
     def _default_servers(self) -> list:
-        """Дефолты дня 16: Context7, Firecrawl, Git (stdio/npx)."""
+        """Дефолты дня 16: Firecrawl, Git (stdio/npx)."""
         repo = os.path.abspath(
             os.path.join(self._store.data_dir, "..", ".."))
         return [
-            {"name": "Context7", "type": "stdio",
-             "command": ["npx", "-y", "@upstash/context7-mcp",
-                         "--api-key", "{MCP_CONTEXT7_API_KEY}"],
-             "url": "", "env": {}, "enabled": True},
             {"name": "Firecrawl", "type": "stdio",
              "command": ["npx", "-y", "firecrawl-mcp"],
              "url": "",
