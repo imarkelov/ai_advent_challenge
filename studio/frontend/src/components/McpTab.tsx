@@ -1,13 +1,4 @@
-// Вкладка «MCP» (день 16): внешние Model Context Protocol серверы —
-// stdio-процессы (npx) или streamable-http. Сценарий дня 16: подключить
-// сервер и показать его инструменты в UI; вызов инструментов (tool-loop)
-// — задел, не реализуется.
-// Строка списка: имя / чип типа / статус-чип (не подключён | подключён |
-// ошибка) / число инструментов / [Подключить] [×]. Секция «Инструменты
-// подключённых серверов» — name + description каждого инструмента.
-// Добавление новых серверов в UI нет — реестр фиксирован (дефолты).
-// Все действия перечитывают список после ответа API
-// (state.deleteMcpServer / connectMcpServer внутри вызывают refreshMcp).
+// Панель «MCP» (день 16): внешние Model Context Protocol серверы — stdio-процессы (npx) или streamable-http. Открывается отдельным overlay по кнопке в шапке чата (не в настройках «⚙»). Строка списка: имя / чип типа / статус-чип / число инструментов / [Подключить/Отключить] [×]. Секция «Инструменты подключённых серверов» — name + description. Добавление в UI нет — реестр фиксирован (дефолты). Все действия перечитывают список после ответа API (state.deleteMcpServer / connectMcpServer / disconnectMcpServer внутри вызывают refreshMcp). Подключённый сервер показывает «Отключить» (статус → idle, сервер остаётся в реестре); не подключённый — «Подключить».
 import { useState } from 'react'
 import { useStudio } from '../state'
 
@@ -18,7 +9,7 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export default function McpTab() {
-  const { state, deleteMcpServer, connectMcpServer } = useStudio()
+  const { state, deleteMcpServer, connectMcpServer, disconnectMcpServer } = useStudio()
   const [busy, setBusy] = useState(false)
   const servers = state.mcpServers
   const tools = state.mcpTools
@@ -32,6 +23,20 @@ export default function McpTab() {
         await connectMcpServer(id)
       } catch (err) {
         console.error('connect mcp:', err)
+      } finally {
+        setBusy(false)
+      }
+    })()
+  }
+
+  // Отключить сервер: POST /api/mcp/servers/{id}/disconnect → refreshMcp
+  const disconnect = (id: string) => {
+    setBusy(true)
+    void (async () => {
+      try {
+        await disconnectMcpServer(id)
+      } catch (err) {
+        console.error('disconnect mcp:', err)
       } finally {
         setBusy(false)
       }
@@ -61,7 +66,6 @@ export default function McpTab() {
         </header>
         <p className="mcp-note">
           Внешние MCP-серверы: подключите — и увидите его инструменты.
-          День 16: подключение и просмотр; вызов инструментов — задел.
         </p>
         <ul className="kv-list mcp-list">
           {servers.map((s) => (
@@ -84,10 +88,10 @@ export default function McpTab() {
               <button
                 type="button"
                 className="btn"
-                disabled={busy || !s.enabled}
-                onClick={() => connect(s.id)}
+                disabled={busy || (s.status === 'connected' ? false : !s.enabled)}
+                onClick={() => (s.status === 'connected' ? disconnect(s.id) : connect(s.id))}
               >
-                Подключить
+                {s.status === 'connected' ? 'Отключить' : 'Подключить'}
               </button>
               <button
                 type="button"

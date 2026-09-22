@@ -16,15 +16,35 @@ import httpx
 try:  # пакетный режим: uvicorn studio.backend.main:app из корня репозитория
     from .agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE, StudioAgent
     from .memory import PROFILE_ACTIONS, MemoryStore
+    from .mcp import MCPError
 except ImportError:  # dev-режим: uvicorn main:app из studio/backend
     from agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE, StudioAgent
     from memory import PROFILE_ACTIONS, MemoryStore, PROFILE_ACTIONS
+    from mcp import MCPError
 
 # Секреты/настройки — из .env в корне репозитория.
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 # Данные лежат в studio/data (создаётся при первой записи, в git не коммитится).
 DATA_DIR = str(Path(__file__).resolve().parents[1] / "data")
+
+# Максимальная длина текста результата tools/call в сообщении диалога.
+MCP_RESULT_MAX = 8000
+
+
+def _format_mcp_result(result: dict) -> str:
+    """Текст результата tools/call для сообщения диалога: только text-части;
+    пусто — «(пусто)»; isError — префикс «Ошибка: »; длиннее MCP_RESULT_MAX —
+    обрезка с пометкой."""
+    text = "\n".join(p.get("text", "") for p in (result.get("content") or [])
+                     if isinstance(p, dict) and p.get("type") == "text")
+    if not text:
+        text = "(пусто)"
+    if result.get("isError"):
+        text = "Ошибка: " + text
+    if len(text) > MCP_RESULT_MAX:
+        text = text[:MCP_RESULT_MAX] + "\n…(обрезано)"
+    return text
 
 
 def create_app(agent: StudioAgent | None = None) -> FastAPI:
@@ -532,13 +552,62 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
             view = agent.mcp.connect(sid)
         except KeyError:
             return JSONResponse(status_code=404,
-                                content={"detail": "Сервер не найден"})
+                                 content={"detail": "Сервер не найден"})
+        return {"server": view}
+
+    @app.post("/api/mcp/servers/{sid}/disconnect")
+    def mcp_servers_disconnect(sid: str):
+        try:
+            view = agent.mcp.disconnect(sid)
+        except KeyError:
+            return JSONResponse(status_code=404,
+                                 content={"detail": "Сервер не найден"})
         return {"server": view}
 
     @app.get("/api/mcp/tools")
     def mcp_tools():
         """Инструменты подключённых MCP-серверов."""
         return {"tools": agent.mcp.tools()}
+
+    @app.post("/api/mcp/servers/{sid}/tools/{tool}")
+    def mcp_tool_call(sid: str, tool: str, body: dict):
+        """Вызвать инструмент подключённого MCP-сервера (tool-loop, день 16):
+        результат сохраняется в диалог как system-сообщение с маркером
+        mcp_tool — видно LLM в следующих запросах. 400/404 — RU-detail."""
+        dialogue_id = body.get("dialogue_id")
+        arguments = body.get("arguments")
+        if arguments is None:
+            arguments = {}
+        if not isinstance(dialogue_id, str) or not dialogue_id:
+            return JSONResponse(status_code=400,
+                                content={"detail": "dialogue_id обязательно"})
+        if not isinstance(arguments, dict):
+            return JSONResponse(status_code=400,
+                                content={"detail": "arguments — объект"})
+        if agent.store.get_dialogue(dialogue_id) is None:
+            return JSONResponse(status_code=404,
+                                content={"detail":
+                                         f"Диалог «{dialogue_id}» не найден"})
+        try:
+            result = agent.mcp.call_tool(sid, tool, arguments)
+        except KeyError:
+            return JSONResponse(status_code=404,
+                                content={"detail": "Сервер не найден"})
+        except MCPError as e:
+            return JSONResponse(status_code=400, content={"detail": str(e)})
+        server_name = sid
+        for s in agent.mcp.servers():
+            if s.get("id") == sid:
+                server_name = s.get("name", sid)
+                break
+        args_json = (json.dumps(arguments, ensure_ascii=False)
+                     if arguments else "(пусто)")
+        block = (f"MCP-вызов: {server_name}/{tool}\n"
+                 f"Аргументы: {args_json}\n"
+                 f"Результат:\n{_format_mcp_result(result)}")
+        agent.store.append_message(dialogue_id, "system", block,
+                                   mcp_tool={"server": sid, "tool": tool})
+        return {"ok": True}
 
     # ---------- токены ----------
 

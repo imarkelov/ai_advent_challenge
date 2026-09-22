@@ -102,6 +102,14 @@ for line in sys.stdin:
             {"name": "mock_ping", "description": "E2E ping",
              "inputSchema": {"type": "object"}},
         ]}
+    elif m["method"] == "tools/call":
+        p = m.get("params", {}) or {}
+        nm = p.get("name", "?")
+        ar = p.get("arguments", {}) or {}
+        r = {"content": [{"type": "text",
+                          "text": "echo " + nm + " " +
+                                  json.dumps(ar, sort_keys=True)}],
+             "isError": False}
     else:
         r = {}
     send({"jsonrpc": "2.0", "id": m["id"], "result": r})
@@ -609,6 +617,50 @@ def main() -> int:
                 ok = {"mock_echo", "mock_ping"} <= names
             record("MCP: mock connect (connected, 2 tools в /api/mcp/tools)",
                    "PASS" if ok else "FAIL", f"code={code}, view={view}")
+            # Disconnect: сессия закрывается, status -> idle (сервер остаётся
+            # в реестре); затем повторный connect, чтобы tool call шёл дальше.
+            d1, b1, _ = http("POST",
+                             f"/api/mcp/servers/{mcp_mock['id']}/disconnect",
+                             timeout=30)
+            v1 = json.loads(b1).get("server", {}) if d1 == 200 else {}
+            d2, b2, _ = http("POST",
+                             f"/api/mcp/servers/{mcp_mock['id']}/connect",
+                             timeout=90)
+            v2 = json.loads(b2).get("server", {}) if d2 == 200 else {}
+            dc_ok = (d1 == 200 and v1.get("status") == "idle"
+                     and v1.get("tools_count") == 0
+                     and d2 == 200 and v2.get("status") == "connected")
+            record("MCP: disconnect (idle) + повторный connect (connected)",
+                   "PASS" if dc_ok else "FAIL",
+                   f"code={d1}/{d2}, view={v1}/{v2}")
+            # Вызов тула (tool-loop): 200 + system-сообщение с mcp_tool-маркером
+            # в диалоге; 400 — arguments не объект; 404 — неизвестный сервер.
+            ctc, btc, _ = http("POST",
+                               f"/api/mcp/servers/{mcp_mock['id']}/tools/mock_echo",
+                               {"dialogue_id": dlg_id, "arguments": {"x": "1"}},
+                               timeout=30)
+            tc = json.loads(btc) if ctc == 200 else {}
+            cd2, bd2, _ = http("GET", f"/api/dialogues/{dlg_id}")
+            d2 = json.loads(bd2).get("dialogue", {}) if cd2 == 200 else {}
+            msgs = d2.get("messages", []) or []
+            last = msgs[-1] if msgs else {}
+            tc_ok = (ctc == 200 and tc.get("ok") is True
+                     and last.get("role") == "system"
+                     and last.get("mcp_tool")
+                     == {"server": mcp_mock["id"], "tool": "mock_echo"}
+                     and str(last.get("content", "")).startswith("MCP-вызов:"))
+            record("MCP: tool call mock_echo (200 + сообщение с mcp_tool в диалоге)",
+                   "PASS" if tc_ok else "FAIL", f"code={ctc}")
+            cb, _, _ = http("POST",
+                            f"/api/mcp/servers/{mcp_mock['id']}/tools/mock_echo",
+                            {"dialogue_id": dlg_id, "arguments": "x"}, timeout=10)
+            record("MCP: tool call arguments не объект → 400",
+                   "PASS" if cb == 400 else "FAIL", f"code={cb}")
+            cu, _, _ = http("POST",
+                            "/api/mcp/servers/mcp_nope/tools/mock_echo",
+                            {"dialogue_id": dlg_id, "arguments": {}}, timeout=10)
+            record("MCP: tool call неизвестного сервера → 404",
+                   "PASS" if cu == 404 else "FAIL", f"code={cu}")
             code3, _, _ = http("POST", "/api/mcp/servers/mcp_nope/connect", timeout=10)
             record("MCP: connect неизвестного id → 404", "PASS" if code3 == 404 else "FAIL", f"code={code3}")
             code4, _, _ = http("DELETE", f"/api/mcp/servers/{mcp_mock['id']}", timeout=10)

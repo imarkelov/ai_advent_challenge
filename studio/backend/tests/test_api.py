@@ -1011,6 +1011,33 @@ def test_mcp_api_connect_unknown_404(client, agent_env):
     assert client.delete("/api/mcp/servers/mcp_nope").status_code == 404
 
 
+def test_mcp_api_disconnect(client, agent_env):
+    reg = _mcp_agent(agent_env)
+    try:
+        sid = client.get("/api/mcp/servers").json()["servers"][0]["id"]
+        assert client.post(f"/api/mcp/servers/{sid}/connect").status_code == 200
+        r = client.post(f"/api/mcp/servers/{sid}/disconnect")
+        assert r.status_code == 200
+        view = r.json()["server"]
+        assert view["status"] == "idle"
+        assert view["error"] is None
+        assert view["tools_count"] == 0
+        # сервер остался в реестре
+        s = client.get("/api/mcp/servers").json()["servers"]
+        assert [x for x in s if x["id"] == sid][0]["status"] == "idle"
+        # повторный connect после disconnect — работает
+        assert client.post(f"/api/mcp/servers/{sid}/connect").status_code == 200
+    finally:
+        reg.close_all()
+
+
+def test_mcp_api_disconnect_unknown_404(client, agent_env):
+    _mcp_agent(agent_env)
+    r = client.post("/api/mcp/servers/mcp_nope/disconnect")
+    assert r.status_code == 404
+    assert r.json()["detail"] == "Сервер не найден"
+
+
 def test_mcp_api_add_and_remove(client, agent_env):
     reg = _mcp_agent(agent_env)
     r = client.post("/api/mcp/servers", json={
@@ -1044,6 +1071,128 @@ def test_mcp_api_validation_400(client, agent_env):
     assert client.post("/api/mcp/servers",
                        json={"name": "X", "type": "tcp",
                              "command": ["npx"]}).status_code == 400
+
+
+def test_mcp_api_tool_call_200(client, agent_env, dialogue_id):
+    reg = _mcp_agent(agent_env)
+    try:
+        sid = client.get("/api/mcp/servers").json()["servers"][0]["id"]
+        assert client.post(f"/api/mcp/servers/{sid}/connect").status_code == 200
+        r = client.post(f"/api/mcp/servers/{sid}/tools/mock_echo",
+                        json={"dialogue_id": dialogue_id,
+                              "arguments": {"x": "1"}})
+        assert r.status_code == 200
+        assert r.json() == {"ok": True}
+        d = client.get(f"/api/dialogues/{dialogue_id}").json()["dialogue"]
+        m = d["messages"][-1]
+        assert m["role"] == "system"
+        assert m["mcp_tool"] == {"server": sid, "tool": "mock_echo"}
+        assert m["content"].startswith("MCP-вызов:")
+        assert "Firecrawl/mock_echo" in m["content"]
+        assert "{'x': '1'}" in m["content"]
+    finally:
+        reg.close_all()
+
+
+def test_mcp_api_tool_call_unknown_server_404(client, agent_env, dialogue_id):
+    _mcp_agent(agent_env)
+    r = client.post("/api/mcp/servers/mcp_nope/tools/echo",
+                    json={"dialogue_id": dialogue_id})
+    assert r.status_code == 404
+
+
+def test_mcp_api_tool_call_unknown_dialogue_404(client, agent_env):
+    reg = _mcp_agent(agent_env)
+    try:
+        sid = client.get("/api/mcp/servers").json()["servers"][0]["id"]
+        assert client.post(f"/api/mcp/servers/{sid}/connect").status_code == 200
+        r = client.post(f"/api/mcp/servers/{sid}/tools/mock_echo",
+                        json={"dialogue_id": "d_nope"})
+        assert r.status_code == 404
+    finally:
+        reg.close_all()
+
+
+def test_mcp_api_tool_call_not_connected_400(client, agent_env, dialogue_id):
+    reg = _mcp_agent(agent_env)
+    try:
+        sid = client.get("/api/mcp/servers").json()["servers"][0]["id"]
+        r = client.post(f"/api/mcp/servers/{sid}/tools/mock_echo",
+                        json={"dialogue_id": dialogue_id})
+        assert r.status_code == 400
+        assert "не подключён" in r.json()["detail"]
+    finally:
+        reg.close_all()
+
+
+def test_mcp_api_tool_call_arguments_not_dict_400(client, agent_env,
+                                                   dialogue_id):
+    reg = _mcp_agent(agent_env)
+    try:
+        sid = client.get("/api/mcp/servers").json()["servers"][0]["id"]
+        r = client.post(f"/api/mcp/servers/{sid}/tools/mock_echo",
+                        json={"dialogue_id": dialogue_id,
+                              "arguments": "x"})
+        assert r.status_code == 400
+        assert "arguments" in r.json()["detail"]
+    finally:
+        reg.close_all()
+
+
+def test_mcp_api_tool_call_no_dialogue_400(client, agent_env):
+    reg = _mcp_agent(agent_env)
+    try:
+        sid = client.get("/api/mcp/servers").json()["servers"][0]["id"]
+        r = client.post(f"/api/mcp/servers/{sid}/tools/mock_echo",
+                        json={"arguments": {"a": 1}})
+        assert r.status_code == 400
+        assert "dialogue_id" in r.json()["detail"]
+    finally:
+        reg.close_all()
+
+
+def test_mcp_tool_call_visible_in_llm_payload(client, agent_env, dialogue_id):
+    """Результат tools/call (system-сообщение) уходит LLM в следующем
+    запросе (в отличие от tool-определений — регресс выше)."""
+    reg = _mcp_agent(agent_env)
+    try:
+        sid = client.get("/api/mcp/servers").json()["servers"][0]["id"]
+        client.post(f"/api/mcp/servers/{sid}/connect")
+        assert client.post(
+            f"/api/mcp/servers/{sid}/tools/mock_echo",
+            json={"dialogue_id": dialogue_id, "arguments": {"x": "1"}}
+        ).status_code == 200
+        client.post("/api/profile/action",
+                    json={"dialogue_id": dialogue_id, "action": "decline"})
+        payloads = []
+        orig_transport = agent_env._client._transport
+
+        class CapturingTransport:
+            def __init__(self, inner):
+                self._inner = inner
+
+            def handle_request(self, request):
+                payloads.append(json.loads(request.content))
+                return self._inner.handle_request(request)
+
+            def __getattr__(self, name):
+                return getattr(self._inner, name)
+
+        agent_env._client._transport = CapturingTransport(orig_transport)
+        try:
+            r = client.post("/api/chat",
+                            json={"dialogue_id": dialogue_id,
+                                  "message": "привет"})
+            assert r.status_code == 200
+        finally:
+            agent_env._client._transport = orig_transport
+        assert payloads
+        history = payloads[0]["messages"]
+        assert any(m["role"] == "system" and "MCP-вызов:" in m["content"]
+                   for m in history)
+        assert all(set(m.keys()) <= {"role", "content"} for m in history)
+    finally:
+        reg.close_all()
 
 
 def test_chat_payload_has_no_mcp_tools(client, agent_env, dialogue_id):

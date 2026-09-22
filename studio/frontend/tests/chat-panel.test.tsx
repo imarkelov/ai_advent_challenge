@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useEffect, useRef } from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { StudioProvider, useStudio } from '../src/state'
-import type { TaskState, UserProfile } from '../src/api'
+import type { McpServer, McpTool, TaskState, UserProfile } from '../src/api'
 import ChatPanel from '../src/components/ChatPanel'
 import Sidebar from '../src/components/Sidebar'
 
@@ -708,5 +708,244 @@ describe('ChatPanel — отправка в режиме задачи (день 
     await waitFor(() =>
       expect(posted).toContainEqual({ url: '/api/task/instruction', body: { dialogue_id: 'd1', text: 'используй Kotlin' } }),
     )
+  })
+})
+
+// ── день 16: tool-loop — MCP-команды «/» в режиме чата ──
+
+const FC: McpServer = {
+  id: 'mcp_fc', name: 'Firecrawl', type: 'stdio',
+  command: ['npx', '-y', 'firecrawl-mcp'], url: '', env: {},
+  enabled: true, status: 'connected', error: null, tools_count: 2,
+}
+const GIT: McpServer = {
+  id: 'mcp_g', name: 'Git', type: 'stdio',
+  command: ['npx', '-y', 'git-mcp'], url: '', env: {},
+  enabled: true, status: 'idle', error: null, tools_count: 0,
+}
+const FC_TOOLS: McpTool[] = [
+  {
+    server: 'mcp_fc', name: 'firecrawl_search', description: 'Web-поиск',
+    input_schema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Запрос' },
+        count: { type: 'number' },
+        verbose: { type: 'boolean' },
+      },
+      required: ['query'],
+    },
+  },
+  { server: 'mcp_fc', name: 'firecrawl_scrape', description: 'Скрапинг страницы', input_schema: { type: 'object' } },
+]
+
+// loadAll-контракты + активный диалог d1 + MCP-серверы/инструменты.
+// handler перехватывает URL'ы, на которые нет фиксированного ответа (null — дальше)
+function stubMcpFetch(
+  handler?: (url: string, method: string, init?: RequestInit) => Response | null,
+) {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = normalizeUrl(input)
+      const method = init?.method ?? 'GET'
+      if (handler) {
+        const r = handler(url, method, init)
+        if (r) return r
+      }
+      if (url === '/api/mcp/servers') return jsonResponse({ servers: [FC, GIT] })
+      if (url === '/api/mcp/tools') return jsonResponse({ tools: FC_TOOLS })
+      if (url === '/api/dialogues') {
+        return jsonResponse({
+          active_id: 'd1',
+          dialogues: [{ id: 'd1', title: 'Д', created: '', message_count: 0 }],
+        })
+      }
+      if (url === '/api/dialogues/d1') return jsonResponse({ dialogue: { messages: [] } })
+      return jsonResponse(API_FIXTURES[url] ?? { ok: true })
+    }),
+  )
+}
+
+describe('ChatPanel — автодополнение MCP-команд «/» (день 16, tool-loop)', () => {
+  it('«/» — дропдаун включённых серверов (tier-1)', async () => {
+    stubMcpFetch()
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const ta = (await screen.findByPlaceholderText(/Сообщение…/)) as HTMLTextAreaElement
+    fireEvent.change(ta, { target: { value: '/' } })
+    expect(await screen.findByRole('listbox')).toBeTruthy()
+    expect(screen.getByText('Firecrawl')).toBeTruthy()
+    expect(screen.getByText('Git')).toBeTruthy()
+  })
+
+  it('«/firecr» — только совпадающий сервер (Git скрыт)', async () => {
+    stubMcpFetch()
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const ta = (await screen.findByPlaceholderText(/Сообщение…/)) as HTMLTextAreaElement
+    fireEvent.change(ta, { target: { value: '/firecr' } })
+    await screen.findByRole('listbox')
+    expect(screen.getByText('Firecrawl')).toBeTruthy()
+    expect(screen.queryByText('Git')).toBeNull()
+  })
+
+  it('«/Git x» (tier-2) — сервер не подключён: строка-подсказка, выбор недоступен', async () => {
+    stubMcpFetch()
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const ta = (await screen.findByPlaceholderText(/Сообщение…/)) as HTMLTextAreaElement
+    fireEvent.change(ta, { target: { value: '/Git x' } })
+    await screen.findByRole('listbox')
+    expect(await screen.findByText('Сервер не подключён — сначала подключите в настройках')).toBeTruthy()
+    // в дропдауне нет выбираемых строк (option-роли у <select> модели не счи
+    // там — ищем только внутри .ac-dropdown)
+    expect(document.querySelectorAll('.ac-dropdown [role="option"]').length).toBe(0)
+  })
+
+  it('префикс инструмента (tier-2) — список; Enter — модалка формы', async () => {
+    stubMcpFetch()
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const ta = (await screen.findByPlaceholderText(/Сообщение…/)) as HTMLTextAreaElement
+    fireEvent.change(ta, { target: { value: '/Firecrawl f' } })
+    await screen.findByRole('listbox')
+    expect(screen.getByText('firecrawl_search')).toBeTruthy()
+    expect(screen.getByText('firecrawl_scrape')).toBeTruthy()
+    fireEvent.keyDown(ta, { key: 'Enter' })
+    expect(await screen.findByText('MCP Firecrawl/firecrawl_search')).toBeTruthy()
+  })
+
+  it('«Вызвать» — POST .../tools/{tool} с аргументами формы (string/number/bool)', async () => {
+    const posted: { url: string; body: unknown }[] = []
+    stubMcpFetch((url, method, init) => {
+      if (method === 'POST' && url === '/api/mcp/servers/mcp_fc/tools/firecrawl_search') {
+        posted.push({ url, body: JSON.parse(String(init?.body)) })
+        return jsonResponse({ ok: true })
+      }
+      return null
+    })
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const ta = (await screen.findByPlaceholderText(/Сообщение…/)) as HTMLTextAreaElement
+    fireEvent.change(ta, { target: { value: '/Firecrawl firecrawl_search' } })
+    fireEvent.keyDown(ta, { key: 'Enter' })
+    // модалка: заголовок + описание инструмента (описание дублируется в
+    // открытом дропдауне — ищем по вхождению, а не единственности)
+    await screen.findByText('MCP Firecrawl/firecrawl_search')
+    expect(screen.getAllByText('Web-поиск').length).toBeGreaterThanOrEqual(1)
+    // поля из input_schema: string→text, number→number, boolean→checkbox
+    // доступное имя лейбла = «query * Запрос» (hint-описание внутри label)
+    const query = screen.getByLabelText(/query \*/) as HTMLInputElement
+    const count = screen.getByLabelText('count') as HTMLInputElement
+    const verbose = screen.getByLabelText('verbose') as HTMLInputElement
+    expect(query.type).toBe('text')
+    expect(count.type).toBe('number')
+    expect(verbose.type).toBe('checkbox')
+    fireEvent.change(query, { target: { value: 'hello' } })
+    fireEvent.change(count, { target: { value: '3' } })
+    fireEvent.click(verbose)
+    fireEvent.click(screen.getByRole('button', { name: 'Вызвать' }))
+    await waitFor(() => expect(posted).toHaveLength(1))
+    expect(posted[0].url).toBe('/api/mcp/servers/mcp_fc/tools/firecrawl_search')
+    expect(posted[0].body).toEqual({
+      dialogue_id: 'd1',
+      arguments: { query: 'hello', count: 3, verbose: true },
+    })
+    // успех — модалка закрыта (результат придёт в ленте)
+    await waitFor(() => expect(screen.queryByText('MCP Firecrawl/firecrawl_search')).toBeNull())
+  })
+
+  it('Enter при открытом дропдауне — сообщение НЕ отправляется (выбор строки)', async () => {
+    let chatSent = false
+    stubMcpFetch((url, method) => {
+      if (method === 'POST' && url === '/api/chat') chatSent = true
+      return null
+    })
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const ta = (await screen.findByPlaceholderText(/Сообщение…/)) as HTMLTextAreaElement
+    fireEvent.change(ta, { target: { value: '/Firecrawl f' } })
+    await screen.findByRole('listbox')
+    fireEvent.keyDown(ta, { key: 'Enter' })
+    // Enter выбрал подсвеченный инструмент: draft дополнен, модалка открыта
+    expect(ta.value).toBe('/Firecrawl firecrawl_search')
+    expect(screen.getByText('MCP Firecrawl/firecrawl_search')).toBeTruthy()
+    expect(chatSent).toBe(false)
+  })
+})
+
+describe('ChatPanel — карточка результата MCP (день 16, tool-loop)', () => {
+  it('сообщение с mcp_tool — .mcp-card (chip + вывод), без «в память»', async () => {
+    stubMcpFetch((url, method) => {
+      if (method === 'GET' && url === '/api/dialogues/d1') {
+        return jsonResponse({
+          dialogue: {
+            messages: [
+              { role: 'system', content: 'Результат: 42', mcp_tool: { server: 'mcp_fc', tool: 'firecrawl_search' } },
+            ],
+          },
+        })
+      }
+      return null
+    })
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    expect(await screen.findByText('Результат: 42')).toBeTruthy()
+    const card = container.querySelector('.mcp-card')
+    expect(card).toBeTruthy()
+    expect(card).toHaveTextContent('MCP Firecrawl/firecrawl_search')
+    // не обычный bubble: в ленте нет .msg и кнопки «Сохранить в память»
+    expect(container.querySelectorAll('.msg').length).toBe(0)
+    expect(screen.queryByTitle('Сохранить в память')).toBeNull()
+  })
+})
+
+describe('ChatPanel — кнопка MCP в шапке чата (день 16)', () => {
+  it('рендерит кнопку (aria-label="MCP"); клик → open-mcp (mcpOpen=true)', async () => {
+    stubMcpFetch()
+    let mcpOpen: boolean | null = null
+    function Probe() {
+      const { state } = useStudio()
+      mcpOpen = state.mcpOpen
+      return null
+    }
+    render(
+      <StudioProvider>
+        <ChatPanel />
+        <Probe />
+      </StudioProvider>,
+    )
+    const btn = await screen.findByRole('button', { name: 'MCP' })
+    expect(btn).toHaveClass('mcp-toggle')
+    // шапка чата — верхний правый угол экрана
+    expect(btn.closest('.chat-head')).toBeTruthy()
+    expect(mcpOpen).toBe(false)
+    fireEvent.click(btn)
+    await waitFor(() => expect(mcpOpen).toBe(true))
+    // повторный клик — toggle (close-mcp)
+    fireEvent.click(btn)
+    await waitFor(() => expect(mcpOpen).toBe(false))
   })
 })

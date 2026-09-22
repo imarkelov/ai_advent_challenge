@@ -396,11 +396,89 @@ def test_registry_connect_failure_is_error_view(tmp_path):
         reg.close_all()
 
 
+def test_registry_disconnect(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
+    try:
+        sid = reg.servers()[0]["id"]
+        assert reg.connect(sid)["status"] == "connected"
+        view = reg.disconnect(sid)
+        assert view["status"] == "idle"
+        assert view["error"] is None
+        assert view["tools_count"] == 0
+        # сервер остаётся в реестре
+        s = next(x for x in reg.servers() if x["id"] == sid)
+        assert s["status"] == "idle"
+        assert s["tools_count"] == 0
+        assert reg.tools() == []
+        # повторный connect после disconnect — работает
+        v2 = reg.connect(sid)
+        assert v2["status"] == "connected"
+        assert v2["tools_count"] == 2
+        # disconnect без сессии (idle) — тоже ok
+        reg.disconnect(sid)
+        assert reg.servers()[0]["status"] == "idle"
+    finally:
+        reg.close_all()
+    # запись на диске не тронута
+    assert sid in _store(tmp_path).mcp_servers_items()
+
+
+def test_registry_disconnect_unknown_sid(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
+    try:
+        with pytest.raises(KeyError):
+            reg.disconnect("mcp_nope")
+    finally:
+        reg.close_all()
+
+
 def test_registry_connect_unknown_sid(tmp_path):
     reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
     try:
         with pytest.raises(KeyError):
             reg.connect("mcp_nope")
+    finally:
+        reg.close_all()
+
+
+def test_registry_call_tool_success(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
+    try:
+        sid = reg.servers()[0]["id"]
+        reg.connect(sid)
+        result = reg.call_tool(sid, "mock_echo", {"x": "1"})
+        assert result["isError"] is False
+        assert result["content"][0]["text"] == "{'x': '1'}"
+    finally:
+        reg.close_all()
+
+
+def test_registry_call_tool_not_connected(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
+    try:
+        sid = reg.servers()[0]["id"]  # в реестре, но idle
+        with pytest.raises(MCPError, match="Сервер не подключён"):
+            reg.call_tool(sid, "mock_echo")
+    finally:
+        reg.close_all()
+
+
+def test_registry_call_tool_unknown_sid(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
+    try:
+        with pytest.raises(KeyError):
+            reg.call_tool("mcp_nope", "mock_echo")
+    finally:
+        reg.close_all()
+
+
+def test_registry_call_tool_unknown_tool(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
+    try:
+        sid = reg.servers()[0]["id"]
+        reg.connect(sid)
+        with pytest.raises(MCPError, match="не найден"):
+            reg.call_tool(sid, "mock_nope", {"a": 1})
     finally:
         reg.close_all()
 

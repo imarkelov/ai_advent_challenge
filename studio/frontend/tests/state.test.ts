@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import * as React from 'react'
+import { act, render, waitFor } from '@testing-library/react'
 import type { TaskState, UserProfile } from '../src/api'
 import {
   activeProfileOf,
@@ -7,7 +9,9 @@ import {
   finishAssistant,
   initialState,
   reducer,
+  StudioProvider,
   tasksFrom,
+  useStudio,
   type DialogueMeta,
   type StudioState,
 } from '../src/state'
@@ -362,9 +366,9 @@ describe('reducer — overlay настроек: settingsOpen', () => {
   })
 
   it('open-settings: settingsOpen=true; вкладка не меняется без payload', () => {
-    const s = reducer({ ...base, contextTab: 'mcp' }, { type: 'open-settings' })
+    const s = reducer({ ...base, contextTab: 'invariants' }, { type: 'open-settings' })
     expect(s.settingsOpen).toBe(true)
-    expect(s.contextTab).toBe('mcp')
+    expect(s.contextTab).toBe('invariants')
   })
 
   it('open-settings с payload: открывает overlay И переключает вкладку', () => {
@@ -378,6 +382,24 @@ describe('reducer — overlay настроек: settingsOpen', () => {
     const s2 = reducer(s1, { type: 'close-settings' })
     expect(s2.settingsOpen).toBe(false)
     expect(s2.contextTab).toBe('invariants')
+  })
+})
+
+describe('reducer — overlay MCP: mcpOpen (день 16, отдельная кнопка в шапке чата)', () => {
+  it('initialState: mcpOpen=false (overlay закрыт при старте)', () => {
+    expect(base.mcpOpen).toBe(false)
+    expect(initialState().mcpOpen).toBe(false)
+  })
+
+  it('open-mcp: mcpOpen=true', () => {
+    const s = reducer(base, { type: 'open-mcp' })
+    expect(s.mcpOpen).toBe(true)
+  })
+
+  it('close-mcp: mcpOpen=false', () => {
+    const s1 = reducer(base, { type: 'open-mcp' })
+    const s2 = reducer(s1, { type: 'close-mcp' })
+    expect(s2.mcpOpen).toBe(false)
   })
 })
 
@@ -400,5 +422,88 @@ describe('reducer — инварианты (день 14): флаг наруше�
     const s1 = reducer(base, { type: 'invariant-violation', patterns: ['lang'] })
     const s2 = reducer(s1, { type: 'user-message', message: { role: 'user', content: 'ещё' } })
     expect(s2.invariantViolation).toBeNull()
+  })
+})
+
+// ── день 16: tool-loop — callMcpTool (provider) ────────────────────────────
+
+function jsonResponse(body: unknown): Response {
+  return new Response(JSON.stringify(body), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
+
+describe('StudioProvider — callMcpTool (день 16, tool-loop)', () => {
+  it('POST .../tools/{tool} с {dialogue_id, arguments} + перечитывает активный диалог', async () => {
+    const calls: { url: string; method: string; body?: unknown }[] = []
+    let captured:
+      | ((sid: string, tool: string, did: string, args: Record<string, unknown>) => Promise<void>)
+      | null = null
+    function Probe() {
+      const { callMcpTool } = useStudio()
+      captured = callMcpTool
+      return null
+    }
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input).replace(/^https?:\/\/[^/]+/, '')
+        const method = init?.method ?? 'GET'
+        calls.push({
+          url,
+          method,
+          body: init?.body ? (JSON.parse(String(init.body)) as unknown) : undefined,
+        })
+        if (url === '/api/config') {
+          return jsonResponse({ model: 'm', temperature: 0.7, max_tokens: 1, system_prompt: 'sp' })
+        }
+        if (url === '/api/dialogues') {
+          return jsonResponse({
+            active_id: 'd1',
+            dialogues: [{ id: 'd1', title: 'D', created: '', message_count: 0 }],
+          })
+        }
+        if (url === '/api/dialogues/d1') return jsonResponse({ dialogue: { messages: [] } })
+        if (url === '/api/memory') {
+          return jsonResponse({
+            active_id: 'd1',
+            dialogue: { message_count: 0, tokens_est: 0 },
+            working: { entries: 0, tokens_est: 0, items: {} },
+            long_term: { entries: 0, tokens_est: 0, items: {} },
+          })
+        }
+        if (url === '/api/tokens') {
+          return jsonResponse({ last: null, session: { prompt: 0, completion: 0, total: 0 }, context_limit: 1 })
+        }
+        if (url === '/api/requests') return jsonResponse({ requests: [] })
+        if (url === '/api/models') return jsonResponse({ models: [] })
+        if (url === '/api/invariants') return jsonResponse({ invariants: [] })
+        if (url === '/api/mcp/servers') return jsonResponse({ servers: [] })
+        if (url === '/api/mcp/tools') return jsonResponse({ tools: [] })
+        if (method === 'POST' && url === '/api/mcp/servers/mcp_fc/tools/search') {
+          return jsonResponse({ ok: true })
+        }
+        return jsonResponse({ ok: true })
+      }),
+    )
+    render(React.createElement(StudioProvider, null, React.createElement(Probe)))
+    // loadAll-загрузка завершилась (первый GET /api/dialogues/d1)
+    await waitFor(() => {
+      expect(calls.filter((c) => c.url === '/api/dialogues/d1').length).toBeGreaterThanOrEqual(1)
+    })
+    await act(async () => {
+      await captured!('mcp_fc', 'search', 'd1', { q: 1 })
+    })
+    // POST на эндпоинт инструмента с {dialogue_id, arguments}
+    const post = calls.find((c) => c.url === '/api/mcp/servers/mcp_fc/tools/search')
+    expect(post).toBeTruthy()
+    expect(post?.method).toBe('POST')
+    expect(post?.body).toEqual({ dialogue_id: 'd1', arguments: { q: 1 } })
+    // reloadDialogue: второй GET /api/dialogues/d1 (первый — от loadAll)
+    await waitFor(() => {
+      expect(calls.filter((c) => c.url === '/api/dialogues/d1' && c.method === 'GET').length)
+        .toBeGreaterThanOrEqual(2)
+    })
   })
 })

@@ -441,6 +441,48 @@ class MCPRegistry:
                                       "error": str(e), "client": None}
         return {**base, **view}
 
+    def disconnect(self, sid: str) -> dict:
+        """Отключить сервер: сессия закрывается, status -> idle. Сервер
+        остаётся в реестре (в отличие от remove — удаление записи).
+        KeyError — sid не в реестре."""
+        with self._lock:
+            self._ensure_defaults_locked()
+            items = self._store.mcp_servers_items()
+            if sid not in items:
+                raise KeyError(sid)
+            rec = dict(items[sid])
+            rec["id"] = sid
+            r = self._runtime.get(sid)
+            if r and r.get("client") is not None:
+                r["client"].close()
+            self._runtime[sid] = {"status": "idle", "tools": [],
+                                  "error": None, "client": None}
+        return {"id": sid, "name": rec["name"], "type": rec["type"],
+                "command": rec["command"], "url": rec["url"],
+                "env": rec["env"], "enabled": rec["enabled"],
+                "status": "idle", "error": None, "tools_count": 0}
+
+    def call_tool(self, sid: str, tool_name: str,
+                  arguments: dict | None = None) -> dict:
+        """tools/call на подключённом сервере (tool-loop, день 16).
+        KeyError — sid не в реестре; MCPError — сервер не подключён /
+        инструмент не найден / ошибка самого вызова."""
+        with self._lock:
+            self._ensure_defaults_locked()
+            items = self._store.mcp_servers_items()
+            if sid not in items:
+                raise KeyError(sid)
+            r = self._runtime.get(sid)
+            if r is None or r.get("status") != "connected" \
+                    or r.get("client") is None:
+                raise MCPError("Сервер не подключён")
+            names = [t.get("name") for t in (r.get("tools") or [])]
+            if tool_name not in names:
+                raise MCPError(f"Инструмент «{tool_name}» не найден")
+            client = r["client"]
+        # вызов — вне lock (сеть/процесс, как client.connect() в connect())
+        return client.call_tool(tool_name, arguments or {})
+
     def tools(self) -> list:
         """Инструменты всех enabled+connected серверов:
         [{server, name, description, input_schema}]."""

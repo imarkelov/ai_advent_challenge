@@ -70,6 +70,7 @@ python -m pytest -q
 | DELETE | `/api/mcp/servers/{id}` | Удалить сервер (404 — не найден) |
 | POST | `/api/mcp/servers/{id}/connect` | Подключить (initialize + tools/list) → `{server}`; сбой = status error, 404 — не найден |
 | GET | `/api/mcp/tools` | Инструменты подключённых серверов `[{server, name, description, input_schema}]` |
+| POST | `/api/mcp/servers/{id}/tools/{tool}` | Вызвать инструмент (tool-loop) `{dialogue_id, arguments}` → `{"ok": true}`; результат — system-сообщение с маркером `mcp_tool` в диалоге (видно LLM); 400 — сервер не подключён / arguments не объект, 404 — сервер или диалог не найден |
 
 ## Задача (день 13b)
 

@@ -1,19 +1,45 @@
 // Центральная панель: шапка (название + бейдж профиля + дропдаун модели),
-// лента сообщений (включая карточки процесса задачи, день 13b),
-// тумблер режимов чат/задача и инпут-капсула.
+// лента сообщений (включая карточки процесса задачи, день 13b, и карточки
+// результатов MCP-инструментов, день 16), тумблер режимов чат/задача и
+// инпут-капсула. В режиме «чат» команда «/» открывает автодополнение
+// MCP-серверов/инструментов (день 16, tool-loop).
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { useStudio, type Message } from '../state'
+import type { McpServer, McpTool } from '../api'
 import TaskCard, { taskFromMarkers } from './TaskCard'
 import SaveMessageModal from './SaveMessageModal'
+import ToolCallModal from './ToolCallModal'
+
+// Строка автодополнения «/» (день 16): сервер (tier-1), инструмент
+// (tier-2) или подсказка (сервер не подключён)
+type AcItem =
+  | { kind: 'server'; server: McpServer }
+  | { kind: 'tool'; tool: McpTool; serverId: string; serverName: string }
+  | { kind: 'hint'; text: string }
+
+// Выбранный инструмент — данные модалки вызова (день 16)
+type ToolSel = { serverId: string; serverName: string; tool: McpTool }
+
+const STATUS_HINT: Record<string, string> = {
+  idle: 'не подключён',
+  connected: 'подключён',
+  error: 'ошибка',
+}
 
 export default function ChatPanel() {
   const {
     state, activeProfile, sendMessage, setModel,
-    openSettings, closeSettings,
+    openSettings, closeSettings, openMcp, closeMcp,
     activeTask, chatMode, setChatMode, sendTaskMessage,
+    callMcpTool,
   } = useStudio()
   const [draft, setDraft] = useState('')
   const [saveMsg, setSaveMsg] = useState<Message | null>(null)
+  // Автодополнение «/» (день 16): выбранная модалка инструмента + позиция
+  // подсветки + флаг скрытия по Escape (сбрасывается при вводе)
+  const [toolSel, setToolSel] = useState<ToolSel | null>(null)
+  const [acIndex, setAcIndex] = useState(0)
+  const [acDismissed, setAcDismissed] = useState(false)
   const feedRef = useRef<HTMLDivElement>(null)
   const active = state.dialogues.find((d) => d.id === state.activeId)
 
@@ -62,6 +88,52 @@ export default function ChatPanel() {
     if (el) el.scrollTop = el.scrollHeight
   }, [state.messages, state.streaming, state.taskLive])
 
+  // ── Автодополнение команд «/» (день 16, tool-loop; только режим «чат») ──
+  // Tier-1 (один токен «/query»): серверы (enabled) по префиксу имени.
+  // Tier-2 («/Server tool»): инструменты сервера по префиксу; сервер не
+  // подключён — строка-подсказка без выбора.
+  const trimmed = draft.trim()
+  const isCmd = chatMode === 'chat' && trimmed.startsWith('/')
+  let acItems: AcItem[] = []
+  if (isCmd && !acDismissed) {
+    const parts = trimmed.split(/\s+/)
+    if (parts.length === 1) {
+      const q = parts[0].slice(1).toLowerCase()
+      acItems = state.mcpServers
+        .filter((s) => s.enabled && s.name.toLowerCase().startsWith(q))
+        .map((server) => ({ kind: 'server' as const, server }))
+    } else {
+      const serverName = parts[0].slice(1)
+      const server = state.mcpServers.find((s) => s.name === serverName)
+      if (!server) {
+        acItems = []
+      } else if (server.status !== 'connected') {
+        acItems = [
+          { kind: 'hint' as const, text: 'Сервер не подключён — сначала подключите в настройках' },
+        ]
+      } else {
+        const q = (parts[1] ?? '').toLowerCase()
+        acItems = state.mcpTools
+          .filter((t) => t.server === server.id && t.name.toLowerCase().startsWith(q))
+          .map((tool) => ({ kind: 'tool' as const, tool, serverId: server.id, serverName: server.name }))
+      }
+    }
+  }
+  const acOpen = acItems.length > 0
+  // Индекс подсветки не выходит за список (фильтр мог сузить список)
+  const acClamped = acItems.length === 0 ? 0 : Math.min(acIndex, acItems.length - 1)
+
+  const selectAc = (item: AcItem) => {
+    if (item.kind === 'server') {
+      setDraft(`/${item.server.name} `)
+    } else if (item.kind === 'tool') {
+      setDraft(`/${item.serverName} ${item.tool.name}`)
+      setToolSel({ serverId: item.serverId, serverName: item.serverName, tool: item.tool })
+    }
+    setAcIndex(0)
+    setAcDismissed(false)
+  }
+
   const canSend = !state.streaming && state.activeId != null
     && draft.trim().length > 0 && !taskBusy
   const toggleLocked = taskRunning
@@ -74,10 +146,41 @@ export default function ChatPanel() {
   }
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (acOpen) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setAcIndex((i) => Math.min(i + 1, acItems.length - 1))
+        return
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setAcIndex((i) => Math.max(i - 1, 0))
+        return
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        setAcDismissed(true)
+        return
+      }
+      // Enter/Tab — выбор подсвеченной строки; сообщение при открытом
+      // дропдауне НЕ отправляется
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault()
+        const item = acItems[acClamped]
+        if (item && item.kind !== 'hint') selectAc(item)
+        return
+      }
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       submit()
     }
+  }
+
+  const onDraftChange = (e: { target: { value: string } }) => {
+    setDraft(e.target.value)
+    setAcIndex(0)
+    setAcDismissed(false)
   }
 
   const placeholder =
@@ -133,9 +236,18 @@ export default function ChatPanel() {
           </select>
           <button
             type="button"
+            className="btn-icon mcp-toggle"
+            aria-label="MCP"
+            title="MCP-серверы"
+            onClick={() => (state.mcpOpen ? closeMcp() : openMcp())}
+          >
+            🧩
+          </button>
+          <button
+            type="button"
             className="btn-icon settings-toggle"
             aria-label="Настройки"
-            title="Настройки (память, профили, инварианты, MCP)"
+            title="Настройки (память, профили, инварианты)"
             onClick={() => (state.settingsOpen ? closeSettings() : openSettings())}
           >
             ⚙
@@ -149,6 +261,20 @@ export default function ChatPanel() {
           const isTail = i === state.messages.length - 1
           // Stage/work-сообщения с task_stage рендерятся внутри карточки
           if (m.task_stage) return null
+          // Результат вызова MCP-инструмента (день 16): отдельная карточка
+          // (chip + вывод), без «в память»
+          if (m.mcp_tool) {
+            const mt = m.mcp_tool
+            const serverName = state.mcpServers.find((s) => s.id === mt.server)?.name ?? mt.server
+            return (
+              <div key={i} className="mcp-card">
+                <span className="mcp-card-chip" title="Результат вызова MCP-инструмента">
+                  MCP {serverName}/{mt.tool}
+                </span>
+                <pre className="mcp-card-pre">{m.content}</pre>
+              </div>
+            )
+          }
           return (
             <div key={i}>
               <div className={m.role === 'user' ? 'msg user' : 'msg assistant'}>
@@ -211,16 +337,58 @@ export default function ChatPanel() {
             Задача
           </button>
         </div>
-        <textarea
-          className="input-capsule"
-          rows={2}
-          value={draft}
-          placeholder={placeholder}
-          disabled={state.streaming || state.activeId == null || taskBusy
-            || (chatMode === 'task' && task?.stage === 'failed')}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={onKeyDown}
-        />
+        <div className="input-wrap">
+          {acOpen && (
+            <ul className="ac-dropdown" role="listbox" aria-label="MCP-команды">
+              {acItems.map((item, i) => {
+                if (item.kind === 'hint') {
+                  return <li key="hint" className="ac-hint">{item.text}</li>
+                }
+                const active = i === acClamped
+                const cls = active ? 'ac-item active' : 'ac-item'
+                return item.kind === 'server' ? (
+                  <li
+                    key={`s-${item.server.id}`}
+                    className={cls}
+                    role="option"
+                    aria-selected={active}
+                    onMouseDown={(e) => { e.preventDefault(); selectAc(item) }}
+                    onMouseEnter={() => setAcIndex(i)}
+                  >
+                    <span className="ac-name">{item.server.name}</span>
+                    <span className={`ac-status ${item.server.status}`}>
+                      {STATUS_HINT[item.server.status] ?? item.server.status}
+                    </span>
+                  </li>
+                ) : (
+                  <li
+                    key={`t-${item.serverId}:${item.tool.name}`}
+                    className={cls}
+                    role="option"
+                    aria-selected={active}
+                    onMouseDown={(e) => { e.preventDefault(); selectAc(item) }}
+                    onMouseEnter={() => setAcIndex(i)}
+                  >
+                    <span className="ac-name">{item.tool.name}</span>
+                    {item.tool.description && (
+                      <span className="ac-desc">{item.tool.description}</span>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+          <textarea
+            className="input-capsule"
+            rows={2}
+            value={draft}
+            placeholder={placeholder}
+            disabled={state.streaming || state.activeId == null || taskBusy
+              || (chatMode === 'task' && task?.stage === 'failed')}
+            onChange={onDraftChange}
+            onKeyDown={onKeyDown}
+          />
+        </div>
         <button type="button" className="btn send" onClick={submit} disabled={!canSend}>
           {chatMode === 'chat' ? 'Отправить' : task?.stage === 'paused' ? 'Сохранить' : 'Запустить'}
         </button>
@@ -228,6 +396,22 @@ export default function ChatPanel() {
 
       {saveMsg && (
         <SaveMessageModal message={saveMsg.content} onClose={() => setSaveMsg(null)} />
+      )}
+
+      {toolSel && (
+        <ToolCallModal
+          key={`${toolSel.serverId}/${toolSel.tool.name}`}
+          serverName={toolSel.serverName}
+          tool={toolSel.tool}
+          onCancel={() => setToolSel(null)}
+          onInvoke={async (args) => {
+            const id = state.activeId
+            if (id == null) return
+            await callMcpTool(toolSel.serverId, toolSel.tool.name, id, args)
+            // успех — модалку закрываем; результат придёт в ленте (mcp-card)
+            setToolSel(null)
+          }}
+        />
       )}
     </main>
   )

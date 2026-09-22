@@ -1,6 +1,7 @@
-// Overlay настроек: панель «Контекст» (Память/Профили/Инварианты/MCP)
+// Overlay настроек: панель «Контекст» (Память/Профили/Инварианты)
 // открывается кнопкой «⚙ Настройки» в шапке чата, закрывается кнопкой «×»
 // и кликом по фону; бейдж профиля открывает overlay сразу на «Профили».
+// Вкладка «MCP» вынесена в отдельный overlay (McpOverlay, свой тест).
 // Офлайн: stub fetch (контракты loadAll).
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
@@ -70,17 +71,17 @@ describe('Settings overlay — открытие и закрытие', () => {
     expect(overlayEl()).toBeTruthy()
     expect(overlayEl()).not.toHaveClass('open')
     // закрытый overlay — вкладки панели «Контекст» в DOM нет
-    for (const label of ['Память', 'Профили', 'Инварианты', 'MCP']) {
+    for (const label of ['Память', 'Профили', 'Инварианты']) {
       expect(screen.queryByRole('tab', { name: label })).toBeNull()
     }
     expect(screen.queryByRole('button', { name: 'Закрыть настройки' })).toBeNull()
   })
 
-  it('клик по «⚙» → overlay открывается: 4 вкладки + кнопка «×»; «×» закрывает', async () => {
+  it('клик по «⚙» → overlay открывается: 3 вкладки + кнопка «×»; «×» закрывает', async () => {
     render(<App />)
     fireEvent.click(await screen.findByRole('button', { name: 'Настройки' }))
     await waitFor(() => expect(overlayEl()).toHaveClass('open'))
-    for (const label of ['Память', 'Профили', 'Инварианты', 'MCP']) {
+    for (const label of ['Память', 'Профили', 'Инварианты']) {
       expect(screen.getByRole('tab', { name: label })).toBeTruthy()
     }
     // открыта вкладка по умолчанию — «Память»
@@ -90,7 +91,7 @@ describe('Settings overlay — открытие и закрытие', () => {
 
     fireEvent.click(close)
     await waitFor(() => expect(overlayEl()).not.toHaveClass('open'))
-    expect(screen.queryByRole('tab', { name: 'MCP' })).toBeNull()
+    expect(screen.queryByRole('tab', { name: 'Память' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Закрыть настройки' })).toBeNull()
 
     // повторный клик по «⚙» — снова открывает (toggle)

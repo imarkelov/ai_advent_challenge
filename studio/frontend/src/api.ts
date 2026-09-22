@@ -156,6 +156,7 @@ export async function deleteInvariant(id: string): Promise<void> {
 // POST   /api/mcp/servers {name,type,command?,url?,env?,enabled?} → {server}
 // DELETE /api/mcp/servers/{id}                         → {ok}
 // POST   /api/mcp/servers/{id}/connect                 → {server} (status)
+// POST   /api/mcp/servers/{id}/disconnect              → {server} (status idle)
 // GET    /api/mcp/tools                                → {tools: [...]}
 
 export type McpServerType = 'stdio' | 'http'
@@ -228,10 +229,31 @@ export function connectMcpServer(id: string): Promise<McpServer> {
     .then((r) => normalizeMcpServer(r.server))
 }
 
+// Отключить: POST /api/mcp/servers/{id}/disconnect → {server} (status idle)
+export function disconnectMcpServer(id: string): Promise<McpServer> {
+  return apiPost<{ server: RawMcpServer }>(`/mcp/servers/${encodeURIComponent(id)}/disconnect`)
+    .then((r) => normalizeMcpServer(r.server))
+}
+
 // Инструменты подключённых серверов: GET /api/mcp/tools → {tools}
 export async function getMcpTools(): Promise<McpTool[]> {
   const r = await apiGet<{ tools?: McpTool[] }>('/mcp/tools')
   return r.tools ?? []
+}
+
+// Вызов инструмента (день 16, tool-loop): POST /api/mcp/servers/{sid}/tools/{tool}
+// тело {dialogue_id, arguments} → {ok}. Результат бэкенд сохраняет как
+// system-сообщение с полем mcp_tool; non-2xx — ApiError с RU-detail из тела.
+export async function callMcpTool(
+  sid: string,
+  tool: string,
+  dialogueId: string,
+  args: Record<string, unknown>,
+): Promise<{ ok: boolean }> {
+  return apiPost<{ ok: boolean }>(
+    `/mcp/servers/${encodeURIComponent(sid)}/tools/${encodeURIComponent(tool)}`,
+    { dialogue_id: dialogueId, arguments: args },
+  )
 }
 
 // ── Состояние задачи (день 13b): unified FSM per-диалог ────────────────────

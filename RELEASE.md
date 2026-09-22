@@ -8,22 +8,29 @@
 **Подключение внешних MCP-серверов (Model Context Protocol) к Студии.**
 Студия стартует с фиксированным реестром (Firecrawl — web-поиск, Git —
 репозиторий; stdio-процессы `npx …`, поддерживается и streamable-http):
-пользователь нажимает «Подключить» — и видит инструменты сервера во
-вкладке «MCP» настроек (кнопка «⚙» в шапке чата, панель выезжает справа).
-Сценарий дня 16 — подключение и просмотр; вызов инструментов агентом
-(tool-loop) — архитектурный задел, не реализуется.
+пользователь нажимает «Подключить» — и видит инструменты сервера в
+отдельной панели «MCP» (своя кнопка «🧩» в шапке чата рядом с «⚙», панель
+выезжает справа; в настройках «⚙» вкладки MCP больше нет).
+День 16 — подключение, отключение, просмотр и вызов: инструмент подключённого
+сервера вызывается из чата командой `/имя-сервера имя-тула` (автодополнение,
+форма аргументов по `input_schema`); результат сохраняется в диалог и
+виден LLM в следующих запросах (tool-loop).
 
 - `mcp.py` — клиент MCP 2024-11-05 (JSON-RPC 2.0): `_StdioSession`
   (pipes, JSON по строкам, `{VAR}`-плейсхолдеры env расширяются из
   окружения на запуске), `_HttpSession` (streamable-http,
   `MCP-Protocol-Version`/`MCP-Session-Id`, SSE-кадры `data: {json}`),
-  `MCPClient` (`connect` = `initialize` + `tools/list`), `MCPRegistry`
-  (реестр + runtime-статусы `idle`/`connected`/`error` + `tools_count`).
+  `MCPClient` (`connect` = `initialize` + `tools/list`, `call_tool` —
+  tools/call), `MCPRegistry` (реестр + runtime-статусы
+  `idle`/`connected`/`error` + `tools_count`).
 - `memory.py` — CRUD реестра в `mcp_servers.json`; дефолты: Firecrawl, Git.
 - `agent.py` — опциональный `mcp` (DI); `close_all()` — shutdown-хук.
 - Сбой подключения — `status: error` + текст ошибки, агент не падает;
   повторный connect разрешён (self-heal).
-- Тело LLM-запроса не изменилось: tools MCP НЕ инжектятся (регресс-тест).
+- Определения инструментов (tool-definitions) в тело LLM-запроса НЕ
+  инжектятся (регресс-тест); результат вызова сохраняется как
+  system-сообщение с маркером `mcp_tool` и уходит в следующие запросы
+  (tool-loop).
 
 ## API
 
@@ -33,17 +40,23 @@
 | POST | `/api/mcp/servers` | Добавить сервер `{name, type, command?, url?, env?, enabled?}` → 201 `{server}`; 400 — RU-detail |
 | DELETE | `/api/mcp/servers/{id}` | Удалить сервер (404 — не найден) |
 | POST | `/api/mcp/servers/{id}/connect` | Подключить (initialize + tools/list) → `{server}`; сбой = status error, 404 — не найден |
+| POST | `/api/mcp/servers/{id}/disconnect` | Отключить (закрыть сессию, status → idle, сервер остаётся в реестре) → `{server}`; 404 — не найден |
 | GET | `/api/mcp/tools` | Инструменты подключённых серверов `[{server, name, description, input_schema}]` |
+| POST | `/api/mcp/servers/{id}/tools/{tool}` | Вызвать инструмент (tool-loop) `{dialogue_id, arguments}` → `{"ok": true}`; результат — system-сообщение с маркером `mcp_tool` в диалоге (видно LLM); 400 — сервер не подключён / arguments не объект, 404 — сервер или диалог не найден |
 
 ## Проверка задания
 
-Бэкенд — 305 тестов PASS (stdio-транспорт на fake-процессе, http-транспорт
+Бэкенд — 320 тестов PASS (stdio-транспорт на fake-процессе, http-транспорт
 на `httpx.MockTransport` — JSON/SSE/session-id/ошибки, реестр, API-роуты,
-регресс: tools MCP вне LLM-payload, launcher: `npx.cmd` через `shutil.which`).
-Фронтенд — 194 теста PASS (включая 5 на вкладку «MCP» и overlay настроек);
-tsc и `npm run build` — clean. E2E — 29 PASS, 5 SKIP, 0 FAIL: MCP-блок
-детерминированный (mock stdio-сервер `python -c` без сети: POST 201 →
-connect → 2 tools → connect-404 → DELETE 200/404); live Firecrawl —
+вызов тула `call_tool` + роут `/tools/{tool}`, отключение (`disconnect`:
+сессия → idle, сервер остаётся в реестре), регресс: tool-definitions MCP
+вне LLM-payload, launcher: `npx.cmd` через `shutil.which`).
+Фронтенд — 211 тестов PASS (включая отдельный overlay «MCP» по кнопке «🧩»
+в шапке, автодополнение `/`, форму по `input_schema`, карточку результата и
+тумблер «Подключить»/«Отключить»); tsc и `npm run build` — clean. E2E — 34 PASS,
+4 SKIP, 0 FAIL: MCP-блок детерминированный (mock stdio-сервер `python -c`
+без сети: POST 201 → connect → 2 tools → disconnect (idle) + reconnect → tool call 200 + `mcp_tool`-сообщение
+в диалоге → 400/404 → connect-404 → DELETE 200/404); live Firecrawl —
 best-effort SKIP (npx недоступен); чат/задачи — SKIP (GPustack недоступен
 из-за SSL-сертификата Python).
 

@@ -1,12 +1,13 @@
-// McpTab (день 16): вкладка «MCP» — список серверов {name, type, status,
+// McpTab (день 16): панель «MCP» — список серверов {name, type, status,
 // error, tools_count}, подключение (POST /api/mcp/servers/{id}/connect),
-// инструменты подключённых серверов (GET /api/mcp/tools), удаление
-// (DELETE /api/mcp/servers/{id}). Добавления в UI нет — реестр фиксирован.
+// отключение (POST /api/mcp/servers/{id}/disconnect — статус → idle,
+// кнопка «Отключить» у подключённого сервера), инструменты подключённых
+// серверов (GET /api/mcp/tools), удаление (DELETE /api/mcp/servers/{id}).
+// Добавления в UI нет — реестр фиксирован.
 // Офлайн: stub fetch.
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { StudioProvider } from '../src/state'
-import ContextPanel from '../src/components/ContextPanel'
 import McpTab from '../src/components/McpTab'
 import type { McpServer, McpTool } from '../src/api'
 
@@ -42,9 +43,9 @@ function normalizeUrl(input: RequestInfo | URL): string {
   return String(input).replace(/^https?:\/\/[^/]+/, '')
 }
 
-// fetch-стаб: «серверное» хранилище MCP-серверов (DELETE/connect
+// fetch-стаб: «серверное» хранилище MCP-серверов (DELETE/connect/disconnect
 // меняют его, GET читает текущее состояние); connect помечает сервер
-// connected + даёт ему 2 mock-инструмента
+// connected + даёт ему 2 mock-инструмента, disconnect возвращает idle
 function stubFetch(
   servers: McpServer[],
   onMutate?: (method: string, url: string, body: unknown) => void,
@@ -65,6 +66,19 @@ function stubFetch(
           { server: id, name: 'mock_echo', description: 'Эхо-инструмент', input_schema: { type: 'object' } },
           { server: id, name: 'mock_ping', description: 'Пинг', input_schema: { type: 'object' } },
         )
+      }
+      return jsonResponse({ server: store[i] })
+    }
+    const dm = url.match(/^\/api\/mcp\/servers\/([^/]+)\/disconnect$/)
+    if (method === 'POST' && dm) {
+      onMutate?.('POST', url, null)
+      const id = decodeURIComponent(dm[1])
+      const i = store.findIndex((x) => x.id === id)
+      if (i >= 0) {
+        store[i] = { ...store[i], status: 'idle', error: null, tools_count: 0 }
+        for (let j = tools.length - 1; j >= 0; j--) {
+          if (tools[j].server === id) tools.splice(j, 1)
+        }
       }
       return jsonResponse({ server: store[i] })
     }
@@ -105,6 +119,7 @@ describe('McpTab — список серверов', () => {
       </StudioProvider>,
     )
     await screen.findByText('MockSrv')
+    expect(screen.getByText('Внешние MCP-серверы: подключите — и увидите его инструменты.')).toBeTruthy()
     expect(screen.getByText('Firecrawl')).toBeTruthy()
     expect(screen.getAllByText('stdio').length).toBe(2)
     expect(screen.getByText('не подключён')).toBeTruthy()
@@ -163,21 +178,46 @@ describe('McpTab — удаление', () => {
   })
 })
 
-describe('ContextPanel — вкладка «MCP»', () => {
-  it('4-й таб «MCP» отображается и открывает вкладку', async () => {
+describe('McpTab — тумблер Подключить/Отключить (день 16)', () => {
+  it('connected-сервер — кнопка «Отключить» (enabled), «Подключить» отсутствует', async () => {
+    const CONNECTED: McpServer = { ...MOCK1, status: 'connected', tools_count: 2 }
+    vi.stubGlobal('fetch', stubFetch([CONNECTED]))
+    render(
+      <StudioProvider>
+        <McpTab />
+      </StudioProvider>,
+    )
+    await screen.findByText('MockSrv')
+    expect(screen.getByRole('button', { name: 'Отключить' })).toBeEnabled()
+    expect(screen.queryByRole('button', { name: 'Подключить' })).toBeNull()
+  })
+
+  it('клик «Отключить» → POST .../disconnect; после перечитывания — «не подключён», снова «Подключить»', async () => {
+    const CONNECTED: McpServer = { ...MOCK1, status: 'connected', tools_count: 2 }
+    const calls: { url: string }[] = []
+    vi.stubGlobal('fetch', stubFetch([CONNECTED], (method, url) => {
+      if (method === 'POST' && url.includes('/disconnect')) calls.push({ url })
+    }))
+    render(
+      <StudioProvider>
+        <McpTab />
+      </StudioProvider>,
+    )
+    await screen.findByText('MockSrv')
+    fireEvent.click(screen.getByRole('button', { name: 'Отключить' }))
+    await waitFor(() => expect(calls).toEqual([{ url: '/api/mcp/servers/mcp_a1/disconnect' }]))
+    await screen.findByText('не подключён')
+    expect(screen.getByRole('button', { name: 'Подключить' })).toBeEnabled()
+  })
+
+  it('не подключённый enabled-сервер — кнопка «Подключить» (enabled)', async () => {
     vi.stubGlobal('fetch', stubFetch([MOCK1]))
     render(
       <StudioProvider>
-        <ContextPanel />
+        <McpTab />
       </StudioProvider>,
     )
-    for (const label of ['Память', 'Профили', 'Инварианты', 'MCP']) {
-      expect(screen.getByRole('tab', { name: label })).toBeTruthy()
-    }
-    const tab = screen.getByRole('tab', { name: 'MCP' })
-    expect(tab).toHaveAttribute('aria-selected', 'false')
-    fireEvent.click(tab)
-    expect(tab).toHaveAttribute('aria-selected', 'true')
-    expect(await screen.findByText('MockSrv')).toBeTruthy()
+    await screen.findByText('MockSrv')
+    expect(screen.getByRole('button', { name: 'Подключить' })).toBeEnabled()
   })
 })

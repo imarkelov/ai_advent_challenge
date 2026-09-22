@@ -331,14 +331,18 @@ class MemoryStore:
                        task_stage: str | None = None,
                        task_id: str | None = None,
                        task_step: str | None = None,
-                       task_usage: dict | None = None,
-                       task_duration: int | None = None) -> None:
+                        task_usage: dict | None = None,
+                        task_duration: int | None = None,
+                        mcp_tool: dict | None = None) -> None:
         """Добавить сообщение в диалог; ValueError, если диалог не существует.
 
         model — метка модели (assistant); task_stage/task_id/task_step —
         маркеры задачи (день 13b, в тело LLM-запроса не уходят);
         task_usage/task_duration — токены и длительность (с) LLM-вызова
-        для восстановления карточки после перезагрузки.
+        для восстановления карточки после перезагрузки;
+        mcp_tool — MCP-маркер (день 16, tool-loop): {server, tool};
+        в отличие от task_-маркеров это сообщение ВИДИМО LLM (role=system,
+        уходит в payload).
         """
         with self._lock:
             data = self._read_dialogues()
@@ -358,6 +362,8 @@ class MemoryStore:
                 msg["task_usage"] = task_usage
             if task_duration is not None:
                 msg["task_duration"] = task_duration
+            if mcp_tool is not None:
+                msg["mcp_tool"] = mcp_tool
             d.setdefault("messages", []).append(msg)
             self._write_dialogues(data)
 

@@ -23,8 +23,10 @@ import {
   apiPostTaskStart,
   apiPostTaskApprove,
   apiPostTaskReject,
+  callMcpTool as apiCallMcpTool,
   chatStream,
   connectMcpServer as apiConnectMcpServer,
+  disconnectMcpServer as apiDisconnectMcpServer,
   deleteInvariant as apiDeleteInvariant,
   deleteMcpServer as apiDeleteMcpServer,
   getInvariants,
@@ -65,6 +67,9 @@ export interface Message {
   // из маркеров после перезагрузки (старые сообщения — без полей)
   task_usage?: TaskUsage
   task_duration?: number
+  // Результат вызова инструмента MCP (день 16, tool-loop): system-сообщение,
+  // которое сохранил бэкенд после tool-invocation (старые — без поля)
+  mcp_tool?: { server: string; tool: string }
 }
 
 export interface DialogueMeta {
@@ -146,7 +151,7 @@ export interface ModelInfo {
 
 // Активная вкладка правой панели «Контекст» (день 12: бейдж в шапке чата
 // открывает вкладку «Профили» извне панели)
-export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile' | 'invariants' | 'mcp'
+export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile' | 'invariants'
 
 export interface StudioState {
   loaded: boolean
@@ -176,6 +181,8 @@ export interface StudioState {
   // Overlay настроек (правая панель «Контекст» теперь открывается кнопкой
   // в шапке чата): true — панель видна поверх остального
   settingsOpen: boolean
+  // Overlay MCP (день 16): отдельная панель MCP-серверов по своей кнопке в шапке чата
+  mcpOpen: boolean
   // Инварианты (день 14): жёсткие правила (ассистент не меняет, пользователь — вкл/выкл)
   invariants: Invariant[]
   // Нарушение активного инварианта (SSE invariant_violation, день 14):
@@ -229,6 +236,7 @@ export function initialState(): StudioState {
     lastRequest: null,
     contextTab: 'memory',
     settingsOpen: false,
+    mcpOpen: false,
     invariants: [],
     invariantViolation: null,
     mcpServers: [],
@@ -330,8 +338,11 @@ export type StudioAction =
   | { type: 'show-requests'; on: boolean }
   | { type: 'context-tab'; tab: ContextTab }
   // Overlay настроек: открыть (опц. сразу на указанной вкладке) / закрыть
-  | { type: 'open-settings'; tab?: ContextTab }
-  | { type: 'close-settings' }
+   | { type: 'open-settings'; tab?: ContextTab }
+   | { type: 'close-settings' }
+   // Overlay MCP: открыть / закрыть (отдельная кнопка в шапке чата)
+   | { type: 'open-mcp' }
+   | { type: 'close-mcp' }
   | { type: 'invariants'; invariants: Invariant[] }
   | { type: 'invariant-violation'; patterns: string[] }
   | { type: 'mcp'; mcpServers: McpServer[]; mcpTools: McpTool[] }
@@ -495,6 +506,10 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
     case 'close-settings':
       // Вкладка запоминается — повторное открытие вернёт ту же
       return { ...state, settingsOpen: false }
+    case 'open-mcp':
+      return { ...state, mcpOpen: true }
+    case 'close-mcp':
+      return { ...state, mcpOpen: false }
     case 'invariants':
       return { ...state, invariants: action.invariants }
     case 'mcp':
@@ -541,6 +556,11 @@ export interface StudioApi {
   settingsOpen: boolean
   openSettings: (tab?: ContextTab) => void
   closeSettings: () => void
+  // Overlay MCP (день 16): отдельная панель MCP-серверов — открыть/закрыть
+  // (кнопка в шапке чата; кнопка «×» / клик по фону)
+  mcpOpen: boolean
+  openMcp: () => void
+  closeMcp: () => void
   refreshMemory: () => Promise<void>
   setMemoryToggle: (layer: 'st' | 'wm' | 'lt', on: boolean) => Promise<void>
   // Инварианты (день 14): перечитать/добавить/переключить/удалить — все
@@ -555,11 +575,21 @@ export interface StudioApi {
   toggleInvariant: (id: string) => Promise<void>
   deleteInvariant: (id: string) => Promise<void>
   // MCP (день 16): перечитать (серверы + инструменты), удалить,
-  // подключить — все перечитывают после ответа API (паттерн invariants).
+  // подключить/отключить — все перечитывают после ответа API (паттерн invariants).
   // Добавление в UI нет — реестр фиксирован (дефолты).
   refreshMcp: () => Promise<void>
   deleteMcpServer: (id: string) => Promise<void>
   connectMcpServer: (id: string) => Promise<void>
+  disconnectMcpServer: (id: string) => Promise<void>
+  // Вызвать инструмент MCP (день 16, tool-loop): POST .../tools/{tool} с
+  // {dialogue_id, arguments}; после ответа перечитываем активный диалог
+  // (результат — новое system-сообщение с mcp_tool в ленте)
+  callMcpTool: (
+    sid: string,
+    tool: string,
+    dialogueId: string,
+    args: Record<string, unknown>,
+  ) => Promise<void>
   // Паттерны последнего ответа с нарушением активного инварианта (null — нет)
   invariantViolation: string[] | null
   reloadDialogue: () => Promise<void>
@@ -977,6 +1007,16 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'close-settings' })
   }, [])
 
+  // Открыть overlay MCP (своя кнопка в шапке чата)
+  const openMcp = useCallback(() => {
+    dispatch({ type: 'open-mcp' })
+  }, [])
+
+  // Закрыть overlay MCP (кнопка «×» / клик по фону)
+  const closeMcp = useCallback(() => {
+    dispatch({ type: 'close-mcp' })
+  }, [])
+
   // Перечитать память (после изменений в MemoryTab)
   const refreshMemory = useCallback(async () => {
     dispatch({ type: 'memory', memory: await apiGet<MemoryState>('/memory') })
@@ -1038,6 +1078,27 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       await refreshMcp()
     },
     [refreshMcp],
+  )
+
+  // Отключить MCP-сервер: POST /api/mcp/servers/{id}/disconnect → перечитать
+  const disconnectMcpServer = useCallback(
+    async (id: string) => {
+      await apiDisconnectMcpServer(id)
+      await refreshMcp()
+    },
+    [refreshMcp],
+  )
+
+  // Вызвать инструмент MCP (день 16, tool-loop): POST .../tools/{tool}
+  // {dialogue_id, arguments}; бэкенд сохраняет результат как system-сообщение
+  // с mcp_tool. После ответа перечитываем активный диалог — карточка
+  // результата появляется в ленте (паттерн: api → reload, как refreshMcp).
+  const callMcpTool = useCallback(
+    async (sid: string, tool: string, dialogueId: string, args: Record<string, unknown>) => {
+      await apiCallMcpTool(sid, tool, dialogueId, args)
+      await reloadDialogue()
+    },
+    [reloadDialogue],
   )
 
   // Включить/выключить слой памяти в промпте: POST /api/memory/toggles {layer, enabled}
@@ -1109,6 +1170,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     settingsOpen: state.settingsOpen,
     openSettings,
     closeSettings,
+    mcpOpen: state.mcpOpen,
+    openMcp,
+    closeMcp,
     refreshMemory,
     setMemoryToggle,
     refreshInvariants,
@@ -1118,6 +1182,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     refreshMcp,
     deleteMcpServer,
     connectMcpServer,
+    disconnectMcpServer,
+    callMcpTool,
     invariantViolation: state.invariantViolation,
     reloadDialogue,
     deleteDialogues,
