@@ -1,8 +1,10 @@
-// Раскладка «Студия»: три панели — диалоги+память | чат | контекст
+// Раскладка «Студия»: две панели — диалоги+память | чат. Панель «Контекст»
+// (Память/Профили/Инварианты/MCP) — overlay настроек, открывается кнопкой
+// в шапке чата (SettingsOverlay).
 import { StudioProvider } from './state'
 import Sidebar from './components/Sidebar'
 import ChatPanel from './components/ChatPanel'
-import ContextPanel from './components/ContextPanel'
+import SettingsOverlay from './components/SettingsOverlay'
 
 export default function App() {
   return (
@@ -10,8 +12,8 @@ export default function App() {
       <div className="studio-grid">
         <Sidebar />
         <ChatPanel />
-        <ContextPanel />
       </div>
+      <SettingsOverlay />
     </StudioProvider>
   )
 }

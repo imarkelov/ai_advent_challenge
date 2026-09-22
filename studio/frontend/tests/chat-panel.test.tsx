@@ -312,12 +312,14 @@ describe('ChatPanel — бейдж нарушения инварианта (де
 })
 
 describe('ChatPanel — бейдж инициализации профиля в шапке (день 12)', () => {
-  // Проба: ловит вкладку контекстной панели из состояния провайдера
-  // (клик по бейджу должен установить её в «Профили»)
+  // Проба: ловит вкладку + состояние overlay настроек из состояния провайдера
+  // (клик по бейджу должен открыть overlay на вкладке «Профили»)
   let capturedTab = 'memory'
+  let capturedSettingsOpen = false
   function TabProbe() {
     const { state } = useStudio()
     capturedTab = state.contextTab
+    capturedSettingsOpen = state.settingsOpen
     return null
   }
 
@@ -341,9 +343,10 @@ describe('ChatPanel — бейдж инициализации профиля в 
     )
   }
 
-  it('pending — бейдж «Профиль не заполнен», клик → вкладка «Профили»', async () => {
+  it('pending — бейдж «Профиль не заполнен», клик → overlay настроек на вкладке «Профили»', async () => {
     stubProfileFetch({ status: 'pending', interview: false, name: '', role: '', tone: '', taboos: '' })
     capturedTab = 'memory'
+    capturedSettingsOpen = false
     render(
       <StudioProvider>
         <TabProbe />
@@ -351,10 +354,11 @@ describe('ChatPanel — бейдж инициализации профиля в 
       </StudioProvider>,
     )
     const badge = await screen.findByRole('button', { name: 'Профиль не заполнен' })
-    expect(badge).toHaveAttribute('title', 'Открыть вкладку «Профили»')
+    expect(badge).toHaveAttribute('title', 'Открыть настройки на вкладке «Профили»')
     expect(badge.className).toContain('pending')
     fireEvent.click(badge)
-    await waitFor(() => expect(capturedTab).toBe('profile'))
+    await waitFor(() => expect(capturedSettingsOpen).toBe(true))
+    expect(capturedTab).toBe('profile')
   })
 
   it('declined — бейдж «Профиль отключён» (приглушённый)', async () => {

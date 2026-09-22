@@ -75,11 +75,11 @@ body {
     var(--bg);
 }
 
-/* ── Раскладка: три панели на весь viewport ────────────────────────────── */
+/* ── Раскладка: сайдбар | чат (панель «Контекст» — overlay настроек) ───── */
 
 .studio-grid {
   display: grid;
-  grid-template-columns: 260px 1fr 360px;
+  grid-template-columns: 260px 1fr;
   gap: var(--sp-2);
   height: 100vh;
   padding: var(--sp-2);
@@ -591,7 +591,88 @@ button {
   filter: brightness(1.1);
 }
 
-/* ── Контекст (правая панель) ──────────────────────────────────────────── */
+/* ── Overlay настроек (слайд-овер справа поверх backdrop) ──────────────── */
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100; /* выше панелей и модалок (z-index: 1000) */
+  visibility: hidden;
+  pointer-events: none;
+}
+.settings-overlay.open {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.settings-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 14, 0.66);
+  backdrop-filter: blur(3px);
+}
+.settings-overlay.open .settings-backdrop {
+  animation: settings-fade var(--t-med) var(--ease) both;
+}
+
+.settings-panel {
+  position: absolute;
+  top: var(--sp-2);
+  right: var(--sp-2);
+  bottom: var(--sp-2);
+  width: 420px;
+  max-width: calc(100vw - var(--sp-2) * 2);
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55), 0 0 24px var(--accent-glow);
+}
+.settings-overlay.open .settings-panel {
+  animation: settings-in var(--t-med) var(--ease) both;
+}
+
+@keyframes settings-in {
+  from { transform: translateX(105%); opacity: 0.4; }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes settings-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border);
+}
+.settings-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.settings-close {
+  font-size: 18px;
+  padding: var(--sp-1) var(--sp-2);
+}
+
+/* ContextPanel внутри overlay: на всю высоту, без собственной рамки */
+.settings-panel .context {
+  flex: 1;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--panel);
+}
+
+/* ── Контекст (панель «Контекст» внутри overlay настроек) ──────────────── */
 
 .tabs {
   display: flex;

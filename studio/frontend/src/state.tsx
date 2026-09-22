@@ -12,7 +12,6 @@ import {
 } from 'react'
 import {
   addInvariant as apiAddInvariant,
-  addMcpServer as apiAddMcpServer,
   apiDelete,
   apiGet,
   apiGetTask,
@@ -36,7 +35,6 @@ import {
   type ChatEvent,
   type Invariant,
   type McpServer,
-  type McpServerType,
   type McpTool,
   type TaskEvent,
   type TaskPlanStatus,
@@ -173,8 +171,11 @@ export interface StudioState {
   showRequests: boolean
   streaming: boolean
   lastRequest: RequestDetail | null
-  // Вкладка правой панели «Контекст» (день 12)
+  // Вкладка панели «Контекст» (день 12)
   contextTab: ContextTab
+  // Overlay настроек (правая панель «Контекст» теперь открывается кнопкой
+  // в шапке чата): true — панель видна поверх остального
+  settingsOpen: boolean
   // Инварианты (день 14): жёсткие правила (ассистент не меняет, пользователь — вкл/выкл)
   invariants: Invariant[]
   // Нарушение активного инварианта (SSE invariant_violation, день 14):
@@ -227,6 +228,7 @@ export function initialState(): StudioState {
     streaming: false,
     lastRequest: null,
     contextTab: 'memory',
+    settingsOpen: false,
     invariants: [],
     invariantViolation: null,
     mcpServers: [],
@@ -327,6 +329,9 @@ export type StudioAction =
   | { type: 'last-request'; detail: RequestDetail | null }
   | { type: 'show-requests'; on: boolean }
   | { type: 'context-tab'; tab: ContextTab }
+  // Overlay настроек: открыть (опц. сразу на указанной вкладке) / закрыть
+  | { type: 'open-settings'; tab?: ContextTab }
+  | { type: 'close-settings' }
   | { type: 'invariants'; invariants: Invariant[] }
   | { type: 'invariant-violation'; patterns: string[] }
   | { type: 'mcp'; mcpServers: McpServer[]; mcpTools: McpTool[] }
@@ -484,6 +489,12 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
       return { ...state, showRequests: action.on }
     case 'context-tab':
       return { ...state, contextTab: action.tab }
+    case 'open-settings':
+      // Открыть overlay; payload — сразу переключить на указанную вкладку
+      return { ...state, settingsOpen: true, contextTab: action.tab ?? state.contextTab }
+    case 'close-settings':
+      // Вкладка запоминается — повторное открытие вернёт ту же
+      return { ...state, settingsOpen: false }
     case 'invariants':
       return { ...state, invariants: action.invariants }
     case 'mcp':
@@ -522,10 +533,14 @@ export interface StudioApi {
   setModel: (id: string) => Promise<void>
   updateConfig: (partial: Partial<Config>) => Promise<void>
   setShowRequests: (on: boolean) => void
-  // Вкладка правой панели «Контекст» (день 12): читаем текущую, устанавливаем
-  // извне (бейдж в шапке чата открывает «Профили»)
+  // Вкладка панели «Контекст»: читаем текущую, устанавливаем изнутри панели
   contextTab: ContextTab
   setContextTab: (tab: ContextTab) => void
+  // Overlay настроек: открыть (опц. на указанной вкладке — бейдж профиля),
+  // закрыть (кнопка «×» / клик по фону)
+  settingsOpen: boolean
+  openSettings: (tab?: ContextTab) => void
+  closeSettings: () => void
   refreshMemory: () => Promise<void>
   setMemoryToggle: (layer: 'st' | 'wm' | 'lt', on: boolean) => Promise<void>
   // Инварианты (день 14): перечитать/добавить/переключить/удалить — все
@@ -539,17 +554,10 @@ export interface StudioApi {
   ) => Promise<void>
   toggleInvariant: (id: string) => Promise<void>
   deleteInvariant: (id: string) => Promise<void>
-  // MCP (день 16): перечитать (серверы + инструменты), добавить,
-  // удалить, подключить — все перечитывают после ответа API (паттерн invariants)
+  // MCP (день 16): перечитать (серверы + инструменты), удалить,
+  // подключить — все перечитывают после ответа API (паттерн invariants).
+  // Добавление в UI нет — реестр фиксирован (дефолты).
   refreshMcp: () => Promise<void>
-  addMcpServer: (
-    name: string,
-    type: McpServerType,
-    command?: string[],
-    url?: string,
-    env?: Record<string, string>,
-    enabled?: boolean,
-  ) => Promise<void>
   deleteMcpServer: (id: string) => Promise<void>
   connectMcpServer: (id: string) => Promise<void>
   // Паттерны последнего ответа с нарушением активного инварианта (null — нет)
@@ -953,10 +961,20 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'show-requests', on })
   }, [])
 
-  // Переключить вкладку правой панели «Контекст» (день 12): клик по вкладке
-  // внутри панели и клик по бейджу профиля в шапке чата — один и тот же путь
+  // Переключить вкладку панели «Контекст»: клик по вкладке внутри панели
   const setContextTab = useCallback((tab: ContextTab) => {
     dispatch({ type: 'context-tab', tab })
+  }, [])
+
+  // Открыть overlay настроек; tab — сразу на указанной вкладке
+  // (бейдж профиля в шапке чата открывает «Профили»)
+  const openSettings = useCallback((tab?: ContextTab) => {
+    dispatch({ type: 'open-settings', tab })
+  }, [])
+
+  // Закрыть overlay настроек (кнопка «×» / клик по фону)
+  const closeSettings = useCallback(() => {
+    dispatch({ type: 'close-settings' })
   }, [])
 
   // Перечитать память (после изменений в MemoryTab)
@@ -1002,22 +1020,6 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     const [mcpServers, mcpTools] = await Promise.all([getMcpServers(), getMcpTools()])
     dispatch({ type: 'mcp', mcpServers, mcpTools })
   }, [])
-
-  // Добавить MCP-сервер: POST /api/mcp/servers → перечитать
-  const addMcpServer = useCallback(
-    async (
-      name: string,
-      type: McpServerType,
-      command: string[] = [],
-      url: string = '',
-      env: Record<string, string> = {},
-      enabled: boolean = true,
-    ) => {
-      await apiAddMcpServer(name, type, command, url, env, enabled)
-      await refreshMcp()
-    },
-    [refreshMcp],
-  )
 
   // Удалить MCP-сервер: DELETE /api/mcp/servers/{id} → перечитать
   const deleteMcpServer = useCallback(
@@ -1104,6 +1106,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setShowRequests,
     contextTab: state.contextTab,
     setContextTab,
+    settingsOpen: state.settingsOpen,
+    openSettings,
+    closeSettings,
     refreshMemory,
     setMemoryToggle,
     refreshInvariants,
@@ -1111,7 +1116,6 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     toggleInvariant,
     deleteInvariant,
     refreshMcp,
-    addMcpServer,
     deleteMcpServer,
     connectMcpServer,
     invariantViolation: state.invariantViolation,

@@ -355,6 +355,32 @@ describe('reducer — день 13b: chatMode, task-step, task-step-delta', () =>
   })
 })
 
+describe('reducer — overlay настроек: settingsOpen', () => {
+  it('initialState: settingsOpen=false (overlay закрыт при старте)', () => {
+    expect(base.settingsOpen).toBe(false)
+    expect(initialState().settingsOpen).toBe(false)
+  })
+
+  it('open-settings: settingsOpen=true; вкладка не меняется без payload', () => {
+    const s = reducer({ ...base, contextTab: 'mcp' }, { type: 'open-settings' })
+    expect(s.settingsOpen).toBe(true)
+    expect(s.contextTab).toBe('mcp')
+  })
+
+  it('open-settings с payload: открывает overlay И переключает вкладку', () => {
+    const s = reducer(base, { type: 'open-settings', tab: 'profile' })
+    expect(s.settingsOpen).toBe(true)
+    expect(s.contextTab).toBe('profile')
+  })
+
+  it('close-settings: settingsOpen=false, текущая вкладка запоминается', () => {
+    const s1 = reducer(base, { type: 'open-settings', tab: 'invariants' })
+    const s2 = reducer(s1, { type: 'close-settings' })
+    expect(s2.settingsOpen).toBe(false)
+    expect(s2.contextTab).toBe('invariants')
+  })
+})
+
 describe('reducer — инварианты (день 14): флаг нарушения invariant_violation', () => {
   it('invariant-violation: ставит transient-флаг с паттернами (default null)', () => {
     expect(base.invariantViolation).toBeNull()

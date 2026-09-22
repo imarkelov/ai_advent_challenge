@@ -1,8 +1,8 @@
 // McpTab (день 16): вкладка «MCP» — список серверов {name, type, status,
 // error, tools_count}, подключение (POST /api/mcp/servers/{id}/connect),
-// инструменты подключённых серверов (GET /api/mcp/tools), добавление
-// (POST /api/mcp/servers, env — KEY=VALUE по строкам), удаление
-// (DELETE /api/mcp/servers/{id}). Офлайн: stub fetch.
+// инструменты подключённых серверов (GET /api/mcp/tools), удаление
+// (DELETE /api/mcp/servers/{id}). Добавления в UI нет — реестр фиксирован.
+// Офлайн: stub fetch.
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { StudioProvider } from '../src/state'
@@ -42,7 +42,7 @@ function normalizeUrl(input: RequestInfo | URL): string {
   return String(input).replace(/^https?:\/\/[^/]+/, '')
 }
 
-// fetch-стаб: «серверное» хранилище MCP-серверов (POST/DELETE/connect
+// fetch-стаб: «серверное» хранилище MCP-серверов (DELETE/connect
 // меняют его, GET читает текущее состояние); connect помечает сервер
 // connected + даёт ему 2 mock-инструмента
 function stubFetch(
@@ -54,24 +54,6 @@ function stubFetch(
   return vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = normalizeUrl(input)
     const method = init?.method ?? 'GET'
-    if (method === 'POST' && url === '/api/mcp/servers') {
-      const body = JSON.parse(String(init.body)) as Partial<McpServer>
-      onMutate?.('POST', url, body)
-      const created: McpServer = {
-        id: 'mcp-new',
-        name: body.name ?? '',
-        type: (body.type as McpServer['type']) ?? 'stdio',
-        command: body.command ?? [],
-        url: body.url ?? '',
-        env: body.env ?? {},
-        enabled: body.enabled ?? true,
-        status: 'idle',
-        error: null,
-        tools_count: 0,
-      }
-      store.push(created)
-      return jsonResponse({ server: created }, 201)
-    }
     const cm = url.match(/^\/api\/mcp\/servers\/([^/]+)\/connect$/)
     if (method === 'POST' && cm) {
       onMutate?.('POST', url, null)
@@ -99,9 +81,9 @@ function stubFetch(
   })
 }
 
-const CTX7: McpServer = {
-  id: 'mcp_c7', name: 'Context7', type: 'stdio',
-  command: ['npx', '-y', '@upstash/context7-mcp'], url: '', env: {},
+const MOCK1: McpServer = {
+  id: 'mcp_a1', name: 'MockSrv', type: 'stdio',
+  command: ['npx', '-y', 'mock-mcp'], url: '', env: {},
   enabled: true, status: 'idle', error: null, tools_count: 0,
 }
 const FIRECRAWL: McpServer = {
@@ -116,13 +98,13 @@ beforeEach(() => {
 
 describe('McpTab — список серверов', () => {
   it('рендерит имя, тип и статус-чипы (idle — «не подключён», error — «ошибка»)', async () => {
-    vi.stubGlobal('fetch', stubFetch([CTX7, FIRECRAWL]))
+    vi.stubGlobal('fetch', stubFetch([MOCK1, FIRECRAWL]))
     render(
       <StudioProvider>
         <McpTab />
       </StudioProvider>,
     )
-    await screen.findByText('Context7')
+    await screen.findByText('MockSrv')
     expect(screen.getByText('Firecrawl')).toBeTruthy()
     expect(screen.getAllByText('stdio').length).toBe(2)
     expect(screen.getByText('не подключён')).toBeTruthy()
@@ -144,7 +126,7 @@ describe('McpTab — список серверов', () => {
 describe('McpTab — подключение', () => {
   it('клик «Подключить» → POST .../connect; после перечитывания — «подключён», счётчик и инструменты', async () => {
     const calls: { url: string }[] = []
-    vi.stubGlobal('fetch', stubFetch([CTX7], (method, url) => {
+    vi.stubGlobal('fetch', stubFetch([MOCK1], (method, url) => {
       if (method === 'POST' && url.includes('/connect')) calls.push({ url })
     }))
     render(
@@ -152,9 +134,9 @@ describe('McpTab — подключение', () => {
         <McpTab />
       </StudioProvider>,
     )
-    await screen.findByText('Context7')
+    await screen.findByText('MockSrv')
     fireEvent.click(screen.getByRole('button', { name: 'Подключить' }))
-    await waitFor(() => expect(calls).toEqual([{ url: '/api/mcp/servers/mcp_c7/connect' }]))
+    await waitFor(() => expect(calls).toEqual([{ url: '/api/mcp/servers/mcp_a1/connect' }]))
     await screen.findByText('подключён')
     expect(screen.getByText('2 инстр.')).toBeTruthy()
     // инструменты подключённого сервера видны в секции
@@ -164,73 +146,10 @@ describe('McpTab — подключение', () => {
   })
 })
 
-describe('McpTab — добавление', () => {
-  it('кнопка «Добавить» disabled, пока не заполнены имя и command (stdio)', async () => {
-    vi.stubGlobal('fetch', stubFetch([]))
-    render(
-      <StudioProvider>
-        <McpTab />
-      </StudioProvider>,
-    )
-    const btn = await screen.findByRole('button', { name: 'Добавить' })
-    expect(btn).toBeDisabled()
-    fireEvent.change(screen.getByPlaceholderText('Имя'), { target: { value: 'My' } })
-    expect(btn).toBeDisabled()
-    fireEvent.change(screen.getByPlaceholderText(/npx -y/), { target: { value: 'npx -y x' } })
-    expect(btn).toBeEnabled()
-  })
-
-  it('клик «Добавить» → POST {name, type, command-массив, env из KEY=VALUE}; поля очищаются', async () => {
-    const calls: { url: string; body: unknown }[] = []
-    vi.stubGlobal('fetch', stubFetch([], (method, url, body) => {
-      if (method === 'POST' && url === '/api/mcp/servers') calls.push({ url, body })
-    }))
-    render(
-      <StudioProvider>
-        <McpTab />
-      </StudioProvider>,
-    )
-    await screen.findByRole('button', { name: 'Добавить' })
-    fireEvent.change(screen.getByPlaceholderText('Имя'), { target: { value: 'My' } })
-    fireEvent.change(screen.getByPlaceholderText(/npx -y/), { target: { value: 'npx -y pkg --flag' } })
-    fireEvent.change(screen.getByPlaceholderText(/KEY=VALUE/), { target: { value: 'TOKEN=abc\n' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }))
-    await waitFor(() =>
-      expect(calls).toEqual([{
-        url: '/api/mcp/servers',
-        body: { name: 'My', type: 'stdio', command: ['npx', '-y', 'pkg', '--flag'], url: '', env: { TOKEN: 'abc' }, enabled: true },
-      }]),
-    )
-    expect((screen.getByPlaceholderText('Имя') as HTMLInputElement).value).toBe('')
-  })
-
-  it('тип http → поле url, command не уходит в POST', async () => {
-    const calls: { body: unknown }[] = []
-    vi.stubGlobal('fetch', stubFetch([], (method, url, body) => {
-      if (method === 'POST' && url === '/api/mcp/servers') calls.push({ body })
-    }))
-    render(
-      <StudioProvider>
-        <McpTab />
-      </StudioProvider>,
-    )
-    await screen.findByRole('button', { name: 'Добавить' })
-    fireEvent.change(screen.getByPlaceholderText('Имя'), { target: { value: 'R' } })
-    fireEvent.change(screen.getByRole('combobox', { name: 'Тип сервера' }), { target: { value: 'http' } })
-    fireEvent.change(screen.getByPlaceholderText(/https:/), { target: { value: 'https://x/mcp' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Добавить' }))
-    await waitFor(() =>
-      expect(calls).toEqual([{
-        body: { name: 'R', type: 'http', command: [], url: 'https://x/mcp', env: {}, enabled: true },
-      }]),
-    )
-  })
-})
-
 describe('McpTab — удаление', () => {
   it('клик по «×» → DELETE /api/mcp/servers/{id}', async () => {
     const calls: { url: string }[] = []
-    vi.stubGlobal('fetch', stubFetch([CTX7, FIRECRAWL], (method, url) => {
+    vi.stubGlobal('fetch', stubFetch([MOCK1, FIRECRAWL], (method, url) => {
       if (method === 'DELETE') calls.push({ url })
     }))
     render(
@@ -238,15 +157,15 @@ describe('McpTab — удаление', () => {
         <McpTab />
       </StudioProvider>,
     )
-    await screen.findByText('Context7')
-    fireEvent.click(screen.getByRole('button', { name: 'Удалить Context7' }))
-    await waitFor(() => expect(calls).toEqual([{ url: '/api/mcp/servers/mcp_c7' }]))
+    await screen.findByText('MockSrv')
+    fireEvent.click(screen.getByRole('button', { name: 'Удалить MockSrv' }))
+    await waitFor(() => expect(calls).toEqual([{ url: '/api/mcp/servers/mcp_a1' }]))
   })
 })
 
 describe('ContextPanel — вкладка «MCP»', () => {
   it('4-й таб «MCP» отображается и открывает вкладку', async () => {
-    vi.stubGlobal('fetch', stubFetch([CTX7]))
+    vi.stubGlobal('fetch', stubFetch([MOCK1]))
     render(
       <StudioProvider>
         <ContextPanel />
@@ -259,6 +178,6 @@ describe('ContextPanel — вкладка «MCP»', () => {
     expect(tab).toHaveAttribute('aria-selected', 'false')
     fireEvent.click(tab)
     expect(tab).toHaveAttribute('aria-selected', 'true')
-    expect(await screen.findByText('Context7')).toBeTruthy()
+    expect(await screen.findByText('MockSrv')).toBeTruthy()
   })
 })

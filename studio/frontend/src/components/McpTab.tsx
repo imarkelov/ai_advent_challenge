@@ -5,27 +5,11 @@
 // Строка списка: имя / чип типа / статус-чип (не подключён | подключён |
 // ошибка) / число инструментов / [Подключить] [×]. Секция «Инструменты
 // подключённых серверов» — name + description каждого инструмента.
-// Форма добавления: [Имя][тип][command или url][env KEY=VALUE по строкам]
-// [Добавить]. Все действия перечитывают список после ответа API
-// (state.addMcpServer / deleteMcpServer / connectMcpServer внутри вызывают
-// refreshMcp).
+// Добавление новых серверов в UI нет — реестр фиксирован (дефолты).
+// Все действия перечитывают список после ответа API
+// (state.deleteMcpServer / connectMcpServer внутри вызывают refreshMcp).
 import { useState } from 'react'
 import { useStudio } from '../state'
-import type { McpServerType } from '../api'
-
-// Переменные окружения из формы: строки «KEY=VALUE»; строки без «=»
-// или с пустым ключом пропускаем
-function parseEnv(raw: string): Record<string, string> {
-  const out: Record<string, string> = {}
-  for (const line of raw.split('\n')) {
-    const i = line.indexOf('=')
-    if (i <= 0) continue
-    const k = line.slice(0, i).trim()
-    if (!k) continue
-    out[k] = line.slice(i + 1).trim()
-  }
-  return out
-}
 
 const STATUS_LABEL: Record<string, string> = {
   idle: 'не подключён',
@@ -34,12 +18,7 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export default function McpTab() {
-  const { state, addMcpServer, deleteMcpServer, connectMcpServer } = useStudio()
-  const [name, setName] = useState('')
-  const [type, setType] = useState<McpServerType>('stdio')
-  const [command, setCommand] = useState('')
-  const [url, setUrl] = useState('')
-  const [envRaw, setEnvRaw] = useState('')
+  const { state, deleteMcpServer, connectMcpServer } = useStudio()
   const [busy, setBusy] = useState(false)
   const servers = state.mcpServers
   const tools = state.mcpTools
@@ -66,25 +45,6 @@ export default function McpTab() {
         await deleteMcpServer(id)
       } catch (err) {
         console.error('delete mcp:', err)
-      }
-    })()
-  }
-
-  // Добавить сервер: POST /api/mcp/servers → refreshMcp
-  const add = () => {
-    const n = name.trim()
-    if (!n) return
-    const cmd = type === 'stdio' ? command.trim().split(/\s+/).filter(Boolean) : []
-    const u = type === 'http' ? url.trim() : ''
-    void (async () => {
-      try {
-        await addMcpServer(n, type, cmd, u, parseEnv(envRaw), true)
-        setName('')
-        setCommand('')
-        setUrl('')
-        setEnvRaw('')
-      } catch (err) {
-        console.error('add mcp:', err)
       }
     })()
   }
@@ -155,61 +115,6 @@ export default function McpTab() {
             </ul>
           </div>
         )}
-        <div className="mcp-form">
-          <input
-            className="input"
-            placeholder="Имя"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <div className="mcp-form-row">
-            <select
-              className="input"
-              value={type}
-              aria-label="Тип сервера"
-              onChange={(e) => setType(e.target.value as McpServerType)}
-            >
-              <option value="stdio">stdio (локальный процесс)</option>
-              <option value="http">http (удалённый)</option>
-            </select>
-            {type === 'stdio' ? (
-              <input
-                className="input"
-                placeholder="npx -y @upstash/context7-mcp"
-                value={command}
-                onChange={(e) => setCommand(e.target.value)}
-              />
-            ) : (
-              <input
-                className="input"
-                placeholder="https://example.com/mcp"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-              />
-            )}
-          </div>
-          <textarea
-            className="input mcp-env-input"
-            placeholder="Переменные окружения: KEY=VALUE (по строке)"
-            rows={2}
-            value={envRaw}
-            onChange={(e) => setEnvRaw(e.target.value)}
-          />
-          <div className="inv-form-foot">
-            <button
-              type="button"
-              className="btn btn-add"
-              disabled={
-                busy || !name.trim()
-                || (type === 'stdio' && !command.trim())
-                || (type === 'http' && !url.trim())
-              }
-              onClick={add}
-            >
-              Добавить
-            </button>
-          </div>
-        </div>
       </section>
     </div>
   )

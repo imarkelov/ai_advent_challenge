@@ -216,19 +216,6 @@ export async function getMcpServers(): Promise<McpServer[]> {
   return (r.servers ?? []).map(normalizeMcpServer)
 }
 
-// Добавить сервер: POST /api/mcp/servers (201) → {server}
-export function addMcpServer(
-  name: string,
-  type: McpServerType,
-  command: string[] = [],
-  url: string = '',
-  env: Record<string, string> = {},
-  enabled: boolean = true,
-): Promise<McpServer> {
-  return apiPost<{ server: RawMcpServer }>('/mcp/servers', { name, type, command, url, env, enabled })
-    .then((r) => normalizeMcpServer(r.server))
-}
-
 // Удалить сервер: DELETE /api/mcp/servers/{id} → {ok}
 export async function deleteMcpServer(id: string): Promise<void> {
   await apiDelete<unknown>(`/mcp/servers/${encodeURIComponent(id)}`)

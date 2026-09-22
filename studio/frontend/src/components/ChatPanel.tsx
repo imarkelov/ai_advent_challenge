@@ -8,7 +8,8 @@ import SaveMessageModal from './SaveMessageModal'
 
 export default function ChatPanel() {
   const {
-    state, activeProfile, sendMessage, setModel, setContextTab,
+    state, activeProfile, sendMessage, setModel,
+    openSettings, closeSettings,
     activeTask, chatMode, setChatMode, sendTaskMessage,
   } = useStudio()
   const [draft, setDraft] = useState('')
@@ -113,8 +114,8 @@ export default function ChatPanel() {
               className={`profile-chip profile-badge ${
                 activeProfile.status === 'declined' ? 'declined' : 'pending'
               }`}
-              title="Открыть вкладку «Профили»"
-              onClick={() => setContextTab('profile')}
+              title="Открыть настройки на вкладке «Профили»"
+              onClick={() => openSettings('profile')}
             >
               {activeProfile.status === 'declined' ? 'Профиль отключён' : 'Профиль не заполнен'}
             </button>
@@ -130,6 +131,15 @@ export default function ChatPanel() {
               <option key={m.id} value={m.id}>{m.id}</option>
             ))}
           </select>
+          <button
+            type="button"
+            className="btn-icon settings-toggle"
+            aria-label="Настройки"
+            title="Настройки (память, профили, инварианты, MCP)"
+            onClick={() => (state.settingsOpen ? closeSettings() : openSettings())}
+          >
+            ⚙
+          </button>
         </div>
       </header>
 
