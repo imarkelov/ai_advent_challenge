@@ -16,6 +16,7 @@ import queue
 import re
 import subprocess
 import threading
+import uuid
 
 import httpx
 
@@ -312,3 +313,154 @@ class MCPClient:
             return self._launcher(expanded, proc_env)
         except OSError as e:
             raise MCPError(str(e)) from None
+
+
+class MCPRegistry:
+    """Реестр MCP-серверов. Хранение — MemoryStore (mcp_servers.json);
+    runtime (статус/инструменты/сессия) — in-memory, после рестарта все
+    серверы idle (подключение явное, по кнопке)."""
+
+    def __init__(self, store, launcher=None, http_client=None,
+                 env: dict | None = None, timeout: float | None = None):
+        self._store = store
+        self._launcher = launcher
+        self._http_client = http_client
+        self._env = dict(env if env is not None else os.environ)
+        self._timeout = timeout  # None -> MCPClient берёт дефолт
+        self._lock = threading.Lock()
+        self._runtime = {}  # sid -> {status, tools, error, client}
+
+    def _default_servers(self) -> list:
+        """Дефолты дня 16: Context7, Firecrawl, Git (stdio/npx)."""
+        repo = os.path.abspath(
+            os.path.join(self._store.data_dir, "..", ".."))
+        return [
+            {"name": "Context7", "type": "stdio",
+             "command": ["npx", "-y", "@upstash/context7-mcp",
+                         "--api-key", "{MCP_CONTEXT7_API_KEY}"],
+             "url": "", "env": {}, "enabled": True},
+            {"name": "Firecrawl", "type": "stdio",
+             "command": ["npx", "-y", "firecrawl-mcp"],
+             "url": "",
+             "env": {"FIRECRAWL_API_URL": "https://firecrawl.data.lmru.tech/"},
+             "enabled": True},
+            {"name": "Git", "type": "stdio",
+             "command": ["npx", "-y", "@cyanheads/git-mcp-server@latest"],
+             "url": "",
+             "env": {"MCP_TRANSPORT_TYPE": "stdio", "MCP_LOG_LEVEL": "warn",
+                     "GIT_SIGN_COMMITS": "false", "GIT_BASE_DIR": repo},
+             "enabled": True},
+        ]
+
+    def _ensure_defaults_locked(self) -> None:
+        """Первый вызов — досеять дефолты (повторно не дублирует).
+        Вызывать ТОЛЬКО под self._lock."""
+        if self._store.mcp_servers_items():
+            return
+        for d in self._default_servers():
+            self._store.mcp_servers_set(
+                "mcp_" + uuid.uuid4().hex[:4], d["name"], d["type"],
+                d["command"], d["url"], d["env"], d["enabled"])
+
+    def servers(self) -> list:
+        """Реестр с runtime-статусом: id/name/type/command/url/env/enabled
+        + status(idle|connected|error), error, tools_count."""
+        with self._lock:
+            self._ensure_defaults_locked()
+            items = self._store.mcp_servers_items()
+            rt = {i: dict(v) for i, v in self._runtime.items()}
+        out = []
+        for sid, e in items.items():
+            r = rt.get(sid) or {}
+            out.append({
+                "id": sid, "name": e["name"], "type": e["type"],
+                "command": e["command"], "url": e["url"], "env": e["env"],
+                "enabled": e["enabled"],
+                "status": r.get("status") or "idle",
+                "error": r.get("error"),
+                "tools_count": (len(r.get("tools") or [])
+                                if r.get("status") == "connected" else 0),
+            })
+        return out
+
+    def add(self, name: str, type: str, command=None, url=None,
+            env=None, enabled: bool = True) -> dict:
+        """Добавить сервер (id авто). Валидация — MemoryStore
+        (ValueError с RU-сообщением — как есть)."""
+        sid = "mcp_" + uuid.uuid4().hex[:4]
+        with self._lock:
+            self._ensure_defaults_locked()
+            rec = self._store.mcp_servers_set(sid, name, type, command,
+                                              url or "", env, enabled)
+            self._runtime.pop(sid, None)
+        return rec
+
+    def remove(self, sid: str) -> bool:
+        """Удалить сервер; сессия закрывается."""
+        with self._lock:
+            r = self._runtime.pop(sid, None)
+            if r and r.get("client") is not None:
+                r["client"].close()
+            return self._store.mcp_servers_remove(sid)
+
+    def connect(self, sid: str) -> dict:
+        """Подключить сервер: initialize + tools/list. Сбой — НЕ исключение:
+        возвращается view со status=error (self-heal: повтор разрешён).
+        KeyError — sid не в реестре."""
+        with self._lock:
+            self._ensure_defaults_locked()
+            items = self._store.mcp_servers_items()
+            if sid not in items:
+                raise KeyError(sid)
+            rec = dict(items[sid])
+            rec["id"] = sid
+            old = self._runtime.get(sid)
+            if old and old.get("client") is not None:
+                old["client"].close()
+        client = MCPClient(rec, launcher=self._launcher,
+                           http_client=self._http_client,
+                           env=self._env, timeout=self._timeout)
+        base = {"id": sid, "name": rec["name"], "type": rec["type"],
+                "command": rec["command"], "url": rec["url"],
+                "env": rec["env"], "enabled": rec["enabled"]}
+        try:
+            tools = client.connect()
+            view = {"status": "connected", "error": None,
+                    "tools_count": len(tools)}
+            with self._lock:
+                self._runtime[sid] = {"status": "connected",
+                                      "tools": tools, "error": None,
+                                      "client": client}
+        except (MCPError, OSError, ValueError) as e:
+            client.close()
+            view = {"status": "error", "error": str(e), "tools_count": 0}
+            with self._lock:
+                self._runtime[sid] = {"status": "error", "tools": [],
+                                      "error": str(e), "client": None}
+        return {**base, **view}
+
+    def tools(self) -> list:
+        """Инструменты всех enabled+connected серверов:
+        [{server, name, description, input_schema}]."""
+        with self._lock:
+            self._ensure_defaults_locked()
+            items = self._store.mcp_servers_items()
+            rt = {i: dict(v) for i, v in self._runtime.items()}
+        out = []
+        for sid, e in items.items():
+            if not e.get("enabled"):
+                continue
+            r = rt.get(sid) or {}
+            if r.get("status") != "connected":
+                continue
+            for t in (r.get("tools") or []):
+                out.append({"server": sid, **t})
+        return out
+
+    def close_all(self) -> None:
+        """Закрыть все сессии (шатдаун/тесты)."""
+        with self._lock:
+            for r in self._runtime.values():
+                if r.get("client") is not None:
+                    r["client"].close()
+            self._runtime.clear()

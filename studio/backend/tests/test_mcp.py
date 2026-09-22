@@ -312,3 +312,145 @@ def test_http_error_status_is_mcp_error():
     with pytest.raises(MCPError, match="500"):
         client.connect()
     client.close()
+
+
+# ---------- MCPRegistry (реестр + статусы + дефолты) ----------
+
+from mcp import MCPRegistry  # noqa: E402
+
+
+def _store(tmp_path) -> MemoryStore:
+    return MemoryStore(str(tmp_path))
+
+
+def test_registry_seeds_defaults_once(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
+    try:
+        names1 = [s["name"] for s in reg.servers()]
+        assert names1 == ["Context7", "Firecrawl", "Git"]
+        assert all(s["status"] == "idle" for s in reg.servers())
+        # повторный вызов не дублирует
+        assert [s["name"] for s in reg.servers()] == names1
+    finally:
+        reg.close_all()
+    # файл создан на диске
+    assert (tmp_path / "mcp_servers.json").exists()
+
+
+def test_registry_defaults_env(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
+    try:
+        servers = {s["name"]: s for s in reg.servers()}
+        assert servers["Context7"]["command"] == [
+            "npx", "-y", "@upstash/context7-mcp",
+            "--api-key", "{MCP_CONTEXT7_API_KEY}"]
+        assert servers["Firecrawl"]["env"]["FIRECRAWL_API_URL"] == \
+            "https://firecrawl.data.lmru.tech/"
+        git_env = servers["Git"]["env"]
+        assert git_env["MCP_TRANSPORT_TYPE"] == "stdio"
+        assert git_env["GIT_SIGN_COMMITS"] == "false"
+        assert git_env["GIT_BASE_DIR"]
+    finally:
+        reg.close_all()
+
+
+# env для тестов: плейсхолдер {MCP_CONTEXT7_API_KEY} у дефолта Context7
+# должен разворачиваться (fake-процесс его не видит).
+TEST_ENV = {**os.environ, "MCP_CONTEXT7_API_KEY": "test-key"}
+
+
+def test_registry_connect_and_tools(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher(),
+                      env=TEST_ENV)
+    try:
+        sid = reg.servers()[0]["id"]
+        view = reg.connect(sid)
+        assert view["status"] == "connected"
+        assert view["tools_count"] == 2
+        assert view["error"] is None
+        tools = reg.tools()
+        assert {(t["server"], t["name"]) for t in tools} == \
+            {(sid, "mock_echo"), (sid, "mock_ping")}
+        assert all("description" in t and "input_schema" in t
+                   for t in tools)
+        # повторное connect — новый клиент, без дублей
+        assert reg.connect(sid)["tools_count"] == 2
+        assert len(reg.tools()) == 2
+    finally:
+        reg.close_all()
+
+
+def test_registry_connect_failure_is_error_view(tmp_path):
+    reg = MCPRegistry(_store(tmp_path),
+                      launcher=make_fake_launcher(fail=True))
+    try:
+        sid = reg.servers()[0]["id"]
+        view = reg.connect(sid)
+        assert view["status"] == "error"
+        assert view["error"]
+        assert view["tools_count"] == 0
+        assert reg.tools() == []
+        # повтор после сбоя — допустим (self-heal)
+        assert reg.connect(sid)["status"] == "error"
+    finally:
+        reg.close_all()
+
+
+def test_registry_connect_unknown_sid(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
+    try:
+        with pytest.raises(KeyError):
+            reg.connect("mcp_nope")
+    finally:
+        reg.close_all()
+
+
+def test_registry_add_remove(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
+    try:
+        rec = reg.add("My", "stdio", command=["npx", "-y", "x"])
+        assert rec["id"].startswith("mcp_")
+        assert rec["name"] == "My"
+        sids = [s["id"] for s in reg.servers()]
+        assert rec["id"] in sids
+        with pytest.raises(ValueError):
+            reg.add("Bad", "tcp")
+        with pytest.raises(ValueError):
+            reg.add("Bad", "stdio")  # без command
+        assert reg.remove(rec["id"]) is True
+        assert reg.remove(rec["id"]) is False
+        assert rec["id"] not in [s["id"] for s in reg.servers()]
+    finally:
+        reg.close_all()
+
+
+def test_registry_disabled_server_not_in_tools(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher(),
+                      env=TEST_ENV)
+    try:
+        sid = reg.servers()[0]["id"]
+        rec = reg._store.mcp_servers_set(
+            sid, "Context7", "stdio",
+            command=reg._store.mcp_servers_items()[sid]["command"],
+            enabled=False)
+        reg.connect(sid)
+        view = next(s for s in reg.servers() if s["id"] == sid)
+        assert view["enabled"] is False
+        assert reg.tools() == []
+        reg._store.mcp_servers_set(sid, "Context7", "stdio",
+                                   command=rec["command"], enabled=True)
+        assert len(reg.tools()) == 2
+    finally:
+        reg.close_all()
+
+
+def test_registry_close_all_resets_runtime(tmp_path):
+    reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher(),
+                      env=TEST_ENV)
+    sid = reg.servers()[0]["id"]
+    reg.connect(sid)
+    reg.close_all()
+    assert reg.servers()[0]["status"] == "idle"
+    assert reg.tools() == []
+    # реестр на диске не тронут
+    assert _store(tmp_path).mcp_servers_items()
