@@ -2,6 +2,7 @@
 httpx.MockTransport — сеть и npx не используются."""
 import json
 import os
+import shutil
 import sys
 import threading
 import time
@@ -336,7 +337,7 @@ def test_registry_seeds_defaults_once(tmp_path):
     reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
     try:
         names1 = [s["name"] for s in reg.servers()]
-        assert names1 == ["Firecrawl", "Git"]
+        assert names1 == ["Firecrawl", "Git", "Task Manager"]
         assert all(s["status"] == "idle" for s in reg.servers())
         # повторный вызов не дублирует
         assert [s["name"] for s in reg.servers()] == names1
@@ -356,6 +357,35 @@ def test_registry_defaults_env(tmp_path):
         assert git_env["MCP_TRANSPORT_TYPE"] == "stdio"
         assert git_env["GIT_SIGN_COMMITS"] == "false"
         assert git_env["GIT_BASE_DIR"]
+    finally:
+        reg.close_all()
+
+
+def test_registry_task_manager_default_command(tmp_path):
+    # Дефолт Task Manager (день 17): command[0] — текущий python,
+    # command[1] — путь к task_manager.py. Копируем реальный файл в
+    # tmp-каталог под раскладку <root>/studio/{data,mcp_servers}, чтобы
+    # путь из дефолта (data_dir/../../studio/...) существовал.
+    (tmp_path / "studio" / "data").mkdir(parents=True)
+    (tmp_path / "studio" / "mcp_servers").mkdir(parents=True)
+    shutil.copyfile(TASK_MANAGER_PATH,
+                    tmp_path / "studio" / "mcp_servers"
+                    / "task_manager.py")
+    reg = MCPRegistry(MemoryStore(str(tmp_path / "studio" / "data")),
+                      launcher=make_fake_launcher())
+    try:
+        servers = {s["name"]: s for s in reg.servers()}
+        tm = servers["Task Manager"]
+        assert tm["type"] == "stdio"
+        assert tm["enabled"] is True
+        assert tm["env"] == {}
+        # command[0] — тот же python, что и pytest (по имени,
+        # без учёта регистра)
+        assert tm["command"][0].lower().endswith(
+            os.path.basename(sys.executable).lower())
+        # command[1] — путь к реальному файлу сервера
+        assert tm["command"][1].endswith("task_manager.py")
+        assert os.path.exists(tm["command"][1])
     finally:
         reg.close_all()
 

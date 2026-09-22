@@ -16,6 +16,7 @@ import queue
 import re
 import shutil
 import subprocess
+import sys
 import threading
 import uuid
 
@@ -337,7 +338,8 @@ class MCPRegistry:
         self._runtime = {}  # sid -> {status, tools, error, client}
 
     def _default_servers(self) -> list:
-        """Дефолты дня 16: Firecrawl, Git (stdio/npx)."""
+        """Дефолты: Firecrawl, Git (stdio/npx, день 16) и Task Manager
+        (локальный python-процесс, день 17 — без npx и сети)."""
         repo = os.path.abspath(
             os.path.join(self._store.data_dir, "..", ".."))
         return [
@@ -351,6 +353,13 @@ class MCPRegistry:
              "url": "",
              "env": {"MCP_TRANSPORT_TYPE": "stdio", "MCP_LOG_LEVEL": "warn",
                      "GIT_SIGN_COMMITS": "false", "GIT_BASE_DIR": repo},
+             "enabled": True},
+            {"name": "Task Manager", "type": "stdio",
+             "command": [sys.executable,
+                         os.path.join(repo, "studio", "mcp_servers",
+                                      "task_manager.py")],
+             "url": "",
+             "env": {},
              "enabled": True},
         ]
 
@@ -427,6 +436,10 @@ class MCPRegistry:
                 "env": rec["env"], "enabled": rec["enabled"]}
         try:
             tools = client.connect()
+            # Лог успешного подключения (день 17): имя сервера, число
+            # инструментов и их имена — видно в консоли при запуске.
+            print(f"[MCP Init] {rec['name']}: {len(tools)} инструментов: "
+                  + ", ".join(t["name"] for t in tools), flush=True)
             view = {"status": "connected", "error": None,
                     "tools_count": len(tools)}
             with self._lock:
