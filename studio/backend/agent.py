@@ -15,8 +15,10 @@ import httpx
 
 try:  # пакетный режим: studio.backend.agent
     from .memory import MemoryStore, atomic_write_json, read_json
+    from .mcp import MCPRegistry
 except ImportError:  # dev-режим: импорт из studio/backend
     from memory import MemoryStore, atomic_write_json, read_json
+    from mcp import MCPRegistry
 
 # Ограничения контекста известных моделей; неизвестной — 32768.
 CONTEXT_LIMITS = {
@@ -226,7 +228,7 @@ class StudioAgent:
     """Агент-обёртка над LLM API (OpenAI-совместимое) с памятью и журналом."""
 
     def __init__(self, data_dir: str, base_url: str = None, api_key: str = None,
-                 client=None, env=None, verify_ssl: bool = None):
+                 client=None, env=None, verify_ssl: bool = None, mcp=None):
         """Создаёт агента.
 
         data_dir — каталог данных (MemoryStore + config.json + requests.json);
@@ -237,8 +239,11 @@ class StudioAgent:
           GPUSTACK_VERIFY_SSL (\"1\"/\"true\"/\"yes\" -> True, прочее -> False).
           По умолчанию False: внутренний GPustack отдаёт истёкший самоподписанный
           сертификат, поэтому проверка отключена. Для продакшена верните True.
+        mcp — MCPRegistry (в тестах — с fake-launcher); по умолчанию
+          MCPRegistry(self.store).
         """
         self.store = MemoryStore(data_dir)
+        self.mcp = mcp or MCPRegistry(self.store)
         self.base_url = (base_url or os.environ.get("GPUSTACK_BASE_URL",
                         "https://gpustack.data.lmru.tech/v1")).rstrip("/")
         self.api_key = api_key if api_key is not None else os.environ.get("GPUSTACK_API_KEY", "")

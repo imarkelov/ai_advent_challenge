@@ -9,7 +9,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 import httpx
 
@@ -32,6 +32,12 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
     по умолчанию — StudioAgent(DATA_DIR) с настройками из окружения."""
     agent = agent or StudioAgent(DATA_DIR)
     app = FastAPI(title="Студия")
+
+    @app.on_event("shutdown")
+    def _mcp_shutdown():
+        """Закрыть все MCP-сессии при остановке приложения."""
+        agent.mcp.close_all()
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
@@ -485,6 +491,54 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
         if rec is None:
             raise HTTPException(404, f"Инвариант «{iid}» не найден")
         return {"invariant": rec}
+
+    # ---------- MCP-серверы (день 16) ----------
+
+    @app.get("/api/mcp/servers")
+    def mcp_servers_list():
+        """Реестр MCP-серверов с runtime-статусом."""
+        return {"servers": agent.mcp.servers()}
+
+    @app.post("/api/mcp/servers", status_code=201)
+    def mcp_servers_add(body: dict):
+        name = body.get("name")
+        if not isinstance(name, str) or not name.strip():
+            return JSONResponse(status_code=400,
+                                content={"detail": "Название обязательно"})
+        if body.get("type") not in ("stdio", "http"):
+            return JSONResponse(status_code=400,
+                                content={"detail": "Тип: 'stdio' или 'http'"})
+        if not isinstance(body.get("enabled", True), bool):
+            return JSONResponse(status_code=400,
+                                content={"detail": "enabled — bool"})
+        try:
+            rec = agent.mcp.add(name, body.get("type"),
+                                body.get("command"), body.get("url"),
+                                body.get("env"), body.get("enabled", True))
+        except ValueError as e:
+            return JSONResponse(status_code=400, content={"detail": str(e)})
+        return {"server": rec}
+
+    @app.delete("/api/mcp/servers/{sid}")
+    def mcp_servers_delete(sid: str):
+        if not agent.mcp.remove(sid):
+            return JSONResponse(status_code=404,
+                                content={"detail": "Сервер не найден"})
+        return {"ok": True}
+
+    @app.post("/api/mcp/servers/{sid}/connect")
+    def mcp_servers_connect(sid: str):
+        try:
+            view = agent.mcp.connect(sid)
+        except KeyError:
+            return JSONResponse(status_code=404,
+                                content={"detail": "Сервер не найден"})
+        return {"server": view}
+
+    @app.get("/api/mcp/tools")
+    def mcp_tools():
+        """Инструменты подключённых MCP-серверов."""
+        return {"tools": agent.mcp.tools()}
 
     # ---------- токены ----------
 

@@ -1,5 +1,6 @@
 """Тесты FastAPI-роутов «Студии» (офлайн, MockTransport для LLM)."""
 import json
+import os
 
 import httpx
 import pytest
@@ -7,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from agent import StudioAgent, TASK_STAGE_USER
 from conftest import delta_chunk, sse_body, usage_chunk
+from mcp import MCPRegistry
 
 
 @pytest.fixture
@@ -958,3 +960,125 @@ def test_pause_during_validation_verdict_fail(tmp_path):
     assert events[-1] == {"type": "task_paused", "stage": "paused"}
     t = c.get("/api/task", params={"dialogue_id": did}).json()["task"]
     assert t["stage"] == "paused"
+
+
+# ---------- MCP (день 16) ----------
+
+def _mcp_launcher(command, env):
+    """Офлайн-запуск: переиспользуем fake-процесс из test_mcp."""
+    from tests.test_mcp import FakeMcpProcess
+    return FakeMcpProcess()
+
+
+def _mcp_agent(agent_env):
+    """Подменить реестр на офлайн-версию (fake-процесс вместо npx).
+    env с MCP_CONTEXT7_API_KEY: плейсхолдер у дефолта Context7
+    должен разворачиваться (fake-процесс его не видит)."""
+    agent_env.mcp = MCPRegistry(agent_env.store, launcher=_mcp_launcher,
+                                env={**os.environ,
+                                     "MCP_CONTEXT7_API_KEY": "test"})
+    return agent_env.mcp
+
+
+def test_mcp_api_servers_list(client, agent_env):
+    _mcp_agent(agent_env)
+    r = client.get("/api/mcp/servers")
+    assert r.status_code == 200
+    servers = r.json()["servers"]
+    assert [s["name"] for s in servers] == ["Context7", "Firecrawl", "Git"]
+    assert all(s["status"] == "idle" for s in servers)
+    assert all(s["tools_count"] == 0 for s in servers)
+
+
+def test_mcp_api_connect_and_tools(client, agent_env):
+    reg = _mcp_agent(agent_env)
+    sid = client.get("/api/mcp/servers").json()["servers"][0]["id"]
+    r = client.post(f"/api/mcp/servers/{sid}/connect")
+    assert r.status_code == 200
+    view = r.json()["server"]
+    assert view["status"] == "connected"
+    assert view["tools_count"] == 2
+    assert view["error"] is None
+    # статус виден в списке
+    s = client.get("/api/mcp/servers").json()["servers"]
+    assert [x for x in s if x["id"] == sid][0]["status"] == "connected"
+    # инструменты доступны
+    tools = client.get("/api/mcp/tools").json()["tools"]
+    assert [(t["server"], t["name"]) for t in tools] == \
+        [(sid, "mock_echo"), (sid, "mock_ping")]
+    reg.close_all()
+
+
+def test_mcp_api_connect_unknown_404(client, agent_env):
+    _mcp_agent(agent_env)
+    assert client.post("/api/mcp/servers/mcp_nope/connect").status_code == 404
+    assert client.delete("/api/mcp/servers/mcp_nope").status_code == 404
+
+
+def test_mcp_api_add_and_remove(client, agent_env):
+    reg = _mcp_agent(agent_env)
+    r = client.post("/api/mcp/servers", json={
+        "name": "My", "type": "stdio", "command": ["npx", "-y", "x"]})
+    assert r.status_code == 201
+    rec = r.json()["server"]
+    assert rec["id"].startswith("mcp_") and rec["name"] == "My"
+    assert client.delete(f"/api/mcp/servers/{rec['id']}").status_code == 200
+    assert client.delete(f"/api/mcp/servers/{rec['id']}").status_code == 404
+    reg.close_all()
+
+
+def test_mcp_api_validation_400(client, agent_env):
+    _mcp_agent(agent_env)
+    # без name
+    assert client.post("/api/mcp/servers",
+                       json={"type": "stdio",
+                             "command": ["npx"]}).status_code == 400
+    # не-bool enabled
+    assert client.post("/api/mcp/servers",
+                       json={"name": "X", "type": "stdio",
+                             "command": ["npx"], "enabled": "yes"}
+                       ).status_code == 400
+    # stdio без command
+    assert client.post("/api/mcp/servers",
+                       json={"name": "X", "type": "stdio"}).status_code == 400
+    # http без url
+    assert client.post("/api/mcp/servers",
+                       json={"name": "X", "type": "http"}).status_code == 400
+    # неизвестный type
+    assert client.post("/api/mcp/servers",
+                       json={"name": "X", "type": "tcp",
+                             "command": ["npx"]}).status_code == 400
+
+
+def test_chat_payload_has_no_mcp_tools(client, agent_env, dialogue_id):
+    """Регрессия дня 16: MCP-инструменты НЕ инжектятся в тело LLM."""
+    _mcp_agent(agent_env)
+    # decline-профиль: иначе первое сообщение не уходит в LLM
+    client.post("/api/profile/action",
+                json={"dialogue_id": dialogue_id, "action": "decline"})
+    payloads = []
+    orig_transport = agent_env._client._transport
+
+    class CapturingTransport:
+        """Все LLM-запросы проходят через transport — ловим тела там."""
+
+        def __init__(self, inner):
+            self._inner = inner
+
+        def handle_request(self, request):
+            payloads.append(json.loads(request.content))
+            return self._inner.handle_request(request)
+
+        def __getattr__(self, name):
+            return getattr(self._inner, name)
+
+    agent_env._client._transport = CapturingTransport(orig_transport)
+    try:
+        r = client.post("/api/chat",
+                        json={"dialogue_id": dialogue_id,
+                              "message": "привет"})
+        assert r.status_code == 200
+    finally:
+        agent_env._client._transport = orig_transport
+    assert payloads, "LLM-запрос не перехвачен"
+    assert all("tools" not in p for p in payloads)
