@@ -1456,3 +1456,62 @@ button {
   background: var(--danger-soft);
   color: var(--danger);
 }
+
+/* ── MCP (день 16): вкладка «MCP» ─────────────────────────────────────────── */
+.mcp-chip {
+  font-size: .7rem;
+  color: var(--accent);
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  border-radius: 10px;
+  padding: 1px 8px;
+}
+.mcp-chip[title] { cursor: help; }
+.mcp-note {
+  font-size: .78rem;
+  color: var(--muted);
+  margin: 6px 0;
+}
+.mcp-row { display: flex; align-items: center; gap: 8px; }
+.mcp-row.off { opacity: .55; }
+.mcp-main {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+.mcp-name { font-weight: 600; }
+.mcp-type {
+  font-size: .7rem;
+  color: var(--muted);
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 0 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.mcp-error {
+  color: var(--accent);
+  font-size: .75rem;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mcp-status { font-size: .75rem; padding: 1px 8px; border-radius: 10px; white-space: nowrap; }
+.mcp-status.idle { color: var(--muted); }
+.mcp-status.connected { color: var(--ok); }
+.mcp-status.error { color: var(--accent); }
+.mcp-count { font-size: .72rem; color: var(--muted); white-space: nowrap; }
+.mcp-tools h4 { margin: 10px 0 4px; font-size: .85rem; }
+.mcp-tool-row { display: flex; gap: 8px; align-items: baseline; }
+.mcp-tool-name {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .8rem;
+  white-space: nowrap;
+}
+.mcp-tool-desc { color: var(--muted); font-size: .78rem; }
+.mcp-form-row { display: flex; gap: 6px; }
+.mcp-form-row select { flex: 0 0 40%; }
+.mcp-env-input { resize: vertical; }
