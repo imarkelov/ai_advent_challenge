@@ -1,3 +1,72 @@
+# Release Notes — day17-mcp-tool-loop (день 17)
+
+Ветка: [`day17-mcp-tool-loop`](https://github.com/imarkelov/ai_advent_challenge/tree/day17-mcp-tool-loop)
+(от `day16-mcp-connect`).
+
+## Что в релизе
+
+**LLM-driven MCP tool-loop.** Инструменты подключённых MCP-серверов
+уходят в тело LLM-запроса (`tools`, формат OpenAI), модель сама решает
+вызвать инструмент (`tool_calls`), агент вызывает его на MCP-сервере,
+результат возвращается модели сообщением `role: "tool"` в цикле до
+финального ответа (кап 5 итераций). Пути дня 16 (вызов по команде
+`/сервер тул`, system-маркер `mcp_tool`) не меняются — tool-loop
+добавлен поверх.
+
+- `studio/mcp_servers/task_manager.py` — новый stdio MCP-сервер
+  (JSON-RPC 2024-11-05, только stdlib, без npx): in-memory задачи
+  (TASK-42 `in_progress`/migor, TASK-7 `done`), инструменты
+  `get_task_details` (required `task_id`), `create_task` (required
+  `title`); «не найдено» → `{"error": "Задача не найдена: <id>"}` +
+  `isError: true`; неизвестный метод → JSON-RPC -32601.
+- `mcp.py` — Task Manager как третий дефолт реестра
+  (`[sys.executable, <repo>/studio/mcp_servers/task_manager.py]`);
+  `connect()` на успех → `[MCP Init] {name}: {n} инструментов:
+  {список}` (stdout, flush).
+- `agent.py` — tool-loop в `ask_stream` (кап 5 итераций): `tools` из
+  подключённых серверов (коллизии имён — префикс `{server_id}__`),
+  агрегация `delta.tool_calls` по `index`, assistant-сообщение с
+  `tool_calls` + `role: "tool"`-сообщения (`tool_call_id`, `name`) в
+  диалоге, цикл с повторными guards; превышение капа → SSE `error`
+  «Tool-loop: превышен лимит итераций (5)»; ошибка инструмента → текст
+  ошибки в tool-сообщении (цикл продолжается, без crash); без
+  подключённых серверов `tools` в payload нет (регресс дня 16
+  `test_chat_payload_has_no_mcp_tools`); журнал — запись на каждую
+  итерацию, usage суммируется.
+- Консоль-логи этапов: `[MCP Init]`, `[LLM Decision]`, `[MCP Response]`,
+  `[Final Response]` (`print(..., flush=True)`).
+- `state.tsx`/`ChatPanel.tsx` — служебные `role: "tool"`-сообщения
+  хранятся в памяти диалога, но не рендерятся чат-пузырями.
+- `scripts/e2e_day17.py` — гибрид: Part A — детерминированное ядро
+  в-процессе (StudioAgent + `httpx.MockTransport` fake-LLM, эмитирующая
+  `tool_calls` + реальный subprocess `task_manager.py` через
+  `MCPRegistry`; 6 assert); Part B — live (uvicorn :8101, реальный LLM
+  GPustack), best-effort SKIP; exit 0 для PASS/SKIP, 1 для FAIL.
+
+## API
+
+Новых REST-эндпоинтов нет; меняется только тело `POST /api/chat`:
+`tools` в LLM-запросе при подключённых серверах, `tool_calls` /
+`tool_call_id` проходят в историю `messages`. SSE-протокол не
+расширяется (delta/done/error/invariant_violation — как есть).
+
+## Проверка задания
+
+Бэкенд — 330 тестов PASS (`pytest -q`, офлайн). Фронтенд — 212 тестов
+PASS (Vitest) + `tsc -b` clean. E2E `scripts/e2e_day17.py` на этой
+машине: Part A 6/6 PASS; Part B — SKIP (GPustack недоступен:
+SSL CERTIFICATE_VERIFY_FAILED — окружение, не продукт).
+
+## Коммиты
+
+- `c7e341f` — mock task manager stdio MCP server
+- `7f56b93` — task manager in registry defaults + `[MCP Init]` log
+- `38df527` — LLM tool-calling loop in StudioAgent
+- `cb69817` — UI: service tool messages not rendered
+- `6cf4fa4` — e2e_day17 (deterministic core + live best-effort)
+
+---
+
 # Release Notes — day16-mcp-connect (день 16)
 
 Ветка: [`day16-mcp-connect`](https://github.com/imarkelov/ai_advent_challenge/tree/day16-mcp-connect)

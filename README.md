@@ -21,6 +21,7 @@
 | День 14 | [`day14-invariants`](https://github.com/imarkelov/ai_advent_challenge/tree/day14-invariants) | Инварианты: глобальные жёсткие ограничения (архитектура, техрешения, стек, бизнес-правила), хранятся отдельно от диалога, всегда активны, инжектятся в system-промпт + правило конфликтов + server-side гард (отказ при противоречии), вкладка «Инварианты» + тесты конкурса/объяснения отказа |
 | День 15 | [`day15-plan-review`](https://github.com/imarkelov/ai_advent_challenge/tree/day15-plan-review) | Проверка плана (plan_review): человеческий гейт одобрения плана между planning и execution (кнопки «Одобрить»/«Отклонить», детект ограничений плана — инварианты/память/табу + альтернатива), фикс done-пост-гарда для согласованного контекста (запрет из одобренного контекста задачи не рубит объяснение альтернативы), пауза во время LLM-вызова валидатора/синтеза, move вкладок Токены/Запрос в сайдбар |
 | День 16 | [`day16-mcp-connect`](https://github.com/imarkelov/ai_advent_challenge/tree/day16-mcp-connect) | Подключение MCP: реестр MCP-серверов (stdio/http) в `mcp_servers.json`, клиент JSON-RPC (`mcp.py`), REST `/api/mcp/*` (список/удалить/подключить/инструменты), отдельная панель «MCP» по своей кнопке «🧩» в шапке чата (рядом с «⚙»; статусы, инструменты подключённых серверов), дефолты: Firecrawl, Git; вызов инструментов из чата (tool-loop): команда `/сервер тул`, автодополнение, форма аргументов по `input_schema`, результат сохраняется в диалог и виден LLM |
+| День 17 | [`day17-mcp-tool-loop`](https://github.com/imarkelov/ai_advent_challenge/tree/day17-mcp-tool-loop) | MCP Tool-Loop (LLM-driven): инструменты подключённых серверов уходят в LLM-пейлоад (`tools`), модель сама вызывает инструмент (`tool_calls` → MCP-сервер → `role: "tool"` обратно модели, цикл до 5 итераций); новый stdio MCP-сервер Mock Task Manager (in-memory, только stdlib, `get_task_details`/`create_task`); лог-теги `[MCP Init]`/`[LLM Decision]`/`[MCP Response]`/`[Final Response]`; e2e_day17.py (детерминированное ядро + live best-effort) |
 
 ## День 7: как работает сервис
 
@@ -872,3 +873,79 @@ E2E —
 `mcp_tool`-сообщение в диалоге → 400/404 → DELETE 200/404), live Firecrawl
 — best-effort SKIP, если npx недоступен. Ветка `day16-mcp-connect`
 (от `day15-plan-review`).
+
+## День 17: MCP Tool-Loop (LLM-driven)
+
+### Что это
+
+LLM-driven tool-calling поверх подключения MCP дня 16: инструменты
+подключённых MCP-серверов уходят в тело LLM-запроса (`tools`, формат
+OpenAI), модель **сама** решает вызвать инструмент (`tool_calls`), агент
+вызывает его на MCP-сервере, результат возвращается модели сообщением
+`role: "tool"` в цикле до финального текстового ответа (кап 5 итераций).
+День 16 вызывал инструменты только по команде пользователя
+(`/сервер тул`); день 17 — модель сама. Пути дня 16 не меняются —
+tool-loop добавлен поверх. Новый MCP-сервер — **Mock Task Manager**
+(`studio/mcp_servers/task_manager.py`): stdio JSON-RPC (2024-11-05),
+только stdlib, без npx; in-memory задачи (TASK-42: `in_progress`,
+исполнитель migor; TASK-7: `done`), инструменты `get_task_details`
+(required `task_id`) и `create_task` (required `title`).
+
+### Архитектура
+
+- **`task_manager.py`** — stdio MCP-сервер (newline-delimited JSON-RPC
+  2.0): `initialize` (protocolVersion 2024-11-05), `tools/list`,
+  `tools/call`; notification (без id) — без ответа; неизвестный метод —
+  JSON-RPC -32601; ошибка «не найдено» — `{"error": "Задача не найдена:
+  <id>"}` с `isError: true`.
+- **`mcp.py`** — Task Manager добавлен как третий дефолт реестра
+  (`command = [sys.executable, <repo>/studio/mcp_servers/task_manager.py]`,
+  без npx); `connect()` на успех логирует `[MCP Init] {name}: {n}
+  инструментов: {список}` (stdout, flush).
+- **`agent.py`** — tool-loop в `ask_stream` (максимум 5 итераций):
+  `_llm_tools()` превращает инструменты подключённых серверов в
+  OpenAI-`tools`-массив (коллизии имён — префикс `{server_id}__`);
+  `delta.tool_calls` агрегируются по `index`; assistant-сообщение
+  сохраняется в диалог с `tool_calls`, каждый вызов — через
+  `MCPRegistry.call_tool`, результат — `role: "tool"`-сообщение с
+  `tool_call_id` и `name`; цикл повторяется (guards памяти/табу/
+  инвариантов — повторно); финальный текст — `done`. Превышение капа —
+  SSE `error` «Tool-loop: превышен лимит итераций (5)». Ошибка
+  инструмента (MCPError, битые JSON-аргументы) — текст ошибки в
+  tool-сообщении, цикл продолжается, агент не падает. Без подключённых
+  серверов `tools` в payload нет (поведение дня 16, регресс
+  `test_chat_payload_has_no_mcp_tools` остаётся зелёным). Журнал
+  LLM-запросов — запись на каждую итерацию (тело с `tools`), usage
+  суммируется.
+- **Фронтенд** (`state.tsx`, `ChatPanel.tsx`) — сообщения
+  `role: "tool"` — служебные записи: хранятся в памяти диалога (видно
+  LLM), но не рендерятся чат-пузырями (паттерн day-16 mcp_tool-карточек).
+
+### Логирование (консоль)
+
+| Тег | Момент |
+| --- | --- |
+| `[MCP Init] {сервер}: N инструментов: a, b` | успешный `connect` (`mcp.py`) |
+| `[LLM Decision] {тул} {args}` | модель решила вызвать инструмент |
+| `[MCP Response] {тул}: {результат}` | сырой результат MCP-сервера |
+| `[Final Response] {ответ}` | финальный текстовый ответ |
+
+### E2E — `scripts/e2e_day17.py`
+
+Гибрид: **Part A** — детерминированное ядро в-процессе (без uvicorn и
+без сети): `StudioAgent` + `httpx.MockTransport`-fake LLM (эмитит
+`tool_calls`) + **реальный** subprocess `task_manager.py` через
+`MCPRegistry`; 6 assert. **Part B** — live (uvicorn :8101, реальный
+LLM GPustack), best-effort: инфраструктурные шаги — FAIL на реальном
+баге, модель не вызвала инструмент — SKIP (поведение модели, не FAIL),
+cleanup всегда. Exit 0 для PASS/SKIP, 1 для FAIL.
+
+### Проверка задания
+
+Бэкенд — 330 тестов PASS (офлайн: tool-loop на scripted `tool_calls` +
+`FakeMcpProcess`, task_manager на реальном subprocess, регресс «без
+подключённых серверов — `tools` в payload нет»). Фронтенд — 212 тестов
+PASS + `tsc -b` clean. E2E `scripts/e2e_day17.py` на этой машине:
+Part A 6/6 PASS; Part B — SKIP («GPustack недоступен: SSL
+CERTIFICATE_VERIFY_FAILED» — окружение, не продукт). Ветка
+`day17-mcp-tool-loop` (от `day16-mcp-connect`).
