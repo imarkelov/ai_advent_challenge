@@ -10,7 +10,8 @@ OpenAI-совместимый API) со стримингом по SSE, три с
 |---|---|
 | `main.py` | FastAPI-приложение и все роуты (валидация 400/404 с RU detail) |
 | `agent.py` | `StudioAgent` — запрос к LLM, SSE-стрим, конфиг, журнал, сессионные токены |
-| `memory.py` | `MemoryStore` — диалоги (ST), рабочая (WM) и долговременная (LT) память |
+| `memory.py` | `MemoryStore` — диалоги (ST), рабочая (WM) и долговременная (LT) память, реестр MCP-серверов (день 16) |
+| `mcp.py` | MCP-клиент (день 16): stdio/http транспорты, `MCPClient`, `MCPRegistry` |
 | `tests/` | Офлайн-тесты (tmp_path + httpx.MockTransport, без сети) |
 | `requirements.txt` | fastapi, uvicorn, httpx, pytest, python-dotenv |
 
@@ -64,6 +65,11 @@ python -m pytest -q
 | GET | `/api/requests` | Журнал LLM-запросов (без тел) |
 | GET | `/api/requests/{id}` | Полная запись журнала (с телом запроса) |
 | DELETE | `/api/requests` | Очистить журнал |
+| GET | `/api/mcp/servers` | Реестр MCP-серверов с runtime-статусом (idle/connected/error, tools_count) |
+| POST | `/api/mcp/servers` | Добавить сервер `{name, type, command?, url?, env?, enabled?}` → 201 `{server}`; 400 — RU-detail |
+| DELETE | `/api/mcp/servers/{id}` | Удалить сервер (404 — не найден) |
+| POST | `/api/mcp/servers/{id}/connect` | Подключить (initialize + tools/list) → `{server}`; сбой = status error, 404 — не найден |
+| GET | `/api/mcp/tools` | Инструменты подключённых серверов `[{server, name, description, input_schema}]` |
 
 ## Задача (день 13b)
 

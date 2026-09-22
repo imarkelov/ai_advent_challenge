@@ -20,6 +20,7 @@
 | День 13b | [`day13-task-state-machine`](https://github.com/imarkelov/ai_advent_challenge/tree/day13-task-state-machine) | Задача = запрос в режиме «задача» (тумблер чат/задача), карточка процесса в чате (спавн stage-агентов, чек-лист work-шагов, живой вывод), unified FSM planning/execution/validation/done/paused/failed, пошаговое исполнение (1 LLM-вызов на шаг), пауза на границе шага + инструкция |
 | День 14 | [`day14-invariants`](https://github.com/imarkelov/ai_advent_challenge/tree/day14-invariants) | Инварианты: глобальные жёсткие ограничения (архитектура, техрешения, стек, бизнес-правила), хранятся отдельно от диалога, всегда активны, инжектятся в system-промпт + правило конфликтов + server-side гард (отказ при противоречии), вкладка «Инварианты» + тесты конкурса/объяснения отказа |
 | День 15 | [`day15-plan-review`](https://github.com/imarkelov/ai_advent_challenge/tree/day15-plan-review) | Проверка плана (plan_review): человеческий гейт одобрения плана между planning и execution (кнопки «Одобрить»/«Отклонить», детект ограничений плана — инварианты/память/табу + альтернатива), фикс done-пост-гарда для согласованного контекста (запрет из одобренного контекста задачи не рубит объяснение альтернативы), пауза во время LLM-вызова валидатора/синтеза, move вкладок Токены/Запрос в сайдбар |
+| День 16 | [`day16-mcp-connect`](https://github.com/imarkelov/ai_advent_challenge/tree/day16-mcp-connect) | Подключение MCP: реестр MCP-серверов (stdio/http) в `mcp_servers.json`, клиент JSON-RPC (`mcp.py`), REST `/api/mcp/*` (список/добавить/удалить/подключить/инструменты), вкладка «MCP» в панели «Контекст» (статусы, инструменты подключённых серверов, форма добавления), дефолты: Context7, Firecrawl, Git; вызов инструментов (tool-loop) — задел |
 
 ## День 7: как работает сервис
 
@@ -769,3 +770,80 @@ forbidden `python` — пайплайн прошёл `planning → plan_review (
 execution → validation → done`, финальный ответ — решение на TypeScript без
 баннера «Нарушен инвариант» и с явным объяснением (без Python).
 Ветка `day15-plan-review` (от `day14-invariants`).
+
+## День 16: Подключение MCP
+
+### Что это
+
+Подключение внешних **Model Context Protocol (MCP)** серверов к Студии:
+пользователь добавляет сервер (stdio-процесс на `npx` или удалённый
+streamable-http), нажимает «Подключить» — и видит инструменты сервера
+в вкладке «MCP» панели «Контекст». Сценарий дня 16 — **подключение и
+просмотр**: вызов инструментов агентом (tool-loop) не реализуется,
+архитектурный задел — сделан.
+
+### Архитектура
+
+- **`mcp.py`** — клиент MCP-протокола (2024-11-05, JSON-RPC 2.0):
+  - `_StdioSession` — локальный процесс: pipes (stdin/stdout), по одной
+    JSON-строке в кадр; env-плейсхолдеры `{VAR}` расширяются из окружения
+    на запуске (в файле хранятся плейсхолдеры, не значения);
+  - `_HttpSession` — streamable-http: `POST {url}` с заголовками
+    `MCP-Protocol-Version`/`MCP-Session-Id` (из ответа `initialize`),
+    `Accept: application/json, text/event-stream`; SSE-ответ разбирается
+    по кадрам `data: {json}`;
+  - `MCPClient` — facade: `connect()` = `initialize` + `tools/list`,
+    `tools()`, `close()`;
+  - `MCPRegistry` — реестр: держит клиенты, runtime-статусы
+    (`idle`/`connected`/`error` + `tools_count`), `add`/`remove`/
+    `connect`/`tools`/`close_all`. Сбой подключения — `status: error` +
+    текст ошибки, агент не падает; повторный connect разрешён (self-heal).
+- **`memory.py`** — CRUD реестра: `mcp_servers.json` рядом с
+  `longterm.json`; при первом обращении создаются дефолты
+  **Context7** (`npx -y @upstash/context7-mcp`, env
+  `MCP_CONTEXT7_API_KEY={MCP_CONTEXT7_API_KEY}`), **Firecrawl**
+  (`npx -y firecrawl-mcp`) и **Git** (`npx -y @modelcontextprotocol/server-git`).
+- **`agent.py`** — принимает опциональный `mcp` (DI для тестов) или
+  строит `MCPRegistry` сам; `MCPRegistry.close_all()` — shutdown-хук.
+- **Таймауты** — из `.env`: `MCP_CONNECT_TIMEOUT` (дефолт 30 c).
+
+### API
+
+| Метод | Путь | Назначение |
+| --- | --- | --- |
+| GET | `/api/mcp/servers` | Реестр MCP-серверов с runtime-статусом (idle/connected/error, tools_count) |
+| POST | `/api/mcp/servers` | Добавить сервер `{name, type, command?, url?, env?, enabled?}` → 201 `{server}`; 400 — RU-detail |
+| DELETE | `/api/mcp/servers/{id}` | Удалить сервер (404 — не найден) |
+| POST | `/api/mcp/servers/{id}/connect` | Подключить (initialize + tools/list) → `{server}`; сбой = status error, 404 — не найден |
+| GET | `/api/mcp/tools` | Инструменты подключённых серверов `[{server, name, description, input_schema}]` |
+
+### UI
+
+Вкладка «MCP» (4-я в панели «Контекст», `McpTab.tsx`):
+
+- строка сервера — имя / чип типа (`stdio`/`http`) / статус-чип
+  (не подключён / подключён / ошибка, при ошибке — текст) / число
+  инструментов / кнопка «Подключить» / «×» (удалить);
+- секция «Инструменты подключённых серверов» — name + description
+  каждого инструмента;
+- форма добавления: имя, тип (stdio → command; http → url), переменные
+  окружения `KEY=VALUE` по строкам, «Добавить».
+
+### Безопасность
+
+Секреты — только в `.env` (корень репозитория): например
+`MCP_CONTEXT7_API_KEY`. В `mcp_servers.json` хранится плейсхолдер
+`{MCP_CONTEXT7_API_KEY}` — расширение происходит в памяти при запуске
+процесса.
+
+### Проверка задания
+
+Бэкенд — 304 теста PASS (включая stdio-транспорт на fake-процессе,
+http-транспорт на `httpx.MockTransport` (JSON + SSE + session-id +
+ошибки), реестр, API-роуты, **регресс: tools MCP НЕ уходят в LLM-payload**
+— задел на tool-loop). Фронтенд — 189 тестов PASS (включая 8 на вкладку
+«MCP»). E2E — 29 PASS, 5 SKIP, 0 FAIL: MCP-блок детерминированный
+(mock stdio-сервер на `python -c` без сети: POST 201 → connect → 2 tools →
+404 → DELETE 200/404), live Context7 — best-effort SKIP, если
+npx/`MCP_CONTEXT7_API_KEY` недоступны. Ветка `day16-mcp-connect`
+(от `day15-plan-review`).

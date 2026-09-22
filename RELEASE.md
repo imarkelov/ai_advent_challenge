@@ -1,3 +1,61 @@
+# Release Notes — day16-mcp-connect (день 16)
+
+Ветка: [`day16-mcp-connect`](https://github.com/imarkelov/ai_advent_challenge/tree/day16-mcp-connect)
+(от `day15-plan-review`).
+
+## Что в релизе
+
+**Подключение внешних MCP-серверов (Model Context Protocol) к Студии.**
+Пользователь добавляет сервер (stdio-процесс `npx …` или удалённый
+streamable-http), нажимает «Подключить» — и видит инструменты сервера
+в новой вкладке «MCP» панели «Контекст». Сценарий дня 16 — подключение
+и просмотр; вызов инструментов агентом (tool-loop) — архитектурный
+задел, не реализуется.
+
+- `mcp.py` — клиент MCP 2024-11-05 (JSON-RPC 2.0): `_StdioSession`
+  (pipes, JSON по строкам, `{VAR}`-плейсхолдеры env расширяются из
+  окружения на запуске), `_HttpSession` (streamable-http,
+  `MCP-Protocol-Version`/`MCP-Session-Id`, SSE-кадры `data: {json}`),
+  `MCPClient` (`connect` = `initialize` + `tools/list`), `MCPRegistry`
+  (реестр + runtime-статусы `idle`/`connected`/`error` + `tools_count`).
+- `memory.py` — CRUD реестра в `mcp_servers.json`; дефолты: Context7,
+  Firecrawl, Git.
+- `agent.py` — опциональный `mcp` (DI); `close_all()` — shutdown-хук.
+- Сбой подключения — `status: error` + текст ошибки, агент не падает;
+  повторный connect разрешён (self-heal).
+- Тело LLM-запроса не изменилось: tools MCP НЕ инжектятся (регресс-тест).
+
+## API
+
+| Метод | Путь | Назначение |
+| --- | --- | --- |
+| GET | `/api/mcp/servers` | Реестр MCP-серверов с runtime-статусом (idle/connected/error, tools_count) |
+| POST | `/api/mcp/servers` | Добавить сервер `{name, type, command?, url?, env?, enabled?}` → 201 `{server}`; 400 — RU-detail |
+| DELETE | `/api/mcp/servers/{id}` | Удалить сервер (404 — не найден) |
+| POST | `/api/mcp/servers/{id}/connect` | Подключить (initialize + tools/list) → `{server}`; сбой = status error, 404 — не найден |
+| GET | `/api/mcp/tools` | Инструменты подключённых серверов `[{server, name, description, input_schema}]` |
+
+## Проверка задания
+
+Бэкенд — 304 теста PASS (stdio-транспорт на fake-процессе, http-транспорт
+на `httpx.MockTransport` — JSON/SSE/session-id/ошибки, реестр, API-роуты,
+регресс: tools MCP вне LLM-payload). Фронтенд — 189 тестов PASS (включая
+8 на вкладку «MCP»); tsc и `npm run build` — clean. E2E — 29 PASS, 5 SKIP,
+0 FAIL: MCP-блок детерминированный (mock stdio-сервер `python -c` без сети:
+POST 201 → connect → 2 tools → connect-404 → DELETE 200/404); live Context7
+— best-effort SKIP (npx/`MCP_CONTEXT7_API_KEY` недоступны); чат/задачи —
+SKIP (GPustack недоступен из-за SSL-сертификата Python).
+
+## Безопасность
+
+Секреты — только в `.env` (корень репозитория), например
+`MCP_CONTEXT7_API_KEY`. В `mcp_servers.json` хранится плейсхолдер
+`{MCP_CONTEXT7_API_KEY}` — значение подставляется из окружения в памяти
+при запуске процесса, в файл не пишется. Таймаут подключения —
+`MCP_CONNECT_TIMEOUT` (дефолт 30 c).
+
+---
+
 # Release Notes — day13-task-state-machine (День 13b)
 
 Ветка: [`day13-task-state-machine`](https://github.com/imarkelov/ai_advent_challenge/tree/day13-task-state-machine)
