@@ -6,6 +6,7 @@ import sys
 import threading
 import time
 
+import httpx
 import pytest
 
 from mcp import MCPClient, MCPError
@@ -191,4 +192,123 @@ def test_stdio_timeout_raises_mcp_error():
     with pytest.raises(MCPError):
         client.connect()
     assert time.monotonic() - start < 5
+    client.close()
+
+
+# ---------- http-транспорт (streamable-http, MockTransport) ----------
+
+HTTP_SERVER = {"id": "mcp_h1", "name": "Remote", "type": "http",
+               "command": [], "url": "https://mcp.example.com/sse",
+               "env": {}, "enabled": True}
+
+
+def mock_mcp_transport():
+    """httpx.MockTransport: отвечает на POST JSON-RPC строкой JSON."""
+    def _handler(request: httpx.Request) -> httpx.Response:
+        msg = json.loads(request.content)
+        if msg.get("method") == "initialize":
+            return httpx.Response(
+                200, json={"jsonrpc": "2.0", "id": msg["id"],
+                           "result": {"protocolVersion": "2024-11-05",
+                                      "capabilities": {},
+                                      "serverInfo": {"name": "r",
+                                                     "version": "1"}}},
+                headers={"Mcp-Session-Id": "s-1"})
+        if msg.get("method") == "tools/list":
+            return httpx.Response(200, json={"jsonrpc": "2.0",
+                                             "id": msg["id"],
+                                             "result": {"tools": [
+                                                 {"name": "remote_search",
+                                                  "description": "Поиск",
+                                                  "inputSchema":
+                                                      {"type": "object"}}]}})
+        if msg.get("method") == "tools/call":
+            return httpx.Response(200, json={"jsonrpc": "2.0",
+                                             "id": msg["id"],
+                                             "result": {
+                                                 "content":
+                                                     [{"type": "text",
+                                                       "text": "ok"}],
+                                                 "isError": False}})
+        if msg.get("id") is None:  # notification
+            return httpx.Response(202)
+        return httpx.Response(200, json={"jsonrpc": "2.0",
+                                         "id": msg.get("id"),
+                                         "result": {}})
+    return httpx.MockTransport(_handler)
+
+
+def test_http_connect_returns_tools():
+    client = MCPClient(HTTP_SERVER, http_client=httpx.Client(
+        transport=mock_mcp_transport()))
+    tools = client.connect()
+    client.close()
+    assert [t["name"] for t in tools] == ["remote_search"]
+    assert tools[0]["input_schema"] == {"type": "object"}
+
+
+def test_http_session_id_reused():
+    seen = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request.headers.get("Mcp-Session-Id"))
+        msg = json.loads(request.content)
+        if msg.get("method") == "initialize":
+            return httpx.Response(
+                200, json={"jsonrpc": "2.0", "id": msg["id"],
+                           "result": {"protocolVersion": "2024-11-05",
+                                      "capabilities": {},
+                                      "serverInfo": {"name": "r",
+                                                     "version": "1"}}},
+                headers={"Mcp-Session-Id": "s-42"})
+        if msg.get("method") == "tools/list":
+            return httpx.Response(200, json={"jsonrpc": "2.0",
+                                             "id": msg["id"],
+                                             "result": {"tools": []}})
+        return httpx.Response(202)
+
+    client = MCPClient(HTTP_SERVER,
+                       http_client=httpx.Client(
+                           transport=httpx.MockTransport(handler)))
+    client.connect()
+    client.close()
+    # initialize — без id; notification initialized и tools/list — с s-42
+    assert seen == [None, "s-42", "s-42"]
+
+
+def test_http_sse_response():
+    def handler(request: httpx.Request) -> httpx.Response:
+        msg = json.loads(request.content)
+        if msg.get("method") == "initialize":
+            return httpx.Response(
+                200, json={"jsonrpc": "2.0", "id": msg["id"],
+                           "result": {"protocolVersion": "2024-11-05",
+                                      "capabilities": {},
+                                      "serverInfo": {"name": "r",
+                                                     "version": "1"}}})
+        body = ('event: message\n'
+                'data: {"jsonrpc": "2.0", "id": 1, "result": '
+                '{"tools": [{"name": "sse_tool", "description": "SSE",'
+                ' "inputSchema": {"type": "object"}}]}}\n\n')
+        return httpx.Response(200, text=body,
+                              headers={"content-type":
+                                       "text/event-stream"})
+
+    client = MCPClient(HTTP_SERVER,
+                       http_client=httpx.Client(
+                           transport=httpx.MockTransport(handler)))
+    tools = client.connect()
+    client.close()
+    assert [t["name"] for t in tools] == ["sse_tool"]
+
+
+def test_http_error_status_is_mcp_error():
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(500)
+
+    client = MCPClient(HTTP_SERVER,
+                       http_client=httpx.Client(
+                           transport=httpx.MockTransport(handler)))
+    with pytest.raises(MCPError, match="500"):
+        client.connect()
     client.close()
