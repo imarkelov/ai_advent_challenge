@@ -8,7 +8,8 @@
      всё ещё занят — SKIP с сообщением, exit 0.
   3. Запуск `python -m uvicorn studio.backend.main:app --port 8100` detached
      из корня репозитория (prod-режим: API + собранный фронтенд из dist).
-  4. UI: GET / → 200, HTML содержит «Студия»; assets из index.html → 200.
+   4. UI: GET / → 200, HTML содержит «AI Studio» (бренд, день 14); assets из
+      index.html → 200.
   5. GET /api/config; GET /api/models (502 допустим — фиксируем, не FAIL).
   6. POST /api/dialogues → 201 + active_id.
   7. WM: POST /api/memory/working → ok; GET /api/memory → working.entries == 1.
@@ -27,20 +28,26 @@
          профилями, один вопрос → разные ответы (best-effort) + профиль-
           блоки в телах запросов журнала; запрос с табу-словом → system-
           напоминание гарда (D8) в теле LLM-запроса.
-     8d. Задача (день 13b): пошаговый пайплайн — start (task_id, plan из
-          4 записей, user-маркер) → run (SSE до конца: agent_spawned /
-          step_updated / step_delta / stage_done / task_done, структура
-          событий, имя/число work-шагов не фиксированы) → состояние done
-          (plan + work_steps completed) → маркеры сообщений
-          (task_id/task_stage/task_step, финальный assistant без
-          task_stage) → 400-гарды на done (pause/instruction/run) →
-          новая задача (D9: новый task_id, 2 user-якоря) → гард чата
-          на активной + reset. Live best-effort (SKIP, не FAIL): пауза
-          на границе work-шага → task_paused + context_snapshot →
-          instruction → resume → run → task_done; чат-режим после done
-          (обычный чат, новых task_id-маркеров нет). SKIP, если
-          GPustack недоступен.
-   11. GET /api/tokens → {last, session, context_limit}.
+      8d. Задача (день 13b): пошаговый пайплайн — start (task_id, plan из
+           4 записей, user-маркер) → run (SSE до конца: agent_spawned /
+           step_updated / step_delta / stage_done / task_done, структура
+           событий, имя/число work-шагов не фиксированы) → состояние done
+           (plan + work_steps completed) → маркеры сообщений
+           (task_id/task_stage/task_step, финальный assistant без
+           task_stage) → 400-гарды на done (pause/instruction/run) →
+           новая задача (D9: новый task_id, 2 user-якоря) → гард чата
+           на активной + reset. Live best-effort (SKIP, не FAIL): пауза
+           на границе work-шага → task_paused + context_snapshot →
+           instruction → resume → run → task_done; чат-режим после done
+           (обычный чат, новых task_id-маркеров нет). SKIP, если
+           GPustack недоступен.
+    7e. MCP (день 16): дефолты в реестре (Context7/Firecrawl/Git) → 400-
+         валидация → mock stdio-сервер (python -c, без сети): POST (201) →
+         connect (200, status connected, 2 tools) → /api/mcp/tools содержит
+         mock_echo/mock_ping → connect неизвестного id (404) → DELETE (200 +
+         повтор 404). Live: connect Context7 — best-effort, SKIP (не FAIL),
+         если npx/MCP_CONTEXT7_API_KEY недоступны.
+    11. GET /api/tokens → {last, session, context_limit}.
   11. GET /api/requests → список; после успешного чата запись с model.
   12. finally: ВСЕГДА убить свой uvicorn, убедиться, что порт 8100 закрыт.
 
@@ -67,6 +74,38 @@ WAIT_PORT_BUSY_MAX = 600   # 10 минут ожидания освобожден
 WAIT_PORT_BUSY_STEP = 10
 WAIT_SERVER_UP_MAX = 90
 CHAT_TIMEOUT = 330
+
+# MCP (день 16): детерминированный mock stdio-сервер для e2e-подключения
+# (JSON-RPC по stdin/stdout, 2 инструмента; сеть и npx не нужны)
+MOCK_MCP_SERVER = r'''
+import json, sys
+def send(obj):
+    sys.stdout.write(json.dumps(obj) + "\n")
+    sys.stdout.flush()
+for line in sys.stdin:
+    line = line.strip()
+    if not line:
+        continue
+    try:
+        m = json.loads(line)
+    except ValueError:
+        continue
+    if "id" not in m:
+        continue
+    if m["method"] == "initialize":
+        r = {"protocolVersion": "2024-11-05", "capabilities": {},
+             "serverInfo": {"name": "mock", "version": "1"}}
+    elif m["method"] == "tools/list":
+        r = {"tools": [
+            {"name": "mock_echo", "description": "E2E echo tool",
+             "inputSchema": {"type": "object"}},
+            {"name": "mock_ping", "description": "E2E ping",
+             "inputSchema": {"type": "object"}},
+        ]}
+    else:
+        r = {}
+    send({"jsonrpc": "2.0", "id": m["id"], "result": r})
+'''
 
 # Windows-консоль может быть cp1251 — выводим UTF-8, чтобы «→» не падало.
 for _stream in (sys.stdout, sys.stderr):
@@ -289,7 +328,7 @@ def main() -> int:
         # 1. UI
         code, body, headers = http("GET", "/")
         text = body.decode("utf-8", "replace")
-        if code == 200 and "Студия" in html.unescape(text):
+        if code == 200 and "AI Studio" in html.unescape(text):
             record("UI: GET / → студия", "PASS")
         else:
             record("UI: GET / → студия", "FAIL", f"code={code}")
@@ -378,7 +417,12 @@ def main() -> int:
                    f"set={code} mem={code2} items={lt_items}")
             return 1
 
-        # 7b. Тумблеры слоёв: wm off → отражается в /api/memory → restore on
+        # 7b. Тумблеры слоёв: wm off → отражается в /api/memory → restore on.
+        #     Idempotent: baseline — текущие toggles (toggles.json persistится,
+        #     st/lt могут быть выключены пользователем); проверяем, что wm
+        #     переключился, а st/lt не тронулись.
+        _, body, _ = http("GET", "/api/memory")
+        tog_orig = json.loads(body).get("toggles", {})
         code, _, _ = http("POST", "/api/memory/toggles",
                           {"layer": "wm", "enabled": False})
         code2, body, _ = http("GET", "/api/memory")
@@ -386,12 +430,14 @@ def main() -> int:
         code3, _, _ = http("POST", "/api/memory/toggles",
                            {"layer": "wm", "enabled": True})
         if (code == 200 and code2 == 200 and code3 == 200
-                and tog.get("wm") is False and tog.get("st") is True
-                and tog.get("lt") is True):
+                and tog.get("wm") is False
+                and tog.get("st") == tog_orig.get("st")
+                and tog.get("lt") == tog_orig.get("lt")):
             record("API: memory toggles (wm off/on)", "PASS")
         else:
             record("API: memory toggles (wm off/on)", "FAIL",
-                   f"off={code} mem={code2} on={code3} toggles={tog}")
+                   f"off={code} mem={code2} on={code3} "
+                   f"toggles={tog} orig={tog_orig}")
             return 1
 
         # 7c. профиль (день 12): pending → set → block в rules → decline.
@@ -527,6 +573,66 @@ def main() -> int:
             record("API: invariants DELETE (200) + повтор (404)", "FAIL",
                    f"del={code} gone={gone} del2={code3}")
             return 1
+
+        # 7e. MCP (день 16): реестр + connect на локальном mock stdio-сервере
+        # (детерминировано, без сети); live-context7 — best-effort SKIP.
+        code, body, _ = http("GET", "/api/mcp/servers")
+        mcp_servers = json.loads(body).get("servers", []) if code == 200 else []
+        if code == 200 and {"Context7", "Firecrawl", "Git"} <= {s["name"] for s in mcp_servers}:
+            record(f"MCP: дефолты в реестре ({len(mcp_servers)} серверов)", "PASS")
+        else:
+            record("MCP: дефолты в реестре", "FAIL", f"code={code}")
+
+        code, _, _ = http("POST", "/api/mcp/servers",
+                          {"type": "stdio", "command": ["npx"]}, timeout=10)
+        record("MCP: POST без name → 400", "PASS" if code == 400 else "FAIL", f"code={code}")
+        code, _, _ = http("POST", "/api/mcp/servers",
+                          {"name": "X", "type": "tcp", "command": ["npx"]}, timeout=10)
+        record("MCP: POST с неизвестным type → 400", "PASS" if code == 400 else "FAIL", f"code={code}")
+
+        code, body, _ = http("POST", "/api/mcp/servers", {
+            "name": "E2E Mock", "type": "stdio",
+            "command": ["python", "-c", MOCK_MCP_SERVER],
+        }, timeout=10)
+        mcp_mock = json.loads(body).get("server", {}) if code == 201 else {}
+        record("MCP: POST mock-сервер (201)", "PASS" if code == 201 else "FAIL", f"code={code}")
+
+        if mcp_mock:
+            code, body, _ = http("POST", f"/api/mcp/servers/{mcp_mock['id']}/connect", timeout=90)
+            view = json.loads(body).get("server", {}) if code == 200 else {}
+            ok = code == 200 and view.get("status") == "connected" \
+                and view.get("tools_count") == 2
+            if ok:
+                code2, body, _ = http("GET", "/api/mcp/tools")
+                tools = json.loads(body).get("tools", []) if code2 == 200 else []
+                names = {t["name"] for t in tools if t.get("server") == mcp_mock["id"]}
+                ok = {"mock_echo", "mock_ping"} <= names
+            record("MCP: mock connect (connected, 2 tools в /api/mcp/tools)",
+                   "PASS" if ok else "FAIL", f"code={code}, view={view}")
+            code3, _, _ = http("POST", "/api/mcp/servers/mcp_nope/connect", timeout=10)
+            record("MCP: connect неизвестного id → 404", "PASS" if code3 == 404 else "FAIL", f"code={code3}")
+            code4, _, _ = http("DELETE", f"/api/mcp/servers/{mcp_mock['id']}", timeout=10)
+            code5, _, _ = http("DELETE", f"/api/mcp/servers/{mcp_mock['id']}", timeout=10)
+            record("MCP: DELETE (200) + повтор (404)",
+                   "PASS" if code4 == 200 and code5 == 404 else "FAIL",
+                   f"code={code4}/{code5}")
+        else:
+            record("MCP: mock connect (connected, 2 tools в /api/mcp/tools)",
+                   "FAIL", "mock-сервер не создан (нет 201)")
+
+        # Live: connect Context7 — best-effort (npx / MCP_CONTEXT7_API_KEY
+        # могут быть недоступны — SKIP, не FAIL)
+        ctx = next((s for s in mcp_servers if s["name"] == "Context7"), None)
+        if ctx:
+            code, body, _ = http("POST", f"/api/mcp/servers/{ctx['id']}/connect", timeout=180)
+            view = json.loads(body).get("server", {}) if code == 200 else {}
+            if code == 200 and view.get("status") == "connected":
+                record(f"MCP: live Context7 (connected, {view.get('tools_count')} tools)", "PASS")
+            else:
+                record("MCP: live Context7", "SKIP",
+                       f"npx/ключ недоступны ({view.get('error') or code})")
+        else:
+            record("MCP: live Context7", "SKIP", "Context7 нет в реестре")
 
         # 8. чат (SSE) — SKIP, если GPustack недоступен
         skip_reason = probe_gpustack()
