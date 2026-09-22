@@ -51,7 +51,7 @@ import {
 const sleep = (ms: number) => new Promise<void>((r) => { setTimeout(r, ms) })
 
 // ── Типы по контракту API дня 11 ────────────────────────────────────────────
-export type Role = 'system' | 'user' | 'assistant'
+export type Role = 'system' | 'user' | 'assistant' | 'tool'
 
 export interface Message {
   role: Role
@@ -70,6 +70,13 @@ export interface Message {
   // Результат вызова инструмента MCP (день 16, tool-loop): system-сообщение,
   // которое сохранил бэкенд после tool-invocation (старые — без поля)
   mcp_tool?: { server: string; tool: string }
+  // Tool-сообщения LLM-лупа (день 17): результат вызова инструмента,
+  // который сохранил бэкенд для контекста LLM (служебные, не bubble)
+  tool_call_id?: string
+  name?: string
+  // Assistant-сообщения с вызовами инструментов (день 17):
+  // [{id, type, function:{name, arguments}}] (старые — без поля)
+  tool_calls?: unknown
 }
 
 export interface DialogueMeta {

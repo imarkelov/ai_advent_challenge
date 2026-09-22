@@ -261,6 +261,10 @@ export default function ChatPanel() {
           const isTail = i === state.messages.length - 1
           // Stage/work-сообщения с task_stage рендерятся внутри карточки
           if (m.task_stage) return null
+          // Tool-сообщения LLM-лупа (день 17): служебные результаты
+          // MCP-инструментов для контекста LLM — не рендерятся пузырём
+          // (итог даёт финальный assistant-ответ)
+          if (m.role === 'tool') return null
           // Результат вызова MCP-инструмента (день 16): отдельная карточка
           // (chip + вывод), без «в память»
           if (m.mcp_tool) {

@@ -922,6 +922,35 @@ describe('ChatPanel — карточка результата MCP (день 16, 
   })
 })
 
+describe('ChatPanel — служебные tool-сообщения (день 17, LLM tool-loop)', () => {
+  it('role "tool" не рендерится в ленте; обычный assistant-ответ виден', async () => {
+    stubDialogueFetch([
+      { role: 'user', content: 'Каков статус задачи TASK-42?' },
+      {
+        role: 'assistant',
+        content: '',
+        tool_calls: [{ id: 'call_1', type: 'function', function: { name: 'get_task_details', arguments: '{"task_id": "TASK-42"}' } }],
+      },
+      { role: 'tool', content: 'TOOL-SERVICE-SECRET-123', tool_call_id: 'call_1', name: 'get_task_details' },
+      { role: 'assistant', content: 'Финальный ответ: in_progress', model: 'qwen3.8-27b' },
+    ])
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    // финальный assistant-ответ в ленте
+    const final = await screen.findByText('Финальный ответ: in_progress')
+    expect(final).toBeTruthy()
+    // сырой tool-результат (служебные данные для LLM) вне DOM
+    expect(container.textContent).not.toContain('TOOL-SERVICE-SECRET-123')
+    // и не как «модель»-пузырь: всего 2 bubble (user + финальный assistant)
+    const texts = Array.from(container.querySelectorAll('.msg-text')).map((el) => el.textContent)
+    expect(texts).toContain('Финальный ответ: in_progress')
+    expect(texts.some((t) => t && t.includes('TOOL-SERVICE-SECRET-123'))).toBe(false)
+  })
+})
+
 describe('ChatPanel — кнопка MCP в шапке чата (день 16)', () => {
   it('рендерит кнопку (aria-label="MCP"); клик → open-mcp (mcpOpen=true)', async () => {
     stubMcpFetch()
