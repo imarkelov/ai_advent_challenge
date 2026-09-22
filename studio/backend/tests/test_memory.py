@@ -985,3 +985,70 @@ def test_layer_stats_invariants(store):
     assert stats["invariants"]["items"] == {
         iid: {"title": "Стек", "description": "Kotlin",
               "forbidden": [], "is_active": True}}
+
+# ---------- реестр MCP-серверов (день 16) ----------
+
+def test_mcp_servers_missing_and_broken_file(data_dir):
+    assert MemoryStore(str(data_dir)).mcp_servers_items() == {}
+    (data_dir / "mcp_servers.json").write_text("{битый json", encoding="utf-8")
+    assert MemoryStore(str(data_dir)).mcp_servers_items() == {}
+
+
+def test_mcp_servers_crud(store):
+    rec = store.mcp_servers_set("mcp_a1", "Context7", "stdio",
+                                command=["npx", "-y", "@upstash/context7-mcp"])
+    assert rec == {"id": "mcp_a1", "name": "Context7", "type": "stdio",
+                   "command": ["npx", "-y", "@upstash/context7-mcp"],
+                   "url": "", "env": {}, "enabled": True}
+    assert store.mcp_servers_items()["mcp_a1"]["name"] == "Context7"
+    # обновление по id сохраняет id
+    rec2 = store.mcp_servers_set("mcp_a1", "Context7", "stdio", command=["npx"])
+    assert rec2["id"] == "mcp_a1" and rec2["command"] == ["npx"]
+    # http-сервер: command пуст, url задан
+    rec3 = store.mcp_servers_set("mcp_b2", "Yandex", "http",
+                                 url="https://example.com/mcp")
+    assert rec3 == {"id": "mcp_b2", "name": "Yandex", "type": "http",
+                    "command": [], "url": "https://example.com/mcp",
+                    "env": {}, "enabled": True}
+    assert store.mcp_servers_remove("mcp_a1") is True
+    assert store.mcp_servers_remove("mcp_a1") is False
+    store.mcp_servers_clear()
+    assert store.mcp_servers_items() == {}
+
+
+def test_mcp_servers_persistence_across_instances(data_dir):
+    s1 = MemoryStore(str(data_dir))
+    s1.mcp_servers_set("mcp_a1", "Git", "stdio", command=["npx"])
+    s2 = MemoryStore(str(data_dir))
+    assert s2.mcp_servers_items()["mcp_a1"]["name"] == "Git"
+
+
+def test_mcp_servers_validation(store):
+    with pytest.raises(ValueError):
+        store.mcp_servers_set("mcp_x", "", "stdio", command=["npx"])
+    with pytest.raises(ValueError):
+        store.mcp_servers_set("mcp_x", "S", "tcp", command=["npx"])
+    with pytest.raises(ValueError):
+        store.mcp_servers_set("mcp_x", "S", "stdio", command=[])
+    with pytest.raises(ValueError):
+        store.mcp_servers_set("mcp_x", "S", "stdio", command=["npx", 42])
+    with pytest.raises(ValueError):
+        store.mcp_servers_set("mcp_x", "S", "http", url="ftp://x")
+    with pytest.raises(ValueError):
+        store.mcp_servers_set("mcp_x", "S", "http")
+    with pytest.raises(ValueError):
+        store.mcp_servers_set("mcp_x", "S", "stdio", command=["npx"],
+                              env={"K": "V", "J": 1})
+    with pytest.raises(ValueError):
+        store.mcp_servers_set("mcp_x", "S", "stdio", command=["npx"],
+                              enabled="yes")
+
+
+def test_mcp_servers_isolation_from_memory(store):
+    store.mcp_servers_set("mcp_a1", "Git", "stdio", command=["npx"])
+    store.lt_set("k", "v")
+    d = store.new_dialogue()
+    store.wm_set(d["id"], "w", "x")
+    stats = store.layer_stats()
+    assert "mcp" not in stats
+    assert store.lt_items() == {"k": "v"}

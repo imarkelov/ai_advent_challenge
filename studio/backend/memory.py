@@ -157,6 +157,10 @@ class MemoryStore:
     # любое сочетание работает независимо).
     TOGGLE_LAYERS = ("st", "wm", "lt")
 
+    # Типы MCP-серверов (день 16): stdio (локальный процесс) и http
+    # (удалённый streamable-http).
+    MCP_SERVER_TYPES = ("stdio", "http")
+
     def __init__(self, data_dir: str):
         """Создаёт store поверх каталога data_dir (каталог создаётся при первой записи)."""
         self.data_dir = data_dir
@@ -166,6 +170,7 @@ class MemoryStore:
         self._p_longterm = os.path.join(data_dir, "longterm.json")
         self._p_invariants = os.path.join(data_dir, "invariants.json")
         self._p_toggles = os.path.join(data_dir, "toggles.json")
+        self._p_mcp_servers = os.path.join(data_dir, "mcp_servers.json")
 
     # ---------- внутреннее чтение/запись ----------
 
@@ -956,6 +961,96 @@ class MemoryStore:
         return ("\n\nИнварианты (неукоснительно):\n"
                 + "\n".join(f"- {e['title']}: {e['description']}"
                             for e in active))
+
+    # ---------- реестр MCP-серверов (день 16, mcp_servers.json) ----------
+
+    def _read_mcp_servers(self) -> dict:
+        """Реестр {id: record}; битый/отсутствующий файл -> {}."""
+        d = read_json(self._p_mcp_servers, None)
+        if not isinstance(d, dict):
+            return {}
+        out = {}
+        for k, v in d.items():
+            if not isinstance(k, str) or not k:
+                continue
+            if not isinstance(v, dict):
+                continue
+            if not isinstance(v.get("name"), str) or not v["name"].strip():
+                continue
+            if v.get("type") not in self.MCP_SERVER_TYPES:
+                continue
+            if not isinstance(v.get("command"), list):
+                continue
+            if not isinstance(v.get("url"), str):
+                continue
+            if not isinstance(v.get("env"), dict):
+                continue
+            rec = {
+                "id": k,
+                "name": v["name"].strip(),
+                "type": v["type"],
+                "command": [c for c in v["command"] if isinstance(c, str)],
+                "url": v["url"],
+                "env": {ek: ev for ek, ev in v["env"].items()
+                        if isinstance(ek, str) and isinstance(ev, str)},
+                "enabled": bool(v.get("enabled", True)),
+            }
+            out[k] = rec
+        return out
+
+    def _write_mcp_servers(self, v: dict) -> None:
+        atomic_write_json(self._p_mcp_servers, v)
+
+    def mcp_servers_items(self) -> dict:
+        """Все MCP-серверы {id: record}."""
+        with self._lock:
+            return self._read_mcp_servers()
+
+    def mcp_servers_set(self, id_: str, name: str, type_: str,
+                        command=None, url="", env=None, enabled=True) -> dict:
+        """Создать/обновить MCP-сервер по id; вернуть запись."""
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("name обязателен (непустая строка)")
+        if type_ not in self.MCP_SERVER_TYPES:
+            raise ValueError(f"type: {self.MCP_SERVER_TYPES}")
+        cmd = list(command or [])
+        if any(not isinstance(c, str) for c in cmd):
+            raise ValueError("command: список строк")
+        if type_ == "stdio" and not cmd:
+            raise ValueError("stdio-сервер требует непустого command")
+        if not isinstance(url, str):
+            raise ValueError("url: строка")
+        if type_ == "http" and not (url.startswith("http://")
+                                    or url.startswith("https://")):
+            raise ValueError("http-сервер требует url http(s)://")
+        env = dict(env or {})
+        if any(not isinstance(k, str) or not isinstance(v, str)
+               for k, v in env.items()):
+            raise ValueError("env: словарь str->str")
+        if not isinstance(enabled, bool):
+            raise ValueError("enabled: bool")
+        rec = {"id": id_, "name": name.strip(), "type": type_,
+               "command": cmd, "url": url, "env": env, "enabled": enabled}
+        with self._lock:
+            v = self._read_mcp_servers()
+            v[id_] = rec
+            self._write_mcp_servers(v)
+        return rec
+
+    def mcp_servers_remove(self, id_: str) -> bool:
+        """Удалить сервер по id; True, если существовал."""
+        with self._lock:
+            v = self._read_mcp_servers()
+            if id_ not in v:
+                return False
+            del v[id_]
+            self._write_mcp_servers(v)
+        return True
+
+    def mcp_servers_clear(self) -> None:
+        """Очистить все MCP-серверы."""
+        with self._lock:
+            self._write_mcp_servers({})
 
     # ---------- тумблеры слоёв памяти (toggles.json) ----------
 
