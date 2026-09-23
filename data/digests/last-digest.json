@@ -1,8 +1,12 @@
 {
-  "id": "digest-20260923-1941",
-  "generated_at": "2026-09-23T19:41:18Z",
+  "id": "digest-20260923-2009",
+  "generated_at": "2026-09-23T20:09:10Z",
   "weather": {
-    "error": "<urlopen error timed out>"
+    "city": "Самара",
+    "temp_c": 16.2,
+    "feels_like_c": 15.9,
+    "description": "Ясно",
+    "wind_ms": 5.4
   },
   "news": {
     "vc.ru": [
@@ -72,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20260923-1941: погода недоступна (<urlopen error timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260923-2009: Самара 16.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
