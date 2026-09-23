@@ -200,3 +200,16 @@ def test_live_fetch_news():
     items = collector.fetch_news("vc.ru")
     assert 1 <= len(items) <= collector.TOP_N
     assert all(i["title"] and i["url"] for i in items)
+
+
+# ---------- collector: CLI main ----------
+
+def test_cli_main_writes_and_prints(tmp_path, monkeypatch):
+    # Мокаем реальные фетчеры патчем модуля — сеть в оффлайне не нужна
+    monkeypatch.setattr(collector, "fetch_weather", lambda city: dict(FAKE_WEATHER))
+    monkeypatch.setattr(collector, "fetch_news", lambda src: list(FAKE_NEWS[src]))
+    code = collector.main(["--out", str(tmp_path)])
+    assert code == 0
+    last = json.loads((tmp_path / "last-digest.json")
+                      .read_text(encoding="utf-8"))
+    assert last["weather"]["city"] == "Самара"

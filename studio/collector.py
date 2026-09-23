@@ -219,3 +219,24 @@ def collect_digest(city=DEFAULT_CITY, now=None, fetch_weather=None,
     }
     digest["summary"] = build_summary(digest)
     return digest
+
+
+def main(argv=None):
+    """CLI (GitHub Actions): собрать и сохранить дайджест.
+    `python studio/collector.py --out DIR [--city City]`
+    Печатает JSON дайджеста; сбой фетчей не меняет exit code (0)."""
+    import argparse
+    p = argparse.ArgumentParser(description="Собрать дайджест (день 18)")
+    p.add_argument("--out", default=None,
+                   help="Каталог данных (дефолт: $DIGEST_DATA_DIR или "
+                        "<repo>/data/digests)")
+    p.add_argument("--city", default=DEFAULT_CITY)
+    a = p.parse_args(argv)
+    digest = collect_digest(city=a.city)  # реальные fetch_weather/fetch_news
+    save_digest(digest, a.out)
+    print(json.dumps(digest, ensure_ascii=False, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
