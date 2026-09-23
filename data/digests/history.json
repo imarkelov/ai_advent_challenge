@@ -1,0 +1,78 @@
+[
+  {
+    "id": "digest-20260923-1941",
+    "generated_at": "2026-09-23T19:41:18Z",
+    "weather": {
+      "error": "<urlopen error timed out>"
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "YouTube разрешит настраивать ленты — сервис будет их собирать по текстовому описанию пользователя",
+          "url": "https://vc.ru/services/3155294-youtube-zapustit-kastomizirovannye-lenty?from=rss"
+        },
+        {
+          "title": "«Ъ»: власти обсуждают новый сбор с пассажиров на поддержку лизинга и обслуживание новых российских самолётов — он может составить до 500-700 рублей за внутренний рейс и до 1000-2000 рублей за международный",
+          "url": "https://vc.ru/transport/3153936-sbor-s-passazhirov-dlya-podderzhki-rossiiskikh-aviakompanii?from=rss"
+        },
+        {
+          "title": "Росфинмониторинг предложил ввести новое основание для блокировки банковских счетов — «частичное совпадение» данных клиента с информацией о человеке, к которому применяются ограничения",
+          "url": "https://vc.ru/money/3154057-rosfinmonitoring-blokirovka-schetov-chastichnoe-sovpadenie-dannykh?from=rss"
+        },
+        {
+          "title": "LinkedIn добавил функции для борьбы с фейковыми профилями — пользователи смогут подтверждать опыт своих коллег и однокурсников",
+          "url": "https://vc.ru/services/3154971-linkedin-uluchshaet-zashchitu-ot-feykovykh-profiley?from=rss"
+        },
+        {
+          "title": "Ozon увеличил срок бесплатного размещения товаров в логистических центрах и продлил бесплатную перевозку товаров продавцов на объекты в Сибири и Казахстане до 2027 года",
+          "url": "https://vc.ru/marketplace/3154980-ozon-uvelichil-srok-besplatnogo-razmeshheniya-tovarov?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "JetBrains больше не хочет быть просто компанией про IDE",
+          "url": "https://habr.com/ru/news/1085888/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1085888"
+        },
+        {
+          "title": "KodaCode 1.2.0 получил новые модели, субагентов и планирование в Desktop и CLI",
+          "url": "https://habr.com/ru/companies/koda/news/1085884/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1085884"
+        },
+        {
+          "title": "Apple распаяла накопитель Mac mini в моделях с M6 и M5 Pro; теперь его нельзя заменить",
+          "url": "https://habr.com/ru/news/1085880/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1085880"
+        },
+        {
+          "title": "Физики не нашли противоречий в том, как могли бы вести себя в нашем мире объекты с отрицательной массой",
+          "url": "https://habr.com/ru/news/1085874/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1085874"
+        },
+        {
+          "title": "Возможно, никаких управляющих разумом паразитов не существует",
+          "url": "https://habr.com/ru/news/1085834/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1085834"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "UiPath сделала полный стек Automation Suite доступным на Linux и обновила управление ИИ-агентами",
+          "url": "https://tproger.ru/news/uipath-sdelala-polnyj-stek-automation-suite-dostupnym-na-linux-i"
+        },
+        {
+          "title": "OpenAI выпустила GPT-6 Sol и GPT-6 Luna в API",
+          "url": "https://tproger.ru/news/openai-vypustila-gpt-6-sol-i-gpt-6-luna-v-api"
+        },
+        {
+          "title": "Полезные сервисы для студентов технических вузов: от учёбы до стажировки",
+          "url": "https://tproger.ru/articles/poleznye-servisy-dlya-studentov-tehnicheskih-vuzov-ot-uchyoby-do-st"
+        },
+        {
+          "title": "Вышел systemd 262 со статической сборкой PID 1 и усиленной защитой TPM-учётных данных",
+          "url": "https://tproger.ru/news/vywel-systemd-262-so-staticheskoj-sborkoj-pid-1-i-usilennoj-zashhit"
+        },
+        {
+          "title": "Anthropic выпустила флагманскую модель Claude Opus 5.5",
+          "url": "https://tproger.ru/news/anthropic-vypustila-flagmanskuyu-model-claude-opus-5-5"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20260923-1941: погода недоступна (<urlopen error timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  }
+]

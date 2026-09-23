@@ -27,6 +27,8 @@ __pycache__/
 # Данные агента
 history.json
 dialogues.json
+# День 18: message bus дайджестов — в git (не данные агента)
+!data/digests/history.json
 
 # День 11 (студия)
 studio/data/
