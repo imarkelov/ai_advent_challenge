@@ -7,11 +7,25 @@
 import json
 import re
 import os
+import sys
 import threading
 import time
 from datetime import datetime
 
 import httpx
+
+# Windows: stdout консоли/пипы может быть cp1251. Лог-теги
+# ([LLM Decision]/[MCP Response]/[Final Response], день 17) могут
+# содержать символы, не кодируемые кодировкой консоли (❌, эмодзи и
+# т.п.) — print бросает UnicodeEncodeError ВНУТРИ SSE-генератора,
+# стрим обрывается без done-кадра (клиент: IncompleteRead).
+# Делаем print нефатальным: не кодируемые символы заменяются,
+# сама кодировка потоков не меняется.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(errors="replace")
+    except Exception:
+        pass
 
 try:  # пакетный режим: studio.backend.agent
     from .memory import MemoryStore, atomic_write_json, read_json
