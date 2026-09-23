@@ -7,6 +7,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
+def pytest_configure(config):
+    """live — сетевые тесты (день 18): по умолчанию пропускаются
+    через -m "not live"; прогоняются явно: -m live."""
+    config.addinivalue_line("markers",
+                            "live: сетевой тест (нужна сеть), "
+                            "пропускается по умолчанию")
+
+
 def sse_body(chunks: list) -> str:
     """Собирает SSE-тело из чанков (dict или строка "[DONE]")."""
     parts = []

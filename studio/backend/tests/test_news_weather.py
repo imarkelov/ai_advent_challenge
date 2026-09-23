@@ -141,3 +141,62 @@ def test_save_digest_corrupt_history_recovered(tmp_path):
     collector.save_digest(d, str(tmp_path))  # не падает
     hist = json.loads((tmp_path / "history.json").read_text(encoding="utf-8"))
     assert hist == [d]
+
+
+# ---------- collector: RSS / реальные фетчеры ----------
+
+RSS_FIXTURE = """<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+  <item><title>Первая</title><link>https://a/1</link></item>
+  <item><title>Вторая</title><link>https://a/2</link></item>
+  <item><title>Дубль</title><link>https://a/1</link></item>
+  <item><title>Без ссылки</title></item>
+  <item><title>Третья</title><link>https://a/3</link></item>
+</channel></rss>"""
+
+
+def test_parse_rss_items_basic():
+    items = collector._parse_rss_items(RSS_FIXTURE)
+    assert [i["url"] for i in items] == ["https://a/1", "https://a/2",
+                                         "https://a/1", "https://a/3"]
+    assert items[0]["title"] == "Первая"
+
+
+def test_parse_rss_corrupt_xml_empty():
+    assert collector._parse_rss_items("<rss><item><title>") == []
+    assert collector._parse_rss_items("") == []
+
+
+def test_dedup_top_cap_and_order():
+    items = [{"title": "t%d" % i, "url": "https://x/%d" % i} for i in range(7)]
+    out = collector._dedup_top(items, 5)
+    assert len(out) == 5
+    assert out[0]["url"] == "https://x/0"  # порядок фида сохранён
+
+
+def test_default_news_sources_registered():
+    assert set(collector.NEWS_FEEDS) == {"vc.ru", "habr", "tproger"}
+
+
+def test_wmo_codes_have_common_entries():
+    assert collector.WMO_CODES[0] == "Ясно"
+    assert collector.WMO_CODES[61] == "Небольшой дождь"
+    assert collector.WMO_CODES[95] == "Гроза"
+
+
+# live-тесты: сеть, по умолчанию пропускаются (-m "not live")
+import pytest  # noqa: E402
+
+
+@pytest.mark.live
+def test_live_fetch_weather():
+    w = collector.fetch_weather("Самара")
+    assert w["city"]
+    assert isinstance(w["temp_c"], (int, float))
+
+
+@pytest.mark.live
+def test_live_fetch_news():
+    items = collector.fetch_news("vc.ru")
+    assert 1 <= len(items) <= collector.TOP_N
+    assert all(i["title"] and i["url"] for i in items)
