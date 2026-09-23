@@ -121,6 +121,45 @@ fetch_weather = _default_fetch_weather
 fetch_news = _default_fetch_news
 
 
+def default_data_dir():
+    """<repo>/data/digests (корень репозитория = родитель studio/)."""
+    return os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "data", "digests")
+
+
+def resolve_data_dir():
+    """Env DIGEST_DATA_DIR или дефолт (офлайн-тесты переопределяют)."""
+    return os.environ.get("DIGEST_DATA_DIR") or default_data_dir()
+
+
+def _atomic_write_json(path, obj):
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, path)
+
+
+def save_digest(digest, data_dir=None):
+    """Атомарно: last-digest.json (перезапись) + history.json
+    (массив полных дайджестов, кап HISTORY_CAP - старейшие вытесняются)."""
+    dd = data_dir or resolve_data_dir()
+    os.makedirs(dd, exist_ok=True)
+    _atomic_write_json(os.path.join(dd, "last-digest.json"), digest)
+    hist_path = os.path.join(dd, "history.json")
+    history = []
+    if os.path.exists(hist_path):
+        try:
+            with open(hist_path, encoding="utf-8") as f:
+                loaded = json.load(f)
+            if isinstance(loaded, list):
+                history = loaded
+        except (ValueError, OSError):
+            history = []
+    history.append(digest)
+    _atomic_write_json(hist_path, history[-HISTORY_CAP:])
+
+
 def build_digest_id(now):
     return "digest-" + now.astimezone(timezone.utc).strftime("%Y%m%d-%H%M")
 

@@ -102,3 +102,42 @@ def test_collect_digest_weather_failure():
     assert "no net" in d["weather"]["error"]
     assert len(d["news"]["vc.ru"]) == 3  # новости при погоде-сбое
     assert "погода недоступна" in d["summary"]
+
+
+# ---------- collector: save_digest ----------
+
+def test_save_digest_writes_files(tmp_path):
+    d = _digest()
+    collector.save_digest(d, str(tmp_path))
+    last = json.loads((tmp_path / "last-digest.json")
+                      .read_text(encoding="utf-8"))
+    assert last["id"] == d["id"]
+    hist = json.loads((tmp_path / "history.json").read_text(encoding="utf-8"))
+    assert len(hist) == 1
+    assert hist[0]["id"] == d["id"]
+
+
+def test_save_digest_history_cap_96(tmp_path):
+    # 97 записей с шагом 6ч от 2026-09-01T00:00Z -> кап 96, старейшая
+    # (i=0: 20260901-0000) вытеснена
+    for i in range(97):
+        now = (datetime(2026, 9, 1, tzinfo=timezone.utc)
+               + timedelta(hours=6 * i))
+        collector.save_digest(
+            collector.collect_digest(
+                now=now,
+                fetch_weather=lambda city: dict(FAKE_WEATHER),
+                fetch_news=_fake_fetch_news),
+            str(tmp_path))
+    hist = json.loads((tmp_path / "history.json").read_text(encoding="utf-8"))
+    assert len(hist) == 96
+    assert hist[0]["id"] == "digest-20260901-0600"
+    assert hist[-1]["id"] == "digest-20260925-0000"
+
+
+def test_save_digest_corrupt_history_recovered(tmp_path):
+    (tmp_path / "history.json").write_text("{битый json", encoding="utf-8")
+    d = _digest()
+    collector.save_digest(d, str(tmp_path))  # не падает
+    hist = json.loads((tmp_path / "history.json").read_text(encoding="utf-8"))
+    assert hist == [d]
