@@ -1,3 +1,83 @@
+# Release Notes — day18-mcp-digest (день 18)
+
+Ветка: [`day18-mcp-digest`](https://github.com/imarkelov/ai_advent_challenge/tree/day18-mcp-digest)
+(от `day17-mcp-tool-loop`).
+
+## Что в релизе
+
+**Периодический дайджест 24/7.** MCP-инструмент с периодическим
+выполнением: сохраняет данные (JSON), выполняется по расписанию
+(GitHub Actions cron), возвращает агрегированный результат. Агент
+отвечает на «покажи последнюю сводку» через tool-loop дня 17 — модель
+сама вызывает `get_latest_digest`.
+
+- `studio/collector.py` — общий stdlib-коллектор (только stdlib,
+  `urllib`/`xml`/`json`): `collect_digest` (погода Open-Meteo
+  (геокодинг + `current` + `daily.2d`, WMO-code → RU) + новости
+  vc.ru/habr/tproger — top-5 на источник, дедуп по нормализованному
+  заголовку), `build_summary` (город + число новостей), `save_digest`
+  (атомарно: tmp + `os.replace`; `last-digest.json` перезапись;
+  `history.json` кап 96 = 4 дня × 6/ч), CLI `--out DIR --city C`.
+  Сбой источника — его поле `{"error": ...}`, дайджест не гибнет.
+- `studio/mcp_servers/news_weather.py` — четвёртый дефолт реестра MCP
+  (stdio JSON-RPC 2024-11-05, только stdlib, паттерн
+  `task_manager.py`): 4 инструмента — `get_weather(city?)`,
+  `get_news(source?)`, `make_digest(city?)` (сбор + запись JSON),
+  `get_latest_digest()` (локальный файл → фолбэк GitHub API →
+  `isError` «Дайджест недоступен»).
+- `data/digests/` (корень репозитория, в git — «message bus»):
+  `last-digest.json` + `history.json` (кап 96).
+- `.github/workflows/digest.yml` — cron `0 */6 * * *` (UTC) +
+  `workflow_dispatch`, ubuntu-latest, Python 3.12,
+  `if: github.ref == 'refs/heads/master'`: `collector.py --out
+  data/digests` → проверка схемы → `git add data/digests` → коммит
+  `digest: <id>` → push с retry (3×). Без API-ключей (Open-Meteo и RSS
+  открытые). **Cron живёт только в master — ветку нужно смержить.**
+- `scripts/e2e_day18.py` — гибрид: Part A (офлайн, 6 assert, MUST
+  PASS) — реальный subprocess `news_weather.py` через `MCPRegistry`
+  (connect → 4 tools, `make_digest`/`get_latest_digest`
+  (source=local, id совпадает), `collect_digest` (детерминированный
+  id/generated_at), `save_digest` ×2 (история=2), CLI (exit 0); Part B
+  (live, uvicorn :8102, реальный LLM), best-effort — диалог → decline
+  профиля → «Покажи последнюю сводку (дайджест)» → модель сама
+  вызывает `get_latest_digest` → `done.answer` содержит сводку.
+  Exit 0 для PASS/SKIP, 1 для FAIL.
+- `agent.py` — фикс cp1251: при импорте `sys.stdout`/`sys.stderr`
+  реconfigure'ятся с `errors="replace"` — print лог-тегов
+  (`[Final Response]` и др.) не рвёт SSE-стрим, если ответ содержит
+  символы вне cp1251 (❌, эмодзи) (было: `UnicodeEncodeError` в
+  SSE-генераторе → обрыв без `done`, клиент `IncompleteRead`).
+
+## API
+
+Новых REST-эндпоинтов нет. Реестр MCP дня 16 получает четвёртый
+дефолт `news-weather` (`[sys.executable, <repo>/studio/mcp_servers/news_weather.py]`)
+— подключение через существующие `/api/mcp/servers/*`. В чате —
+обычный tool-loop дня 17 (модель вызывает `get_latest_digest`).
+
+## Проверка задания
+
+Бэкенд — 350 тестов PASS (офлайн: collect_digest/save_digest/RSS/дедуп/
+CLI + `news_weather` на реальном subprocess + 4-й дефолт + регресс
+дней 1–17). Фронтенд — без изменений (регресс `npm test`/`tsc -b`).
+E2E `scripts/e2e_day18.py`: Part A 6/6 PASS; Part B — PASS (модель
+вызвала `get_latest_digest`, ответ содержит сводку, `source: local`).
+
+## Коммиты
+
+- `d9e4eeb` — openspec change (proposal/design/spec/tasks)
+- `a8a6526` — collector core: collect_digest + build_summary
+- `56784ee` — collector: save_digest, атомарная запись, история кап 96
+- `a2be5a8` — collector: RSS-фикстуры, дедуп, live-маркеры
+- `c74ae2b` — collector CLI --out/--city
+- `161eaa0` — news_weather stdio MCP server (4 tools)
+- `f93b5fd` — News & Weather как четвёртый дефолт реестра
+- `acfe45d` — GitHub Actions cron 6h (digest.yml)
+- `1983d8e` — fix: cp1251-stdout не рвёт SSE-стрим
+- `2e3ce57` — e2e_day18 + data/digests (первый дайджест)
+
+---
+
 # Release Notes — day17-mcp-tool-loop (день 17)
 
 Ветка: [`day17-mcp-tool-loop`](https://github.com/imarkelov/ai_advent_challenge/tree/day17-mcp-tool-loop)

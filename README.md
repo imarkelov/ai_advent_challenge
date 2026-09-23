@@ -22,6 +22,7 @@
 | День 15 | [`day15-plan-review`](https://github.com/imarkelov/ai_advent_challenge/tree/day15-plan-review) | Проверка плана (plan_review): человеческий гейт одобрения плана между planning и execution (кнопки «Одобрить»/«Отклонить», детект ограничений плана — инварианты/память/табу + альтернатива), фикс done-пост-гарда для согласованного контекста (запрет из одобренного контекста задачи не рубит объяснение альтернативы), пауза во время LLM-вызова валидатора/синтеза, move вкладок Токены/Запрос в сайдбар |
 | День 16 | [`day16-mcp-connect`](https://github.com/imarkelov/ai_advent_challenge/tree/day16-mcp-connect) | Подключение MCP: реестр MCP-серверов (stdio/http) в `mcp_servers.json`, клиент JSON-RPC (`mcp.py`), REST `/api/mcp/*` (список/удалить/подключить/инструменты), отдельная панель «MCP» по своей кнопке «🧩» в шапке чата (рядом с «⚙»; статусы, инструменты подключённых серверов), дефолты: Firecrawl, Git; вызов инструментов из чата (tool-loop): команда `/сервер тул`, автодополнение, форма аргументов по `input_schema`, результат сохраняется в диалог и виден LLM |
 | День 17 | [`day17-mcp-tool-loop`](https://github.com/imarkelov/ai_advent_challenge/tree/day17-mcp-tool-loop) | MCP Tool-Loop (LLM-driven): инструменты подключённых серверов уходят в LLM-пейлоад (`tools`), модель сама вызывает инструмент (`tool_calls` → MCP-сервер → `role: "tool"` обратно модели, цикл до 5 итераций); новый stdio MCP-сервер Mock Task Manager (in-memory, только stdlib, `get_task_details`/`create_task`); лог-теги `[MCP Init]`/`[LLM Decision]`/`[MCP Response]`/`[Final Response]`; e2e_day17.py (детерминированное ядро + live best-effort) |
+| День 18 | [`day18-mcp-digest`](https://github.com/imarkelov/ai_advent_challenge/tree/day18-mcp-digest) | Периодический дайджест 24/7: свой stdio MCP-сервер `news_weather` (4 инструмента: `get_weather`/`get_news`/`make_digest`/`get_latest_digest`), общий stdlib-коллектор `collector.py` (погода Open-Meteo + новости vc.ru/habr/tproger, дедуп, top-5), JSON-хранилище `data/digests/` (last-digest.json + история, кап 96, атомарная запись), GitHub Actions cron раз в 6 часов — сбор и коммит дайджеста; агент отвечает «покажи сводку» через tool-loop дня 17 (`get_latest_digest`) |
 
 ## День 7: как работает сервис
 
@@ -949,3 +950,110 @@ PASS + `tsc -b` clean. E2E `scripts/e2e_day17.py` на этой машине:
 Part A 6/6 PASS; Part B — SKIP («GPustack недоступен: SSL
 CERTIFICATE_VERIFY_FAILED» — окружение, не продукт). Ветка
 `day17-mcp-tool-loop` (от `day16-mcp-connect`).
+
+## День 18: Планировщик и фоновые задачи (MCP-дайджест 24/7)
+
+### Что это
+
+Агент, который **работает 24/7 и периодически выдаёт сводку**. Суть
+задания дня 18 — MCP-инструмент с периодическим выполнением, который
+**сохраняет данные (JSON)**, **выполняется по расписанию** и
+**возвращает агрегированный результат**. Реализовано как связка из трёх
+частей:
+
+1. **Общий stdlib-коллектор** (`studio/collector.py`) — собирает
+   агрегированный дайджест: погода (Open-Meteo, город по умолчанию
+   Самара, `current` + `daily.2d`) и новости трёх RU-tech RSS-источников
+   (vc.ru, habr, tproger) — top-5 на источник, дедуп по нормализованному
+   заголовку. Чистый stdlib (`urllib`/`xml`/`json`), без зависимостей.
+2. **Свой stdio MCP-сервер** (`studio/mcp_servers/news_weather.py`) —
+   четвёртый дефолт реестра MCP дня 16, только stdlib (newline JSON-RPC
+   2.0, паттерн `task_manager.py` дня 17), 4 инструмента:
+   `get_weather(city?)`, `get_news(source?)`, `make_digest(city?)`
+   (собирает + **сохраняет в JSON**) и `get_latest_digest()`
+   (читает локальный файл, фолбэк — GitHub API репозитория).
+3. **Расписание — GitHub Actions cron** (`.github/workflows/digest.yml`)
+   — `0 */6 * * *` (UTC) + ручной `workflow_dispatch`: собирает
+   `python studio/collector.py --out <repo>/data/digests`, коммитит
+   `data/digests/` (push с retry). Дайджест лежит в git — «message bus»
+   между расписанием и агентом.
+
+Итого: расписание **пишет** дайджест в `data/digests/` (JSON), агент
+**читает** его через tool-loop дня 17 — «покажи последнюю сводку» →
+модель сама вызывает `get_latest_digest` → ответ со свежей сводкой.
+
+### Хранилище `data/digests/` (в корне репозитория, в git)
+
+| Файл | Содержимое |
+| --- | --- |
+| `last-digest.json` | последний дайджест: `id`, `generated_at`, `weather` (или `error`), `news` (5 на источник или `error`), `summary` |
+| `history.json` | массив дайджестов, **кап 96** (4 дня × 6/ч), старые отбрасываются |
+
+Запись — атомарная (tmp + `os.replace`). Формат дайджеста:
+
+```json
+{
+  "id": "digest-YYYYMMDD-HHMM",
+  "generated_at": "2026-09-23T19:41:18Z",
+  "weather": {"city": "Самара", "temperature_2m": 21.4, "wmo": "...", "code": 3, "daily": [...]},
+  "news": {"vc.ru": [{"title": "...", "link": "...", "published": "..."}], "habr": [...], "tproger": [...]},
+  "summary": "Погода Самара: +21.4° (переменная облачность). 15 новостей: vc.ru 5, habr 5, tproger 5."
+}
+```
+
+Сбой одного источника — поле `{"error": "..."}` этого источника,
+остальные источники и дайджест в целом — не гибнут (e2e проверяет
+degrade-поведение). `id` и `generated_at` — детерминированы временем
+сбора (инъектируемый `utcnow` в тестах/CLI).
+
+### MCP-сервер `news_weather` (4 инструмента)
+
+| Инструмент | Аргументы | Результат |
+| --- | --- | --- |
+| `get_weather` | `city?` (default Самара) | Open-Meteo `current` + `daily.2d` (геокодинг Open-Meteo) |
+| `get_news` | `source?` (`vc.ru`\|`habr`\|`tproger`, default все) | top-5 на источник, дедуп |
+| `make_digest` | `city?` | коллектор + **сохранение** `last-digest.json` + `history.json` |
+| `get_latest_digest` | — | локальный файл → фолбэк GitHub API → `isError` «Дайджест недоступен» |
+
+### Расписание — `.github/workflows/digest.yml`
+
+- Триггеры: `schedule: cron "0 */6 * * *"` (UTC) + `workflow_dispatch`.
+- `ubuntu-latest`, Python 3.12, `if: github.ref == 'refs/heads/master'`.
+- Шаги: `collector.py --out data/digests` (сбор) → проверка
+  `last-digest.json` (id + generated_at) → `git add data/digests` →
+  коммит «digest: <id>» → push с retry (3×). Без API-ключей:
+  Open-Meteo и RSS — открытые.
+- **Важно:** cron живёт только в `master` — ветку нужно смержить, иначе
+  расписание не будет выполняться.
+
+### E2E — `scripts/e2e_day18.py`
+
+Гибрид (паттерн e2e_day17): **Part A** — детерминированное ядро, 6
+assert, без uvicorn и без live-LLM: реальный subprocess
+`news_weather.py` через `MCPRegistry` (connect → 4 инструмента),
+`make_digest`/`get_latest_digest` (source=local, id совпадает),
+`collect_digest` (детерминированный id/generated_at), `save_digest` ×2
+(история=2), CLI `collector.py --out` (exit 0). **Part B** — live
+(uvicorn :8102, реальный LLM GPustack), best-effort: диалог → decline
+профиля → «Покажи последнюю сводку (дайджест)» → model сама вызывает
+`get_latest_digest` (tool-loop дня 17) → `done.answer` содержит
+сводку. Exit 0 для PASS/SKIP, 1 для FAIL.
+
+### Исправление после релиза (cp1251 → SSE)
+
+Live-e2e поймал реальный баг: `print("[Final Response] ...")` в
+`agent.py` на Windows-консоли (stdout cp1251) падал с
+`UnicodeEncodeError`, если ответ содержал символы вне cp1251
+(❌, эмодзи) — исключение рвало SSE-генератор, стрим обрывался без
+`done` (клиент: `IncompleteRead`). Фикс: при импорте `agent.py`
+`sys.stdout`/`sys.stderr` реconfigure'ятся с `errors="replace"` — print
+нефатален, кодировка потоков не меняется.
+
+### Проверка задания
+
+Бэкенд — 350 тестов PASS (офлайн: collect_digest/save_digest/RSS-парсинг/
+дедуп/CLI + `news_weather` на реальном subprocess + 4-й дефолт реестра +
+регресс дней 1–17). E2E `scripts/e2e_day18.py` на этой машине: Part A
+6/6 PASS; Part B — PASS (модель вызвала `get_latest_digest`, ответ
+содержит сводку с `source: local`). Ветка `day18-mcp-digest` (от
+`day17-mcp-tool-loop`).
