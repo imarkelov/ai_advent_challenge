@@ -37,8 +37,8 @@
 ## 5. GitHub Actions workflow
 
 - [x] 5.1 `.github/workflows/digest.yml`: cron `'0 */6 * * *'` + `workflow_dispatch`, `permissions: contents: write`, checkout → `collector.py --out data/digests` → коммит `data/digests/` (guard на изменения, автор `ai-advent-digest[bot]`) — проверено: YAML валиден
-- [ ] 5.2 Запушить ветку; `workflow_dispatch` (или мерж в master → cron) — проверено: job success, коммит дайджеста в репо
-  (best-effort: зависит от push-доступа; локально — синтаксис + lint) — **осталось после мержа в master**
+- [x] 5.2 Запушить ветку; `workflow_dispatch` (или мерж в master → cron) — проверено: job success, коммит дайджеста в репо
+  (best-effort: зависит от push-доступа; локально — синтаксис + lint) — мерж в master (`16537f8`), workflow_dispatch success, первый дайджест бота `d2df40c` (Самара 16.2°C, 15 новостей)
 - [x] Коммит секции 5:
   <!-- commit: acfe45d -->
 
