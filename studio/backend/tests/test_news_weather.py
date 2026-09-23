@@ -213,3 +213,91 @@ def test_cli_main_writes_and_prints(tmp_path, monkeypatch):
     last = json.loads((tmp_path / "last-digest.json")
                       .read_text(encoding="utf-8"))
     assert last["weather"]["city"] == "Самара"
+
+
+# ---------- news_weather: subprocess-клиент ----------
+
+def _nw_client(tmp_path, github_repo=None):
+    """Клиент на реальный stdio-процесс news_weather.py
+    (DIGEST_DATA_DIR в tmp — данные не трогаем)."""
+    env = {"DIGEST_DATA_DIR": str(tmp_path)}
+    if github_repo is not None:
+        env["DIGEST_GITHUB_REPO"] = github_repo
+    server = {"id": "mcp_nw", "name": "News & Weather", "type": "stdio",
+              "command": [sys.executable, NEWS_WEATHER_PATH], "url": "",
+              "env": env, "enabled": True}
+    return MCPClient(server, timeout=90)
+
+
+def test_nw_connect_and_tools(tmp_path):
+    c = _nw_client(tmp_path)
+    try:
+        tools = c.connect()
+        names = [t["name"] for t in tools]
+        assert names == ["get_weather", "get_news", "make_digest",
+                         "get_latest_digest"]
+        assert all(t["input_schema"]["type"] == "object" for t in tools)
+        assert all(t["description"] for t in tools)
+    finally:
+        c.close()
+
+
+def test_nw_get_weather_shape(tmp_path):
+    # get_weather ходит в сеть; офлайн-тест проверяет форму:
+    # сервер НЕ падает — либо живой ответ, либо isError + error
+    c = _nw_client(tmp_path)
+    c.connect()
+    try:
+        r = c.call_tool("get_weather", {"city": "Самара"})
+        payload = json.loads(r["content"][0]["text"])
+        if "error" not in payload:  # сеть есть — живой ответ
+            assert payload["city"]
+        else:
+            assert r["isError"] is True
+    finally:
+        c.close()
+
+
+def test_nw_make_digest_and_latest_local(tmp_path):
+    # make_digest с сетью-сбоем тоже валиден (error-поля), но локальный
+    # файл MUST появиться; get_latest_digest читает его (source=local)
+    c = _nw_client(tmp_path)
+    c.connect()
+    try:
+        r = c.call_tool("make_digest", {})
+        assert r["isError"] is False
+        digest = json.loads(r["content"][0]["text"])
+        assert "id" in digest and "generated_at" in digest
+        assert os.path.exists(os.path.join(str(tmp_path),
+                                           "last-digest.json"))
+        g = c.call_tool("get_latest_digest", {})
+        assert g["isError"] is False
+        latest = json.loads(g["content"][0]["text"])
+        assert latest["source"] == "local"
+        assert latest["digest"]["id"] == digest["id"]
+    finally:
+        c.close()
+
+
+def test_nw_latest_github_fallback_repo_missing(tmp_path):
+    # Локального файла нет; DIGEST_GITHUB_REPO — несуществующее репо
+    # -> github-ответ 404 -> isError + error (детерминированно)
+    c = _nw_client(tmp_path, github_repo="definitely-not-real-xyz/none")
+    c.connect()
+    try:
+        g = c.call_tool("get_latest_digest", {})
+        assert g["isError"] is True
+        payload = json.loads(g["content"][0]["text"])
+        assert "error" in payload
+    finally:
+        c.close()
+
+
+def test_nw_unknown_tool_is_error(tmp_path):
+    c = _nw_client(tmp_path)
+    c.connect()
+    try:
+        r = c.call_tool("nope", {})
+        assert r["isError"] is True
+    finally:
+        c.close()
