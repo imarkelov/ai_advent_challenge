@@ -337,7 +337,8 @@ def test_registry_seeds_defaults_once(tmp_path):
     reg = MCPRegistry(_store(tmp_path), launcher=make_fake_launcher())
     try:
         names1 = [s["name"] for s in reg.servers()]
-        assert names1 == ["Firecrawl", "Git", "Task Manager"]
+        assert names1 == ["Firecrawl", "Git", "Task Manager",
+                          "News & Weather"]
         assert all(s["status"] == "idle" for s in reg.servers())
         # повторный вызов не дублирует
         assert [s["name"] for s in reg.servers()] == names1

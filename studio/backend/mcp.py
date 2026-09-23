@@ -338,8 +338,10 @@ class MCPRegistry:
         self._runtime = {}  # sid -> {status, tools, error, client}
 
     def _default_servers(self) -> list:
-        """Дефолты: Firecrawl, Git (stdio/npx, день 16) и Task Manager
-        (локальный python-процесс, день 17 — без npx и сети)."""
+        """Дефолты: Firecrawl, Git (stdio/npx, день 16), Task Manager
+        (локальный python-процесс, день 17) и News & Weather (локальный
+        python-процесс, день 18 — без npx; погода+новости, дайджесты
+        в data/digests/)."""
         repo = os.path.abspath(
             os.path.join(self._store.data_dir, "..", ".."))
         return [
@@ -354,14 +356,21 @@ class MCPRegistry:
              "env": {"MCP_TRANSPORT_TYPE": "stdio", "MCP_LOG_LEVEL": "warn",
                      "GIT_SIGN_COMMITS": "false", "GIT_BASE_DIR": repo},
              "enabled": True},
-            {"name": "Task Manager", "type": "stdio",
-             "command": [sys.executable,
-                         os.path.join(repo, "studio", "mcp_servers",
-                                      "task_manager.py")],
-             "url": "",
-             "env": {},
-             "enabled": True},
-        ]
+             {"name": "Task Manager", "type": "stdio",
+              "command": [sys.executable,
+                          os.path.join(repo, "studio", "mcp_servers",
+                                       "task_manager.py")],
+              "url": "",
+              "env": {},
+              "enabled": True},
+             {"name": "News & Weather", "type": "stdio",
+              "command": [sys.executable,
+                          os.path.join(repo, "studio", "mcp_servers",
+                                       "news_weather.py")],
+              "url": "",
+              "env": {},
+              "enabled": True},
+         ]
 
     def _ensure_defaults_locked(self) -> None:
         """Первый вызов — досеять дефолты (повторно не дублирует).

@@ -301,3 +301,32 @@ def test_nw_unknown_tool_is_error(tmp_path):
         assert r["isError"] is True
     finally:
         c.close()
+
+
+# ---------- registry: четвёртый дефолт (день 18) ----------
+
+def test_registry_news_weather_default_command(tmp_path):
+    # Копируем реальный news_weather.py в tmp-раскладку
+    # <root>/studio/{data,mcp_servers}, чтобы путь дефолта существовал
+    # (тот же приём, что test_registry_task_manager_default_command).
+    (tmp_path / "studio" / "data").mkdir(parents=True)
+    (tmp_path / "studio" / "mcp_servers").mkdir(parents=True)
+    shutil.copyfile(NEWS_WEATHER_PATH,
+                    tmp_path / "studio" / "mcp_servers"
+                    / "news_weather.py")
+    reg = MCPRegistry(MemoryStore(str(tmp_path / "studio" / "data")),
+                      launcher=make_fake_launcher())
+    try:
+        servers = {s["name"]: s for s in reg.servers()}
+        nw = servers["News & Weather"]
+        assert nw["type"] == "stdio"
+        assert nw["enabled"] is True
+        assert nw["env"] == {}
+        assert nw["command"][0].lower().endswith(
+            os.path.basename(sys.executable).lower())
+        assert nw["command"][1].endswith("news_weather.py")
+        assert os.path.exists(nw["command"][1])
+        assert [s["name"] for s in reg.servers()] == [
+            "Firecrawl", "Git", "Task Manager", "News & Weather"]
+    finally:
+        reg.close_all()
