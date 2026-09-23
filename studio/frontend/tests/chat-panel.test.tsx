@@ -738,6 +738,30 @@ const FC_TOOLS: McpTool[] = [
   },
   { server: 'mcp_fc', name: 'firecrawl_scrape', description: 'Скрапинг страницы', input_schema: { type: 'object' } },
 ]
+// Многословное имя сервера (дефолт дня 17) — регресс парсера «/»
+const TM: McpServer = {
+  id: 'mcp_tm', name: 'Task Manager', type: 'stdio',
+  command: ['python', 'task_manager.py'], url: '', env: {},
+  enabled: true, status: 'connected', error: null, tools_count: 2,
+}
+const TM_TOOLS: McpTool[] = [
+  {
+    server: 'mcp_tm', name: 'get_task_details', description: 'Детали задачи',
+    input_schema: {
+      type: 'object',
+      properties: { task_id: { type: 'string', description: 'ID задачи' } },
+      required: ['task_id'],
+    },
+  },
+  {
+    server: 'mcp_tm', name: 'create_task', description: 'Создать задачу',
+    input_schema: {
+      type: 'object',
+      properties: { title: { type: 'string', description: 'Заголовок' } },
+      required: ['title'],
+    },
+  },
+]
 
 // loadAll-контракты + активный диалог d1 + MCP-серверы/инструменты.
 // handler перехватывает URL'ы, на которые нет фиксированного ответа (null — дальше)
@@ -890,6 +914,57 @@ describe('ChatPanel — автодополнение MCP-команд «/» (д�
     expect(ta.value).toBe('/Firecrawl firecrawl_search')
     expect(screen.getByText('MCP Firecrawl/firecrawl_search')).toBeTruthy()
     expect(chatSent).toBe(false)
+  })
+
+  // Многословное имя сервера («Task Manager»): парсер должен разобрать
+  // «/Task Manager tool» как сервер + тул, а не как сервер «Task»
+  it('многословное имя «/Task Manager» — сервер резолвится, список тулов (tier-2)', async () => {
+    stubMcpFetch((url) => {
+      if (url === '/api/mcp/servers') return jsonResponse({ servers: [FC, TM] })
+      if (url === '/api/mcp/tools') return jsonResponse({ tools: [...FC_TOOLS, ...TM_TOOLS] })
+      return null
+    })
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const ta = (await screen.findByPlaceholderText(/Сообщение…/)) as HTMLTextAreaElement
+    fireEvent.change(ta, { target: { value: '/Task Manager' } })
+    await screen.findByRole('listbox')
+    expect(screen.getByText('get_task_details')).toBeTruthy()
+    expect(screen.getByText('create_task')).toBeTruthy()
+    // префикс тула — фильтрует, как у однословных серверов
+    fireEvent.change(ta, { target: { value: '/Task Manager get' } })
+    expect(await screen.findByText('get_task_details')).toBeTruthy()
+    expect(screen.queryByText('create_task')).toBeNull()
+  })
+
+  it('многословное имя: сервер из автодополнения, тул — модалка формы', async () => {
+    stubMcpFetch((url) => {
+      if (url === '/api/mcp/servers') return jsonResponse({ servers: [FC, TM] })
+      if (url === '/api/mcp/tools') return jsonResponse({ tools: [...FC_TOOLS, ...TM_TOOLS] })
+      return null
+    })
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const ta = (await screen.findByPlaceholderText(/Сообщение…/)) as HTMLTextAreaElement
+    // tier-1: префикс «task» — в списке только многословный сервер
+    fireEvent.change(ta, { target: { value: '/task' } })
+    await screen.findByRole('listbox')
+    expect(screen.getByText('Task Manager')).toBeTruthy()
+    // Enter — выбор сервера, draft дополнен полным именем
+    fireEvent.keyDown(ta, { key: 'Enter' })
+    expect(ta.value).toBe('/Task Manager ')
+    // tier-2: тул выбранной — модалка формы открывается
+    fireEvent.change(ta, { target: { value: '/Task Manager get_task_details' } })
+    fireEvent.keyDown(ta, { key: 'Enter' })
+    expect(await screen.findByText('MCP Task Manager/get_task_details')).toBeTruthy()
+    const task_id = screen.getByLabelText(/task_id \*/) as HTMLInputElement
+    expect(task_id.type).toBe('text')
   })
 })
 

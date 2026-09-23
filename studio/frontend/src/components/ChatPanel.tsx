@@ -103,8 +103,14 @@ export default function ChatPanel() {
         .filter((s) => s.enabled && s.name.toLowerCase().startsWith(q))
         .map((server) => ({ kind: 'server' as const, server }))
     } else {
-      const serverName = parts[0].slice(1)
-      const server = state.mcpServers.find((s) => s.name === serverName)
+      // Имя сервера может быть многословным («Task Manager»): ищем самое
+      // длинное имя реестра, являющееся префиксом введённого текста
+      // (с границей слова); остаток — запрос по инструменту (первый токен,
+      // как раньше — по parts[1])
+      const typed = trimmed.slice(1)
+      const server = state.mcpServers
+        .filter((s) => typed === s.name || typed.startsWith(s.name + ' '))
+        .sort((a, b) => b.name.length - a.name.length)[0]
       if (!server) {
         acItems = []
       } else if (server.status !== 'connected') {
@@ -112,7 +118,7 @@ export default function ChatPanel() {
           { kind: 'hint' as const, text: 'Сервер не подключён — сначала подключите в настройках' },
         ]
       } else {
-        const q = (parts[1] ?? '').toLowerCase()
+        const q = (typed.slice(server.name.length).trim().split(/\s+/)[0] ?? '').toLowerCase()
         acItems = state.mcpTools
           .filter((t) => t.server === server.id && t.name.toLowerCase().startsWith(q))
           .map((tool) => ({ kind: 'tool' as const, tool, serverId: server.id, serverName: server.name }))
