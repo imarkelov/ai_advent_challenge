@@ -1,12 +1,12 @@
 {
-  "id": "digest-20260924-1626",
-  "generated_at": "2026-09-24T16:26:19Z",
+  "id": "digest-20260924-2106",
+  "generated_at": "2026-09-24T21:06:04Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 20.4,
-    "feels_like_c": 20.2,
+    "temp_c": 17.3,
+    "feels_like_c": 16.9,
     "description": "Ясно",
-    "wind_ms": 7.7
+    "wind_ms": 7.9
   },
   "news": {
     "vc.ru": [
@@ -15,7 +15,7 @@
         "url": "https://vc.ru/money/3157187-izmeneniya-v-semejnoy-ipoteke?from=rss"
       },
       {
-        "title": "Исследование: при запуске Max данные о сетевом окружении пользователя могут уходить в VK, а в «секретных» чатах нет сквозного шифрования",
+        "title": "Центр безопасности Мax опроверг исследование InterSecLab о функциях отслеживания",
         "url": "https://vc.ru/services/3157052-issledovanie-max-peredacha-dannyh-v-vk?from=rss"
       },
       {
@@ -27,11 +27,23 @@
         "url": "https://vc.ru/transport/3156582-whoosh-i-segway-testiruyut-obnovlennyy-elektrosamokat-v-moskve?from=rss"
       },
       {
-        "title": "«Сбер» установил первые банкоматы для выдачи банковских карт — в Нижнем Новгороде",
-        "url": "https://vc.ru/money/3156845-sber-bankomaty-dlya-polucheniya-kart-v-nizhnem-novgorode?from=rss"
+        "title": "Минпромторг определил ставки технологического сбора для производителей и импортёров электроники, который начнут брать с 1 декабря 2026 года",
+        "url": "https://vc.ru/tech/3157538-minpromtorg-utverdil-stavki-tehnologicheskogo-sbora-dlya-elektroniki?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "OpenAI добавила плагины в голосовой режим ChatGPT",
+        "url": "https://habr.com/ru/companies/bothub/news/1086400/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086400"
+      },
+      {
+        "title": "Учёные выдвинули теорию о тёмных измерениях и первичных чёрных дырах",
+        "url": "https://habr.com/ru/news/1086384/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086384"
+      },
+      {
+        "title": "DrivingBench проверили GPT-6 Astra, GPT-5.6 Sol, Grok 4.6 и Claude Fable 5.1 на возможность управлять авто",
+        "url": "https://habr.com/ru/news/1086380/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086380"
+      },
       {
         "title": "Beyond Good &amp; Evil 2 все еще жива: разработка продолжается спустя 18 лет после анонса",
         "url": "https://habr.com/ru/companies/ggsel/news/1086326/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086326"
@@ -39,21 +51,21 @@
       {
         "title": "950 Claude‑агентов за 21 час нашли новую биологическую систему",
         "url": "https://habr.com/ru/news/1086300/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086300"
-      },
-      {
-        "title": "Больше никакого фарма чертежей: в ARC Raiders переработают систему разблокировки оружия",
-        "url": "https://habr.com/ru/companies/ggsel/news/1086272/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086272"
-      },
-      {
-        "title": "Southern Water превращает действующие оптоволоконные телеком‑кабели в подземные сенсоры",
-        "url": "https://habr.com/ru/news/1086270/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086270"
-      },
-      {
-        "title": "Вебинар: «Практический PKI: построение доверенной Linux‑инфраструктуры»",
-        "url": "https://habr.com/ru/companies/astralinux/news/1086268/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086268"
       }
     ],
     "tproger": [
+      {
+        "title": "В PostgreSQL 19 Beta 4 исключили SQL/PGQ и онлайн-переключение checksums",
+        "url": "https://tproger.ru/news/v-postgresql-19-beta-4-isklyuchili-sql-pgq-i-onlajn-pereklyuchenie-c"
+      },
+      {
+        "title": "Hermes Agent 0.21.5 получил SDK для десктопных плагинов и обновлённые коннекторы",
+        "url": "https://tproger.ru/news/hermes-agent-0-21-5-poluchil-sdk-dlya-desktopnyh-plaginov-i-obnovl"
+      },
+      {
+        "title": "OpenClaw 2026.9.6 для macOS пересобрали из-за сбоя при запуске",
+        "url": "https://tproger.ru/news/openclaw-2026-9-6-dlya-macos-peresobrali-iz-za-sboya-pri-zapuske"
+      },
       {
         "title": "CloudNativePG 1.30.1 закрыл обход проверки путей и исправил зависания при переключении кластеров",
         "url": "https://tproger.ru/news/cloudnativepg-1-30-1-zakryl-obhod-proverki-putej-i-ispravil-zavi"
@@ -61,20 +73,8 @@
       {
         "title": "workerd 1.20260924.1 добавил веб-поиск для Workers AI и обновил обработку байтовых потоков",
         "url": "https://tproger.ru/news/workerd-1-20260924-1-dobavil-veb-poisk-dlya-workers-ai-i-obnovil"
-      },
-      {
-        "title": "Как получать удовольствие от работы: качаем скилл",
-        "url": "https://tproger.ru/articles/kak-poluchat-udovolstvie-ot-raboty-kachaem-skill"
-      },
-      {
-        "title": "Как оплатить iCloud в России в 2026 году: айклауд после 1 апреля, цены на хранилище и 6 карт, которые я проверил",
-        "url": "https://tproger.ru/articles/kak-oplatit-icloud-v-rossii-v-2026-godu-ajklaud-posle-1-aprelya"
-      },
-      {
-        "title": "Нейросеть пишет не по методичке: 3 промпта, которые это исправят",
-        "url": "https://tproger.ru/articles/nejroset-piwet-ne-po-metodichke-3-prompta-kotorye-eto-ispravyat"
       }
     ]
   },
-  "summary": "Сводка digest-20260924-1626: Самара 20.4°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260924-2106: Самара 17.3°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
