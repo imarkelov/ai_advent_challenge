@@ -234,5 +234,85 @@
       ]
     },
     "summary": "Сводка digest-20260924-0259: Самара 13.4°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20260924-1103",
+    "generated_at": "2026-09-24T11:03:16Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 26.2,
+      "feels_like_c": 24.7,
+      "description": "Ясно",
+      "wind_ms": 10.2
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Минфин предложил распространить прогрессивную ставку НДФЛ 13-22% на доходы россиян от вкладов, инвестиций в ценные бумаги и продажи имущества",
+          "url": "https://vc.ru/money/3156248-minfin-predlozhil-progrestivnyi-ndfl-13-22-na-dohody-rossiyan?from=rss"
+        },
+        {
+          "title": "День 1673: «Ведомости» узнали, что в Госдуме собираются создать новый комитет — по технологическому лидерству",
+          "url": "https://vc.ru/money/3155831-sozdanie-komiteta-po-tehnologicheskomu-liderstvu-v-gosdume?from=rss"
+        },
+        {
+          "title": "«Т-Банк» добавил возможность оплаты мобильной связи у зарубежных операторов из десяти стран",
+          "url": "https://vc.ru/money/3155990-t-bank-oplata-mobilnoj-svyazi?from=rss"
+        },
+        {
+          "title": "Meta* представила «умные» очки без камеры Ray-Ban Meta* Audio за $349",
+          "url": "https://vc.ru/tech/3156105-ray-ban-meta-audio-ochki-bez-kamery?from=rss"
+        },
+        {
+          "title": "YouTube разрешит настраивать ленты — сервис будет их собирать по текстовому описанию пользователя",
+          "url": "https://vc.ru/services/3155294-youtube-zapustit-kastomizirovannye-lenty?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Лучшее за неделю (14.09 — 20.09)",
+          "url": "https://habr.com/ru/companies/ruvds/news/1085768/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1085768"
+        },
+        {
+          "title": "Серия вебинаров «САПР Delta Design 4.2. Быстрый старт»",
+          "url": "https://habr.com/ru/companies/eremexru/news/1086124/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086124"
+        },
+        {
+          "title": "Теперь при создании кластера Managed Kubernetes появляется StorageClass с AZ-независимым типом диска",
+          "url": "https://habr.com/ru/companies/selectel/news/1086088/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086088"
+        },
+        {
+          "title": "ИИ в сетевой кибербезопасности: кто победит — атака или защита",
+          "url": "https://habr.com/ru/companies/infowatch/news/1086118/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086118"
+        },
+        {
+          "title": "От Postgres до машинного зрения: 10 коротких докладов на TECH EVENT 2026",
+          "url": "https://habr.com/ru/companies/infostart/news/1086108/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086108"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Нейросеть пишет не по методичке: 3 промпта, которые это исправят",
+          "url": "https://tproger.ru/articles/nejroset-piwet-ne-po-metodichke-3-prompta-kotorye-eto-ispravyat"
+        },
+        {
+          "title": "Вышел Visual Studio Code 1.139 с поддержкой Dev Containers на удалённых хостах",
+          "url": "https://tproger.ru/news/vywel-visual-studio-code-1-139-s-podderzhkoj-dev-containers-na-ud"
+        },
+        {
+          "title": "GitHub Copilot App получил локальную песочницу для защиты файлов и учётных данных",
+          "url": "https://tproger.ru/news/github-copilot-app-poluchil-lokalnuyu-pesochnicu-dlya-zashhity-fajlov"
+        },
+        {
+          "title": "UiPath сделала полный стек Automation Suite доступным на Linux и обновила управление ИИ-агентами",
+          "url": "https://tproger.ru/news/uipath-sdelala-polnyj-stek-automation-suite-dostupnym-na-linux-i"
+        },
+        {
+          "title": "OpenAI выпустила GPT-6 Sol и GPT-6 Luna в API",
+          "url": "https://tproger.ru/news/openai-vypustila-gpt-6-sol-i-gpt-6-luna-v-api"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20260924-1103: Самара 26.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
