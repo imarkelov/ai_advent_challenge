@@ -327,6 +327,7 @@ def test_registry_news_weather_default_command(tmp_path):
         assert nw["command"][1].endswith("news_weather.py")
         assert os.path.exists(nw["command"][1])
         assert [s["name"] for s in reg.servers()] == [
-            "Firecrawl", "Git", "Task Manager", "News & Weather"]
+            "Firecrawl", "Git", "Task Manager", "News & Weather",
+            "Pipeline Tools"]
     finally:
         reg.close_all()

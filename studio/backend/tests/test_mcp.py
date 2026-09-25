@@ -338,7 +338,7 @@ def test_registry_seeds_defaults_once(tmp_path):
     try:
         names1 = [s["name"] for s in reg.servers()]
         assert names1 == ["Firecrawl", "Git", "Task Manager",
-                          "News & Weather"]
+                          "News & Weather", "Pipeline Tools"]
         assert all(s["status"] == "idle" for s in reg.servers())
         # повторный вызов не дублирует
         assert [s["name"] for s in reg.servers()] == names1

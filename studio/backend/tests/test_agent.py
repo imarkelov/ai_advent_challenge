@@ -2098,3 +2098,24 @@ def test_tool_error_becomes_tool_message(data_dir):
         assert asst_tc[0]["tool_calls"][0]["function"]["name"] == "nope"
     finally:
         reg.close_all()
+
+
+def test_mcp_tools_rule_only_when_tools_connected(data_dir):
+    """День 19: правило композиции MCP-инструментов в system-промпте
+    ТОЛЬКО когда есть подключённые тулы; без подключённых серверов —
+    блок не добавляется (поведение без MCP не меняется)."""
+    agent, reg = _tool_loop_agent(data_dir, ok_handler)
+    try:
+        d = agent.store.new_dialogue()
+        ready(agent, d)
+        agent.store.append_message(d["id"], "user", "привет")
+        # без подключения: правило композиции отсутствует
+        system = agent.build_payload(d["id"])[0]["content"]
+        assert "композиция" not in system
+        # подключил сервер (fake-тулы mock_echo/mock_ping): правило есть
+        sid = reg.servers()[0]["id"]
+        assert reg.connect(sid)["status"] == "connected"
+        system = agent.build_payload(d["id"])[0]["content"]
+        assert "композиция" in system
+    finally:
+        reg.close_all()
