@@ -1,59 +1,71 @@
 {
-  "id": "digest-20260925-0316",
-  "generated_at": "2026-09-25T03:16:33Z",
+  "id": "digest-20260925-1103",
+  "generated_at": "2026-09-25T11:03:38Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 14.5,
-    "feels_like_c": 13.7,
+    "temp_c": 25.1,
+    "feels_like_c": 23.8,
     "description": "Ясно",
-    "wind_ms": 6.2
+    "wind_ms": 11.4
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Минфин поменял условия семейной ипотеки — ставка и максимальная сумма кредита будут зависеть от количества детей и региона проживания",
-        "url": "https://vc.ru/money/3157187-izmeneniya-v-semejnoy-ipoteke?from=rss"
+        "title": "В App Store появилось приложение Spotluma с функциями «Т-Банка»",
+        "url": "https://vc.ru/services/3158891-prilozhenie-spotluma-v-app-store-s-funkciyami-t-banka?from=rss"
       },
       {
         "title": "Центр безопасности Мax опроверг исследование InterSecLab о функциях отслеживания",
         "url": "https://vc.ru/services/3157052-issledovanie-max-peredacha-dannyh-v-vk?from=rss"
       },
       {
-        "title": "Минфин предложил распространить прогрессивную ставку НДФЛ 13-22% на доходы россиян от вкладов, инвестиций в ценные бумаги и продажи имущества",
-        "url": "https://vc.ru/money/3156248-minfin-predlozhil-progrestivnyi-ndfl-13-22-na-dohody-rossiyan?from=rss"
+        "title": "Минфин поменял условия семейной ипотеки — ставка и максимальная сумма кредита будут зависеть от количества детей и региона проживания",
+        "url": "https://vc.ru/money/3157187-izmeneniya-v-semejnoy-ipoteke?from=rss"
       },
       {
-        "title": "Whoosh и Segway начали тестировать в Москве обновлённый электросамокат с увеличенным до 60 км запасом хода",
-        "url": "https://vc.ru/transport/3156582-whoosh-i-segway-testiruyut-obnovlennyy-elektrosamokat-v-moskve?from=rss"
+        "title": "Студия Bleecker Street выпустила трейлер четырёхчасового «разоблачительного» документального фильма об Илоне Маске",
+        "url": "https://vc.ru/media/3158292-dokumentalnyj-film-o-maske-ot-bleecker-street?from=rss"
       },
       {
-        "title": "Минпромторг определил ставки технологического сбора для производителей и импортёров электроники, который начнут брать с 1 декабря 2026 года",
-        "url": "https://vc.ru/tech/3157538-minpromtorg-utverdil-stavki-tehnologicheskogo-sbora-dlya-elektroniki?from=rss"
+        "title": "День 1674: правительство утвердило проект бюджета на 2027-2029 годы — с плановым дефицитом 2% ВВП, оптимизацией расходов на 2 трлн рублей и точечным увеличением налогов",
+        "url": "https://vc.ru/money/3158146-proekty-byudzheta-s-defitsitom-i-optimizatsiey-raskhodov?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Исследователи представили DrivingBench — бенчмарк, в котором популярные LLM управляют настоящей Toyota Corolla",
-        "url": "https://habr.com/ru/news/1086446/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086446"
+        "title": "ПСБ занял первое место в рейтинге Markswebb интернет-банков для бизнеса",
+        "url": "https://habr.com/ru/companies/psb/news/1086548/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086548"
       },
       {
-        "title": "Представлено обновление Wireshark 4.6.9",
-        "url": "https://habr.com/ru/news/1085982/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1085982"
+        "title": "Пираты массово призывают покупать Control Resonant и спасать Remedy",
+        "url": "https://habr.com/ru/companies/ggsel/news/1086640/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086640"
       },
       {
-        "title": "Вышло обновление FreeRDP 3.32",
-        "url": "https://habr.com/ru/news/1085822/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1085822"
+        "title": "Microsoft Excel начал поддерживать несколько значений в одной ячейке",
+        "url": "https://habr.com/ru/news/1086632/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086632"
       },
       {
-        "title": "OpenAI добавила плагины в голосовой режим ChatGPT",
-        "url": "https://habr.com/ru/companies/bothub/news/1086400/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086400"
+        "title": "В ChatGPT хотят добавить подписку Pro Max за $500 в месяц",
+        "url": "https://habr.com/ru/companies/bothub/news/1086622/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086622"
       },
       {
-        "title": "Учёные выдвинули теорию о тёмных измерениях и первичных чёрных дырах",
-        "url": "https://habr.com/ru/news/1086384/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086384"
+        "title": "Система Tesla FSD превышает скорость в 55% зон с ограничением 30 км/ч в Брюсселе",
+        "url": "https://habr.com/ru/news/1086620/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086620"
       }
     ],
     "tproger": [
+      {
+        "title": "Как выбрать лучший хостинг для Telegram-бота в 2026–2027 году",
+        "url": "https://tproger.ru/articles/kak-vybrat-luchwij-hosting-dlya-telegram-bota-v-2026-2027-godu"
+      },
+      {
+        "title": "GitHub Security Lab открыла автономный ИИ-конвейер для фаззинга C/C++",
+        "url": "https://tproger.ru/news/github-security-lab-otkryla-avtonomnyj-ii-konvejer-dlya-fazzinga"
+      },
+      {
+        "title": "GitHub выпустил Spec Kit 1.0.11 с идемпотентным добавлением каталогов",
+        "url": "https://tproger.ru/news/github-vypustil-spec-kit-1-0-11-s-idempotentnym-dobavleniem-kata"
+      },
       {
         "title": "В PostgreSQL 19 Beta 4 исключили SQL/PGQ и онлайн-переключение checksums",
         "url": "https://tproger.ru/news/v-postgresql-19-beta-4-isklyuchili-sql-pgq-i-onlajn-pereklyuchenie-c"
@@ -61,20 +73,8 @@
       {
         "title": "Hermes Agent 0.21.5 получил SDK для десктопных плагинов и обновлённые коннекторы",
         "url": "https://tproger.ru/news/hermes-agent-0-21-5-poluchil-sdk-dlya-desktopnyh-plaginov-i-obnovl"
-      },
-      {
-        "title": "OpenClaw 2026.9.6 для macOS пересобрали из-за сбоя при запуске",
-        "url": "https://tproger.ru/news/openclaw-2026-9-6-dlya-macos-peresobrali-iz-za-sboya-pri-zapuske"
-      },
-      {
-        "title": "CloudNativePG 1.30.1 закрыл обход проверки путей и исправил зависания при переключении кластеров",
-        "url": "https://tproger.ru/news/cloudnativepg-1-30-1-zakryl-obhod-proverki-putej-i-ispravil-zavi"
-      },
-      {
-        "title": "workerd 1.20260924.1 добавил веб-поиск для Workers AI и обновил обработку байтовых потоков",
-        "url": "https://tproger.ru/news/workerd-1-20260924-1-dobavil-veb-poisk-dlya-workers-ai-i-obnovil"
       }
     ]
   },
-  "summary": "Сводка digest-20260925-0316: Самара 14.5°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260925-1103: Самара 25.1°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
