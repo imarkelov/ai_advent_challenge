@@ -1022,9 +1022,9 @@ describe('ChatPanel — «Шаги агента»: сворачиваемая г
       {
         role: 'assistant',
         content: '',
-        tool_calls: [{ id: 'call_1', type: 'function', function: { name: 'get_task_details', arguments: '{"task_id": "TASK-42"}' } }],
+        tool_calls: [{ id: 'call_1', type: 'function', function: { name: 'task_get__get_task_details', arguments: '{"task_id": "TASK-42"}' } }],
       },
-      { role: 'tool', content: 'TOOL-RESULT-123', tool_call_id: 'call_1', name: 'get_task_details' },
+      { role: 'tool', content: 'TOOL-RESULT-123', tool_call_id: 'call_1', name: 'task_get__get_task_details' },
       { role: 'assistant', content: 'Финальный ответ: in_progress', model: 'qwen3.8-27b' },
     ])
     const { container } = render(
@@ -1038,19 +1038,19 @@ describe('ChatPanel — «Шаги агента»: сворачиваемая г
     // (аргументы 22 символа ≈ 10, результат 15 ≈ 7 → сумма ≈ 17)
     const header = await screen.findByRole('button', { name: /🧩 Шаги агента/ })
     expect(header).toHaveAttribute('aria-expanded', 'false')
-    expect(screen.getByText('get_task_details')).toBeTruthy()
+    expect(screen.getByText('task_get · get_task_details')).toBeTruthy()
     expect(screen.getAllByText(/≈ \d+ tok/)).toHaveLength(1)
     expect(screen.getByText('≈ 17 tok')).toBeTruthy()
     expect(container.querySelector('.step-row')).toBeNull()
-    expect(screen.queryByText('🔧 get_task_details')).toBeNull()
+    expect(screen.queryByText('🔧 task_get__get_task_details')).toBeNull()
     expect(screen.queryByText('TOOL-RESULT-123')).toBeNull()
     expect(screen.queryByText('{"task_id": "TASK-42"}')).toBeNull()
     // раскрытие группы: ряды шагов (chip + свои ≈ N tok) видны,
     // а payload в <pre> — НЕТ (ряды свёрнуты по умолчанию)
     fireEvent.click(header)
     await waitFor(() => expect(header).toHaveAttribute('aria-expanded', 'true'))
-    const callRow = screen.getByRole('button', { name: /🔧 get_task_details/ })
-    const resRow = screen.getByRole('button', { name: /↳ get_task_details/ })
+    const callRow = screen.getByRole('button', { name: /🔧 task_get__get_task_details/ })
+    const resRow = screen.getByRole('button', { name: /↳ task_get__get_task_details/ })
     expect(callRow).toHaveAttribute('aria-expanded', 'false')
     expect(resRow).toHaveAttribute('aria-expanded', 'false')
     // свои оценки: аргументы ≈ 10, результат ≈ 7 (+ сумма 17 в заголовке)
@@ -1137,6 +1137,33 @@ describe('ChatPanel — «Шаги агента»: сворачиваемая г
     // суммарная оценка токенов группы (аргументы ≈ 8+8+5, результаты ≈ 1+1+1)
     expect(screen.getByText('≈ 24 tok')).toBeTruthy()
     expect(screen.getByText('Готово')).toBeTruthy()
+  })
+
+  it('бейдж без префикса — как есть; несколько тулов — уникальные бейджи', async () => {
+    stubDialogueFetch([
+      { role: 'user', content: 'проверь' },
+      {
+        role: 'assistant',
+        content: '',
+        tool_calls: [
+          { id: 'c1', type: 'function', function: { name: 'plain_tool', arguments: '{}' } },
+          { id: 'c2', type: 'function', function: { name: 'digest_search__search', arguments: '{"query":"x"}' } },
+        ],
+      },
+      { role: 'tool', content: 'r1', tool_call_id: 'c1', name: 'plain_tool' },
+      { role: 'tool', content: 'r2', tool_call_id: 'c2', name: 'digest_search__search' },
+      { role: 'assistant', content: 'готово', model: 'qwen3.8-27b' },
+    ])
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('готово')
+    expect(screen.getByText('plain_tool')).toBeTruthy()
+    expect(screen.getByText('digest_search · search')).toBeTruthy()
+    // дубль бейджей нет (уникальные имена)
+    expect(container.querySelectorAll('.tool-badge')).toHaveLength(2)
   })
 })
 

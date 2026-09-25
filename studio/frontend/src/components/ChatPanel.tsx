@@ -71,6 +71,13 @@ function StepRow({ variant, chip, chipTitle, payload }: {
   )
 }
 
+// День 20: имена MCP-тулов всегда {server}__{tool} — бейдж шапки
+// «Шаги агента» рендерит их как «server · tool» (первое «__»).
+function formatToolName(n: string): string {
+  const i = n.indexOf('__')
+  return i > 0 ? `${n.slice(0, i)} · ${n.slice(i + 2)}` : n
+}
+
 // Сворачиваемый блок «Шаги агента»: подряд идущие tool-сообщения
 // (assistant.tool_calls / role:"tool") — в одной группе, свёрнута по
 // умолчанию; в развёрнутом теле каждый шаг — свой сворачиваемый ряд (StepRow).
@@ -105,7 +112,9 @@ function AgentSteps({ messages }: { messages: Message[] }) {
       >
         <span className="agent-steps-title">🧩 Шаги агента · {calls.length}</span>
         {names.map((n) => (
-          <span key={n} className="tool-badge">{n}</span>
+          <span key={n} className="tool-badge" title={n}>
+            {formatToolName(n)}
+          </span>
         ))}
         <span className="step-tokens" title="Оценка токенов (эвристика)">≈ {totalTokens} tok</span>
         <span className="agent-steps-caret" aria-hidden>{open ? '▴' : '▾'}</span>
