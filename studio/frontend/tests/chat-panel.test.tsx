@@ -756,27 +756,19 @@ const FC_TOOLS: McpTool[] = [
   },
   { server: 'mcp_fc', name: 'firecrawl_scrape', description: 'Скрапинг страницы', input_schema: { type: 'object' } },
 ]
-// Многословное имя сервера (дефолт дня 17) — регресс парсера «/»
-const TM: McpServer = {
-  id: 'mcp_tm', name: 'Task Manager', type: 'stdio',
-  command: ['python', 'task_manager.py'], url: '', env: {},
-  enabled: true, status: 'connected', error: null, tools_count: 2,
+// Однословное имя сервера (дефолт дня 20, 1 сервер = 1 тул) — регресс парсера «/»
+const WEATHER: McpServer = {
+  id: 'mcp_weather', name: 'weather', type: 'stdio',
+  command: ['python', 'weather.py'], url: '', env: {},
+  enabled: true, status: 'connected', error: null, tools_count: 1,
 }
-const TM_TOOLS: McpTool[] = [
+const WEATHER_TOOLS: McpTool[] = [
   {
-    server: 'mcp_tm', name: 'get_task_details', description: 'Детали задачи',
+    server: 'mcp_weather', name: 'get_weather', description: 'Текущая погода по городу',
     input_schema: {
       type: 'object',
-      properties: { task_id: { type: 'string', description: 'ID задачи' } },
-      required: ['task_id'],
-    },
-  },
-  {
-    server: 'mcp_tm', name: 'create_task', description: 'Создать задачу',
-    input_schema: {
-      type: 'object',
-      properties: { title: { type: 'string', description: 'Заголовок' } },
-      required: ['title'],
+      properties: { city: { type: 'string', description: 'Город (дефолт: Самара)' } },
+      required: [],
     },
   },
 ]
@@ -934,12 +926,12 @@ describe('ChatPanel — автодополнение MCP-команд «/» (д�
     expect(chatSent).toBe(false)
   })
 
-  // Многословное имя сервера («Task Manager»): парсер должен разобрать
-  // «/Task Manager tool» как сервер + тул, а не как сервер «Task»
-  it('многословное имя «/Task Manager» — сервер резолвится, список тулов (tier-2)', async () => {
+  // Однословное имя сервера (дефолт дня 20 «weather»): парсер должен
+  // разобрать «/weather tool» как сервер + тул («/weather» без тула — tier-1)
+  it('однословное имя «/weather get» — сервер резолвится, список тулов (tier-2)', async () => {
     stubMcpFetch((url) => {
-      if (url === '/api/mcp/servers') return jsonResponse({ servers: [FC, TM] })
-      if (url === '/api/mcp/tools') return jsonResponse({ tools: [...FC_TOOLS, ...TM_TOOLS] })
+      if (url === '/api/mcp/servers') return jsonResponse({ servers: [FC, WEATHER] })
+      if (url === '/api/mcp/tools') return jsonResponse({ tools: [...FC_TOOLS, ...WEATHER_TOOLS] })
       return null
     })
     render(
@@ -948,20 +940,23 @@ describe('ChatPanel — автодополнение MCP-команд «/» (д�
       </StudioProvider>,
     )
     const ta = (await screen.findByPlaceholderText(/Сообщение…/)) as HTMLTextAreaElement
-    fireEvent.change(ta, { target: { value: '/Task Manager' } })
+    // без тула — tier-1: строка сервера, не тул
+    fireEvent.change(ta, { target: { value: '/weather' } })
     await screen.findByRole('listbox')
-    expect(screen.getByText('get_task_details')).toBeTruthy()
-    expect(screen.getByText('create_task')).toBeTruthy()
-    // префикс тула — фильтрует, как у однословных серверов
-    fireEvent.change(ta, { target: { value: '/Task Manager get' } })
-    expect(await screen.findByText('get_task_details')).toBeTruthy()
-    expect(screen.queryByText('create_task')).toBeNull()
+    expect(screen.queryByText('get_weather')).toBeNull()
+    // тул после имени — tier-2: список тулов по префиксу
+    fireEvent.change(ta, { target: { value: '/weather get' } })
+    expect(await screen.findByText('get_weather')).toBeTruthy()
+    // префикс тула — фильтрует: чужой тул не найден, дропдаун закрыт
+    fireEvent.change(ta, { target: { value: '/weather create' } })
+    expect(screen.queryByText('get_weather')).toBeNull()
+    expect(screen.queryByRole('listbox')).toBeNull()
   })
 
-  it('многословное имя: сервер из автодополнения, тул — модалка формы', async () => {
+  it('однословное имя: сервер из автодополнения, тул — модалка формы', async () => {
     stubMcpFetch((url) => {
-      if (url === '/api/mcp/servers') return jsonResponse({ servers: [FC, TM] })
-      if (url === '/api/mcp/tools') return jsonResponse({ tools: [...FC_TOOLS, ...TM_TOOLS] })
+      if (url === '/api/mcp/servers') return jsonResponse({ servers: [FC, WEATHER] })
+      if (url === '/api/mcp/tools') return jsonResponse({ tools: [...FC_TOOLS, ...WEATHER_TOOLS] })
       return null
     })
     render(
@@ -970,19 +965,19 @@ describe('ChatPanel — автодополнение MCP-команд «/» (д�
       </StudioProvider>,
     )
     const ta = (await screen.findByPlaceholderText(/Сообщение…/)) as HTMLTextAreaElement
-    // tier-1: префикс «task» — в списке только многословный сервер
-    fireEvent.change(ta, { target: { value: '/task' } })
+    // tier-1: префикс «wea» — в списке только сервер weather
+    fireEvent.change(ta, { target: { value: '/wea' } })
     await screen.findByRole('listbox')
-    expect(screen.getByText('Task Manager')).toBeTruthy()
+    expect(screen.getByText('weather')).toBeTruthy()
     // Enter — выбор сервера, draft дополнен полным именем
     fireEvent.keyDown(ta, { key: 'Enter' })
-    expect(ta.value).toBe('/Task Manager ')
+    expect(ta.value).toBe('/weather ')
     // tier-2: тул выбранной — модалка формы открывается
-    fireEvent.change(ta, { target: { value: '/Task Manager get_task_details' } })
+    fireEvent.change(ta, { target: { value: '/weather get_weather' } })
     fireEvent.keyDown(ta, { key: 'Enter' })
-    expect(await screen.findByText('MCP Task Manager/get_task_details')).toBeTruthy()
-    const task_id = screen.getByLabelText(/task_id \*/) as HTMLInputElement
-    expect(task_id.type).toBe('text')
+    expect(await screen.findByText('MCP weather/get_weather')).toBeTruthy()
+    const city = screen.getByLabelText(/city/) as HTMLInputElement
+    expect(city.type).toBe('text')
   })
 })
 
