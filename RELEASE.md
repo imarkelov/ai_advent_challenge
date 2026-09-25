@@ -116,7 +116,11 @@ best-effort, не FAIL). Валидация кириллицы: TTF `cmap` → �
 
 ## Коммиты
 
-_(заполнить после коммита)_
+- `ff110a2` — pipeline_tools stdio MCP server (search/summarize/saveToFile) + stdlib PDF writer
+- `df63060` — MCP_TOOLS_RULE — LLM-driven tool composition, search text field for data passing
+- `efaa753` — e2e_day19 — deterministic chain (data passing + PDF) + live best-effort
+- `d17dd12` — feat(ui): agent steps — per-step collapse, MCP tool badges, token estimates, tabs, 5-dialogs sidebar
+- `af6b0f1` — docs: day19 README/RELEASE/plan/openspec + LINKS.md
 
 ---
 
