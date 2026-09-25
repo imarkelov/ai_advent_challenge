@@ -37,10 +37,14 @@
   `task_manager.py` (2 тула, in-memory), `news_weather.py` (4 тула,
   `collector.py`), `pipeline_tools.py` (3 тула, `pdf_writer.py`).
   Скелетон JSON-RPC loop ~200 строк, скопирован 3 раза.
-- `collector.py` — interface: `_default_fetch_weather(city)`,
-  `_default_fetch_news(source)`, `_parse_rss_items(xml)`, `_dedup_top`,
-  `collect_digest(city, now, fetch_weather=..., ...)`, `save_digest(digest,
-  data_dir)`, `build_digest_id`, `build_summary`, `resolve_data_dir`.
+- `collector.py` — interface: публичные алиасы `fetch_weather(city)` /
+  `fetch_news(source)` (patch-абельны из тестов; алиасы на
+  `_default_*`), `NEWS_FEEDS` (vc.ru / habr / tproger, habr =
+  `https://habr.com/ru/rss/news/?fl=ru`), `_http_get(url)`,
+  `_parse_rss_items(xml)` (возвращает только `{title, url}`, **без дат**),
+  `_dedup_top`, `collect_digest(city, now, fetch_weather=..., ...)`,
+  `save_digest(digest, data_dir)`, `build_digest_id`, `build_summary`,
+  `resolve_data_dir` (env `DIGEST_DATA_DIR`).
 - E2E-конвенция: Part A — детерминированное ядро в-процессе (реальные
   subprocess MCP-серверов + scripted fake-LLM на `httpx.MockTransport`),
   MUST PASS; Part B — live (uvicorn + реальный GPustack LLM), best-effort
@@ -55,7 +59,7 @@
 
 | Сервер (имя в реестре) | Файл | Тул | Аргументы | Поведение / источник |
 |---|---|---|---|---|
-| `weather` | `weather.py` | `get_weather` | `city?` (default Самара) | Open-Meteo `current` + `daily.2d` (collector._default_fetch_weather). Сбой сети → `isError: true` |
+| `weather` | `weather.py` | `get_weather` | `city?` (default Самара) | Open-Meteo geocoding + current (collector.fetch_weather): `{city, temp_c, feels_like_c, description, wind_ms}`. Сбой сети/город не найден → `isError: true` «Погода недоступна: …» (текст дня 18) |
 | `news` | `news.py` | `get_news` | `sources?` (vc.ru\|habr\|tproger, default все) | top-5 на источник, дедуп (collector._default_fetch_news). Сбой одного источника → `{"error"}` у этого источника, остальные живы (паттерн дня 18) |
 | `digest_make` | `digest_make.py` | `make_digest` | `city?` | collect_digest + save_digest в `data/digests/` (env `DIGEST_DATA_DIR`); возвращает JSON дайджеста |
 | `digest_read` | `digest_read.py` | `get_latest_digest` | — | локальный `last-digest.json` → фолбэк GitHub API (env `DIGEST_GITHUB_REPO`, default `imarkelov/ai_advent_challenge`) → `isError`. Результат (форма дня 18): `{source: local\|github, generated_at, digest}` |
@@ -64,7 +68,7 @@
 | `digest_search` | `digest_search.py` | `search` | `query` (required) | Субстринг по `data/digests/*.json` (env `PIPELINE_SEARCH_DIR`), top-20 по `generated_at` desc, возвращает `{query, count, matches, text}` (готовое поле `text`; алгоритм дня 19). Нет совпадений → `isError` «no matches for '<query>'» (поведение дня 19) |
 | `digest_summarize` | `digest_summarize.py` | `summarize` | `text` (required), `max_points?`=8 (max 20) | Детерминированная extractive-сводка (частотная оценка, **без LLM**, алгоритм дня 19) |
 | `file_save` | `file_save.py` | `saveToFile` | `filename`, `content`, `format?`=md\|txt\|json\|pdf | Атомарная запись (tmp + `os.replace`) в `data/pipeline/` (env `PIPELINE_OUT_DIR`), basename-санитизация; pdf → `pdf_writer` |
-| `habr_news` | `habr_news.py` | `get_habr_news` | `topics?` (массив: `testing` \| `ai`, default оба), `limit?`=10 | RSS Habr (URL из collector + `_parse_rss_items`), фильтр по заголовкам (ниже), top-`limit` по `published` desc. Сбой сети → `isError` |
+| `habr_news` | `habr_news.py` | `get_habr_news` | `topics?` (массив: `testing` \| `ai`, default оба), `limit?`=10 | Фид `collector.NEWS_FEEDS["habr"]` через `collector._http_get` + **локальный** RSS-парсер (title/link/pubDate — `_parse_rss_items` collector не даёт даты; ~15 строк, тот же ET-стиль). Fetch — module-level функция, публичный алиас, **patch-абелен из тестов** (паттерн collector). Фильтр по заголовкам (ниже), top-`limit` по pubDate desc. Пункт: `{title, url, published, topic}`. Сбой сети/парсинга → `isError` |
 
 **Фильтр тем `habr_news` (детерминированный, case-insensitive,
 `re.UNICODE`):**
@@ -221,8 +225,10 @@ digest_search, digest_summarize, file_save, habr_news.
 - Кросс-процессные задачи: `task_create` (процесс A) создаёт →
   `task_get` (процесс B) находит; новый файл → сид TASK-42/TASK-7;
   следующий id = max+1; не найдено → isError.
-- `habr_news`-фильтр: фиктивный RSS-XML — RU-паттерны, word-boundary
-  («maintain» ≠ «ai»), темы по одной, неизвестная тема → isError.
+- `habr_news`-фильтр: запатченный fetch (фиктивные items) — RU-паттерны,
+  word-boundary («maintain» ≠ «ai», «акции» ≠ «ии»), темы по одной,
+  неизвестная тема → isError; отдельно — локальный RSS-парсер на
+  фиктивном XML (title/link/pubDate, битый XML → []).
 - `_mcp_base`: `-32601`, notification без ответа, исключение handler →
   isError.
 
