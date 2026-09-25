@@ -22,8 +22,11 @@ import collector  # noqa: E402  (только URL фида)
 from _mcp_base import run_server  # noqa: E402
 
 TOPIC_PATTERNS = {
-    "testing": re.compile(r"\bтест\w*|\bqa\b", re.IGNORECASE),
-    "ai": re.compile(r"\b(ai|ии|llm|gpt|ml)\b|нейросет\w*", re.IGNORECASE),
+    "testing": re.compile(r"тест|\bqa\b|\btest\b",
+                          re.IGNORECASE | re.UNICODE),
+    "ai": re.compile(r"\b(ai|llm|gpt|ml)\b|\bии\b|нейросет|"
+                     r"machine learning|искусственный интеллект",
+                     re.IGNORECASE | re.UNICODE),
 }
 
 TOOL = {

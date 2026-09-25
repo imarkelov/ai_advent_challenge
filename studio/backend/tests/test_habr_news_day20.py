@@ -63,6 +63,39 @@ def test_word_boundary_guard(monkeypatch):
     assert payload["count"] == 0  # maintain/акции/студии — не ИИ
 
 
+def test_testing_pattern_word_test(monkeypatch):
+    # спека §4.1: \btest\b (латиница) проходит testing
+    items = [{"title": "Automated test coverage", "url": "t1",
+              "published": ""}]
+    monkeypatch.setattr(habr_news, "fetch_habr", lambda: items)
+    payload, is_err = habr_news.call({"topics": ["testing"]})
+    assert is_err is False
+    assert payload["count"] == 1
+    assert payload["items"][0]["topic"] == "testing"
+
+
+def test_ai_pattern_machine_learning(monkeypatch):
+    # спека §4.1: подстрока "machine learning" проходит ai
+    items = [{"title": "Machine learning in practice", "url": "m1",
+              "published": ""}]
+    monkeypatch.setattr(habr_news, "fetch_habr", lambda: items)
+    payload, is_err = habr_news.call({"topics": ["ai"]})
+    assert is_err is False
+    assert payload["count"] == 1
+    assert payload["items"][0]["topic"] == "ai"
+
+
+def test_ai_pattern_ru_spelled_out(monkeypatch):
+    # спека §4.1: подстрока "искусственный интеллект" проходит ai
+    items = [{"title": "Искусственный интеллект в проде", "url": "i1",
+              "published": ""}]
+    monkeypatch.setattr(habr_news, "fetch_habr", lambda: items)
+    payload, is_err = habr_news.call({"topics": ["ai"]})
+    assert is_err is False
+    assert payload["count"] == 1
+    assert payload["items"][0]["topic"] == "ai"
+
+
 def test_single_topic_and_limit(monkeypatch):
     items = [{"title": "Тесты: часть %d" % i, "url": "u%d" % i,
               "published": "2026-09-25T00:0%d:00Z" % i} for i in range(5)]

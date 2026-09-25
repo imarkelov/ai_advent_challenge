@@ -375,10 +375,19 @@ class MCPRegistry:
         Custom-серверы не трогаем. Только под self._lock."""
         items = self._store.mcp_servers_items()
         if not items:
+            # уникальность id: регенерация при коллизии
+            entries = []
+            sids = set()
             for d in self._default_servers():
+                sid = "mcp_" + uuid.uuid4().hex[:8]
+                while sid in sids:
+                    sid = "mcp_" + uuid.uuid4().hex[:8]
+                sids.add(sid)
+                entries.append((sid, d))
+            for sid, d in entries:
                 self._store.mcp_servers_set(
-                    "mcp_" + uuid.uuid4().hex[:4], d["name"], d["type"],
-                    d["command"], d["url"], d["env"], d["enabled"])
+                    sid, d["name"], d["type"], d["command"], d["url"],
+                    d["env"], d["enabled"])
             return
         by_name = {e["name"]: sid for sid, e in items.items()}
         for old in _OLD_MULTI_TOOL:
@@ -391,9 +400,13 @@ class MCPRegistry:
             self._store.mcp_servers_remove(sid)
         for d in self._default_servers():
             if d["name"] not in by_name:
+                # уникальность id: регенерация при коллизии
+                sid = "mcp_" + uuid.uuid4().hex[:8]
+                while sid in items:
+                    sid = "mcp_" + uuid.uuid4().hex[:8]
                 self._store.mcp_servers_set(
-                    "mcp_" + uuid.uuid4().hex[:4], d["name"], d["type"],
-                    d["command"], d["url"], d["env"], d["enabled"])
+                    sid, d["name"], d["type"], d["command"], d["url"],
+                    d["env"], d["enabled"])
 
     def servers(self) -> list:
         """Реестр с runtime-статусом: id/name/type/command/url/env/enabled
