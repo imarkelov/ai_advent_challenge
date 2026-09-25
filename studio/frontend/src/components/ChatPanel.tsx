@@ -20,10 +20,145 @@ type AcItem =
 // Выбранный инструмент — данные модалки вызова (день 16)
 type ToolSel = { serverId: string; serverName: string; tool: McpTool }
 
+// Вызов инструмента LLM (день 17, LLM-driven tool-loop): форма OpenAI
+// tool_calls (assistant-сообщение из бэкенда; поля могут отсутствовать)
+interface LlmToolCall {
+  id?: string
+  type?: string
+  function?: { name?: string; arguments?: string }
+}
+
 const STATUS_HINT: Record<string, string> = {
   idle: 'не подключён',
   connected: 'подключён',
   error: 'ошибка',
+}
+
+// Оценка токенов (клиентская эвристика, без API): норма ~0.44 токена/символ,
+// откалибрована на кириллической норме рабочей модели qwen3.8-27b
+function estTokens(s?: string | null): number {
+  return s ? Math.max(1, Math.round(s.length * 0.44)) : 0
+}
+
+// Строка шага «Шагов агента»: один вызов (tool_call) или один результат
+// (role:"tool") — самостоятельный сворачиваемый ряд (своё состояние,
+// свёрнут по умолчанию): шапка = chip + ≈ токенов + caret; тело — payload в <pre>
+function StepRow({ variant, chip, chipTitle, payload }: {
+  variant: 'call' | 'result'
+  chip: string
+  chipTitle: string
+  payload: string
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={variant === 'call' ? 'step-row call' : 'step-row result'}>
+      <button
+        type="button"
+        className="step-row-header"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="tool-card-chip" title={chipTitle}>{chip}</span>
+        <span className="step-tokens" title="Оценка токенов (эвристика)">≈ {estTokens(payload)} tok</span>
+        <span className="agent-steps-caret" aria-hidden>{open ? '▴' : '▾'}</span>
+      </button>
+      {open && (
+        <div className="step-row-body">
+          <pre className="tool-card-pre">{payload}</pre>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// День 20: имена MCP-тулов всегда {server}__{tool} — бейдж шапки
+// «Шаги агента» рендерит их как «server · tool» (первое «__»).
+function formatToolName(n: string): string {
+  const i = n.indexOf('__')
+  return i > 0 ? `${n.slice(0, i)} · ${n.slice(i + 2)}` : n
+}
+
+// Сворачиваемый блок «Шаги агента»: подряд идущие tool-сообщения
+// (assistant.tool_calls / role:"tool") — в одной группе, свёрнута по
+// умолчанию; в развёрнутом теле каждый шаг — свой сворачиваемый ряд (StepRow).
+function AgentSteps({ messages }: { messages: Message[] }) {
+  const [open, setOpen] = useState(false)
+  const calls = messages.flatMap((m) =>
+    Array.isArray(m.tool_calls) ? (m.tool_calls as LlmToolCall[]) : [],
+  )
+  // Уникальные имена тулов в порядке первого появления (для бейджей)
+  const names: string[] = []
+  for (const tc of calls) {
+    const n = tc.function?.name
+    if (n && !names.includes(n)) names.push(n)
+  }
+  // Суммарная оценка токенов группы: аргументы всех вызовов + содержимое
+  // всех результатов
+  const totalTokens = messages.reduce((sum, m) => {
+    if (Array.isArray(m.tool_calls)) {
+      for (const tc of m.tool_calls as LlmToolCall[]) sum += estTokens(tc.function?.arguments)
+    } else if (m.role === 'tool') {
+      sum += estTokens(m.content)
+    }
+    return sum
+  }, 0)
+  return (
+    <div className="agent-steps">
+      <button
+        type="button"
+        className="agent-steps-header"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="agent-steps-title">🧩 Шаги агента · {calls.length}</span>
+        {names.map((n) => (
+          <span key={n} className="tool-badge" title={n}>
+            {formatToolName(n)}
+          </span>
+        ))}
+        <span className="step-tokens" title="Оценка токенов (эвристика)">≈ {totalTokens} tok</span>
+        <span className="agent-steps-caret" aria-hidden>{open ? '▴' : '▾'}</span>
+      </button>
+      {open && (
+        <div className="agent-steps-body">
+          {messages.map((m, j) => {
+            // Вызов инструмента (assistant.tool_calls): каждый вызов — свой
+            // сворачиваемый ряд; текст assistant — строка-заметка сверху
+            // (не сворачивается)
+            if (Array.isArray(m.tool_calls) && m.tool_calls.length > 0) {
+              return (
+                <div key={j} className="agent-steps-msg">
+                  {m.content && <div className="tool-card-note">{m.content}</div>}
+                  {(m.tool_calls as LlmToolCall[]).map((tc, k) => (
+                    <StepRow
+                      key={tc.id ?? k}
+                      variant="call"
+                      chip={`🔧 ${tc.function?.name ?? 'инструмент'}`}
+                      chipTitle="Модель вызвала инструмент"
+                      payload={tc.function?.arguments ?? ''}
+                    />
+                  ))}
+                </div>
+              )
+            }
+            // Результат инструмента (role:"tool"): свой сворачиваемый ряд
+            if (m.role === 'tool') {
+              return (
+                <StepRow
+                  key={j}
+                  variant="result"
+                  chip={`↳ ${m.name ?? 'инструмент'}`}
+                  chipTitle="Результат инструмента"
+                  payload={m.content}
+                />
+              )
+            }
+            return null
+          })}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function ChatPanel() {
@@ -73,6 +208,79 @@ export default function ChatPanel() {
   const cardData = (taskId: string) => {
     if (task && task.task_id === taskId) return { t: task, live: true }
     return { t: taskFromMarkers(state.messages, taskId), live: false }
+  }
+
+  // ── Лента: группировка tool-сообщений (LLM-driven tool-loop, день 17) ──
+  // Подряд идущие tool-сообщения (assistant.tool_calls / role:"tool") —
+  // в одной сворачиваемой группе «Шаги агента»; остальное — по одному
+  // элементу с ИСХОДНЫМ индексом сообщения (якорь TaskCard cardAt.has(i)
+  // и caret isTail от него зависят). task_stage-сообщения — внутри карточки.
+  type FeedItem =
+    | { kind: 'group'; key: number; messages: Message[] }
+    | { kind: 'msg'; index: number }
+  const feedItems: FeedItem[] = []
+  state.messages.forEach((m, i) => {
+    if (m.task_stage) return
+    const isTool = (Array.isArray(m.tool_calls) && m.tool_calls.length > 0) || m.role === 'tool'
+    if (isTool) {
+      const last = feedItems[feedItems.length - 1]
+      if (last && last.kind === 'group') last.messages.push(m)
+      else feedItems.push({ kind: 'group', key: i, messages: [m] })
+    } else {
+      feedItems.push({ kind: 'msg', index: i })
+    }
+  })
+
+  // Обычное сообщение (user/assistant) или карточка MCP (день 16);
+  // key = исходный индекс сообщения
+  const renderMsg = (m: Message, i: number) => {
+    const isTail = i === state.messages.length - 1
+    // Результат вызова MCP-инструмента (день 16): отдельная карточка
+    // (chip + вывод), без «в памяти»
+    if (m.mcp_tool) {
+      const mt = m.mcp_tool
+      const serverName = state.mcpServers.find((s) => s.id === mt.server)?.name ?? mt.server
+      return (
+        <div key={i} className="mcp-card">
+          <span className="mcp-card-chip" title="Результат вызова MCP-инструмента">
+            MCP {serverName}/{mt.tool}
+          </span>
+          <pre className="mcp-card-pre">{m.content}</pre>
+        </div>
+      )
+    }
+    return (
+      <div key={i}>
+        <div className={m.role === 'user' ? 'msg user' : 'msg assistant'}>
+          <div className="msg-role">
+            {m.role === 'user' ? 'вы' : 'модель'}
+            <button
+              type="button"
+              className="btn-icon msg-save"
+              title="Сохранить в память"
+              onClick={() => setSaveMsg(m)}
+            >
+              в память
+            </button>
+          </div>
+          <div className="msg-text">
+            {m.content}
+            {state.streaming && isTail && m.role === 'assistant' && (
+              <span className="caret" aria-hidden />
+            )}
+          </div>
+          {m.role === 'assistant' && m.model && (
+            <span className="msg-model-chip" title="Модель, которой выполнен запрос">
+              {m.model}
+            </span>
+          )}
+        </div>
+        {cardAt.has(i) && (() => {
+          const { t, live } = cardData(cardAt.get(i) as string)
+          return <TaskCard task={t} live={live} />
+        })()}
+      </div>
+    )
   }
 
   const currentModel = state.config?.model ?? ''
@@ -202,7 +410,7 @@ export default function ChatPanel() {
               ? 'Задача упала — «Повтор» в карточке'
               : task?.stage === 'plan_review'
                 ? 'Ожидание одобрения плана — кнопки в карточке'
-                : 'Опишите задачу… (Enter — запустить пайплайн)'
+                : 'Опишите проект… (Enter — запустить пайплайн)'
 
   return (
     <main className="panel chat">
@@ -263,61 +471,13 @@ export default function ChatPanel() {
 
       <div className="chat-feed" ref={feedRef}>
         {state.messages.length === 0 && <p className="chat-empty">Отправьте первое сообщение…</p>}
-        {state.messages.map((m, i) => {
-          const isTail = i === state.messages.length - 1
-          // Stage/work-сообщения с task_stage рендерятся внутри карточки
-          if (m.task_stage) return null
-          // Tool-сообщения LLM-лупа (день 17): служебные результаты
-          // MCP-инструментов для контекста LLM — не рендерятся пузырём
-          // (итог даёт финальный assistant-ответ)
-          if (m.role === 'tool') return null
-          // Результат вызова MCP-инструмента (день 16): отдельная карточка
-          // (chip + вывод), без «в память»
-          if (m.mcp_tool) {
-            const mt = m.mcp_tool
-            const serverName = state.mcpServers.find((s) => s.id === mt.server)?.name ?? mt.server
-            return (
-              <div key={i} className="mcp-card">
-                <span className="mcp-card-chip" title="Результат вызова MCP-инструмента">
-                  MCP {serverName}/{mt.tool}
-                </span>
-                <pre className="mcp-card-pre">{m.content}</pre>
-              </div>
-            )
-          }
-          return (
-            <div key={i}>
-              <div className={m.role === 'user' ? 'msg user' : 'msg assistant'}>
-                <div className="msg-role">
-                  {m.role === 'user' ? 'вы' : 'модель'}
-                  <button
-                    type="button"
-                    className="btn-icon msg-save"
-                    title="Сохранить в память"
-                    onClick={() => setSaveMsg(m)}
-                  >
-                    в память
-                  </button>
-                </div>
-                <div className="msg-text">
-                  {m.content}
-                  {state.streaming && isTail && m.role === 'assistant' && (
-                    <span className="caret" aria-hidden />
-                  )}
-                </div>
-                {m.role === 'assistant' && m.model && (
-                  <span className="msg-model-chip" title="Модель, которой выполнен запрос">
-                    {m.model}
-                  </span>
-                )}
-              </div>
-              {cardAt.has(i) && (() => {
-                const { t, live } = cardData(cardAt.get(i) as string)
-                return <TaskCard task={t} live={live} />
-              })()}
-            </div>
-          )
-        })}
+        {feedItems.map((item) =>
+          item.kind === 'group' ? (
+            <AgentSteps key={`steps-${item.key}`} messages={item.messages} />
+          ) : (
+            renderMsg(state.messages[item.index], item.index)
+          ),
+        )}
         {task && !cardAt.has(state.messages.findIndex((m) => m.task_id === task.task_id)) && (
           // Живая задача, якорь ещё не в ленте (start в процессе) — карточка хвостом
           <TaskCard task={task} live />
@@ -334,7 +494,7 @@ export default function ChatPanel() {
             disabled={toggleLocked}
             onClick={() => setChatMode('chat')}
           >
-            Чат
+            Диалог
           </button>
           <button
             type="button"
@@ -344,7 +504,7 @@ export default function ChatPanel() {
             disabled={toggleLocked}
             onClick={() => setChatMode('task')}
           >
-            Задача
+            Проект
           </button>
         </div>
         <div className="input-wrap">

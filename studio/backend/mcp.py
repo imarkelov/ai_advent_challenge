@@ -27,6 +27,11 @@ MCP_CLIENT_INFO = {"name": "studio", "version": "1.0"}
 
 _ENV_REF = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
 
+_LOCAL_SERVERS = ("weather", "news", "digest_make", "digest_read",
+                  "task_create", "task_get", "digest_search",
+                  "digest_summarize", "file_save", "habr_news")
+_OLD_MULTI_TOOL = ("Task Manager", "News & Weather", "Pipeline Tools")
+
 
 class MCPError(Exception):
     """Ошибка подключения/вызова MCP (RU-сообщение)."""
@@ -338,13 +343,11 @@ class MCPRegistry:
         self._runtime = {}  # sid -> {status, tools, error, client}
 
     def _default_servers(self) -> list:
-        """Дефолты: Firecrawl, Git (stdio/npx, день 16), Task Manager
-        (локальный python-процесс, день 17) и News & Weather (локальный
-        python-процесс, день 18 — без npx; погода+новости, дайджесты
-        в data/digests/)."""
+        """Дефолты (день 20): Firecrawl, Git (npx, день 16) + 10
+        одиночных локальных MCP-серверов (python-процессы)."""
         repo = os.path.abspath(
             os.path.join(self._store.data_dir, "..", ".."))
-        return [
+        defaults = [
             {"name": "Firecrawl", "type": "stdio",
              "command": ["npx", "-y", "firecrawl-mcp"],
              "url": "",
@@ -356,31 +359,54 @@ class MCPRegistry:
              "env": {"MCP_TRANSPORT_TYPE": "stdio", "MCP_LOG_LEVEL": "warn",
                      "GIT_SIGN_COMMITS": "false", "GIT_BASE_DIR": repo},
              "enabled": True},
-             {"name": "Task Manager", "type": "stdio",
-              "command": [sys.executable,
-                          os.path.join(repo, "studio", "mcp_servers",
-                                       "task_manager.py")],
-              "url": "",
-              "env": {},
-              "enabled": True},
-             {"name": "News & Weather", "type": "stdio",
-              "command": [sys.executable,
-                          os.path.join(repo, "studio", "mcp_servers",
-                                       "news_weather.py")],
-              "url": "",
-              "env": {},
-              "enabled": True},
-         ]
+        ]
+        for name in _LOCAL_SERVERS:
+            defaults.append({
+                "name": name, "type": "stdio",
+                "command": [sys.executable,
+                            os.path.join(repo, "studio", "mcp_servers",
+                                         name + ".py")],
+                "url": "", "env": {}, "enabled": True})
+        return defaults
 
     def _ensure_defaults_locked(self) -> None:
-        """Первый вызов — досеять дефолты (повторно не дублирует).
-        Вызывать ТОЛЬКО под self._lock."""
-        if self._store.mcp_servers_items():
+        """День 20: миграция реестра — удалить старые мультитул-серверы
+        по имени, добавить недостающие дефолты по имени. Идемпотентно.
+        Custom-серверы не трогаем. Только под self._lock."""
+        items = self._store.mcp_servers_items()
+        if not items:
+            # уникальность id: регенерация при коллизии
+            entries = []
+            sids = set()
+            for d in self._default_servers():
+                sid = "mcp_" + uuid.uuid4().hex[:8]
+                while sid in sids:
+                    sid = "mcp_" + uuid.uuid4().hex[:8]
+                sids.add(sid)
+                entries.append((sid, d))
+            for sid, d in entries:
+                self._store.mcp_servers_set(
+                    sid, d["name"], d["type"], d["command"], d["url"],
+                    d["env"], d["enabled"])
             return
+        by_name = {e["name"]: sid for sid, e in items.items()}
+        for old in _OLD_MULTI_TOOL:
+            sid = by_name.get(old)
+            if sid is None:
+                continue
+            r = self._runtime.pop(sid, None)
+            if r is not None and r.get("client") is not None:
+                r["client"].close()
+            self._store.mcp_servers_remove(sid)
         for d in self._default_servers():
-            self._store.mcp_servers_set(
-                "mcp_" + uuid.uuid4().hex[:4], d["name"], d["type"],
-                d["command"], d["url"], d["env"], d["enabled"])
+            if d["name"] not in by_name:
+                # уникальность id: регенерация при коллизии
+                sid = "mcp_" + uuid.uuid4().hex[:8]
+                while sid in items:
+                    sid = "mcp_" + uuid.uuid4().hex[:8]
+                self._store.mcp_servers_set(
+                    sid, d["name"], d["type"], d["command"], d["url"],
+                    d["env"], d["enabled"])
 
     def servers(self) -> list:
         """Реестр с runtime-статусом: id/name/type/command/url/env/enabled
@@ -507,7 +533,7 @@ class MCPRegistry:
 
     def tools(self) -> list:
         """Инструменты всех enabled+connected серверов:
-        [{server, name, description, input_schema}]."""
+        [{server, server_name, name, description, input_schema}]."""
         with self._lock:
             self._ensure_defaults_locked()
             items = self._store.mcp_servers_items()
@@ -520,7 +546,7 @@ class MCPRegistry:
             if r.get("status") != "connected":
                 continue
             for t in (r.get("tools") or []):
-                out.append({"server": sid, **t})
+                out.append({"server": sid, "server_name": e["name"], **t})
         return out
 
     def close_all(self) -> None:

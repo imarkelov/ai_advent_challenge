@@ -956,6 +956,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
           } else if (e.type === 'done') {
             dispatch({ type: 'done', answer: e.answer })
             void refreshPanels(e.request_id).catch((err) => console.error('refreshPanels:', err))
+            // День 19: перечитываем авторитетные сообщения диалога — в них
+            // tool-сообщения (assistant.tool_calls / role:"tool"), которые не
+            // эмитятся в SSE-стрим; без reload карточки вызовов инструментов
+            // не появятся в ленте. Тот же паттерн, что runTask/callMcpTool.
+            void reloadDialogue().catch((err) => console.error('reloadDialogue:', err))
             // Бэкенд сам назвал новый диалог по первому сообщению — перечитываем
             // список, чтобы сайдбар показал авто-название без перезагрузки.
             // Ошибка перечитывания не ломает чат.
@@ -973,7 +978,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         })
       }
     },
-    [refreshPanels],
+    [refreshPanels, reloadDialogue],
   )
 
   // Смена модели: POST /api/config {model} → сервер отвечает актуальным конфигом

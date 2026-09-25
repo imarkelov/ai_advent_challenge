@@ -115,6 +115,55 @@ INVARIANTS_RULE = (
     "отвечай как обычно, соблюдая инварианты."
 )
 
+# Правило MCP-инструментов (день 20, v2): модель сама выстраивает цепочку
+# инструментов; имена тулов ВСЕГДА с префиксом сервера (server__tool —
+# без логики коллизий); каталог подключённых серверов добавляется следом
+# (build_payload: MCP_TOOLS_RULE + _mcp_catalog_block); передача данных —
+# по полям (text → text, summary → content). Добавляется в system-промпт
+# ТОЛЬКО когда есть подключённые MCP-тулы (иначе — шум).
+MCP_TOOLS_RULE = (
+    "\n\nMCP-инструменты — композиция (цепочку выстраиваешь сам): когда в "
+    "задаче участвуют инструменты MCP-серверов, выполняй её САМ, вызывая "
+    "нужные инструменты, и ПЕРЕДАВАЙ результат каждого инструмента во вход "
+    "следующего. Бери только те инструменты, которые нужны задаче, в том "
+    "порядке, в котором их требует задача; не вызывай инструмент, в котором "
+    "задача не нуждается. Не останавливайся после первого инструмента и не "
+    "спрашивай разрешения продолжить — доведи задачу до конца и в финальном "
+    "ответе отчитайся результатом (что сделано и куда сохранено, если "
+    "что-то сохранялось).\n"
+    "Имена тулов всегда с префиксом сервера: server__tool — вызывай "
+    "инструменты строго под именами из каталога ниже (например, "
+    "weather__get_weather); без префикса вызов не дойдёт до сервера.\n"
+    "Как передавать данные: инструменты возвращают готовые поля — копируй "
+    "их в аргументы следующего инструмента. Например, у "
+    "digest_search__search есть поле text (готовый текст найденного) — "
+    "передай его в digest_summarize__summarize аргументом text; у "
+    "digest_summarize__summarize есть поле summary — передай его в "
+    "file_save__saveToFile аргументом content.\n"
+    "Пример — «найди записи про Самара, суммаризируй и сохрани в PDF»: "
+    "digest_search__search {query:\"Самара\"} → "
+    "digest_summarize__summarize {text: <поле text из "
+    "digest_search__search>} → file_save__saveToFile "
+    "{filename:\"samara_report.pdf\", content: <поле summary из "
+    "digest_summarize__summarize>, format:\"pdf\"} → в ответе сообщи, "
+    "что и куда сохранено."
+)
+
+
+def _mcp_slug(name: str) -> str:
+    """День 20: slug сервера для префикса тула (a-z0-9_)."""
+    return re.sub(r"[^a-z0-9]+", "_", (name or "").lower()).strip("_") \
+        or "server"
+
+
+def _tool_loop_cap() -> int:
+    """День 20: лимит итераций tool-loop (env TOOL_LOOP_CAP, дефолт 15).
+    Читаем на каждый вызов — тесты переопределяют env."""
+    try:
+        return max(1, int(os.environ.get("TOOL_LOOP_CAP") or 15))
+    except ValueError:
+        return 15
+
 JOURNAL_CAP = 100  # максимум записей в журнале (FIFO)
 
 # Глаголы действующих запросов для server-side гарда «запрос ↔ память»:
@@ -382,6 +431,10 @@ class StudioAgent:
                        ". Они не применяются к этому запросу: не ссылайся "
                        "на их пункты и не отказывай, ссылаясь на них, даже "
                        "если они упоминались ранее в диалоге.")
+        # День 19/20: MCP — правило + каталог только когда есть
+        # подключённые тулы (иначе шум в system-промпте).
+        if self.mcp.tools():
+            system += MCP_TOOLS_RULE + self._mcp_catalog_block()
         # День 14: инварианты непусты — правило с высшим приоритетом
         # в КОНЦЕ system-промпта (самое «свежее» место в system).
         if invariants:
@@ -406,36 +459,44 @@ class StudioAgent:
                        if msgs else []]
         return [{"role": "system", "content": system}] + history
 
+    def _mcp_catalog_block(self) -> str:
+        """День 20: каталог подключённых серверов в system-промпте:
+        - {server_name} ({slug}): {tool} — описание (до 120 символов)."""
+        by_server = {}
+        for t in self.mcp.tools():
+            name = t.get("server_name")
+            slug = _mcp_slug(name or t["server"])
+            by_server.setdefault((name or slug, slug), []).append(t)
+        lines = ["\n\nКаталог MCP-серверов (сервер: доступные тулы). "
+                 "Имена тулов всегда server__tool — вызывать строго как "
+                 "в каталоге:"]
+        for (name, slug), ts in by_server.items():
+            desc = "; ".join(
+                (t["name"] + " — " + (t.get("description") or "")[:120])
+                for t in ts)
+            lines.append("- %s (%s): %s" % (name, slug, desc))
+        return "\n".join(lines)
+
     def _llm_tools(self) -> tuple:
-        """Инструменты для LLM (день 17): OpenAI-формат из подключённых
-        MCP-серверов. Возвращает (tools, tool_map): tools — список
-        {"type": "function", "function": {"name", "description",
-        "parameters"}} (None, если подключённых тулов нет), tool_map —
-        {llm_name: (server_id, real_name)}. Коллизии имён тулов между
-        серверами: первое вхождение забирает обычное имя, следующие —
-        префикс "{server_id}__"."""
-        raw = self.mcp.tools()
-        if not raw:
+        """День 20: LLM-тулы MCP ВСЕГДА с префиксом {slug}__{tool}.
+        Возвращает (llm_tools | None, tool_map: llm_name -> (sid, real))."""
+        tools = self.mcp.tools()
+        if not tools:
             return None, {}
-        used = set()
-        tools = []
-        tool_map = {}
-        for t in raw:
-            name, server_id = t["name"], t["server"]
-            llm_name = name if name not in used else f"{server_id}__{name}"
-            while llm_name in used:  # страховка от двойной коллизии
-                llm_name += "_"
-            used.add(llm_name)
-            tools.append({
+        llm_tools, tool_map = [], {}
+        for t in tools:
+            slug = _mcp_slug(t.get("server_name") or t["server"])
+            llm_name = "%s__%s" % (slug, t["name"])
+            if llm_name in tool_map:
+                continue  # защита от дубля (не должно случаться)
+            tool_map[llm_name] = (t["server"], t["name"])
+            llm_tools.append({
                 "type": "function",
-                "function": {
-                    "name": llm_name,
-                    "description": t.get("description") or "",
-                    "parameters": t.get("input_schema") or {"type": "object"},
-                },
-            })
-            tool_map[llm_name] = (server_id, name)
-        return tools, tool_map
+                "function": {"name": llm_name,
+                             "description": t.get("description", ""),
+                             "parameters": t.get("input_schema")
+                             or {"type": "object", "properties": {}}}})
+        return llm_tools, tool_map
 
     def _append_message_ex(self, dialogue_id: str, role: str, content: str,
                            **extra) -> None:
@@ -467,8 +528,9 @@ class StudioAgent:
         День 17: tool-loop — если в тело уходят MCP-инструменты (ключ
         tools), модель может ответить tool_calls: агент вызывает каждый
         инструмент на MCP-сервере, результат дописывает в диалог
-        (role "tool") и повторяет запрос; кап — 5 итераций (превышение
-        — error-событие «Tool-loop: превышен лимит итераций (5)»).
+        (role "tool") и повторяет запрос; кап — TOOL_LOOP_CAP итераций
+        (env, дефолт 15; превышение — error-событие
+        «Tool-loop: превышен лимит итераций (N)»).
         """
         d = self.store.get_dialogue(dialogue_id)
         # День 13b: активная незавершённая непаузанная задача — чат
@@ -512,7 +574,8 @@ class StudioAgent:
         # вычисляем один раз — за ход состав подключённых серверов
         # не меняется.
         llm_tools, tool_map = self._llm_tools()
-        for iteration in range(5):
+        cap = _tool_loop_cap()
+        for iteration in range(cap):
             # Каждая итерация: пересобираем пейлоад (в истории появились
             # новые tool-сообщения) и повторно применяем три server-side
             # гарда по исходному пользовательскому сообщению.
@@ -628,8 +691,8 @@ class StudioAgent:
                 return
 
             # Модель решила вызвать инструменты: логируем решение,
-            # сохраняем assistant-сообщение с tool_calls (реальные имена
-            # тулов — не llm_name) и вызываем каждый инструмент;
+            # сохраняем assistant-сообщение с tool_calls (LLM-имена
+            # тулов — день 20) и вызываем каждый инструмент;
             # результаты (role "tool") дописываем в диалог — в следующей
             # итерации модель видит их и строит финальный ответ.
             calls = []
@@ -649,9 +712,9 @@ class StudioAgent:
             self._append_message_ex(
                 dialogue_id, "assistant", "".join(parts),
                 tool_calls=[{"id": c["id"], "type": "function",
-                              "function": {"name": rn,
+                              "function": {"name": c["name"],
                                            "arguments": c["arguments"]}}
-                             for c, _, rn in calls])
+                             for c, _, _ in calls])
             for call, sid, real_name in calls:
                 try:
                     args = json.loads(call["arguments"])
@@ -679,12 +742,13 @@ class StudioAgent:
                       flush=True)
                 self._append_message_ex(dialogue_id, "tool", text,
                                         tool_call_id=call["id"],
-                                        name=real_name)
-            if iteration == 4:
-                # 5-я итерация снова вернула tool_calls — лимит исчерпан
-                # (assistant-сообщения с tool_calls уже в диалоге).
+                                        name=call["name"])
+            if iteration == cap - 1:
+                # Последняя итерация снова вернула tool_calls — лимит
+                # исчерпан (assistant-сообщения с tool_calls уже в диалоге).
                 yield {"type": "error",
-                       "message": "Tool-loop: превышен лимит итераций (5)"}
+                       "message": ("Tool-loop: превышен лимит итераций "
+                                   "(%d)" % cap)}
                 return
 
     def _apply_guards(self, messages: list, dialogue_id: str,

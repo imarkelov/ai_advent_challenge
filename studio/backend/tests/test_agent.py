@@ -1962,9 +1962,11 @@ def _tool_loop_agent(data_dir, handler):
     return agent, reg
 
 
-def _tool_loop_handler(tool_name="mock_echo", always_tool_calls=False):
+def _tool_loop_handler(tool_name=None, always_tool_calls=False):
     """Fake-LLM: non-stream (авто-название) — JSON; в messages НЕТ
-    role "tool" — SSE с tool-call чанком (mock_echo/mock_ping/"nope");
+    role "tool" — SSE с tool-call чанком (день 20: LLM-имя берётся из
+    payload["tools"] — всегда с префиксом сервера, напр.
+    "firecrawl__mock_echo"; tool_name="nope" — имя не из реестра);
     role "tool" ЕСТЬ — SSE «Готово: <текст tool>» (+ usage + [DONE])."""
     def handler(request: httpx.Request) -> httpx.Response:
         payload = json.loads(request.content)
@@ -1979,8 +1981,12 @@ def _tool_loop_handler(tool_name="mock_echo", always_tool_calls=False):
             body = sse_body([delta_chunk("Готово: " + tool_text),
                              usage_chunk(), "[DONE]"])
             return httpx.Response(200, content=body.encode("utf-8"))
+        if tool_name is None:
+            llm_name = payload["tools"][0]["function"]["name"]
+        else:
+            llm_name = tool_name
         tc = {"index": 0, "id": "call_1", "type": "function",
-              "function": {"name": tool_name,
+              "function": {"name": llm_name,
                            "arguments": '{"x": "TASK-42"}'}}
         body = sse_body([
             {"choices": [{"index": 0, "delta": {"tool_calls": [tc]},
@@ -1995,8 +2001,9 @@ def _tool_loop_handler(tool_name="mock_echo", always_tool_calls=False):
 
 
 def test_tool_loop_happy_path(data_dir):
-    """Подключённый сервер: tools в body, LLM решает вызвать mock_echo,
-    результат (role tool) возвращается модели, финальный done с ответом."""
+    """Подключённый сервер: tools в body (LLM-имена с префиксом), LLM
+    решает вызвать firecrawl__mock_echo, результат (role tool, LLM-имя)
+    возвращается модели, финальный done с ответом."""
     agent, reg = _tool_loop_agent(data_dir, _tool_loop_handler())
     try:
         d = agent.store.new_dialogue()
@@ -2007,26 +2014,27 @@ def test_tool_loop_happy_path(data_dir):
         assert events[-1]["type"] == "done"
         assert "TASK-42" in events[-1]["answer"]
         msgs = agent.store.get_messages(d["id"])
-        # ровно один assistant с tool_calls (реальное имя, args — JSON)
+        # ровно один assistant с tool_calls (LLM-имя с префиксом, args — JSON)
         asst_tc = [m for m in msgs
                    if m["role"] == "assistant" and m.get("tool_calls")]
         assert len(asst_tc) == 1
         tc = asst_tc[0]["tool_calls"][0]
         assert tc["id"] == "call_1"
-        assert tc["function"]["name"] == "mock_echo"
+        assert tc["function"]["name"] == "firecrawl__mock_echo"
         assert json.loads(tc["function"]["arguments"]) == {"x": "TASK-42"}
-        # ровно один tool-ответ (эхо fake-процесса)
+        # ровно один tool-ответ (эхо fake-процесса, name — LLM-имя)
         tool_msgs = [m for m in msgs if m["role"] == "tool"]
         assert len(tool_msgs) == 1
         assert tool_msgs[0]["tool_call_id"] == "call_1"
+        assert tool_msgs[0]["name"] == "firecrawl__mock_echo"
         assert tool_msgs[0]["content"] == "{'x': 'TASK-42'}"
-        # журнал: 2 записи LLM; в первой tools содержит mock_echo
+        # журнал: 2 записи LLM; в первой tools содержит LLM-имена с префиксом
         rl = agent.requests_list()
         assert len(rl) == 2
         first = agent.requests_get(rl[0]["id"])
         assert "tools" in first["request"]
         names = [t["function"]["name"] for t in first["request"]["tools"]]
-        assert "mock_echo" in names and "mock_ping" in names
+        assert "firecrawl__mock_echo" in names and "firecrawl__mock_ping" in names
     finally:
         reg.close_all()
 
@@ -2056,9 +2064,11 @@ def test_tool_loop_no_tools_without_connected_servers(data_dir):
         reg.close_all()
 
 
-def test_tool_loop_iteration_cap(data_dir):
-    """LLM ВСЕГДА отдаёт tool_calls → кап 5 итераций: events заканчиваются
-    error «превышен лимит итераций», LLM-вызовов (записей журнала) ровно 5."""
+def test_tool_loop_iteration_cap(data_dir, monkeypatch):
+    """LLM ВСЕГДА отдаёт tool_calls → кап из env (TOOL_LOOP_CAP=5):
+    events заканчиваются error «Tool-loop: превышен лимит итераций (5)»,
+    LLM-вызовов (записей журнала) ровно 5."""
+    monkeypatch.setenv("TOOL_LOOP_CAP", "5")
     agent, reg = _tool_loop_agent(
         data_dir, _tool_loop_handler(always_tool_calls=True))
     try:
@@ -2068,7 +2078,8 @@ def test_tool_loop_iteration_cap(data_dir):
         assert reg.connect(sid)["status"] == "connected"
         events = list(agent.ask_stream(d["id"], "статус TASK-42?"))
         assert events[-1]["type"] == "error"
-        assert "превышен лимит итераций" in events[-1]["message"]
+        assert events[-1]["message"] \
+            == "Tool-loop: превышен лимит итераций (5)"
         assert len(agent.requests_list()) == 5
     finally:
         reg.close_all()
@@ -2096,5 +2107,26 @@ def test_tool_error_becomes_tool_message(data_dir):
                    if m["role"] == "assistant" and m.get("tool_calls")]
         assert len(asst_tc) == 1
         assert asst_tc[0]["tool_calls"][0]["function"]["name"] == "nope"
+    finally:
+        reg.close_all()
+
+
+def test_mcp_tools_rule_only_when_tools_connected(data_dir):
+    """День 19: правило композиции MCP-инструментов в system-промпте
+    ТОЛЬКО когда есть подключённые тулы; без подключённых серверов —
+    блок не добавляется (поведение без MCP не меняется)."""
+    agent, reg = _tool_loop_agent(data_dir, ok_handler)
+    try:
+        d = agent.store.new_dialogue()
+        ready(agent, d)
+        agent.store.append_message(d["id"], "user", "привет")
+        # без подключения: правило композиции отсутствует
+        system = agent.build_payload(d["id"])[0]["content"]
+        assert "композиция" not in system
+        # подключил сервер (fake-тулы mock_echo/mock_ping): правило есть
+        sid = reg.servers()[0]["id"]
+        assert reg.connect(sid)["status"] == "connected"
+        system = agent.build_payload(d["id"])[0]["content"]
+        assert "композиция" in system
     finally:
         reg.close_all()

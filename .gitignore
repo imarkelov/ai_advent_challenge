@@ -37,3 +37,9 @@ studio/frontend/dist/
 dialogues.json.bak*
 working_memory.json
 memory.json
+
+# День 19: runtime-вывод saveToFile (PDF/отчёты) — не данные, не в git
+data/pipeline/
+
+# День 20: runtime-состояние задач (task store) — сид регенерируется из кода, не в git
+data/tasks.json

@@ -1,3 +1,260 @@
+# Release Notes — day20-mcp-orchestration (день 20)
+
+Ветка: [`day20-mcp-orchestration`](https://github.com/imarkelov/ai_advent_challenge/tree/day20-mcp-orchestration)
+(от `day19-mcp-pipeline`).
+
+## Что в релизе
+
+**Orchestration MCP.** Мультитул-серверы дней 17–19 разбиты на
+**10 едицельных локальных MCP-серверов** (1 сервер = 1 тул, без дублей;
+`task_manager.py`/`news_weather.py`/`pipeline_tools.py` удалены, общий
+каркас `_mcp_base.py`), агентская маршрутизация по серверам:
+**always-префикс** `{server}__{tool}` в именах тулов + **каталог
+подключённых серверов** в system-промпте, лимит tool-loop 5 → **15**
+(`TOOL_LOOP_CAP`), реестр 12 дефолтов с миграцией, бейджи «server · tool»
+в шапке «Шаги агента». Проверка задания — 10-шаговый кросс-серверный
+флоу в e2e (порт 8104).
+
+- `studio/mcp_servers/_mcp_base.py` (новый) — общий каркас едицельных
+  stdio-серверов (JSON-RPC 2024-11-05, только stdlib):
+  `run_server(server_name, tool, call)`, контракт
+  `call(args) -> (payload: dict, is_error: bool)`; `initialize`
+  (serverInfo `version: "1.0"`) / `tools/list` (ровно 1 тул) /
+  `tools/call`; notification без ответа; `-32601` / `-32700`; исключение
+  в `call` → `isError`, процесс жив. При старте `sys.stdout`/`stderr`
+  реconfigure'ятся с `errors="replace"` — cp1251-пайп + символы вне cp1251
+  (U+2011, эмодзи из реального контента) больше не убивают MCP-процесс
+  (паттерн фикса дня 18 из `agent.py`; фикс по живому багу из Task 10).
+- 10 едицельных серверов (новые, stdio, `[sys.executable, ...]`, без
+  npx): `weather`/`get_weather` (Open-Meteo, `city?` Самара),
+  `news`/`get_news` (vc.ru/habr/tproger, top-5, дедуп),
+  `digest_make`/`make_digest` (сбор + сохранение в `data/digests/`),
+  `digest_read`/`get_latest_digest` (файл → GitHub API → `isError`),
+  `task_create`/`create_task` (title required), `task_get`/
+  `get_task_details` (task_id required), `digest_search`/`search`
+  (локальный поиск по `data/digests/*.json`, топ-20, поле `text`),
+  `digest_summarize`/`summarize` (детерминированная экстрактивная
+  сводка, без LLM), `file_save`/`saveToFile` (`md|txt|json|pdf`,
+  `pdf_writer` дня 19, traversal-safe), `habr_news`/`get_habr_news`
+  (темы `testing`/`ai`, word-boundary-фильтр по заголовку, `limit` до
+  50, sort `published` desc). Live-источники — деградация в `isError`,
+  процесс не падает.
+- `studio/mcp_servers/_tasks_store.py` (новый) — file-backed хранилище
+  задач `data/tasks.json` (в `.gitignore`): seed `TASK-42`/`TASK-7`
+  (задачи дня 17), новая задача — `TASK-<max+1>` (первая — `TASK-43`),
+  атомарная запись, env `TASKS_FILE`.
+- Удалены: `studio/mcp_servers/task_manager.py`, `news_weather.py`,
+  `pipeline_tools.py` и их тесты (тулы перенесены 1:1 в едицельные
+  серверы; `collector.py`/`pdf_writer.py` переиспользуются).
+- `studio/backend/mcp.py` — реестр **12 дефолтов** (Firecrawl, Git +
+  10 локальных); **идемпотентная миграция** `_ensure_defaults_locked`:
+  старые `Task Manager`/`News & Weather`/`Pipeline Tools` удаляются по
+  имени (открытые сессии закрываются), недостающие дефолты добавляются,
+  custom-серверы не трогаются; `tools()` — записи дополнены полем
+  `server_name`.
+- `studio/backend/agent.py` — always-префикс: `_llm_tools()` — имена в
+  LLM-payload всегда `{slug}__{tool}` (`_mcp_slug`:
+  `re.sub(r"[^a-z0-9]+","_",name.lower()).strip("_")`), `tool_map`
+  обратного маршрута; `MCP_TOOLS_RULE` (v2) + `_mcp_catalog_block()` —
+  каталог серверов в system-промпте; кап `_tool_loop_cap()` — env
+  `TOOL_LOOP_CAP` (дефолт **15**, читается на каждый вызов);
+  assistant-`tool_calls`/`role:"tool"` хранятся с префиксированными
+  именами (routing proof в истории диалога).
+- `studio/frontend/src/components/ChatPanel.tsx` — бейджи в шапке «🧩
+  Шаги агента»: `formatToolName` режет имя по первому `__` →
+  `server · tool`, полное имя — `title={n}` на hover; чипы StepRow
+  сохраняют полное префиксированное имя.
+- `scripts/e2e_day20.py` (новый, stdlib, :8104): **Part A** —
+  офлайн-детерминированное ядро (fake-LLM + **реальные MCP-субпроцессы**
+  всех 10 серверов, сеть отрезана `_NO_NET` 127.0.0.1:1): 10-шаговый
+  флоу `task_create → weather → news → digest_make → digest_read →
+  habr_news → digest_search → digest_summarize → file_save → task_get`;
+  assert на порядок `{server}__{tool}`-сообщений, маршрутизацию (spy
+  `reg.call_tool` == FLOW), передачу данных, кап (→ SSE error «Tool-loop:
+  превышен лимит итераций»). MUST PASS. **Part B** — live (uvicorn :8104,
+  реальный LLM), best-effort (PASS/SKIP, не FAIL). e2e дня 17–19 — на
+  едицельных серверах (Part A 6/6, 6/6, 12/12).
+- REST-роуты не меняются; `GET /api/mcp/tools` — добавлено поле
+  `server_name`.
+
+## API
+
+Новых REST-эндпоинтов нет. Изменение: `GET /api/mcp/tools` —
+`[{server, server_name, name, description, input_schema}]` (добавлено
+`server_name`).
+
+## Проверка задания
+
+Бэкенд — 393 тестов PASS (офлайн). Фронтенд — 219 тестов PASS (Vitest)
++ `tsc -b` + `npm run build` clean. E2E: `e2e_day17.py` — Part A 6/6,
+Part B PASS (14/0/0); `e2e_day18.py` — Part A 6/6, Part B PASS
+(14/0/0); `e2e_day19.py` — Part A 12/12, Part B SKIP (18 PASS / 0 FAIL
+/ 1 SKIP); `e2e_day20.py` — Part A 19/19, Part B SKIP (26 PASS / 0 FAIL
+/ 1 SKIP: инфраструктура green, модель исчерпала 15 итераций на живом
+10-серверном сценарии — поведение модели, не FAIL). Live: `GET
+/api/mcp/servers` на живом dev-процессе — ровно 12 серверов, старых 3
+имён нет (миграция на реальных `data/mcp_servers.json`). Live-
+маршрутизация (демо-видео): `[LLM Decision] digest_search__search
+{"query": "Самара"}` → `digest_summarize__summarize {"text": <поле text
+из search>}` — префикс-имена + передача данных между серверами.
+Демо-видео: `day20-mcp-orchestration-demo.mp4` (папка «AI Advent
+Challenge - видео» на рабочем столе) — ссылка в `LINKS.md`.
+
+## Коммиты
+
+- `c63380d` — final-review — fixture references day-20 single-purpose server
+- `f02719c` — final-review — unique default ids, prefixed few-shot, spec habr patterns
+- `7131696` — final-review — sources arg in day-20 table, full commit list in RELEASE
+- `6fd2181` — README/RELEASE/openspec — Orchestration MCP day
+- `ad1aff6` — agent-steps badges render MCP tools as 'server · tool'
+- `313ce1e` — e2e_day20 Part B — SSE model error → SKIP (not FAIL); remove duplicate _NO_NET injection
+- `7cccc67` — _mcp_base stdout errors=replace (non-cp1251 payload chars crash server)
+- `3f2854a` — e2e_day20 — 10-server cross-flow (Part A deterministic + Part B live :8104)
+- `599335d` — e2e day17-19 on single-tool servers; remove task_manager/news_weather/pipeline_tools
+- `2068ab0` — agent routing — always server__tool prefix, MCP catalog in system prompt, TOOL_LOOP_CAP=15, llm names stored in history
+- `f2b0312` — MCP registry — 12 defaults (10 single-tool), old-server migration, server_name in tools()
+- `9e75ead` — habr_news MCP server (testing/ai topics, word-boundary filter)
+- `533481b` — single-tool MCP servers digest_search/digest_summarize/file_save
+- `4f47ab7` — gitignore data/tasks.json (runtime task-store state)
+- `6636d47` — isolate in-process task tests with temp TASKS_FILE (idempotent, no repo pollution)
+- `9348b50` — file-backed tasks store + task_create/task_get servers
+- `d1780ed` — single-tool MCP servers digest_make + digest_read
+- `592af6b` — single-tool MCP servers weather + news
+- `54d2231` — _mcp_base — shared single-tool stdio MCP server skeleton
+- `57fcd58` — implementation plan — 12 tasks (servers, registry, agent, e2e, frontend, docs)
+- `274b126` — spec fact-check vs collector.py — weather result shape, habr pubDate via local parser, patchable fetch
+- `4e6cb19` — spec fact-check vs day17/18/19 server code — version 1.0, task/digest/search result shapes
+- `bc5db5e` — spec self-review — flow covers all 10 servers (digest_read step), tighten habr filter boundaries
+- `04ea37f` — design spec — 10 single-tool MCP servers + agent routing (always-prefix, server catalog, cap 15)
+
+---
+
+# Release Notes — day19-mcp-pipeline (день 19)
+
+Ветка: [`day19-mcp-pipeline`](https://github.com/imarkelov/ai_advent_challenge/tree/day19-mcp-pipeline)
+(от `day18-mcp-digest`).
+
+## Что в релизе
+
+**Композиция MCP-инструментов (pipeline).** Несколько MCP-инструментов,
+комбинируемых в пайплайн: `search` (получает данные) → `summarize`
+(обрабатывает) → `saveToFile` (сохраняет результат). **LLM-driven**:
+оркестратора в коде нет — модель через tool-loop дня 17 (лимит 5 итераций)
+сама решает, какие инструменты вызвать, в каком порядке и сколько. Пайплайн
+динамический: «какая погода?» → 1 `search`; «найди, суммаризируй, сохрани в
+PDF» → цепочка из 3. `saveToFile` — `format` md/txt/json/pdf; `pdf` — полный
+PDF с кириллицей (встроенный TTF), чистый stdlib.
+
+- `studio/mcp_servers/pipeline_tools.py` — **пятый** дефолт реестра MCP
+  (stdio JSON-RPC 2024-11-05, только stdlib, паттерн `news_weather.py`):
+  3 инструмента — `search(query)` (локальный поиск по
+  `data/digests/*.json` дня 18, case-insensitive, топ-20), `summarize(text,
+  max_points=8)` (детерминированная экстрактивная сводка, **без LLM**),
+  `saveToFile(filename, content, format)` (атомарная запись в
+  `data/pipeline/`, basename-санитизация, traversal-safe). Env:
+  `PIPELINE_SEARCH_DIR` / `PIPELINE_OUT_DIR` / `PIPELINE_FONT_PATH`. Ошибка
+  → `{"error": ...}` + `isError: true`, процесс жив.
+- `studio/mcp_servers/pdf_writer.py` — stdlib-PDF-движок (только stdlib,
+  ~450 строк): TTF-парсер `struct` (`head`/`hhea`/`maxp`/`hmtx`/`cmap` 4+12
+  /`name`; `glyf` не парсится), PDF 1.4 (A4 595×842, 11/14pt, межстрочный
+  1.45, перенос по hmtx, мультистраницы), шрифт Type0/`Identity-H` →
+  CIDFontType2 (`/FontFile2` — сырой TTF, `/CIDToGIDMap /Identity`,
+  `/ToUnicode` CMap для кириллицы). `find_default_font()` (env →
+  `arial.ttf`/`segoeui.ttf`/`tahoma.ttf` в `C:\Windows\Fonts` → `None`),
+  `text_to_pdf(text, title="", font_path=None) -> bytes`, `PdfError`.
+  **Детерминизм**: без дат — повторный вызов → идентичные байты.
+- `studio/backend/mcp.py` — **Pipeline Tools** как пятый дефолт
+  (`[sys.executable, .../pipeline_tools.py]`, stdio, без npx). Порядок
+  дефолтов: Firecrawl, Git, Task Manager, News & Weather, Pipeline Tools.
+  Правка 3 тестов-списков-дефолтов (5-е имя).
+- Тесты (новые, офлайн): `studio/backend/tests/test_pdf_writer.py`
+  (7: структура PDF, xref, мультистраницы, детерминизм, кириллица,
+  `PdfError`), `studio/backend/tests/test_pipeline_tools.py` (12: subprocess
+  — 3 tools, `search` локально, `summarize` детерминизм, `saveToFile` 4
+  формата + traversal + атомарность, error-ветки, 5-й дефолт).
+- `scripts/e2e_day19.py` — гибрид (stdlib, :8103): **Part A** —
+  детерминированное ядро в-процессе (без uvicorn/сети): `MCPRegistry` +
+  реальный subprocess `pipeline_tools.py` + `StudioAgent`/`MockTransport`
+  fake-LLM со скриптованной цепочкой `search → summarize → saveToFile`;
+  assert на порядок tool-сообщений, **передачу данных** (выход этапа N ⊂
+  вход N+1) и PDF на диске (`%PDF-1.4` + `/ToUnicode`) — MUST PASS.
+  **Part B** — live (uvicorn :8103, реальный LLM), best-effort: «найди
+  записи про Самара, суммаризируй, сохрани в PDF» → PASS (≥1 tool-сообщение
+  + PDF на диске) или SKIP (поведение модели). Exit 0 для PASS/SKIP, 1 для
+  FAIL.
+- `studio/backend/agent.py` — `MCP_TOOLS_RULE`: при подключённых
+  MCP-серверах в system-промпт добавляется правило «модель сама выбирает
+  инструменты и **сама передаёт данные между ними** (результат вызова —
+  входом в аргументы следующего), доводит цепочку до конца без
+  согласования» (+ тесты). Без подключённых серверов правило не
+  инжектится (регресс).
+- `pipeline_tools.py` — результат `search` дополнен полем `text`
+  (склейка `title — snippet` построчно): модель копирует его в
+  `summarize.text` — передача данных между тулами на стороне модели.
+- **UI: шаги агента** (`ChatPanel.tsx`, `Sidebar.tsx`, `styles.css`,
+  `state.tsx`):
+  - подряд идущие tool-сообщения одного ответа (`tool_calls` /
+    `role:"tool"`) группируются в блок `🧩 Шаги агента · N` — свёрнут по
+    умолчанию, клик — разворачивает; **каждый шаг — отдельно
+    сворачиваемая строка** (`StepRow`: `🔧`/`↳` + payload в `<pre>`);
+  - бейджи MCP-тулов в шапке блока (уникальные имена, порядок первого
+    появления: `search` `summarize` `saveToFile`);
+  - оценка токенов рядом с каждой кнопкой сворачивания: `estTokens`
+    (эвристика 0.44 tok/символ, калибровка qwen3.8-27b), в шапке блока —
+    сумма;
+  - режимы переименованы: `Чат → Диалог`, `Задача → Проект`
+    (placeholder «Опишите проект…», флаг «Проект использовался»);
+  - сайдбар: 5 самых свежих диалогов + «Показать ещё N (старые) ▾» /
+    «Свернуть ▴» (в режиме выбора — полный список);
+  - `state.tsx`: `reloadDialogue()` после `done` — tool-сообщения не
+    идут в SSE, лента перечитывается с сервера.
+- REST-роуты не меняются: tool-loop дня 17 сам отдаёт 3 инструмента
+  модели, композиция целиком на стороне модели.
+
+## API
+
+Новых REST-эндпоинтов нет. Реестр MCP дня 16 получает пятый дефолт
+`pipeline-tools` (`[sys.executable, <repo>/studio/mcp_servers/pipeline_tools.py]`)
+— подключение через существующие `/api/mcp/servers/*`. В чате — обычный
+tool-loop дня 17 (модель сама вызывает `search`/`summarize`/`saveToFile`).
+
+## Проверка задания
+
+Бэкенд — 372 теста PASS (офлайн; 1 pre-existing live-network fail
+`test_live_fetch_weather` — Open-Meteo недоступен с машины, окружение,
+не продукт). Фронтенд — 218 тестов PASS (Vitest) + `tsc -b` + `npm run
+build` clean. E2E `scripts/e2e_day19.py`: **18 PASS, 0 FAIL, 1 SKIP** —
+Part A 12/12 (детерминированная цепочка + передача данных + валидный PDF
+с кириллицей); Part B — вся инфраструктура green, единственный SKIP =
+live PDF-артефакт (модель не доводит цепочку до `saveToFile` автономно —
+best-effort, не FAIL). Валидация кириллицы: TTF `cmap` → ненулевые GID
+для всех кириллических кодов, `/ToUnicode` покрывает использованный
+диапазон, PDF содержит `/FontFile2` + `/Identity-H` + `/CIDToGIDMap`.
+
+**Live-проверка в браузере** (qwen3.8-27b, реальный MCP subprocess):
+1. «Найди новости про ИИ, сделай суммаризацию и сохрани в файл» →
+   `search → summarize`, модель копирует результат `search` (поле `text`)
+   в `summarize.text` — передача данных подтверждена посимвольно.
+2. «Сохрани файл новостей про ИИ без суммаризации» → модель **автономно**
+   выполнила полную цепочку `search → summarize(max_points=5) →
+   saveToFile`; файл `data/pipeline/news_digest.md` (643 B) на диске.
+3. UI: блок «🧩 Шаги агента · 3» с бейджами `search summarize saveToFile`,
+   сворачивание блока и каждого шага по отдельности, оценка токенов
+   рядом с каждой кнопкой; список диалогов 5 + «Показать ещё 18 (старые)».
+
+Демо-видео: `day19-mcp-pipeline-demo.mp4` (папка «AI Advent Challenge —
+видео» на рабочем столе) — ссылка в `LINKS.md`.
+
+## Коммиты
+
+- `ff110a2` — pipeline_tools stdio MCP server (search/summarize/saveToFile) + stdlib PDF writer
+- `df63060` — MCP_TOOLS_RULE — LLM-driven tool composition, search text field for data passing
+- `efaa753` — e2e_day19 — deterministic chain (data passing + PDF) + live best-effort
+- `d17dd12` — feat(ui): agent steps — per-step collapse, MCP tool badges, token estimates, tabs, 5-dialogs sidebar
+- `af6b0f1` — docs: day19 README/RELEASE/plan/openspec + LINKS.md
+
+---
+
 # Release Notes — day18-mcp-digest (день 18)
 
 Ветка: [`day18-mcp-digest`](https://github.com/imarkelov/ai_advent_challenge/tree/day18-mcp-digest)

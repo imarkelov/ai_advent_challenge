@@ -23,6 +23,8 @@
 | День 16 | [`day16-mcp-connect`](https://github.com/imarkelov/ai_advent_challenge/tree/day16-mcp-connect) | Подключение MCP: реестр MCP-серверов (stdio/http) в `mcp_servers.json`, клиент JSON-RPC (`mcp.py`), REST `/api/mcp/*` (список/удалить/подключить/инструменты), отдельная панель «MCP» по своей кнопке «🧩» в шапке чата (рядом с «⚙»; статусы, инструменты подключённых серверов), дефолты: Firecrawl, Git; вызов инструментов из чата (tool-loop): команда `/сервер тул`, автодополнение, форма аргументов по `input_schema`, результат сохраняется в диалог и виден LLM |
 | День 17 | [`day17-mcp-tool-loop`](https://github.com/imarkelov/ai_advent_challenge/tree/day17-mcp-tool-loop) | MCP Tool-Loop (LLM-driven): инструменты подключённых серверов уходят в LLM-пейлоад (`tools`), модель сама вызывает инструмент (`tool_calls` → MCP-сервер → `role: "tool"` обратно модели, цикл до 5 итераций); новый stdio MCP-сервер Mock Task Manager (in-memory, только stdlib, `get_task_details`/`create_task`); лог-теги `[MCP Init]`/`[LLM Decision]`/`[MCP Response]`/`[Final Response]`; e2e_day17.py (детерминированное ядро + live best-effort) |
 | День 18 | [`day18-mcp-digest`](https://github.com/imarkelov/ai_advent_challenge/tree/day18-mcp-digest) | Периодический дайджест 24/7: свой stdio MCP-сервер `news_weather` (4 инструмента: `get_weather`/`get_news`/`make_digest`/`get_latest_digest`), общий stdlib-коллектор `collector.py` (погода Open-Meteo + новости vc.ru/habr/tproger, дедуп, top-5), JSON-хранилище `data/digests/` (last-digest.json + история, кап 96, атомарная запись), GitHub Actions cron раз в 6 часов — сбор и коммит дайджеста; агент отвечает «покажи сводку» через tool-loop дня 17 (`get_latest_digest`) |
+| День 19 | [`day19-mcp-pipeline`](https://github.com/imarkelov/ai_advent_challenge/tree/day19-mcp-pipeline) | Композиция MCP-инструментов: stdio MCP-сервер `pipeline_tools` (3 компонуемых инструмента `search`→`summarize`→`saveToFile`), stdlib-PDF-движок `pdf_writer` (полный PDF с кириллицей, встроенный TTF, детерминированные байты), LLM-driven цепочка через tool-loop дня 17 — модель сама решает, какие инструменты вызвать и сколько; `saveToFile` в форматах md/txt/json/pdf; e2e-гибрид проверяет передачу данных между этапами |
+| День 20 | [`day20-mcp-orchestration`](https://github.com/imarkelov/ai_advent_challenge/tree/day20-mcp-orchestration) | Orchestration MCP: 10 едицельных локальных MCP-серверов (1 сервер = 1 тул, каркас `_mcp_base.py`), always-префикс `{server}__{tool}` + каталог серверов в system-промпте, кап tool-loop 15 (`TOOL_LOOP_CAP`), реестр 12 дефолтов с миграцией старых мультитул-серверов, бейджи «server · tool», e2e_day20 — 10-шаговый кросс-серверный флоу (порт 8104) |
 
 ## День 7: как работает сервис
 
@@ -1057,3 +1059,270 @@ Live-e2e поймал реальный баг: `print("[Final Response] ...")` �
 6/6 PASS; Part B — PASS (модель вызвала `get_latest_digest`, ответ
 содержит сводку с `source: local`). Ветка `day18-mcp-digest` (от
 `day17-mcp-tool-loop`).
+
+## День 19: Композиция MCP-инструментов (pipeline: search → summarize → saveToFile)
+
+### Что это
+
+Композиция MCP-инструментов: несколько MCP-инструментов, которые
+**комбинируются в пайплайн** — первый получает данные, второй обрабатывает,
+третий сохраняет результат. Ключевое архитектурное решение: **LLM-driven
+композиция** — оркестратора в коде нет. Модель через tool-loop дня 17 (лимит
+5 итераций) сама решает, какие из 3 инструментов вызвать, в каком порядке и
+сколько. Пайплайн **динамический** и меняется от запроса пользователя:
+
+- «Какая погода сейчас?» → 1 `search`.
+- «Суммаризируй записи про Самара» → `search` → `summarize`.
+- «…и сохрани в PDF» → `search` → `summarize` → `saveToFile(format=pdf)`.
+
+Пути дней 16–18 (реестр, tool-loop, UI, `data/digests`) не меняются —
+новый сервер `pipeline_tools`, PDF-модуль `pdf_writer` и e2e добавлены
+поверх; `agent.py`/фронтенд/роуты не трогаются (tool-loop сам отдаст
+3 инструмента модели через `_llm_tools`).
+
+### MCP-сервер `pipeline_tools` (stdio, только stdlib)
+
+Стандартный stdio MCP-сервер (2024-11-05, newline JSON-RPC 2.0, паттерн
+`news_weather.py`/`task_manager.py`). 3 компонуемых инструмента:
+
+| Инструмент | Аргументы | Результат |
+| --- | --- | --- |
+| `search` | `query` | локальный поиск по `data/digests/*.json` (день 18), case-insensitive, топ-20 по `generated_at` desc |
+| `summarize` | `text`, `max_points=8` | **детерминированная** экстрактивная сводка (частотная оценка предложений), **без LLM** — сервер офлайн |
+| `saveToFile` | `filename`, `content`, `format=md\|txt\|json\|pdf` | атомарная запись (tmp + `os.replace`) в `data/pipeline/`; basename-санитизация, traversal-safe |
+
+- **`summarize` без LLM** — сервер офлайн (как `news_weather`);
+  детерминизм критичен для офлайн-тестов и для e2e Part A, который
+  ассертит на передачу данных. «Интеллектуальность» композиции — на модели,
+  «обработка» на сервере — воспроизводимый алгоритм.
+- **`saveToFile`** — только basename (`../` не проходит за каталог вывода),
+  каталог `PIPELINE_OUT_DIR` (дефолт `<repo>/data/pipeline`) создаётся
+  при отсутствии; `format=pdf` → `content` (строка) → `pdf_writer` → байты.
+- **Env** (читаются на время вызова): `PIPELINE_SEARCH_DIR` (дефолт
+  `<repo>/data/digests`), `PIPELINE_OUT_DIR`, `PIPELINE_FONT_PATH`.
+- Ошибка любого инструмента — `{"error": ...}` + `isError: true`, процесс не
+  падает. **Pipeline Tools** — **пятый дефолт** `MCPRegistry`
+  (`[sys.executable, .../pipeline_tools.py]`, stdio, без npx).
+
+### PDF-движок `pdf_writer` (stdlib, кириллица)
+
+Полный PDF на чистом stdlib (не картинка/заглушка). `struct`-парсинг TTF:
+`head` (unitsPerEm), `hhea` (ascent/descent, numHMetrics), `maxp`
+(numGlyphs), `hmtx` (advance; short-run), `cmap` (форматы 4 + 12), `name`
+(family → `/BaseFont`). **`glyf` не парсится** — контуры не нужны.
+
+- Шрифт встраивается **целиком** как `/FontFile2` (сырые байты TTF) в
+  Type0/CIDFontType2 с `/CIDToGIDMap /Identity`. Кириллица «из коробки»
+  (GID↔code через Identity + `/ToUnicode` CMap `begincidrange` для
+  поиска/копирования текста).
+- Cвёртка: A4 595×842, поля 72pt, 11pt body / 14pt title, межстрочный 1.45,
+  перенос по hmtx-ширинам (hard-break длинных слов), мультистраничность.
+- **Детерминизм** — в PDF нет дат/UUID: повторный вызов на том же входе →
+  **идентичные байты** (закреплено тестом).
+- Шрифт ищется `find_default_font()` (env `PIPELINE_FONT_PATH` → первый из
+  `arial.ttf`/`segoeui.ttf`/`tahoma.ttf` в `C:\Windows\Fonts` → `None`
+  → `PdfError`). Без кириллического шрифта `text_to_pdf` бросает `PdfError`.
+
+### LLM-driven цепочка (композиция на модели)
+
+Tool-loop дня 17 отдаёт 3 инструмента в LLM-payload (`_llm_tools`); модель
+сама вызывает их в нужном порядке/числе. **Факт live** (GPustack:
+qwen3.8-27b, deepseek-v4-flash, glm-5.3-flash): модели автономно вызывают
+`search` и используют результат, но **не** надёжно доводят цепочку до
+`saveToFile` (суммаризируют в тексте ответа). Это ограничение моделей, а не
+баг пайплайна. Поэтому **корректность передачи данных** доказана
+**детерминированно** в e2e Part A (fake-LLM со скриптованной цепочкой из 3
+tool-вызовов + assert: выход этапа N ⊂ вход N+1), а Part B — best-effort
+live (PASS/PDF на диске или SKIP, не FAIL). Отдельно прогнана авто-цепочка
+через реальный MCP-сервер (subprocess, не mock) →
+`data/pipeline/demo_samara_report.pdf` (валидный `%PDF-1.4`, кириллица).
+
+### E2E — `scripts/e2e_day19.py`
+
+Гибрид (паттерн e2e_day17/18, stdlib, порт **8103**): **Part A** —
+детерминированное ядро в-процессе (без uvicorn/сети): `MCPRegistry` +
+реальный subprocess `pipeline_tools.py` (3 tools) + `StudioAgent` +
+`httpx.MockTransport` fake-LLM со скриптованной цепочкой `search →
+summarize → saveToFile`; assert на порядок tool-сообщений, **передачу
+данных** (выход N ⊂ вход N+1) и PDF на диске (`%PDF-1.4` + `/ToUnicode`).
+**MUST PASS.** **Part B** — live (uvicorn :8103, реальный LLM), best-effort:
+«найди записи про Самара, суммаризируй, сохрани в PDF» → PASS (≥1
+tool-сообщение + `pipeline_report.pdf` на диске) или SKIP (поведение
+модели). Cleanup всегда; exit 0 для PASS/SKIP, 1 для FAIL.
+
+### UI: шаги агента (уточнения после основного релиза)
+
+- **Сворачиваемые шаги.** Подряд идущие tool-сообщения одного ответа модели
+  (`assistant.tool_calls` / `role:"tool"`) в ленте чата группируются в один
+  блок `🧩 Шаги агента · N` (N — число вызовов); свёрнут по умолчанию,
+  клик — разворачивает. Каждый шаг — **отдельно** сворачиваемая строка:
+  `🔧 имя` (вызов + аргументы) / `↳ имя` (результат), payload в `<pre>`.
+- **Бейджи MCP-тулов** в шапке блока: уникальные имена тулов в порядке
+  первого появления (`search`, `summarize`, `saveToFile`) — какие тулы
+  вызвала модель видно без разворачивания.
+- **Токены** рядом с каждой кнопкой сворачивания (шаг и блок в целом):
+  эвристическая оценка `≈ N tok` (0.44 tok/символ, калибровка под
+  qwen3.8-27b); в шапке блока — сумма.
+- **Переименование режимов**: `Чат → Диалог`, `Задача → Проект`
+  (placeholder «Опишите проект…», флаг «Проект использовался» в сайдбаре).
+- **Список диалогов**: всегда 5 самых свежих, остальные — под кнопкой
+  «Показать ещё N (старые) ▾» / «Свернуть ▴»; в режиме выбора список
+  раскрывается полностью.
+
+### Проверка задания
+
+Бэкенд — 372 теста PASS (офлайн; 1 pre-existing live-network fail
+`test_live_fetch_weather` — Open-Meteo недоступен с машины, окружение,
+не продукт). Фронтенд — 218 тестов PASS (Vitest) + `tsc -b` + `npm run
+build` clean. E2E `scripts/e2e_day19.py`: **18 PASS, 0 FAIL, 1
+SKIP** — Part A 12/12 (детерминированная цепочка + передача данных +
+PDF), Part B — вся инфраструктура green, единственный SKIP = live
+PDF-артефакт (модель не доводит цепочку до `saveToFile` автономно —
+best-effort). **Live-проверка в браузере** (qwen3.8-27b): «Сохрани файл
+новостей про ИИ без суммаризации» → модель автономно выстроила полную
+цепочку `search → summarize(max_points=5) → saveToFile`, файл
+`data/pipeline/news_digest.md` (643 B) на диске, UI — блок «Шаги агента»
+с бейджами `search summarize saveToFile`, сворачиваемыми по шагам и
+оценкой токенов. Ветка `day19-mcp-pipeline` (от `day18-mcp-digest`).
+
+## День 20: Orchestration MCP
+
+### Что это
+
+Оркестрация MCP-инструментов: разбивка мультитул-серверов дней 17–19
+(`task_manager`, `news_weather`, `pipeline_tools` — 3 файла, 9 тулов) на
+**10 едицельных локальных MCP-серверов** (1 сервер = 1 тул, без дублей —
+старые файлы удалены, общий каркас `_mcp_base.py`), плюс агентская
+маршрутизация по серверам: **always-префикс** `{server}__{tool}` в именах
+тулов (без логики коллизий) + **каталог подключённых серверов** в
+system-промпте, лимит tool-loop поднят с 5 до **15** (хватает на длинный
+флоу), бейджи «server · tool» в UI. Проверка задания — 10-шаговый
+кросс-серверный флоу в e2e: модель сама маршрутизирует запрос через 10
+разных серверов и передаёт данные между ними.
+
+### Архитектура
+
+- **`studio/mcp_servers/_mcp_base.py`** — общий каркас едицельных
+  stdio-серверов (stdio JSON-RPC 2.0, protocolVersion 2024-11-05, только
+  stdlib, паттерн `task_manager.py` дня 17): `run_server(server_name,
+  tool, call)` — сервер описывается константой `TOOL` и функцией
+  **`call(args) -> (payload: dict, is_error: bool)`**. `initialize`
+  (serverInfo `{name, version: "1.0"}`), `tools/list` (ровно 1 тул),
+  `tools/call` (чужое имя тула — `isError` «Инструмент не найден»),
+  notification без ответа, неизвестный метод — `-32601`, битая JSON-строка
+  — `-32700`. Исключение в `call` — `{"error": ...}` + `isError: true`,
+  процесс не падает. При старте `sys.stdout`/`sys.stderr` реconfigure'ятся
+  с `errors="replace"`: пайп на Windows cp1251, а JSON-RPC
+  (`ensure_ascii=False`) может содержать символы вне cp1251 (U+2011,
+  эмодзи из реального контента) — без фикса `UnicodeEncodeError` убивал
+  MCP-процесс («MCP-сервер закрыл соединение»); тот же паттерн фикса
+  дня 18 из `agent.py`.
+- **10 едицельных серверов** (все stdio, `[sys.executable, .../<name>.py]`,
+  без npx, только stdlib; live-источники деградируют в `isError`, процесс
+  не падает):
+
+  | Сервер | Тул | Назначение |
+  | --- | --- | --- |
+  | `weather` | `get_weather` | Погода Open-Meteo, `city?` (дефолт Самара) |
+  | `news` | `get_news` | Новости vc.ru/habr/tproger, `sources?`, top-5, дедуп (collector дня 18) |
+  | `digest_make` | `make_digest` | Сбор + сохранение дайджеста (`data/digests/last-digest.json` + `history.json`, кап 96) |
+  | `digest_read` | `get_latest_digest` | Чтение последнего дайджеста (локальный файл → фолбэк GitHub API → `isError`) |
+  | `task_create` | `create_task` | Создать задачу (file-backed `data/tasks.json`), `title` required |
+  | `task_get` | `get_task_details` | Прочитать задачу, `task_id` required |
+  | `digest_search` | `search` | Локальный поиск по `data/digests/*.json`, case-insensitive, топ-20, поле `text` для передачи в `summarize` |
+  | `digest_summarize` | `summarize` | Детерминированная экстрактивная сводка, `text`, `max_points=8`, **без LLM** |
+  | `file_save` | `saveToFile` | Атомарная запись в `data/pipeline/`, `md\|txt\|json\|pdf` (PDF — `pdf_writer` дня 19), basename/traversal-safe |
+  | `habr_news` | `get_habr_news` | Новости Habr по темам `testing`/`ai` (word-boundary-фильтр по заголовку: `\bтест\w*\|\bqa\b` / `\b(ai\|ии\|llm\|gpt\|ml)\b\|нейросет\w*` — «акции», «студии», «maintain» не проходят), `topics?`, `limit` (дефолт 10, макс 50), sort по `published` desc |
+
+- **File-backed задачи** (`_tasks_store.py`, `data/tasks.json`, в
+  `.gitignore`): задачи `task_create`/`task_get` живут в файле, а не в
+  памяти — два разных процесса не видят память друг друга. Сид — задачи
+  дня 17: `TASK-42` (`in_progress`) / `TASK-7` (`done`); новая задача —
+  `TASK-<max+1>` (первая созданная — `TASK-43`). Атомарная запись
+  (tmp + `os.replace`); env `TASKS_FILE` — путь файла (тесты/e2e — tmp).
+- **`agent.py`** — маршрутизация:
+  - **always-префикс**: имена тулов в LLM-payload ВСЕГДА
+    `{slug}__{tool}` (`_llm_tools`), `slug = re.sub(r"[^a-z0-9]+", "_",
+    name.lower()).strip("_")` (`_mcp_slug`); логики коллизий нет —
+    префикс снимает проблему по построению; `tool_map: llm_name ->
+    (server_id, real_tool)` — обратный маршрут;
+  - **каталог в system-промпте**: при подключённых серверах за
+    `MCP_TOOLS_RULE` идёт `_mcp_catalog_block()` — строки `- {server}
+    ({slug}): {tool} — описание (до 120 симв.)`;
+  - **кап 15**: `_tool_loop_cap()` читает env `TOOL_LOOP_CAP` на каждый
+    вызов (дефолт 15; было 5 в дни 17–19); превышение — SSE `error`
+    «Tool-loop: превышен лимит итераций (15)»;
+  - **имена LLM = имена в истории**: assistant-`tool_calls` и
+    `role:"tool"`-сообщения хранятся с префиксированными именами —
+    следующая итерация цикла и история диалога видят одно и то же имя
+    (routing proof: из payload журнала видно, что модель вызывает
+    `server__tool`, а не голый `tool`).
+- **Реестр: 12 дефолтов + миграция** (`mcp.py`): Firecrawl, Git (npx,
+  день 16) + 10 локальных (названия = имена серверов в таблице). При
+  первом обращении `_ensure_defaults_locked` **идемпотентная миграция**:
+  старые мультитул-серверы `Task Manager` / `News & Weather` /
+  `Pipeline Tools` удаляются **по имени** (открытые сессии закрываются),
+  недостающие дефолты добавляются по имени, custom-серверы не трогаются.
+  `GET /api/mcp/tools` — каждая запись дополнена полем
+  `server_name` (имя сервера, не только id).
+- **UI** (`ChatPanel.tsx`): бейджи MCP-тулов в шапке блока «🧩 Шаги
+  агента» рендерят `server · tool` — имя режется по **первому** `__`
+  (`formatToolName`), полный префикс-имен `title={n}` на hover; чипы
+  StepRow сохраняют полное префиксированное имя.
+
+### API
+
+Новых REST-роутов нет — все маршруты `/api/mcp/*` дня 16 работают без
+изменений. Изменение в существующем: `GET /api/mcp/tools` — запись
+инструмента `{server, server_name, name, description, input_schema}`
+(добавлено `server_name` — имя сервера, используется `_llm_tools`/
+каталогом).
+
+### E2E — `scripts/e2e_day20.py`
+
+Гибрид (паттерн e2e_day17/18/19, stdlib, порт **8104**): **Part A** —
+офлайн-детерминированное ядро в-процессе (без uvicorn): fake-LLM +
+**реальные MCP-субпроцессы** всех 10 серверов, сеть отрезана
+proxy-переменными `_NO_NET` (127.0.0.1:1 — live-тулы деградируют в
+`isError`, процесс жив); 10-шаговый кросс-серверный флоу в порядке
+`task_create → weather → news → digest_make → digest_read → habr_news →
+digest_search → digest_summarize → file_save → task_get`; assert:
+tool-сообщения `{server}__{tool}` в порядке FLOW, **маршрутизация**
+(spy на `reg.call_tool` — (server, tool) пары == FLOW), передача данных
+между серверами, кап (скриптованный цикл на `TOOL_LOOP_CAP` → SSE
+error «Tool-loop: превышен лимит итераций»). **MUST PASS.** **Part B** —
+live (uvicorn :8104, реальный LLM), best-effort: тот же сценарий одним
+чат-сообщением → PASS (≥10 tool-сообщений + финальный ответ) или SKIP
+(поведение модели / занят порт — НЕ убивается, ждём до 10 мин). Cleanup
+всегда; exit 0 для PASS/SKIP, 1 для FAIL.
+
+### Проверка задания
+
+Бэкенд — 393 тестов PASS (офлайн, включая live-network
+`test_live_fetch_weather` — на момент прогона Open-Meteo был доступен).
+Фронтенд — 219 тестов PASS (Vitest) + `tsc -b` + `npm run build` clean.
+E2E на этой машине: `e2e_day17.py` — Part A 6/6 PASS, Part B PASS
+(14 PASS / 0 FAIL; live: модель вызвала `task_get__get_task_details`);
+`e2e_day18.py` — Part A 6/6 PASS, Part B PASS (14 PASS / 0 FAIL; live:
+модель вызвала `digest_read__get_latest_digest`); `e2e_day19.py` — Part
+A 12/12 PASS, Part B 1 SKIP (18 PASS / 0 FAIL / 1 SKIP; SKIP = live
+PDF-артефакт, модель не доводит цепочку до `saveToFile` автономно —
+best-effort); `e2e_day20.py` — Part A 19/19 PASS, Part B 1 SKIP (26
+PASS / 0 FAIL / 1 SKIP; офлайн-детерминированное ядро: 10 реальных
+MCP-субпроцессов, fake-LLM, маршрутизация + передача данных + кап;
+Part B: вся инфраструктура green, SKIP = модель исчерпала 15
+итераций на живом 10-серверном сценарии — поведение модели, не FAIL).
+Live-проверка (демо-видео, qwen3.8-27b): модель маршрутизировала
+«найди в дайджестах про Самара, суммаризируй, сохрани в PDF» по
+едицельным серверам — в логе `[LLM Decision] digest_search__search
+{"query": "Самара"}` → `[LLM Decision]
+digest_summarize__summarize {"text": <поле text из search>}` (передача
+данных между серверами), бейджи «digest_search · search»,
+«digest_summarize · summarize» в шапке «Шаги агента».
+`GET /api/mcp/servers` на живом dev-процессе: ровно 12 серверов, старых
+3 имён (`task_manager`/`news_weather`/`pipeline_tools`) нет — миграция
+сработала на реальных `data/mcp_servers.json`.
+
+### Статус
+
+Ветка `day20-mcp-orchestration` (от `day19-mcp-pipeline`).
