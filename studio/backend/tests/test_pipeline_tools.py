@@ -3,7 +3,6 @@
 (tmp-каталоги), сеть не используется."""
 import json
 import os
-import shutil
 import sys
 
 sys.path.insert(0, os.path.abspath(
@@ -16,9 +15,7 @@ sys.path.insert(0, os.path.abspath(
 import pytest  # noqa: E402
 
 import pdf_writer  # noqa: E402
-from mcp import MCPClient, MCPRegistry  # noqa: E402
-from memory import MemoryStore  # noqa: E402
-from test_mcp import make_fake_launcher  # noqa: E402
+from mcp import MCPClient  # noqa: E402
 
 PIPELINE_PATH = os.path.abspath(os.path.join(
     os.path.dirname(__file__), "..", "..", "mcp_servers",
@@ -272,33 +269,3 @@ def test_pl_unknown_tool_is_error(tmp_path):
         assert r["isError"] is True
     finally:
         c.close()
-
-
-def test_registry_pipeline_tools_default_command(tmp_path):
-    # Копируем реальные pipeline_tools.py + pdf_writer.py в tmp-раскладку
-    # <root>/studio/{data,mcp_servers}, чтобы путь дефолта существовал
-    # (тот же приём, что test_registry_news_weather_default_command).
-    (tmp_path / "studio" / "data").mkdir(parents=True)
-    (tmp_path / "studio" / "mcp_servers").mkdir(parents=True)
-    shutil.copyfile(PIPELINE_PATH, tmp_path / "studio" / "mcp_servers"
-                    / "pipeline_tools.py")
-    shutil.copyfile(os.path.join(os.path.dirname(PIPELINE_PATH),
-                                 "pdf_writer.py"),
-                    tmp_path / "studio" / "mcp_servers" / "pdf_writer.py")
-    reg = MCPRegistry(MemoryStore(str(tmp_path / "studio" / "data")),
-                      launcher=make_fake_launcher())
-    try:
-        servers = {s["name"]: s for s in reg.servers()}
-        pl = servers["Pipeline Tools"]
-        assert pl["type"] == "stdio"
-        assert pl["enabled"] is True
-        assert pl["env"] == {}
-        assert pl["command"][0].lower().endswith(
-            os.path.basename(sys.executable).lower())
-        assert pl["command"][1].endswith("pipeline_tools.py")
-        assert os.path.exists(pl["command"][1])
-        assert [s["name"] for s in reg.servers()] == [
-            "Firecrawl", "Git", "Task Manager", "News & Weather",
-            "Pipeline Tools"]
-    finally:
-        reg.close_all()

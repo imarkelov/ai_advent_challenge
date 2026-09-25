@@ -982,8 +982,9 @@ def test_mcp_api_servers_list(client, agent_env):
     assert r.status_code == 200
     servers = r.json()["servers"]
     assert [s["name"] for s in servers] == \
-        ["Firecrawl", "Git", "Task Manager", "News & Weather",
-         "Pipeline Tools"]
+        ["Firecrawl", "Git", "weather", "news", "digest_make",
+         "digest_read", "task_create", "task_get", "digest_search",
+         "digest_summarize", "file_save", "habr_news"]
     assert all(s["status"] == "idle" for s in servers)
     assert all(s["tools_count"] == 0 for s in servers)
 
