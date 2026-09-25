@@ -58,10 +58,10 @@
 | `weather` | `weather.py` | `get_weather` | `city?` (default Самара) | Open-Meteo `current` + `daily.2d` (collector._default_fetch_weather). Сбой сети → `isError: true` |
 | `news` | `news.py` | `get_news` | `sources?` (vc.ru\|habr\|tproger, default все) | top-5 на источник, дедуп (collector._default_fetch_news). Сбой одного источника → `{"error"}` у этого источника, остальные живы (паттерн дня 18) |
 | `digest_make` | `digest_make.py` | `make_digest` | `city?` | collect_digest + save_digest в `data/digests/` (env `DIGEST_DATA_DIR`); возвращает JSON дайджеста |
-| `digest_read` | `digest_read.py` | `get_latest_digest` | — | локальный `last-digest.json` → фолбэк GitHub API (env `DIGEST_GITHUB_REPO`) → `isError` |
-| `task_create` | `task_create.py` | `create_task` | `title` (required), `description?` | **File-backed** `data/tasks.json` (env `TASKS_FILE`). Id = `TASK-<n>`, n = max(числовые id в хранилище) + 1. При отсутствии файла — сид TASK-42/TASK-7 (содержимое дня 17) |
+| `digest_read` | `digest_read.py` | `get_latest_digest` | — | локальный `last-digest.json` → фолбэк GitHub API (env `DIGEST_GITHUB_REPO`, default `imarkelov/ai_advent_challenge`) → `isError`. Результат (форма дня 18): `{source: local\|github, generated_at, digest}` |
+| `task_create` | `task_create.py` | `create_task` | `title` (required), `description?` | **File-backed** `data/tasks.json` (env `TASKS_FILE`). Id = `TASK-<n>`, n = max(числовые id в хранилище) + 1 (алгоритм `_next_task_id` дня 17). Созданная задача — форма дня 17: `{id, title, description, status: "todo", assignee: null}`. При отсутствии файла — сид TASK-42 (`in_progress`, migor) / TASK-7 (`done`) из дня 17 |
 | `task_get` | `task_get.py` | `get_task_details` | `task_id` (required) | Читает тот же `tasks.json`. Не найдено → `isError`, `{"error": "Задача не найдена: <id>"}` (паттерн дня 17) |
-| `digest_search` | `digest_search.py` | `search` | `query` (required) | Субстринг по `data/digests/*.json` (env `PIPELINE_SEARCH_DIR`), top-20 по `generated_at` desc, возвращает готовое поле `text` (алгоритм дня 19) |
+| `digest_search` | `digest_search.py` | `search` | `query` (required) | Субстринг по `data/digests/*.json` (env `PIPELINE_SEARCH_DIR`), top-20 по `generated_at` desc, возвращает `{query, count, matches, text}` (готовое поле `text`; алгоритм дня 19). Нет совпадений → `isError` «no matches for '<query>'» (поведение дня 19) |
 | `digest_summarize` | `digest_summarize.py` | `summarize` | `text` (required), `max_points?`=8 (max 20) | Детерминированная extractive-сводка (частотная оценка, **без LLM**, алгоритм дня 19) |
 | `file_save` | `file_save.py` | `saveToFile` | `filename`, `content`, `format?`=md\|txt\|json\|pdf | Атомарная запись (tmp + `os.replace`) в `data/pipeline/` (env `PIPELINE_OUT_DIR`), basename-санитизация; pdf → `pdf_writer` |
 | `habr_news` | `habr_news.py` | `get_habr_news` | `topics?` (массив: `testing` \| `ai`, default оба), `limit?`=10 | RSS Habr (URL из collector + `_parse_rss_items`), фильтр по заголовкам (ниже), top-`limit` по `published` desc. Сбой сети → `isError` |
@@ -87,7 +87,8 @@ run_server(name: str, tool: dict, handler: Callable[[dict], dict]) -> None
 ```
 
 - stdin readline → JSON-RPC 2.0: `initialize` (protocolVersion
-  2024-11-05, serverInfo `{name, version: "1.0.0"}`), `tools/list`
+  2024-11-05, serverInfo `{name, version: "1.0"}` — как у серверов
+  дней 17–19), `tools/list`
   (ровно 1 тул), `tools/call` (handler); notification (без `id`) — без
   ответа; неизвестный метод → `-32601`; исключение handler →
   `{"error": ...}` + `isError: true`, процесс не падает.
