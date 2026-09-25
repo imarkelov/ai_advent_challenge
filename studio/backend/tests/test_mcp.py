@@ -539,51 +539,57 @@ def test_registry_close_all_resets_runtime(tmp_path):
     assert _store(tmp_path).mcp_servers_items()
 
 
-# ---------- Mock Task Manager (день 17): реальный subprocess ----------
-# Файл сервера сам deliverable — поэтому launcher реальный
-# (python studio/mcp_servers/task_manager.py), fake-процесс не используем.
+# ---------- Task Get / Task Create (день 20): реальные subprocess ----------
+# Файлы одиночных серверов сами deliverable — поэтому launcher реальный
+# (python studio/mcp_servers/task_get.py / task_create.py), fake-процесс
+# не используем. TASKS_FILE указывает на tmp — реальный data/tasks.json
+# не трогается (при отсутствии файла сервер сеет TASK-42/TASK-7).
 
-TASK_MANAGER_PATH = os.path.abspath(os.path.join(
-    os.path.dirname(__file__), "..", "..", "mcp_servers",
-    "task_manager.py"))
+MCP_SERVERS_DIR = os.path.abspath(os.path.join(
+    os.path.dirname(__file__), "..", "..", "mcp_servers"))
+TASK_GET_PATH = os.path.join(MCP_SERVERS_DIR, "task_get.py")
+TASK_CREATE_PATH = os.path.join(MCP_SERVERS_DIR, "task_create.py")
 
 
-def _task_manager_client() -> MCPClient:
-    """Клиент на реальный stdio-процесс task_manager.py."""
-    server = {"id": "mcp_tm", "name": "Task Manager", "type": "stdio",
-              "command": [sys.executable, TASK_MANAGER_PATH], "url": "",
-              "env": {}, "enabled": True}
+def _task_client(server_path: str, tasks_file: str, name: str) -> MCPClient:
+    """Клиент на реальный stdio-процесс task_get.py / task_create.py."""
+    server = {"id": "mcp_tg", "name": name, "type": "stdio",
+              "command": [sys.executable, server_path], "url": "",
+              "env": {"TASKS_FILE": tasks_file}, "enabled": True}
     return MCPClient(server)
 
 
-def test_task_manager_connect_real_subprocess():
-    client = _task_manager_client()
+def test_task_get_connect_real_subprocess(tmp_path):
+    client = _task_client(TASK_GET_PATH, str(tmp_path / "tasks.json"),
+                          "Task Get")
     try:
         tools = client.connect()
     finally:
         client.close()
-    assert [t["name"] for t in tools] == \
-        ["get_task_details", "create_task"]
+    assert [t["name"] for t in tools] == ["get_task_details"]
     assert all(t["input_schema"]["type"] == "object" for t in tools)
     assert all(t["description"] for t in tools)
 
 
-def test_task_manager_get_task_found():
-    client = _task_manager_client()
+def test_task_get_found(tmp_path):
+    client = _task_client(TASK_GET_PATH, str(tmp_path / "tasks.json"),
+                          "Task Get")
     client.connect()
     try:
         result = client.call_tool("get_task_details",
                                   {"task_id": "TASK-42"})
     finally:
         client.close()
-    assert result["isError"] is False
+    # _mcp_base ставит isError только при ошибке — успеха = нет ключа.
+    assert result.get("isError") is not True
     text = result["content"][0]["text"]
     assert "in_progress" in text
     assert "TASK-42" in text
 
 
-def test_task_manager_get_task_not_found():
-    client = _task_manager_client()
+def test_task_get_not_found(tmp_path):
+    client = _task_client(TASK_GET_PATH, str(tmp_path / "tasks.json"),
+                          "Task Get")
     client.connect()
     try:
         result = client.call_tool("get_task_details",
@@ -594,26 +600,29 @@ def test_task_manager_get_task_not_found():
     assert "не найдена" in result["content"][0]["text"].lower()
 
 
-def test_task_manager_get_task_missing_argument():
-    client = _task_manager_client()
+def test_task_get_missing_argument(tmp_path):
+    client = _task_client(TASK_GET_PATH, str(tmp_path / "tasks.json"),
+                          "Task Get")
     client.connect()
     try:
         result = client.call_tool("get_task_details", {})
     finally:
         client.close()
     assert result["isError"] is True
-    assert "не найдена" in result["content"][0]["text"].lower()
+    assert "обязательный" in result["content"][0]["text"].lower()
 
 
-def test_task_manager_create_task():
-    client = _task_manager_client()
+def test_task_create(tmp_path):
+    client = _task_client(TASK_CREATE_PATH, str(tmp_path / "tasks.json"),
+                          "Task Create")
     client.connect()
     try:
         result = client.call_tool("create_task", {"title": "E2E-тест"})
     finally:
         client.close()
-    assert result["isError"] is False
+    # _mcp_base ставит isError только при ошибке — успеха = нет ключа.
+    assert result.get("isError") is not True
     task = json.loads(result["content"][0]["text"])
-    assert task["id"].startswith("TASK-")
+    assert task["id"] == "TASK-43"
     assert task["status"] == "todo"
     assert task["title"] == "E2E-тест"

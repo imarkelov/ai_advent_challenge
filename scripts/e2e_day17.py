@@ -4,13 +4,17 @@
   Part A — детерминированное ядро (в-процессе, без uvicorn, БЕЗ сети):
     1. sys.path → studio/backend; StudioAgent + MCPRegistry (реальный
        launcher) + MemoryStore (tmp-каталог, tempfile).
-    2. MCP: reg.add("E2E TM", stdio, [python, task_manager.py]) → connect
-       → status connected, tools_count == 2 (реальный subprocess
-       task_manager.py: initialize + tools/list).
+    2. MCP: reg.add("E2E TG", stdio, [python, task_get.py], env
+       TASKS_FILE=tmp/tasks.json) → connect → status connected,
+       tools_count == 1 (реальный subprocess task_get.py: initialize +
+       tools/list; файл-хранилище — в tmp, реальный data/tasks.json
+       не трогается).
     3. Fake-LLM (httpx.MockTransport, /chat/completions):
        * non-stream (авто-название) → JSON content "E2E-название";
        * stream БЕЗ role "tool" в messages → SSE: tool-чанк
-         get_task_details {"task_id": "TASK-42"} (id call_17) +
+          get_task_details {"task_id": "TASK-42"} (id call_17_0; имя —
+          pick() из payload["tools"], день 20: всегда префикс
+          task_get__) +
          finish_reason "tool_calls" + usage + [DONE];
        * stream С role "tool" → SSE: content "Статус задачи: " + текст
          tool-сообщения (из тела запроса) + finish_reason "stop" +
@@ -18,10 +22,12 @@
     4. store.new_dialogue() + profile decline; ask_stream(«Каков статус
        задачи TASK-42?»).
     5. ASSERT (каждый — record): done (без error); answer содержит
-       TASK-42 + in_progress; ровно 1 tool-сообщение (TASK-42,
-       in_progress) и ровно 1 assistant с tool_calls (get_task_details,
-       args == {"task_id": "TASK-42"}); журнал — 2 записи LLM, в первой
-       body `tools` содержит get_task_details.
+       TASK-42 + in_progress; ровно 1 tool-сообщение (имя
+       task_get__get_task_details — LLM-имя хранится в истории, TASK-42,
+       in_progress) и ровно 1 assistant с tool_calls
+       (task_get__get_task_details, args == {"task_id": "TASK-42"});
+       журнал — 2 записи LLM, в первой body `tools` содержит
+       get_task_details (с префиксом).
     6. finally: reg.close_all() + удаление tmp-каталога.
 
   Part B — live (uvicorn :8101, реальный LLM, best-effort):
@@ -34,8 +40,8 @@
     4. GET /api/models → доступные модели; нет ни одной → FAIL (только
        когда GPustack достижим). Модель чата — первая доступная
        (детерминизм), оригинал конфига восстанавливается в cleanup.
-    5. POST /api/mcp/servers (Task Manager: [python, task_manager.py])
-       → 201; POST connect (timeout 90) → connected, tools_count 2.
+    5. POST /api/mcp/servers (Task Get E2E: [python, task_get.py])
+       → 201; POST connect (timeout 90) → connected, tools_count 1.
     6. POST /api/dialogues → 201; POST /api/profile/action decline.
     7. POST /api/chat «Каков статус задачи TASK-42?» (timeout 330) →
        SSE done.
@@ -71,7 +77,7 @@ WAIT_PORT_BUSY_MAX = 600   # 10 минут ожидания освобожден
 WAIT_PORT_BUSY_STEP = 10
 WAIT_SERVER_UP_MAX = 90
 CHAT_TIMEOUT = 330
-TASK_MANAGER = os.path.join(REPO, "studio", "mcp_servers", "task_manager.py")
+TASK_GET = os.path.join(REPO, "studio", "mcp_servers", "task_get.py")
 
 # Windows-консоль может быть cp1251 — выводим UTF-8, чтобы «→» не падало.
 for _stream in (sys.stdout, sys.stderr):
@@ -270,10 +276,29 @@ def _stop_chunk() -> dict:
             "usage": _E2E_USAGE}
 
 
+def pick(tools_list, suffix):
+    """Имя тула из LLM-payload по суффиксу (день 20: всегда префикс)."""
+    for t in tools_list or []:
+        n = t.get("function", {}).get("name", "")
+        if n == suffix or n.endswith("__" + suffix):
+            return n
+    raise AssertionError("tool %r not in payload tools: %r"
+                         % (suffix, [t.get("function", {}).get("name")
+                                     for t in (tools_list or [])]))
+
+
+def _tc(name: str, args: dict, call_id: str) -> dict:
+    """tool_calls-чанк fake-LLM (OpenAI-формат)."""
+    return {"index": 0, "id": call_id, "type": "function",
+            "function": {"name": name,
+                         "arguments": json.dumps(args, ensure_ascii=False)}}
+
+
 def _fake_llm_handler(request) -> "object":
     """Fake-LLM: non-stream (авто-название) → JSON; stream без role "tool"
-    → SSE с tool-call get_task_details(TASK-42); stream с role "tool" →
-    SSE content «Статус задачи: <текст tool>» (+ usage + [DONE])."""
+    → SSE с tool-call pick(payload["tools"], "get_task_details")(TASK-42);
+    stream с role "tool" → SSE content «Статус задачи: <текст tool>»
+    (+ usage + [DONE])."""
     import httpx
     payload = json.loads(request.content)
     if "stream" not in payload:
@@ -288,9 +313,8 @@ def _fake_llm_handler(request) -> "object":
             _stop_chunk(),
             "[DONE]",
         ]).encode("utf-8"))
-    tc = {"index": 0, "id": "call_17", "type": "function",
-          "function": {"name": "get_task_details",
-                       "arguments": "{\"task_id\": \"TASK-42\"}"}}
+    tc = _tc(pick(payload.get("tools"), "get_task_details"),
+             {"task_id": "TASK-42"}, "call_17_0")
     return httpx.Response(200, content=_sse([
         {"id": "c1", "object": "chat.completion.chunk",
          "choices": [{"index": 0, "delta": {"tool_calls": [tc]},
@@ -318,12 +342,13 @@ def part_a() -> bool:
     try:
         store = MemoryStore(tmp)
         reg = MCPRegistry(store, timeout=30)  # реальный (default) launcher
-        rec = reg.add("E2E TM", "stdio", command=[sys.executable, TASK_MANAGER])
+        rec = reg.add("Task Get", "stdio", command=[sys.executable, TASK_GET],
+                      env={"TASKS_FILE": os.path.join(tmp, "tasks.json")})
         sid = rec["id"]
         view = reg.connect(sid)
         ok = (view.get("status") == "connected"
-              and view.get("tools_count") == 2)
-        record("A: MCP connect (connected, 2 tools)",
+              and view.get("tools_count") == 1)
+        record("A: MCP connect (connected, 1 tool)",
                "PASS" if ok else "FAIL",
                f"status={view.get('status')} tools_count={view.get('tools_count')} "
                f"error={view.get('error')}")
@@ -353,9 +378,11 @@ def part_a() -> bool:
         msgs = agent.store.get_messages(d["id"])
         tool_msgs = [m for m in msgs if m.get("role") == "tool"]
         tm_ok = (len(tool_msgs) == 1
+                 and tool_msgs[0].get("name") == "task_get__get_task_details"
                  and "TASK-42" in str(tool_msgs[0].get("content", ""))
                  and "in_progress" in str(tool_msgs[0].get("content", "")))
-        record("A: ровно 1 tool-сообщение (TASK-42, in_progress)",
+        record("A: ровно 1 tool-сообщение (task_get__get_task_details, "
+               "TASK-42, in_progress)",
                "PASS" if tm_ok else "FAIL", f"tool_msgs={len(tool_msgs)}")
 
         asst_tc = [m for m in msgs
@@ -363,10 +390,12 @@ def part_a() -> bool:
         tc_ok = False
         if len(asst_tc) == 1:
             tc = asst_tc[0]["tool_calls"][0]
-            tc_ok = (tc.get("function", {}).get("name") == "get_task_details"
+            tc_ok = (tc.get("function", {}).get("name")
+                     == "task_get__get_task_details"
                      and json.loads(tc.get("function", {}).get("arguments", "{}"))
                      == {"task_id": "TASK-42"})
-        record("A: ровно 1 assistant с tool_calls (get_task_details, TASK-42)",
+        record("A: ровно 1 assistant с tool_calls "
+               "(task_get__get_task_details, TASK-42)",
                "PASS" if tc_ok else "FAIL", f"asst_tc={len(asst_tc)}")
 
         rl = agent.requests_list()
@@ -376,9 +405,10 @@ def part_a() -> bool:
             tools = (full.get("request") or {}).get("tools") or []
             names = [t.get("function", {}).get("name") for t in tools
                      if isinstance(t, dict)]
-            tools_ok = "get_task_details" in names and "create_task" in names
+            tools_ok = names == ["task_get__get_task_details"]
         record("A: журнал (2 записи; tools с get_task_details в первой)",
-               "PASS" if tools_ok else "FAIL", f"requests={len(rl)}")
+               "PASS" if tools_ok else "FAIL",
+               f"requests={len(rl)} names={names if len(rl) == 2 else '-'}")
 
         failed = (not ok) or (not done_ok) or (not ans_ok) or (not tm_ok) \
             or (not tc_ok) or (not tools_ok)
@@ -436,14 +466,14 @@ def part_b() -> int:
         orig_model = json.loads(body).get("model") if code == 200 else None
         http("POST", "/api/config", {"model": avail[0]["id"]}, timeout=30)
 
-        # MCP: Task Manager (реальный python-subprocess)
+        # MCP: task_get (реальный python-subprocess)
         code, body, _ = http("POST", "/api/mcp/servers",
-                             {"name": "E2E TM", "type": "stdio",
-                              "command": [sys.executable, TASK_MANAGER]},
+                             {"name": "Task Get E2E", "type": "stdio",
+                              "command": [sys.executable, TASK_GET]},
                              timeout=30)
         srv = json.loads(body).get("server", {}) if code == 201 else {}
         if code != 201 or not srv.get("id"):
-            record("B: POST /api/mcp/servers (Task Manager)", "FAIL",
+            record("B: POST /api/mcp/servers (Task Get E2E)", "FAIL",
                    f"code={code}")
             return 1
         mcp_sid = srv["id"]
@@ -453,13 +483,13 @@ def part_b() -> int:
                              timeout=90)
         view = json.loads(body).get("server", {}) if code == 200 else {}
         if (code != 200 or view.get("status") != "connected"
-                or view.get("tools_count") != 2):
-            record("B: MCP connect (connected, 2 tools)", "FAIL",
+                or view.get("tools_count") != 1):
+            record("B: MCP connect (connected, 1 tool)", "FAIL",
                    f"code={code} status={view.get('status')} "
                    f"tools_count={view.get('tools_count')} "
                    f"error={view.get('error')}")
             return 1
-        record("B: MCP connect (connected, 2 tools)", "PASS")
+        record("B: MCP connect (connected, 1 tool)", "PASS")
 
         # Диалог + отказ от профиля (pending-гейт дня 12)
         code, body, _ = http("POST", "/api/dialogues")

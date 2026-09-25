@@ -5,10 +5,12 @@
   Part A — детерминированное ядро (в-процессе, без uvicorn, БЕЗ сети):
     1. sys.path → studio/backend; StudioAgent + MCPRegistry (реальный
        launcher) + MemoryStore (tmp-каталог, tempfile).
-    2. MCP: reg.add("Pipeline E2E", stdio, [python, pipeline_tools.py],
-       env PIPELINE_SEARCH_DIR/PIPELINE_OUT_DIR → tmp) → connect
-       → status connected, tools_count == 3 (реальный subprocess
-       pipeline_tools.py: initialize + tools/list).
+    2. MCP: 3× reg.add (digest_search/digest_summarize/file_save —
+       одиночные серверы, по 1 тулу; env PIPELINE_SEARCH_DIR → tmp у
+       digest_search, PIPELINE_OUT_DIR/PIPELINE_FONT_PATH → tmp у
+       file_save, summarize — без env) + connect → status connected,
+       tools_count == 1 у каждого (3 реальных subprocess-а: initialize
+       + tools/list).
     3. Seed: 3 дайджест-JSON (схема collector.py, кириллица, различные
        generated_at, один с «погода» в summary) в tmp search-каталог.
     4. Direct call_tool sanity: search("погода") → count >= 1;
@@ -44,9 +46,11 @@
     4. GET /api/models → доступные модели; нет ни одной → FAIL (только
        когда GPustack достижим). Модель чата — первая доступная
        (детерминизм), оригинал конфига восстанавливается в cleanup.
-    5. POST /api/mcp/servers (Pipeline: [python, pipeline_tools.py],
-       БЕЗ env-оверрайда — реальные data/digests) → 201; POST connect
-       (timeout 120) → connected, tools_count 3.
+    5. POST /api/mcp/servers ×3 (Digest Search / Digest Summarize /
+       File Save: [python, digest_search.py / digest_summarize.py /
+       file_save.py], БЕЗ env-оверрайда — реальные data/digests) → 201;
+       POST connect ×3 (timeout 120) → connected, tools_count 1 у
+       каждого.
     6. POST /api/dialogues → 201; POST /api/profile/action decline.
     7. POST /api/chat «В дайджестах найди сводки про погоду,
        суммаризируй главное и сохрани результат в PDF-файл
@@ -83,8 +87,10 @@ WAIT_PORT_BUSY_MAX = 600   # 10 минут ожидания освобожден
 WAIT_PORT_BUSY_STEP = 10
 WAIT_SERVER_UP_MAX = 90
 CHAT_TIMEOUT = 330
-PIPELINE_SERVER = os.path.join(REPO, "studio", "mcp_servers",
-                               "pipeline_tools.py")
+MCP_DIR = os.path.join(REPO, "studio", "mcp_servers")
+DIGEST_SEARCH_PY = os.path.join(MCP_DIR, "digest_search.py")
+DIGEST_SUMMARIZE_PY = os.path.join(MCP_DIR, "digest_summarize.py")
+FILE_SAVE_PY = os.path.join(MCP_DIR, "file_save.py")
 PDF_NAME = "pipeline_report.pdf"
 CHAT_MSG = ("В дайджестах найди записи про Самара, суммаризируй главное "
             "и сохрани результат в PDF-файл pipeline_report.pdf")
@@ -237,14 +243,14 @@ def _try_dialogues():
         return 0, b"", {}
 
 
-def _cleanup(dlg_id: str | None, mcp_sid: str | None,
+def _cleanup(dlg_id: str | None, mcp_sids: list[str],
              orig_model: str | None) -> None:
     """Убрать артефакты самого e2e (не трогая данные пользователя)."""
     try:
         if dlg_id:
             http("DELETE", f"/api/dialogues/{dlg_id}", timeout=10)
-        if mcp_sid:
-            http("DELETE", f"/api/mcp/servers/{mcp_sid}", timeout=30)
+        for sid in mcp_sids or []:
+            http("DELETE", f"/api/mcp/servers/{sid}", timeout=30)
         if orig_model:
             http("POST", "/api/config", {"model": orig_model}, timeout=10)
     except Exception:
@@ -343,6 +349,16 @@ def _tc(name: str, arguments: dict, call_id: str) -> dict:
                                                  ensure_ascii=False)}}
 
 
+def pick(tools_list, suffix):
+    """День 20: имя тула с префиксом сервера (digest_search__search)."""
+    for t in tools_list or []:
+        n = (t.get("function") or {}).get("name", "")
+        if n == suffix or n.endswith("__" + suffix):
+            return n
+    raise AssertionError(f"tool with suffix {suffix!r} not found "
+                         f"in {[t.get('function', {}).get('name') for t in (tools_list or [])]}")
+
+
 def _last_tool_text(msgs: list) -> str:
     tool_msgs = [m for m in msgs if m.get("role") == "tool"]
     return str(tool_msgs[-1].get("content", "")) if tool_msgs else ""
@@ -368,7 +384,8 @@ def _fake_llm_handler(request) -> "object":
     msgs = payload.get("messages") or []
     stage = sum(1 for m in msgs if m.get("role") == "tool")
     if stage == 0:
-        return _tool_response(_tc("search", {"query": "погода"},
+        return _tool_response(_tc(pick(payload.get("tools"), "search"),
+                                  {"query": "погода"},
                                   "call_19_0"))
     if stage == 1:
         try:
@@ -380,7 +397,7 @@ def _fake_llm_handler(request) -> "object":
             f"{m.get('city', '')}: {m.get('title', '')} — "
             f"{m.get('summary', '')}"
             for m in matches if isinstance(m, dict))
-        return _tool_response(_tc("summarize",
+        return _tool_response(_tc(pick(payload.get("tools"), "summarize"),
                                   {"text": text, "max_points": 5},
                                   "call_19_1"))
     if stage == 2:
@@ -390,7 +407,7 @@ def _fake_llm_handler(request) -> "object":
             summ = {}
         content = summ.get("summary") or "\n".join(
             str(p) for p in (summ.get("points") or []))
-        return _tool_response(_tc("saveToFile",
+        return _tool_response(_tc(pick(payload.get("tools"), "saveToFile"),
                                   {"filename": PDF_NAME, "content": content,
                                    "format": "pdf"},
                                   "call_19_2"))
@@ -440,7 +457,8 @@ def _seed_digests(search_dir: str) -> list:
 def part_a() -> bool:
     """Детерминированное ядро: всегда выполняется, должно PASSнуть."""
     log("=== Part A: детерминированное ядро "
-        "(fake LLM + реальный MCP-процесс pipeline_tools.py) ===")
+        "(fake LLM + реальные MCP-процессы digest_search/digest_summarize/"
+        "file_save.py) ===")
     import httpx
     sys.path.insert(0, os.path.join(REPO, "studio", "backend"))
     from agent import StudioAgent
@@ -455,26 +473,35 @@ def part_a() -> bool:
     os.makedirs(out_dir, exist_ok=True)
     reg = None
     try:
-        # A1: MCP connect — connected, 3 tools (реальный subprocess)
+        # A1: MCP connect ×3 — connected, 1 tool each (реальные
+        # subprocess-ы digest_search.py / digest_summarize.py /
+        # file_save.py)
         store = MemoryStore(tmp)
         reg = MCPRegistry(store, timeout=120, env=dict(os.environ))
         font = r"C:\Windows\Fonts\arial.ttf" if os.name == "nt" else ""
-        srv_env = {"PIPELINE_SEARCH_DIR": search_dir,
-                   "PIPELINE_OUT_DIR": out_dir}
+        save_env = {"PIPELINE_OUT_DIR": out_dir}
         if font and os.path.exists(font):
-            srv_env["PIPELINE_FONT_PATH"] = font
-        rec = reg.add("Pipeline E2E", "stdio",
-                      command=[sys.executable, PIPELINE_SERVER],
-                      url="", env=srv_env, enabled=True)
-        sid = rec["id"]
-        view = reg.connect(sid)
-        ok = (view.get("status") == "connected"
-              and view.get("tools_count") == 3)
-        record("A: MCP connect (connected, 3 tools)",
+            save_env["PIPELINE_FONT_PATH"] = font
+        adds = [
+            ("Digest Search", DIGEST_SEARCH_PY,
+             {"PIPELINE_SEARCH_DIR": search_dir}),
+            ("Digest Summarize", DIGEST_SUMMARIZE_PY, None),
+            ("File Save", FILE_SAVE_PY, save_env),
+        ]
+        sids = {}
+        views = {}
+        for name, path, senv in adds:
+            rec = reg.add(name, "stdio", command=[sys.executable, path],
+                          url="", env=senv, enabled=True)
+            sids[name] = rec["id"]
+            views[name] = reg.connect(rec["id"])
+        ok = all(v.get("status") == "connected"
+                 and v.get("tools_count") == 1
+                 for v in views.values())
+        record("A: MCP connect ×3 (connected, 1 tool each)",
                "PASS" if ok else "FAIL",
-               f"status={view.get('status')} "
-               f"tools_count={view.get('tools_count')} "
-               f"error={view.get('error')}")
+               " ".join(f"{n}={views[n].get('tools_count')}"
+                        f"/{views[n].get('status')}" for n, _, _ in adds))
 
         # A2: seed 3 дайджеста (схема collector.py, кириллица)
         _seed_digests(search_dir)
@@ -483,7 +510,8 @@ def part_a() -> bool:
                "PASS" if ok else "FAIL", f"files={os.listdir(search_dir)}")
 
         # A3: direct call_tool sanity
-        r = reg.call_tool(sid, "search", {"query": "погода"})
+        r = reg.call_tool(sids["Digest Search"], "search",
+                          {"query": "погода"})
         d = json.loads(r["content"][0]["text"])
         ok = (r.get("isError") is not True
               and int(d.get("count", 0)) >= 1
@@ -498,8 +526,8 @@ def part_a() -> bool:
                      "ожидается похолодание до нуля и гололёд на "
                      "покрытиях, рекомендуется воздержаться от "
                      "дальних поездок.")
-        r = reg.call_tool(sid, "summarize", {"text": long_text,
-                                             "max_points": 5})
+        r = reg.call_tool(sids["Digest Summarize"], "summarize",
+                          {"text": long_text, "max_points": 5})
         d = json.loads(r["content"][0]["text"])
         ok = (r.get("isError") is not True
               and len(d.get("points") or []) >= 1
@@ -508,7 +536,7 @@ def part_a() -> bool:
                "PASS" if ok else "FAIL",
                f"points={len(d.get('points') or [])}")
 
-        r = reg.call_tool(sid, "saveToFile",
+        r = reg.call_tool(sids["File Save"], "saveToFile",
                           {"filename": "t.md", "content": "hello",
                            "format": "md"})
         d = json.loads(r["content"][0]["text"])
@@ -543,7 +571,9 @@ def part_a() -> bool:
         msgs = agent.store.get_messages(d["id"])
         tool_msgs = [m for m in msgs if m.get("role") == "tool"]
         order_ok = ([m.get("name") for m in tool_msgs]
-                    == ["search", "summarize", "saveToFile"])
+                    == ["digest_search__search",
+                        "digest_summarize__summarize",
+                        "file_save__saveToFile"])
         record("A: ровно 3 tool-msg в порядке "
                "search→summarize→saveToFile",
                "PASS" if order_ok else "FAIL",
@@ -565,8 +595,8 @@ def part_a() -> bool:
         first_title = ((search_out.get("matches") or [{}])[0]
                        .get("title", ""))
         chain1_ok = bool(first_title) and (
-            first_title in str(asst_args.get("summarize", {}).get(
-                "text", "")))
+            first_title in str(asst_args.get(
+                "digest_summarize__summarize", {}).get("text", "")))
         record("A: chain — summarize.text содержит title из "
                "результата search",
                "PASS" if chain1_ok else "FAIL",
@@ -575,7 +605,7 @@ def part_a() -> bool:
         summ_out = json.loads(str(tool_msgs[1].get("content", "")))
         summary_text = str(summ_out.get("summary", ""))
         chain2_ok = bool(summary_text) and (
-            summary_text in str(asst_args.get("saveToFile", {})
+            summary_text in str(asst_args.get("file_save__saveToFile", {})
                                 .get("content", "")))
         record("A: chain — saveToFile.content содержит summary "
                "из результата summarize",
@@ -619,7 +649,7 @@ def part_b() -> int:
     log("=== Part B: live (uvicorn :8103, реальный LLM, best-effort) ===")
     proc = None
     dlg_id = None
-    mcp_sid = None
+    mcp_sids: list[str] = []
     orig_model = None
     try:
         busy = wait_port_free()
@@ -654,32 +684,36 @@ def part_b() -> int:
         orig_model = json.loads(body).get("model") if code == 200 else None
         http("POST", "/api/config", {"model": avail[0]["id"]}, timeout=30)
 
-        # MCP: Pipeline (реальный python-subprocess; БЕЗ env-оверрайда —
-        # реальные data/digests и data/pipeline).
-        code, body, _ = http("POST", "/api/mcp/servers",
-                             {"name": "Pipeline E2E", "type": "stdio",
-                              "command": [sys.executable,
-                                          PIPELINE_SERVER]},
-                             timeout=30)
-        srv = json.loads(body).get("server", {}) if code == 201 else {}
-        if code != 201 or not srv.get("id"):
-            record("B: POST /api/mcp/servers (Pipeline)", "FAIL",
-                   f"code={code}")
-            return 1
-        mcp_sid = srv["id"]
-        record("B: POST /api/mcp/servers (201)", "PASS", mcp_sid)
+        # MCP: 3 одиночных сервера (реальные python-subprocess; БЕЗ
+        # env-оверрайда — реальные data/digests и data/pipeline).
+        for name, path in (("Digest Search", DIGEST_SEARCH_PY),
+                           ("Digest Summarize", DIGEST_SUMMARIZE_PY),
+                           ("File Save", FILE_SAVE_PY)):
+            code, body, _ = http("POST", "/api/mcp/servers",
+                                 {"name": name, "type": "stdio",
+                                  "command": [sys.executable, path]},
+                                 timeout=30)
+            srv = json.loads(body).get("server", {}) if code == 201 else {}
+            if code != 201 or not srv.get("id"):
+                record(f"B: POST /api/mcp/servers ({name})", "FAIL",
+                       f"code={code}")
+                return 1
+            mcp_sids.append(srv["id"])
+        record("B: POST /api/mcp/servers ×3 (201)", "PASS",
+               ",".join(s[:8] for s in mcp_sids))
 
-        code, body, _ = http("POST", f"/api/mcp/servers/{mcp_sid}/connect",
-                             timeout=120)
-        view = json.loads(body).get("server", {}) if code == 200 else {}
-        if (code != 200 or view.get("status") != "connected"
-                or view.get("tools_count") != 3):
-            record("B: MCP connect (connected, 3 tools)", "FAIL",
-                   f"code={code} status={view.get('status')} "
-                   f"tools_count={view.get('tools_count')} "
-                   f"error={view.get('error')}")
+        counts = []
+        for sid in mcp_sids:
+            code, body, _ = http("POST", f"/api/mcp/servers/{sid}/connect",
+                                 timeout=120)
+            view = json.loads(body).get("server", {}) if code == 200 else {}
+            counts.append((view.get("status"), view.get("tools_count"),
+                           view.get("error")))
+        if not all(s == "connected" and c == 1 for s, c, _ in counts):
+            record("B: MCP connect ×3 (connected, 1 tool each)", "FAIL",
+                   f"counts={counts}")
             return 1
-        record("B: MCP connect (connected, 3 tools)", "PASS")
+        record("B: MCP connect ×3 (connected, 1 tool each)", "PASS")
 
         # Диалог + отказ от профиля (pending-гейт дня 12)
         code, body, _ = http("POST", "/api/dialogues")
@@ -744,7 +778,7 @@ def part_b() -> int:
         return 0
     finally:
         try:
-            _cleanup(dlg_id, mcp_sid, orig_model)
+            _cleanup(dlg_id, mcp_sids, orig_model)
         finally:
             stop_server(proc)
 

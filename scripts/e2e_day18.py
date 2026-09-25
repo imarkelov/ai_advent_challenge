@@ -5,9 +5,10 @@
   Part A — детерминированное ядро (в-процессе, без uvicorn, БЕЗ сети):
     1. sys.path → studio/backend + studio; MCPRegistry (реальный launcher)
        + MemoryStore (tmp-каталог); env DIGEST_DATA_DIR → tmp/digests.
-    2. MCP: reg.add("E2E NW", stdio, [python, news_weather.py]) → connect
-       → status connected, tools_count == 4 (реальный subprocess
-       news_weather.py: initialize + tools/list).
+    2. MCP: 4× reg.add (weather/news/digest_make/digest_read — одиночные
+       серверы, по 1 тулу) + connect → status connected, tools_count == 1
+       у каждого (реальные subprocess-ы: initialize + tools/list;
+       env DIGEST_DATA_DIR — только у digest_make и digest_read).
     3. reg.call_tool make_digest {} → isError False, id+generated_at,
        last-digest.json на диске в tmp/digests.
     4. reg.call_tool get_latest_digest {} → source "local", id совпадает.
@@ -28,8 +29,8 @@
     4. GET /api/models → доступные модели; нет ни одной → FAIL (только
        когда GPustack достижим). Модель чата — первая доступная
        (детерминизм), оригинал конфига восстанавливается в cleanup.
-    5. POST /api/mcp/servers (News & Weather: [python, news_weather.py])
-       → 201; POST connect (timeout 120) → connected, tools_count 4.
+    5. POST /api/mcp/servers (Digest Read: [python, digest_read.py])
+       → 201; POST connect (timeout 120) → connected, tools_count 1.
     6. POST /api/dialogues → 201; POST /api/profile/action decline.
     7. POST /api/chat «Покажи последнюю сводку (дайджест)» (timeout 330)
        → SSE done.
@@ -65,8 +66,11 @@ WAIT_PORT_BUSY_MAX = 600   # 10 минут ожидания освобожден
 WAIT_PORT_BUSY_STEP = 10
 WAIT_SERVER_UP_MAX = 90
 CHAT_TIMEOUT = 330
-NEWS_WEATHER = os.path.join(REPO, "studio", "mcp_servers",
-                            "news_weather.py")
+MCP_DIR = os.path.join(REPO, "studio", "mcp_servers")
+WEATHER_PY = os.path.join(MCP_DIR, "weather.py")
+NEWS_PY = os.path.join(MCP_DIR, "news.py")
+DIGEST_MAKE_PY = os.path.join(MCP_DIR, "digest_make.py")
+DIGEST_READ_PY = os.path.join(MCP_DIR, "digest_read.py")
 
 # Windows-консоль может быть cp1251 — выводим UTF-8, чтобы «→» не падало.
 for _stream in (sys.stdout, sys.stderr):
@@ -278,25 +282,31 @@ def part_a() -> bool:
     os.makedirs(data_dir, exist_ok=True)
     reg = None
     try:
-        # A1: MCP connect — connected, 4 tools (реальный subprocess)
+        # A1: MCP connect ×4 — connected, 1 tool each (реальные subprocess-ы)
         store = MemoryStore(os.path.join(tmp, "data"))
-        reg = MCPRegistry(store, timeout=120,
-                          env={**os.environ,
-                               "DIGEST_DATA_DIR": data_dir})
-        rec = reg.add("E2E NW", "stdio",
-                      command=[sys.executable, NEWS_WEATHER])
-        sid = rec["id"]
-        view = reg.connect(sid)
-        ok = (view.get("status") == "connected"
-              and view.get("tools_count") == 4)
-        record("A: MCP connect (connected, 4 tools)",
+        reg = MCPRegistry(store, timeout=120)
+        adds = [
+            ("Weather", WEATHER_PY, None),
+            ("News", NEWS_PY, None),
+            ("Digest Make", DIGEST_MAKE_PY, {"DIGEST_DATA_DIR": data_dir}),
+            ("Digest Read", DIGEST_READ_PY, {"DIGEST_DATA_DIR": data_dir}),
+        ]
+        sids = {}
+        views = {}
+        for name, path, senv in adds:
+            rec = reg.add(name, "stdio", command=[sys.executable, path],
+                          env=senv)
+            sids[name] = rec["id"]
+            views[name] = reg.connect(rec["id"])
+        ok = all(v.get("status") == "connected" and v.get("tools_count") == 1
+                 for v in views.values())
+        record("A: MCP connect ×4 (connected, 1 tool each)",
                "PASS" if ok else "FAIL",
-               f"status={view.get('status')} "
-               f"tools_count={view.get('tools_count')} "
-               f"error={view.get('error')}")
+               " ".join(f"{n}={views[n].get('tools_count')}"
+                        f"/{views[n].get('status')}" for n, _, _ in adds))
 
         # A2: make_digest — ok, id+generated_at, last-digest.json на диске
-        r = reg.call_tool(sid, "make_digest", {})
+        r = reg.call_tool(sids["Digest Make"], "make_digest", {})
         d = json.loads(r["content"][0]["text"])
         ok = (r.get("isError") is not True and "id" in d
               and "generated_at" in d
@@ -306,7 +316,7 @@ def part_a() -> bool:
                "PASS" if ok else "FAIL", f"digest={str(d)[:80]}")
 
         # A3: get_latest_digest — source=local, id совпадает
-        g = reg.call_tool(sid, "get_latest_digest", {})
+        g = reg.call_tool(sids["Digest Read"], "get_latest_digest", {})
         lg = json.loads(g["content"][0]["text"])
         ok = (lg.get("source") == "local"
               and lg.get("digest", {}).get("id") == d.get("id"))
@@ -408,14 +418,14 @@ def part_b() -> int:
         orig_model = json.loads(body).get("model") if code == 200 else None
         http("POST", "/api/config", {"model": avail[0]["id"]}, timeout=30)
 
-        # MCP: News & Weather (реальный python-subprocess)
+        # MCP: Digest Read (реальный python-subprocess)
         code, body, _ = http("POST", "/api/mcp/servers",
-                             {"name": "E2E NW", "type": "stdio",
-                              "command": [sys.executable, NEWS_WEATHER]},
+                             {"name": "Digest Read", "type": "stdio",
+                              "command": [sys.executable, DIGEST_READ_PY]},
                              timeout=30)
         srv = json.loads(body).get("server", {}) if code == 201 else {}
         if code != 201 or not srv.get("id"):
-            record("B: POST /api/mcp/servers (News & Weather)", "FAIL",
+            record("B: POST /api/mcp/servers (Digest Read)", "FAIL",
                    f"code={code}")
             return 1
         mcp_sid = srv["id"]
@@ -425,13 +435,13 @@ def part_b() -> int:
                              timeout=120)
         view = json.loads(body).get("server", {}) if code == 200 else {}
         if (code != 200 or view.get("status") != "connected"
-                or view.get("tools_count") != 4):
-            record("B: MCP connect (connected, 4 tools)", "FAIL",
+                or view.get("tools_count") != 1):
+            record("B: MCP connect (connected, 1 tool)", "FAIL",
                    f"code={code} status={view.get('status')} "
                    f"tools_count={view.get('tools_count')} "
                    f"error={view.get('error')}")
             return 1
-        record("B: MCP connect (connected, 4 tools)", "PASS")
+        record("B: MCP connect (connected, 1 tool)", "PASS")
 
         # Диалог + отказ от профиля (pending-гейт дня 12)
         code, body, _ = http("POST", "/api/dialogues")
