@@ -15,6 +15,18 @@ stdio JSON-RPC 2.0 (protocolVersion 2024-11-05), один тул на серве
 import json
 import sys
 
+# Windows: stdout/stderr пайпов могут быть cp1251. Ответ JSON-RPC
+# (ensure_ascii=False) может содержать символы вне cp1251 (\u2011, \u2192,
+# эмодзи из реального контента) — sys.stdout.write бросает
+# UnicodeEncodeError и процесс сервера умирает («MCP-сервер закрыл
+# соединение»). Паттерн day-18 из agent.py: write делается нефатальным —
+# не кодируемые символы заменяются, сама кодировка потоков не меняется.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(errors="replace")
+    except Exception:
+        pass
+
 PROTOCOL = "2024-11-05"
 
 
