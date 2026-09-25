@@ -66,12 +66,13 @@
 | `file_save` | `file_save.py` | `saveToFile` | `filename`, `content`, `format?`=md\|txt\|json\|pdf | Атомарная запись (tmp + `os.replace`) в `data/pipeline/` (env `PIPELINE_OUT_DIR`), basename-санитизация; pdf → `pdf_writer` |
 | `habr_news` | `habr_news.py` | `get_habr_news` | `topics?` (массив: `testing` \| `ai`, default оба), `limit?`=10 | RSS Habr (URL из collector + `_parse_rss_items`), фильтр по заголовкам (ниже), top-`limit` по `published` desc. Сбой сети → `isError` |
 
-**Фильтр тем `habr_news` (детерминированный, case-insensitive):**
-- `testing`: суффиксные/частотные RU-паттерны как подстроки — `тестир`,
-  `тест` (слово), `qa` (слово), `test` (слово, word-boundary)
-- `ai`: word-boundary для латиницы `\b(ai|llm|gpt|ml)\b`
-  («maintain» не проходит), подстроки — `ии` (RU-слово с границей),
-  `нейросет`, `machine learning`, `искусственный интеллект`
+**Фильтр тем `habr_news` (детерминированный, case-insensitive,
+`re.UNICODE`):**
+- `testing`: подстрока `тест` (покрывает тест/тестов/тестирование),
+  word-boundary `\bqa\b`, `\btest\b`
+- `ai`: word-boundary `\b(ai|llm|gpt|ml)\b` («maintain» не проходит),
+  `\бии\b` (RU: «акции»/«студии» не проходят), подстроки `нейросет`,
+  `machine learning`, `искусственный интеллект`
 - Новость проходит, если заголовок совпал с паттерном **хотя бы одной**
   из запрошенных тем; результат помечает совпавшую тему (`topic`).
 - Темы не приходят или неизвестное значение → 400-семантика
@@ -167,7 +168,8 @@ digest_search, digest_summarize, file_save, habr_news.
 ### 5.3 Кап итераций
 
 `TOOL_LOOP_CAP = int(os.environ.get("TOOL_LOOP_CAP") or "15")` (default
-**15**, было 5; флоу из 9 вызовов = 10 итераций — влезает).
+**15**, было 5; флоу §6 = 10 tool-вызовов + финал = 11 итераций —
+влезает).
 `for iteration in range(TOOL_LOOP_CAP)`; error-сообщение
 параметризовано: «Tool-loop: превышен лимит итераций (N)».
 
@@ -179,18 +181,19 @@ digest_search, digest_summarize, file_save, habr_news.
 
 ## 6. Длинный флоу (сценарий задания)
 
-Один запрос пользователя → 9 вызовов через 9 разных серверов:
+Один запрос пользователя → **10 вызовов через все 10 локальных серверов**:
 
 ```
-task_create__create_task   {title, description}        → TASK-<n>
-weather__get_weather       {city: "Самара"}            → погода
-news__get_news             {} (все источники)          → новости
-digest_make__make_digest   {city: "Самара"}            → дайджест сохранён
-habr_news__get_habr_news   {topics: ["testing","ai"]}  → Habr: тесты + ИИ
-digest_search__search      {query: "Самара"}           → text
-digest_summarize__summarize{text: <step6.text>}        → summary
-file_save__saveToFile      {filename, content: <step7.summary>, format: "pdf"}
-task_get__get_task_details {task_id: <step1.id>}       → детали задачи
+ 1. task_create__create_task     {title, description}        → TASK-<n>
+ 2. weather__get_weather         {city: "Самара"}            → погода
+ 3. news__get_news               {} (все источники)          → новости
+ 4. digest_make__make_digest     {city: "Самара"}            → дайджест сохранён
+ 5. digest_read__get_latest_digest {}                        → подтверждение: дайджест прочитан
+ 6. habr_news__get_habr_news     {topics: ["testing","ai"]}  → Habr: тесты + ИИ
+ 7. digest_search__search        {query: "Самара"}           → text
+ 8. digest_summarize__summarize  {text: <step7.text>}        → summary
+ 9. file_save__saveToFile        {filename, content: <step8.summary>, format: "pdf"}
+10. task_get__get_task_details   {task_id: <step1.id>}       → детали задачи
 → финальный текстовый ответ
 ```
 
@@ -245,19 +248,19 @@ task_create/task_get; имена тулов теперь префиксован�
 - env на tmp-каталоги: `DIGEST_DATA_DIR`, `PIPELINE_SEARCH_DIR`,
   `PIPELINE_OUT_DIR`, `TASKS_FILE`; в tmp-дайджесты заранее посеян
   детерминированный дайджест с «Самара» (search не зависит от live-сети).
-- Fake-LLM эмитит флоу §6 (9 tool_calls с префиксованными именами).
+- Fake-LLM эмитит флоу §6 (10 tool_calls с префиксованными именами).
 - Спай на `MCPRegistry.call_tool` фиксирует (server, tool, args).
 - Ассерты:
   1. **Маршрутизация**: последовательность server-значений ==
-     `[task_create, weather, news, digest_make, habr_news,
+     `[task_create, weather, news, digest_make, digest_read, habr_news,
      digest_search, digest_summarize, file_save, task_get]`;
-  2. **Порядок**: 9 tool-сообщений в диалоге в том же порядке;
-  3. **Передача данных**: `summarize.text` == `search.text` (step 6),
-     `saveToFile.content` == `summarize.summary` (step 7),
+  2. **Порядок**: 10 tool-сообщений в диалоге в том же порядке;
+  3. **Передача данных**: `summarize.text` == `search.text` (step 7),
+     `saveToFile.content` == `summarize.summary` (step 8),
      `task_get.task_id` == id из `create_task` (step 1);
   4. **Артефакты**: `day20_report.pdf` (`%PDF-1.4` + `/ToUnicode`) в
      tmp, задача из step 1 в `tasks.json`, дайджест step 4 в
-     tmp-дайджестах;
+     tmp-дайджестах, result step 5 содержит этот же дайджест;
   5. **Кап**: отдельный прогон — fake-LLM зациклен → SSE error с
      «превышен лимит итераций (15)».
 - Live-сети в Part A нет ни на что не опираемся: сбой источника в
