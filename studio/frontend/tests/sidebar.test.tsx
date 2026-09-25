@@ -247,7 +247,7 @@ describe('Sidebar — одиночное удаление по корзине', 
   })
 })
 
-describe('Sidebar — иконка used_task (задача использовалась)', () => {
+describe('Sidebar — иконка used_task (проект использовался)', () => {
   function usedTaskFetchMock(dialogues: DialogueMeta[]) {
     return vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = normalizeUrl(input)
@@ -268,7 +268,7 @@ describe('Sidebar — иконка used_task (задача использова�
     })
   }
 
-  it('used_task: true → иконка с title="Задача использовалась" в строке; без флага — нет', async () => {
+  it('used_task: true → иконка с title="Проект использовался" в строке; без флага — нет', async () => {
     const used: DialogueMeta = { ...d1, used_task: true }
     vi.stubGlobal('fetch', usedTaskFetchMock([used, d2]))
     render(
@@ -277,13 +277,13 @@ describe('Sidebar — иконка used_task (задача использова�
       </StudioProvider>,
     )
     await screen.findByText('Первый')
-    const icons = screen.getAllByTitle('Задача использовалась')
+    const icons = screen.getAllByTitle('Проект использовался')
     expect(icons).toHaveLength(1)
     // иконка именно в строке «Первый», а не «Второй»
     const usedRow = screen.getByRole('button', { name: /Первый/ }).closest('li')
-    expect(usedRow?.querySelector('[title="Задача использовалась"]')).toBeTruthy()
+    expect(usedRow?.querySelector('[title="Проект использовался"]')).toBeTruthy()
     const otherRow = screen.getByRole('button', { name: /Второй/ }).closest('li')
-    expect(otherRow?.querySelector('[title="Задача использовалась"]')).toBeNull()
+    expect(otherRow?.querySelector('[title="Проект использовался"]')).toBeNull()
   })
 
   it('used_task отсутствует у всех — иконок нет', async () => {
@@ -294,7 +294,74 @@ describe('Sidebar — иконка used_task (задача использова�
       </StudioProvider>,
     )
     await screen.findByText('Первый')
-    expect(screen.queryByTitle('Задача использовалась')).toBeNull()
+    expect(screen.queryByTitle('Проект использовался')).toBeNull()
+  })
+})
+
+describe('Sidebar — список диалогов: 5 свежих, старые свёрнуты', () => {
+  function sevenFetchMock(dialogues: DialogueMeta[]) {
+    return vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = normalizeUrl(input)
+      const method = init?.method ?? 'GET'
+      if (method === 'POST' && url.endsWith('/activate')) {
+        return jsonResponse({ active_id: url.split('/')[3] })
+      }
+      if (method === 'GET' && url === '/api/dialogues') {
+        return jsonResponse({ active_id: dialogues[0]?.id ?? null, dialogues })
+      }
+      if (method === 'GET' && url.startsWith('/api/dialogues/')) {
+        return jsonResponse({ dialogue: { messages: [] } })
+      }
+      if (method === 'GET' && url === '/api/memory') {
+        return jsonResponse(memoryFor(dialogues[0]?.id ?? null, {}))
+      }
+      return jsonResponse(BASE_FIXTURES[url] ?? { ok: true })
+    })
+  }
+
+  const seven: DialogueMeta[] = Array.from({ length: 7 }, (_, i) => ({
+    id: `d${i + 1}`,
+    title: `Диалог ${i + 1}`,
+    created: '2026-09-19',
+    message_count: 1,
+  }))
+
+  it('7 диалогов → видны 5 свежих + «Показать ещё 2 (старые)»; клик → все 7 + «Свернуть»; ещё → 5', async () => {
+    vi.stubGlobal('fetch', sevenFetchMock(seven))
+    render(
+      <StudioProvider>
+        <Sidebar />
+      </StudioProvider>,
+    )
+    // видны свежие 5 (свежие — внизу списка); старые 2 не видны
+    for (let i = 3; i <= 7; i++) await screen.findByText(`Диалог ${i}`)
+    expect(screen.queryByText('Диалог 2')).toBeNull()
+    expect(screen.queryByText('Диалог 1')).toBeNull()
+    // кнопка-раскрытие со счётчиком скрытых
+    const more = screen.getByRole('button', { name: 'Показать ещё 2 (старые) ▾' })
+    expect(more).toHaveClass('dialogue-more')
+    // раскрытие: все 7 + «Свернуть»
+    fireEvent.click(more)
+    await screen.findByText('Диалог 1')
+    expect(screen.getByText('Диалог 2')).toBeTruthy()
+    expect(screen.queryByText('Показать ещё 2 (старые) ▾')).toBeNull()
+    const collapse = screen.getByRole('button', { name: 'Свернуть ▴' })
+    // сворачивание: снова 5 свежих
+    fireEvent.click(collapse)
+    expect(screen.queryByText('Диалог 1')).toBeNull()
+    expect(screen.getByText('Диалог 3')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Показать ещё 2 (старые) ▾' })).toBeTruthy()
+  })
+
+  it('≤5 диалогов — кнопки «Показать ещё» нет', async () => {
+    vi.stubGlobal('fetch', sevenFetchMock(seven.slice(0, 5)))
+    render(
+      <StudioProvider>
+        <Sidebar />
+      </StudioProvider>,
+    )
+    await screen.findByText('Диалог 1')
+    expect(screen.queryByRole('button', { name: /Показать ещё/ })).toBeNull()
   })
 })
 

@@ -292,6 +292,24 @@ button {
   flex-shrink: 0;
 }
 
+/* «Показать ещё (старые)» — свёрнутая часть списка диалогов */
+.dialogue-more {
+  width: 100%;
+  background: none;
+  border: none;
+  border-radius: var(--r-sm);
+  padding: var(--sp-1) var(--sp-2);
+  text-align: left;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.dialogue-more:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
 /* Строка диалога: чекбокс выбора + кнопка-строка (или inline-инпут ренейма) */
 .dialogue-item {
   display: flex;
@@ -1767,4 +1785,208 @@ button {
   word-break: break-word;
   max-height: 320px;
   overflow-y: auto;
+}
+
+/* ── MCP (день 17, LLM-driven tool-loop): карточки вызовов в ленте чата ─────── */
+/* Модель вызывает инструмент (assistant.tool_calls): левая борда --st (синий).
+   Результат инструмента (role:"tool"): левая борда --ok (зелёный). Тело
+   (chip + моно-вывод со скроллом) — тот же паттерн, что .mcp-card. */
+.tool-card {
+  align-self: flex-start;
+  max-width: 78%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--st);
+  border-radius: var(--r-md);
+  animation: msg-in var(--t-med) var(--ease);
+}
+/* Текст assistant-сообщения рядом с вызовом: строка-заметка (мелкая, приглушённая) */
+.tool-card-note {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+/* Один вызов инструмента: chip + аргументы */
+.tool-call {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+/* Чип карточки (общий для вызова и результата): цвет задаётся по контексту ниже */
+.tool-card-chip {
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 1px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Чип вызова — синий (--st), под цвет левой борды карточки */
+.tool-card .tool-card-chip {
+  color: var(--st);
+  border-color: rgba(74, 158, 255, 0.45);
+  background: rgba(74, 158, 255, 0.1);
+}
+/* Моно-вывод (аргументы/результат): общий с .mcp-card-pre (со скроллом) */
+.tool-card-pre {
+  margin: 0;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 320px;
+  overflow-y: auto;
+}
+/* Результат инструмента (role:"tool"): левая борда --ok (зелёный) */
+.tool-result {
+  align-self: flex-start;
+  max-width: 78%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--ok);
+  border-radius: var(--r-md);
+  animation: msg-in var(--t-med) var(--ease);
+}
+/* Чип результата — зелёный (--ok), под цвет левой борды */
+.tool-result .tool-card-chip {
+  color: var(--ok);
+  border-color: rgba(61, 220, 132, 0.4);
+  background: rgba(61, 220, 132, 0.08);
+}
+
+/* ── Шаги агента (LLM-driven tool-loop): сворачиваемая группа карточек ──
+   Подряд идущие tool-сообщения (вызовы + результаты) — в одном блоке,
+   свёрнут по умолчанию; заголовок — кнопка с бейджами тулов. */
+.agent-steps {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  animation: msg-in var(--t-med) var(--ease);
+}
+.agent-steps-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--st); /* левая борда --st, как у .tool-card */
+  border-radius: var(--r-md);
+  font-size: 13px;
+  text-align: left;
+  transition: background var(--t-fast) var(--ease);
+}
+.agent-steps-header:hover {
+  background: var(--panel);
+}
+.agent-steps-title {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+/* Бейдж имени тула (уникальные, порядок первого появления): синий (--st) */
+.tool-badge {
+  padding: 1px 7px;
+  border: 1px solid rgba(74, 158, 255, 0.45);
+  border-radius: var(--r-pill);
+  background: rgba(74, 158, 255, 0.1);
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  color: var(--st);
+  white-space: nowrap;
+}
+.agent-steps-caret {
+  color: var(--muted);
+  font-size: 11px;
+}
+/* Оценка токенов (эвристика): приглушённая, прижата к caret справа */
+.step-tokens {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+/* Развёрнутое тело: левый акцент — шаги читаются как вложенные */
+.agent-steps-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding-left: var(--sp-3);
+  border-left: 1px solid var(--border);
+}
+/* Сообщение с tool_calls: заметка + ряды вызовов (заметка не сворачивается) */
+.agent-steps-msg {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+/* ── Шаг «Шагов агента»: самостоятельный сворачиваемый ряд ─────────────────
+   Шапка — кнопка (chip + ≈ токенов + caret); тело — payload в .tool-card-pre.
+   Chip по контексту: вызов — синий (--st), результат — зелёный (--ok). */
+.step-row {
+  display: flex;
+  flex-direction: column;
+}
+.step-row-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: var(--sp-1) var(--sp-2);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  text-align: left;
+  transition: background var(--t-fast) var(--ease);
+}
+.step-row-header:hover {
+  background: var(--panel);
+}
+.step-row-header .tool-card-chip {
+  align-self: auto;
+}
+.step-row.call .tool-card-chip {
+  color: var(--st);
+  border-color: rgba(74, 158, 255, 0.45);
+  background: rgba(74, 158, 255, 0.1);
+}
+.step-row.result .tool-card-chip {
+  color: var(--ok);
+  border-color: rgba(61, 220, 132, 0.4);
+  background: rgba(61, 220, 132, 0.08);
+}
+/* Тело ряда: левый акцент/отступ — pre читается как вложенное */
+.step-row-body {
+  padding-top: var(--sp-1);
+  padding-left: var(--sp-3);
+  border-left: 1px solid var(--border);
 }

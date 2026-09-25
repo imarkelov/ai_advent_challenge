@@ -246,7 +246,16 @@ describe('ChatPanel — бейдж нарушения инварианта (де
           })
         }
         if (method === 'GET' && url === '/api/dialogues/d1') {
-          return jsonResponse({ dialogue: { messages: [] } })
+          // день 19: done → reloadDialogue перечитывает авторитетные сообщения
+          // (tool-карточки) — отдаём реальную ленту, не пустой массив
+          return jsonResponse({
+            dialogue: {
+              messages: [
+                { role: 'user', content: 'напиши по-английски списком' },
+                { role: 'assistant', content: 'Отказ' },
+              ],
+            },
+          })
         }
         if (method === 'GET' && url === '/api/requests/1') {
           return jsonResponse({ id: 1, ts: 't', model: 'qwen3.8-27b', request: {}, usage: null, error: null })
@@ -290,7 +299,16 @@ describe('ChatPanel — бейдж нарушения инварианта (де
           })
         }
         if (method === 'GET' && url === '/api/dialogues/d1') {
-          return jsonResponse({ dialogue: { messages: [] } })
+          // день 19: done → reloadDialogue перечитывает авторитетные сообщения
+          // (tool-карточки) — отдаём реальную ленту, не пустой массив
+          return jsonResponse({
+            dialogue: {
+              messages: [
+                { role: 'user', content: 'привет' },
+                { role: 'assistant', content: 'Ок' },
+              ],
+            },
+          })
         }
         if (method === 'GET' && url === '/api/requests/1') {
           return jsonResponse({ id: 1, ts: 't', model: 'qwen3.8-27b', request: {}, usage: null, error: null })
@@ -453,26 +471,26 @@ function stubDialogueFetch(messages: unknown[], task?: unknown) {
 }
 
 describe('ChatPanel — тумблер режимов чат/задача (день 13b)', () => {
-  it('две кнопки «Чат»/«Задача», активная подсвечена; клик → chatMode + localStorage', async () => {
+  it('две кнопки «Диалог»/«Проект», активная подсвечена; клик → chatMode + localStorage', async () => {
     stubDialogueFetch([])
     render(
       <StudioProvider>
         <ChatPanel />
       </StudioProvider>,
     )
-    const chatBtn = (await screen.findByRole('tab', { name: 'Чат' })) as HTMLButtonElement
-    const taskBtn = screen.getByRole('tab', { name: 'Задача' }) as HTMLButtonElement
+    const chatBtn = (await screen.findByRole('tab', { name: 'Диалог' })) as HTMLButtonElement
+    const taskBtn = screen.getByRole('tab', { name: 'Проект' }) as HTMLButtonElement
     expect(chatBtn.className).toContain('active')
     expect(taskBtn.className).not.toContain('active')
     fireEvent.click(taskBtn)
     await waitFor(() => expect(taskBtn.className).toContain('active'))
     expect(localStorage.getItem('studio.chatMode')).toBe('task')
-    // инпут переключился в режим задачи
+    // инпут переключился в режим проекта
     const ta = document.querySelector('.input-capsule') as HTMLTextAreaElement
-    expect(ta.placeholder).toBe('Опишите задачу… (Enter — запустить пайплайн)')
+    expect(ta.placeholder).toBe('Опишите проект… (Enter — запустить пайплайн)')
   })
 
-  it('taskMode + нет задачи — плейсхолдер «Опишите задачу…»', async () => {
+  it('taskMode + нет задачи — плейсхолдер «Опишите проект…»', async () => {
     localStorage.setItem('studio.chatMode', 'task')
     stubDialogueFetch([])
     render(
@@ -480,9 +498,9 @@ describe('ChatPanel — тумблер режимов чат/задача (де�
         <ChatPanel />
       </StudioProvider>,
     )
-    await screen.findByRole('tab', { name: 'Задача' })
+    await screen.findByRole('tab', { name: 'Проект' })
     const ta = document.querySelector('.input-capsule') as HTMLTextAreaElement
-    expect(ta.placeholder).toBe('Опишите задачу… (Enter — запустить пайплайн)')
+    expect(ta.placeholder).toBe('Опишите проект… (Enter — запустить пайплайн)')
   })
 
   it('chatMode + нет задачи — плейсхолдер «Сообщение…»', async () => {
@@ -492,7 +510,7 @@ describe('ChatPanel — тумблер режимов чат/задача (де�
         <ChatPanel />
       </StudioProvider>,
     )
-    await screen.findByRole('tab', { name: 'Чат' })
+    await screen.findByRole('tab', { name: 'Диалог' })
     const ta = document.querySelector('.input-capsule') as HTMLTextAreaElement
     expect(ta.placeholder).toBe('Сообщение… (Enter — отправить, Shift+Enter — перенос)')
   })
@@ -505,7 +523,7 @@ describe('ChatPanel — тумблер режимов чат/задача (де�
         <ChatPanel />
       </StudioProvider>,
     )
-    await screen.findByRole('tab', { name: 'Задача' })
+    await screen.findByRole('tab', { name: 'Проект' })
     const ta = document.querySelector('.input-capsule') as HTMLTextAreaElement
     expect(ta.placeholder).toBe('Инструкция для агентов… (Enter — сохранить)')
     expect(ta.disabled).toBe(false)
@@ -520,7 +538,7 @@ describe('ChatPanel — тумблер режимов чат/задача (де�
         <ChatPanel />
       </StudioProvider>,
     )
-    await screen.findByRole('tab', { name: 'Задача' })
+    await screen.findByRole('tab', { name: 'Проект' })
     const ta = document.querySelector('.input-capsule') as HTMLTextAreaElement
     expect(ta.placeholder).toBe('Задача упала — «Повтор» в карточке')
     expect(ta.disabled).toBe(true)
@@ -564,8 +582,8 @@ describe('ChatPanel — тумблер режимов чат/задача (де�
     const ta = document.querySelector('.input-capsule') as HTMLTextAreaElement
     expect(ta.placeholder).toBe('Задача выполняется…')
     expect(ta.disabled).toBe(true)
-    expect((screen.getByRole('tab', { name: 'Чат' }) as HTMLButtonElement).disabled).toBe(true)
-    expect((screen.getByRole('tab', { name: 'Задача' }) as HTMLButtonElement).disabled).toBe(true)
+    expect((screen.getByRole('tab', { name: 'Диалог' }) as HTMLButtonElement).disabled).toBe(true)
+    expect((screen.getByRole('tab', { name: 'Проект' }) as HTMLButtonElement).disabled).toBe(true)
   })
 })
 
@@ -656,7 +674,7 @@ describe('ChatPanel — отправка в режиме задачи (день 
         <ChatPanel />
       </StudioProvider>,
     )
-    const taskBtn = (await screen.findByRole('tab', { name: 'Задача' })) as HTMLButtonElement
+    const taskBtn = (await screen.findByRole('tab', { name: 'Проект' })) as HTMLButtonElement
     fireEvent.click(taskBtn)
     await waitFor(() => expect(taskBtn.className).toContain('active'))
 
@@ -701,7 +719,7 @@ describe('ChatPanel — отправка в режиме задачи (день 
         <ChatPanel />
       </StudioProvider>,
     )
-    await screen.findByRole('tab', { name: 'Задача' })
+    await screen.findByRole('tab', { name: 'Проект' })
     const ta = document.querySelector('.input-capsule') as HTMLTextAreaElement
     fireEvent.change(ta, { target: { value: 'используй Kotlin' } })
     fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }))
@@ -997,8 +1015,8 @@ describe('ChatPanel — карточка результата MCP (день 16, 
   })
 })
 
-describe('ChatPanel — служебные tool-сообщения (день 17, LLM tool-loop)', () => {
-  it('role "tool" не рендерится в ленте; обычный assistant-ответ виден', async () => {
+describe('ChatPanel — «Шаги агента»: сворачиваемая группа tool-карточек (LLM tool-loop)', () => {
+  it('группа свёрнута по умолчанию; шапка — суммарные ≈ N tok; ряды шагов — каждый со своим ≈ N tok и своим сворачиванием', async () => {
     stubDialogueFetch([
       { role: 'user', content: 'Каков статус задачи TASK-42?' },
       {
@@ -1006,7 +1024,7 @@ describe('ChatPanel — служебные tool-сообщения (день 17,
         content: '',
         tool_calls: [{ id: 'call_1', type: 'function', function: { name: 'get_task_details', arguments: '{"task_id": "TASK-42"}' } }],
       },
-      { role: 'tool', content: 'TOOL-SERVICE-SECRET-123', tool_call_id: 'call_1', name: 'get_task_details' },
+      { role: 'tool', content: 'TOOL-RESULT-123', tool_call_id: 'call_1', name: 'get_task_details' },
       { role: 'assistant', content: 'Финальный ответ: in_progress', model: 'qwen3.8-27b' },
     ])
     const { container } = render(
@@ -1014,15 +1032,111 @@ describe('ChatPanel — служебные tool-сообщения (день 17,
         <ChatPanel />
       </StudioProvider>,
     )
-    // финальный assistant-ответ в ленте
-    const final = await screen.findByText('Финальный ответ: in_progress')
-    expect(final).toBeTruthy()
-    // сырой tool-результат (служебные данные для LLM) вне DOM
-    expect(container.textContent).not.toContain('TOOL-SERVICE-SECRET-123')
-    // и не как «модель»-пузырь: всего 2 bubble (user + финальный assistant)
+    // финальный assistant-ответ в ленте (обычный bubble)
+    expect(await screen.findByText('Финальный ответ: in_progress')).toBeTruthy()
+    // группа свёрнута: заголовок-кнопка + бейдж тула + суммарные токены
+    // (аргументы 22 символа ≈ 10, результат 15 ≈ 7 → сумма ≈ 17)
+    const header = await screen.findByRole('button', { name: /🧩 Шаги агента/ })
+    expect(header).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByText('get_task_details')).toBeTruthy()
+    expect(screen.getAllByText(/≈ \d+ tok/)).toHaveLength(1)
+    expect(screen.getByText('≈ 17 tok')).toBeTruthy()
+    expect(container.querySelector('.step-row')).toBeNull()
+    expect(screen.queryByText('🔧 get_task_details')).toBeNull()
+    expect(screen.queryByText('TOOL-RESULT-123')).toBeNull()
+    expect(screen.queryByText('{"task_id": "TASK-42"}')).toBeNull()
+    // раскрытие группы: ряды шагов (chip + свои ≈ N tok) видны,
+    // а payload в <pre> — НЕТ (ряды свёрнуты по умолчанию)
+    fireEvent.click(header)
+    await waitFor(() => expect(header).toHaveAttribute('aria-expanded', 'true'))
+    const callRow = screen.getByRole('button', { name: /🔧 get_task_details/ })
+    const resRow = screen.getByRole('button', { name: /↳ get_task_details/ })
+    expect(callRow).toHaveAttribute('aria-expanded', 'false')
+    expect(resRow).toHaveAttribute('aria-expanded', 'false')
+    // свои оценки: аргументы ≈ 10, результат ≈ 7 (+ сумма 17 в заголовке)
+    expect(screen.getAllByText(/≈ \d+ tok/)).toHaveLength(3)
+    expect(screen.getByText('≈ 10 tok')).toBeTruthy()
+    expect(screen.getByText('≈ 7 tok')).toBeTruthy()
+    expect(container.querySelector('.tool-card-pre')).toBeNull()
+    expect(screen.queryByText('{"task_id": "TASK-42"}')).toBeNull()
+    // клик по ряду вызова — его payload виден; ряд результата остаётся свёрнут
+    fireEvent.click(callRow)
+    await waitFor(() => expect(callRow).toHaveAttribute('aria-expanded', 'true'))
+    expect(screen.getByText('{"task_id": "TASK-42"}')).toBeTruthy()
+    expect(screen.queryByText('TOOL-RESULT-123')).toBeNull()
+    expect(resRow).toHaveAttribute('aria-expanded', 'false')
+    // повторный клик по заголовку группы — всё сворачивается
+    fireEvent.click(header)
+    await waitFor(() => expect(container.querySelector('.step-row')).toBeNull())
+    // вызов/результат — не «модель»-пузырями: .msg ровно 2 (user + финальный)
     const texts = Array.from(container.querySelectorAll('.msg-text')).map((el) => el.textContent)
     expect(texts).toContain('Финальный ответ: in_progress')
-    expect(texts.some((t) => t && t.includes('TOOL-SERVICE-SECRET-123'))).toBe(false)
+    expect(texts.some((t) => t && t.includes('TOOL-RESULT-123'))).toBe(false)
+    expect(container.querySelectorAll('.msg').length).toBe(2)
+  })
+
+  it('внутри группы: заметка assistant (не сворачивается) + ряды шагов: chip, <pre> по клику на ряд', async () => {
+    stubDialogueFetch([
+      {
+        role: 'assistant',
+        content: 'Ищу данные по запросу',
+        tool_calls: [{ id: 'c1', type: 'function', function: { name: 'search', arguments: '{"query":"ИИ"}' } }],
+      },
+      { role: 'tool', content: 'результат поиска', tool_call_id: 'c1', name: 'search' },
+    ])
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const header = await screen.findByRole('button', { name: /🧩 Шаги агента/ })
+    // группа свёрнута: заметки и JSON аргументов не видно; бейдж search — виден
+    expect(screen.queryByText('Ищу данные по запросу')).toBeNull()
+    expect(screen.queryByText('{"query":"ИИ"}')).toBeNull()
+    expect(screen.getByText('search')).toBeTruthy()
+    // раскрытие группы: заметка видна сразу (не сворачивается),
+    // ряды шагов свёрнуты — аргументы ещё не видны
+    fireEvent.click(header)
+    const note = await screen.findByText('Ищу данные по запросу')
+    expect(note).toBeTruthy()
+    expect(container.querySelector('.tool-card-note')).toBeTruthy()
+    const callRow = screen.getByRole('button', { name: /🔧 search/ })
+    const resRow = screen.getByRole('button', { name: /↳ search/ })
+    expect(callRow).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByText('{"query":"ИИ"}')).toBeNull()
+    // клик по ряду вызова — аргументы в <pre>
+    fireEvent.click(callRow)
+    const args = await screen.findByText('{"query":"ИИ"}')
+    expect(args.closest('pre.tool-card-pre')).toBeTruthy()
+    // клик по ряду результата — его вывод
+    fireEvent.click(resRow)
+    const out = await screen.findByText('результат поиска')
+    expect(out.closest('pre.tool-card-pre')).toBeTruthy()
+  })
+
+  it('заголовок: счётчик вызовов «· 3»; бейджи — уникальные тулы в порядке появления', async () => {
+    stubDialogueFetch([
+      { role: 'assistant', content: '', tool_calls: [{ id: 'a', type: 'function', function: { name: 'search', arguments: '{"query":"Самара"}' } }] },
+      { role: 'tool', content: 'r1', tool_call_id: 'a', name: 'search' },
+      { role: 'assistant', content: '', tool_calls: [{ id: 'b', type: 'function', function: { name: 'search', arguments: '{"query":"погода"}' } }] },
+      { role: 'tool', content: 'r2', tool_call_id: 'b', name: 'search' },
+      { role: 'assistant', content: '', tool_calls: [{ id: 'c', type: 'function', function: { name: 'summarize', arguments: '{"text":"…"}' } }] },
+      { role: 'tool', content: 'r3', tool_call_id: 'c', name: 'summarize' },
+      { role: 'assistant', content: 'Готово', model: 'qwen3.8-27b' },
+    ])
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    // три вызова (search, search, summarize) — одна группа, счётчик «· 3»
+    expect(await screen.findByRole('button', { name: /🧩 Шаги агента · 3/ })).toBeTruthy()
+    // бейджи: search и summarize по одному (уникальные), порядок первого появления
+    const badges = screen.getAllByText(/^(search|summarize)$/)
+    expect(badges.map((b) => b.textContent)).toEqual(['search', 'summarize'])
+    // суммарная оценка токенов группы (аргументы ≈ 8+8+5, результаты ≈ 1+1+1)
+    expect(screen.getByText('≈ 24 tok')).toBeTruthy()
+    expect(screen.getByText('Готово')).toBeTruthy()
   })
 })
 

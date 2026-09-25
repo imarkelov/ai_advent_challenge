@@ -110,6 +110,13 @@ export default function Sidebar() {
   const renameCancelled = useRef(false)
   // Локальный таб «Токены»/«Запрос» в сайдбаре (перенесён из ContextPanel)
   const [toolTab, setToolTab] = useState<'tokens' | 'request'>('tokens')
+  // Список диалогов: по умолчанию — 5 свежих (массив oldest→newest,
+  // свежие внизу); старые свёрнуты за «Показать ещё». В режиме выбора —
+  // все строки (чекбоксы должны быть доступны)
+  const [showAll, setShowAll] = useState(false)
+  const visibleDialogues = showAll || selectMode
+    ? dialogues
+    : dialogues.slice(-5)
 
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
@@ -182,7 +189,18 @@ export default function Sidebar() {
           </button>
         </div>
         <ul className="dialogue-list">
-          {dialogues.map((d) => (
+          {dialogues.length > 5 && !selectMode && (
+            <li className="dialogue-item">
+              <button
+                type="button"
+                className="dialogue-more"
+                onClick={() => setShowAll((v) => !v)}
+              >
+                {showAll ? 'Свернуть ▴' : `Показать ещё ${dialogues.length - 5} (старые) ▾`}
+              </button>
+            </li>
+          )}
+          {visibleDialogues.map((d) => (
             <li key={d.id} className="dialogue-item">
               {selectMode && (
                 <input
@@ -220,7 +238,7 @@ export default function Sidebar() {
                   >
                     <span className="dialogue-title">{d.title}</span>
                     {d.used_task && (
-                      <span className="dialogue-task-flag" title="Задача использовалась">
+                      <span className="dialogue-task-flag" title="Проект использовался">
                         <TaskUsedIcon />
                       </span>
                     )}
