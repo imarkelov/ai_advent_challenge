@@ -37,3 +37,6 @@ studio/frontend/dist/
 dialogues.json.bak*
 working_memory.json
 memory.json
+
+# День 19: runtime-вывод saveToFile (PDF/отчёты) — не данные, не в git
+data/pipeline/
