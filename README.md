@@ -1224,7 +1224,7 @@ system-промпте, лимит tool-loop поднят с 5 до **15** (хв�
   | Сервер | Тул | Назначение |
   | --- | --- | --- |
   | `weather` | `get_weather` | Погода Open-Meteo, `city?` (дефолт Самара) |
-  | `news` | `get_news` | Новости vc.ru/habr/tproger, `source?`, top-5, дедуп (collector дня 18) |
+  | `news` | `get_news` | Новости vc.ru/habr/tproger, `sources?`, top-5, дедуп (collector дня 18) |
   | `digest_make` | `make_digest` | Сбор + сохранение дайджеста (`data/digests/last-digest.json` + `history.json`, кап 96) |
   | `digest_read` | `get_latest_digest` | Чтение последнего дайджеста (локальный файл → фолбэк GitHub API → `isError`) |
   | `task_create` | `create_task` | Создать задачу (file-backed `data/tasks.json`), `title` required |

@@ -102,21 +102,27 @@ Challenge - видео» на рабочем столе) — ссылка в `LI
 
 ## Коммиты
 
-- `54d2231` — _mcp_base — shared single-tool stdio MCP server skeleton
-- `592af6b` — single-tool MCP servers weather + news
-- `d1780ed` — single-tool MCP servers digest_make + digest_read
-- `9348b50` — file-backed tasks store + task_create/task_get servers
-- `6636d47` — isolate in-process task tests with temp TASKS_FILE
-- `4f47ab7` — gitignore data/tasks.json (runtime task-store state)
-- `533481b` — single-tool MCP servers digest_search/digest_summarize/file_save
-- `9e75ead` — habr_news MCP server (testing/ai topics, word-boundary filter)
-- `f2b0312` — MCP registry — 12 defaults (10 single-tool), old-server migration, server_name in tools()
-- `2068ab0` — agent routing — always server__tool prefix, MCP catalog in system prompt, TOOL_LOOP_CAP=15, llm names stored in history
-- `599335d` — e2e day17-19 on single-tool servers; remove task_manager/news_weather/pipeline_tools
-- `3f2854a` — e2e_day20 — 10-server cross-flow (Part A deterministic + Part B live :8104)
-- `7cccc67` — _mcp_base stdout errors=replace (non-cp1251 payload chars crash server)
-- `313ce1e` — e2e_day20 Part B — SSE model error → SKIP (not FAIL)
+- `6fd2181` — README/RELEASE/openspec — Orchestration MCP day
 - `ad1aff6` — agent-steps badges render MCP tools as 'server · tool'
+- `313ce1e` — e2e_day20 Part B — SSE model error → SKIP (not FAIL); remove duplicate _NO_NET injection
+- `7cccc67` — _mcp_base stdout errors=replace (non-cp1251 payload chars crash server)
+- `3f2854a` — e2e_day20 — 10-server cross-flow (Part A deterministic + Part B live :8104)
+- `599335d` — e2e day17-19 on single-tool servers; remove task_manager/news_weather/pipeline_tools
+- `2068ab0` — agent routing — always server__tool prefix, MCP catalog in system prompt, TOOL_LOOP_CAP=15, llm names stored in history
+- `f2b0312` — MCP registry — 12 defaults (10 single-tool), old-server migration, server_name in tools()
+- `9e75ead` — habr_news MCP server (testing/ai topics, word-boundary filter)
+- `533481b` — single-tool MCP servers digest_search/digest_summarize/file_save
+- `4f47ab7` — gitignore data/tasks.json (runtime task-store state)
+- `6636d47` — isolate in-process task tests with temp TASKS_FILE (idempotent, no repo pollution)
+- `9348b50` — file-backed tasks store + task_create/task_get servers
+- `d1780ed` — single-tool MCP servers digest_make + digest_read
+- `592af6b` — single-tool MCP servers weather + news
+- `54d2231` — _mcp_base — shared single-tool stdio MCP server skeleton
+- `57fcd58` — implementation plan — 12 tasks (servers, registry, agent, e2e, frontend, docs)
+- `274b126` — spec fact-check vs collector.py — weather result shape, habr pubDate via local parser, patchable fetch
+- `4e6cb19` — spec fact-check vs day17/18/19 server code — version 1.0, task/digest/search result shapes
+- `bc5db5e` — spec self-review — flow covers all 10 servers (digest_read step), tighten habr filter boundaries
+- `04ea37f` — design spec — 10 single-tool MCP servers + agent routing (always-prefix, server catalog, cap 15)
 
 ---
 
