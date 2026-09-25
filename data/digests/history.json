@@ -474,5 +474,85 @@
       ]
     },
     "summary": "Сводка digest-20260924-2106: Самара 17.3°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20260925-0316",
+    "generated_at": "2026-09-25T03:16:33Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 14.5,
+      "feels_like_c": 13.7,
+      "description": "Ясно",
+      "wind_ms": 6.2
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Минфин поменял условия семейной ипотеки — ставка и максимальная сумма кредита будут зависеть от количества детей и региона проживания",
+          "url": "https://vc.ru/money/3157187-izmeneniya-v-semejnoy-ipoteke?from=rss"
+        },
+        {
+          "title": "Центр безопасности Мax опроверг исследование InterSecLab о функциях отслеживания",
+          "url": "https://vc.ru/services/3157052-issledovanie-max-peredacha-dannyh-v-vk?from=rss"
+        },
+        {
+          "title": "Минфин предложил распространить прогрессивную ставку НДФЛ 13-22% на доходы россиян от вкладов, инвестиций в ценные бумаги и продажи имущества",
+          "url": "https://vc.ru/money/3156248-minfin-predlozhil-progrestivnyi-ndfl-13-22-na-dohody-rossiyan?from=rss"
+        },
+        {
+          "title": "Whoosh и Segway начали тестировать в Москве обновлённый электросамокат с увеличенным до 60 км запасом хода",
+          "url": "https://vc.ru/transport/3156582-whoosh-i-segway-testiruyut-obnovlennyy-elektrosamokat-v-moskve?from=rss"
+        },
+        {
+          "title": "Минпромторг определил ставки технологического сбора для производителей и импортёров электроники, который начнут брать с 1 декабря 2026 года",
+          "url": "https://vc.ru/tech/3157538-minpromtorg-utverdil-stavki-tehnologicheskogo-sbora-dlya-elektroniki?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Исследователи представили DrivingBench — бенчмарк, в котором популярные LLM управляют настоящей Toyota Corolla",
+          "url": "https://habr.com/ru/news/1086446/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086446"
+        },
+        {
+          "title": "Представлено обновление Wireshark 4.6.9",
+          "url": "https://habr.com/ru/news/1085982/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1085982"
+        },
+        {
+          "title": "Вышло обновление FreeRDP 3.32",
+          "url": "https://habr.com/ru/news/1085822/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1085822"
+        },
+        {
+          "title": "OpenAI добавила плагины в голосовой режим ChatGPT",
+          "url": "https://habr.com/ru/companies/bothub/news/1086400/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086400"
+        },
+        {
+          "title": "Учёные выдвинули теорию о тёмных измерениях и первичных чёрных дырах",
+          "url": "https://habr.com/ru/news/1086384/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086384"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "В PostgreSQL 19 Beta 4 исключили SQL/PGQ и онлайн-переключение checksums",
+          "url": "https://tproger.ru/news/v-postgresql-19-beta-4-isklyuchili-sql-pgq-i-onlajn-pereklyuchenie-c"
+        },
+        {
+          "title": "Hermes Agent 0.21.5 получил SDK для десктопных плагинов и обновлённые коннекторы",
+          "url": "https://tproger.ru/news/hermes-agent-0-21-5-poluchil-sdk-dlya-desktopnyh-plaginov-i-obnovl"
+        },
+        {
+          "title": "OpenClaw 2026.9.6 для macOS пересобрали из-за сбоя при запуске",
+          "url": "https://tproger.ru/news/openclaw-2026-9-6-dlya-macos-peresobrali-iz-za-sboya-pri-zapuske"
+        },
+        {
+          "title": "CloudNativePG 1.30.1 закрыл обход проверки путей и исправил зависания при переключении кластеров",
+          "url": "https://tproger.ru/news/cloudnativepg-1-30-1-zakryl-obhod-proverki-putej-i-ispravil-zavi"
+        },
+        {
+          "title": "workerd 1.20260924.1 добавил веб-поиск для Workers AI и обновил обработку байтовых потоков",
+          "url": "https://tproger.ru/news/workerd-1-20260924-1-dobavil-veb-poisk-dlya-workers-ai-i-obnovil"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20260925-0316: Самара 14.5°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
