@@ -1,12 +1,12 @@
 {
-  "id": "digest-20260925-1626",
-  "generated_at": "2026-09-25T16:26:30Z",
+  "id": "digest-20260925-2103",
+  "generated_at": "2026-09-25T21:03:10Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 20.0,
-    "feels_like_c": 19.9,
+    "temp_c": 17.2,
+    "feels_like_c": 17.1,
     "description": "Переменная облачность",
-    "wind_ms": 6.3
+    "wind_ms": 4.7
   },
   "news": {
     "vc.ru": [
@@ -19,16 +19,16 @@
         "url": "https://vc.ru/legal/3158923-nielsen-prodala-aktivy-v-rossii?from=rss"
       },
       {
+        "title": "«АвтоВАЗ» запустил в Тольятти серийное производство кроссовера Lada Azimut",
+        "url": "https://vc.ru/transport/3157539-avtovaz-zapustil-proizvodstvo-krossovera-lada-azimut?from=rss"
+      },
+      {
         "title": "Wildberries расширил программу упрощённого открытия ПВЗ на города с населением больше 300 тысяч человек — разместить пункт выдачи можно в помещении кофейни или магазина",
         "url": "https://vc.ru/marketplace/3159125-wildberries-rasshiril-uproschennoe-otkrytie-pvz?from=rss"
       },
       {
-        "title": "Центр безопасности Мax опроверг исследование InterSecLab о функциях отслеживания",
-        "url": "https://vc.ru/services/3157052-issledovanie-max-peredacha-dannyh-v-vk?from=rss"
-      },
-      {
-        "title": "«АвтоВАЗ» запустил в Тольятти серийное производство кроссовера Lada Azimut",
-        "url": "https://vc.ru/transport/3157539-avtovaz-zapustil-proizvodstvo-krossovera-lada-azimut?from=rss"
+        "title": "Стартап, который продаёт «тупофоны», устал от однотипных сопроводительных ИИ-писем от кандидатов и попросил писать их от руки",
+        "url": "https://vc.ru/hr/3159698-startup-dumbco-rukopisy-soprovoditelnye-pisma?from=rss"
       }
     ],
     "habr": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20260925-1626: Самара 20.0°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260925-2103: Самара 17.2°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
