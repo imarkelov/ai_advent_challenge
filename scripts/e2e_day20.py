@@ -482,9 +482,9 @@ def part_a() -> bool:
         if font and os.path.exists(font):
             envs["file_save"]["PIPELINE_FONT_PATH"] = font
         # Part A без сети: мёртвый прокси для всех 10 подпроцессов
-        # (см. комментарий у _NO_NET).
-        for _ev in envs.values():
-            _ev.update(_NO_NET)
+        # (см. комментарий у _NO_NET). Единственная точка инъекции _NO_NET.
+        for server, _tool in FLOW:
+            envs.setdefault(server, {}).update(_NO_NET)
 
         # A1: 10× connect, у каждого tools_count == 1
         sids = {}
@@ -493,7 +493,7 @@ def part_a() -> bool:
             srv = os.path.join(REPO, "studio", "mcp_servers", server + ".py")
             rec = reg.add(server, "stdio", command=[sys.executable, srv],
                           url="",
-                          env={**envs.get(server, {}), **_NO_NET},
+                          env=envs.get(server, {}),
                           enabled=True)
             sids[server] = rec["id"]
             view = reg.connect(rec["id"])
@@ -741,18 +741,20 @@ def part_b() -> int:
             "POST", "/api/chat",
             {"dialogue_id": dlg_id, "message": CHAT_MSG})
         deltas, dones, errors = parse_sse(raw)
+        if errors:
+            # SSE error-кадр — поведение модели/tool-loop (напр. кап
+            # итераций), а не сбой инфраструктуры: SKIP по контракту
+            # Part B (FAIL — только для инфра-проблем).
+            record("B: chat SSE (done)", "SKIP",
+                   f"LLM/tool-loop ошибка: {errors[0]} (best-effort)")
+            return 0
         if code != 200 or not dones:
-            detail = (errors[0] if errors
-                      else f"code={code} dones={len(dones)} "
-                           f"full={full} partial={len(raw)}B")
-            record("B: chat SSE (done)", "FAIL", detail)
+            record("B: chat SSE (done)", "FAIL",
+                   f"code={code} dones={len(dones)} "
+                   f"full={full} partial={len(raw)}B")
             return 1
         record(f"B: chat SSE ({len(deltas)} deltas, done)", "PASS",
                "" if full else "(done дошёл до обрыва стрима)")
-        if errors:
-            record("B: 10-серверный флоу live", "SKIP",
-                   f"LLM/tool-loop ошибка: {errors[0]} (best-effort)")
-            return 0
 
         code, body, _ = http("GET", f"/api/dialogues/{dlg_id}")
         dlg_full = json.loads(body).get("dialogue", {}) if code == 200 else {}
