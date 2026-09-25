@@ -68,7 +68,8 @@ def test_create_task_requires_title():
     assert "title" in payload["error"]
 
 
-def test_create_task_shape():
+def test_create_task_shape(tmp_path, monkeypatch):
+    monkeypatch.setenv("TASKS_FILE", str(tmp_path / "tasks.json"))
     payload, is_err = task_create.call({"title": "Новая", "description": "о"})
     assert is_err is False
     assert payload == {"id": "TASK-43", "title": "Новая",
@@ -76,7 +77,8 @@ def test_create_task_shape():
                        "assignee": None}
 
 
-def test_get_task_not_found():
+def test_get_task_not_found(tmp_path, monkeypatch):
+    monkeypatch.setenv("TASKS_FILE", str(tmp_path / "tasks.json"))
     payload, is_err = task_get.call({"task_id": "TASK-999"})
     assert is_err is True
     assert payload["error"] == "Задача не найдена: TASK-999"
