@@ -634,5 +634,85 @@
       ]
     },
     "summary": "Сводка digest-20260925-1103: Самара 25.1°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20260925-1626",
+    "generated_at": "2026-09-25T16:26:30Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 20.0,
+      "feels_like_c": 19.9,
+      "description": "Переменная облачность",
+      "wind_ms": 6.3
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "В App Store появилось приложение Spotluma с функциями «Т-Банка»",
+          "url": "https://vc.ru/services/3158891-prilozhenie-spotluma-v-app-store-s-funkciyami-t-banka?from=rss"
+        },
+        {
+          "title": "Nielsen продала активы в России — на фоне закона, который запрещает заказывать исследования у компаний под контролем иностранцев",
+          "url": "https://vc.ru/legal/3158923-nielsen-prodala-aktivy-v-rossii?from=rss"
+        },
+        {
+          "title": "Wildberries расширил программу упрощённого открытия ПВЗ на города с населением больше 300 тысяч человек — разместить пункт выдачи можно в помещении кофейни или магазина",
+          "url": "https://vc.ru/marketplace/3159125-wildberries-rasshiril-uproschennoe-otkrytie-pvz?from=rss"
+        },
+        {
+          "title": "Центр безопасности Мax опроверг исследование InterSecLab о функциях отслеживания",
+          "url": "https://vc.ru/services/3157052-issledovanie-max-peredacha-dannyh-v-vk?from=rss"
+        },
+        {
+          "title": "«АвтоВАЗ» запустил в Тольятти серийное производство кроссовера Lada Azimut",
+          "url": "https://vc.ru/transport/3157539-avtovaz-zapustil-proizvodstvo-krossovera-lada-azimut?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Вебинар «Как строить защиту облачной инфраструктуры: от логов до мониторинга»",
+          "url": "https://habr.com/ru/companies/T1Holding/news/1086814/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086814"
+        },
+        {
+          "title": "Исследователи изучили ещё одну причину коррозии, потенциально способную влиять на деградацию металлов",
+          "url": "https://habr.com/ru/news/1086800/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086800"
+        },
+        {
+          "title": "В JavaDoc предлагают добавить заметки, которые сложно пропустить",
+          "url": "https://habr.com/ru/companies/spring_aio/news/1086776/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086776"
+        },
+        {
+          "title": "GlowByte приняла участие в конференции Smart Data — 2026 в Китае",
+          "url": "https://habr.com/ru/companies/glowbyte/news/1086624/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086624"
+        },
+        {
+          "title": "Mac mini с M6 стабильно эмулирует Pentium II на 600 МГц; результат на 20% выше, чем у Mac mini с M4",
+          "url": "https://habr.com/ru/news/1086744/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086744"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Claude Code 2.1.282 исправил ошибки разрешений, восстановления сессий и симлинков в macOS",
+          "url": "https://tproger.ru/news/claude-code-2-1-282-ispravil-owibki-razrewenij-vosstanovleniya-s"
+        },
+        {
+          "title": "Курсы по видео с ИИ для детей: рейтинг 9 программ в 2026 году",
+          "url": "https://tproger.ru/articles/kursy-po-video-s-ii-dlya-detej-rejting-10-programm-v-2026-godu"
+        },
+        {
+          "title": "Databricks открыла Genie One MCP Server и закроет прежний бета-эндпоинт",
+          "url": "https://tproger.ru/news/databricks-otkryla-genie-one-mcp-server-i-zakroet-prezhnij-beta-e"
+        },
+        {
+          "title": "Как выбрать лучший хостинг для Telegram-бота в 2026–2027 году",
+          "url": "https://tproger.ru/articles/kak-vybrat-luchwij-hosting-dlya-telegram-bota-v-2026-2027-godu"
+        },
+        {
+          "title": "GitHub Security Lab открыла автономный ИИ-конвейер для фаззинга C/C++",
+          "url": "https://tproger.ru/news/github-security-lab-otkryla-avtonomnyj-ii-konvejer-dlya-fazzinga"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20260925-1626: Самара 20.0°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
