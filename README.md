@@ -1298,7 +1298,7 @@ live (uvicorn :8104, реальный LLM), best-effort: тот же сцена�
 
 ### Проверка задания
 
-Бэкенд — 390 тестов PASS (офлайн, включая live-network
+Бэкенд — 393 тестов PASS (офлайн, включая live-network
 `test_live_fetch_weather` — на момент прогона Open-Meteo был доступен).
 Фронтенд — 219 тестов PASS (Vitest) + `tsc -b` + `npm run build` clean.
 E2E на этой машине: `e2e_day17.py` — Part A 6/6 PASS, Part B PASS
@@ -1307,7 +1307,7 @@ E2E на этой машине: `e2e_day17.py` — Part A 6/6 PASS, Part B PASS
 модель вызвала `digest_read__get_latest_digest`); `e2e_day19.py` — Part
 A 12/12 PASS, Part B 1 SKIP (18 PASS / 0 FAIL / 1 SKIP; SKIP = live
 PDF-артефакт, модель не доводит цепочку до `saveToFile` автономно —
-best-effort); `e2e_day20.py` — Part A 19/19 PASS, Part B 1 SKIP (25
+best-effort); `e2e_day20.py` — Part A 19/19 PASS, Part B 1 SKIP (26
 PASS / 0 FAIL / 1 SKIP; офлайн-детерминированное ядро: 10 реальных
 MCP-субпроцессов, fake-LLM, маршрутизация + передача данных + кап;
 Part B: вся инфраструктура green, SKIP = модель исчерпала 15

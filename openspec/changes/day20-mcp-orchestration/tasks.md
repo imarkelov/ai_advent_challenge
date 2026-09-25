@@ -21,10 +21,10 @@
 
 ## Документация и финальная проверка
 - [x] Task 12: README (таблица + секция «День 20»), RELEASE, LINKS + демо-видео, openspec-изменение, полный прогон (критерий закрытия дня), commit
-  - Финальный прогон: бэкенд 390 PASS; фронтенд 219 PASS + `tsc -b` +
+  - Финальный прогон: бэкенд 393 PASS; фронтенд 219 PASS + `tsc -b` +
     `npm run build` clean; e2e_day17 14 PASS/0 FAIL, e2e_day18
     14 PASS/0 FAIL, e2e_day19 18 PASS/0 FAIL/1 SKIP, e2e_day20
-    25 PASS/0 FAIL/1 SKIP (Part A 19/19; Part B SKIP — модель исчерпала
+    26 PASS/0 FAIL/1 SKIP (Part A 19/19; Part B SKIP — модель исчерпала
     15 итераций, не FAIL); демо-видео `day20-mcp-orchestration-demo.mp4`
     (38.8 с) — live-маршрутизация `digest_search__search` →
     `digest_summarize__summarize` + бейджи «server · tool»;

@@ -85,11 +85,11 @@
 
 ## Проверка задания
 
-Бэкенд — 390 тестов PASS (офлайн). Фронтенд — 219 тестов PASS (Vitest)
+Бэкенд — 393 тестов PASS (офлайн). Фронтенд — 219 тестов PASS (Vitest)
 + `tsc -b` + `npm run build` clean. E2E: `e2e_day17.py` — Part A 6/6,
 Part B PASS (14/0/0); `e2e_day18.py` — Part A 6/6, Part B PASS
 (14/0/0); `e2e_day19.py` — Part A 12/12, Part B SKIP (18 PASS / 0 FAIL
-/ 1 SKIP); `e2e_day20.py` — Part A 19/19, Part B SKIP (25 PASS / 0 FAIL
+/ 1 SKIP); `e2e_day20.py` — Part A 19/19, Part B SKIP (26 PASS / 0 FAIL
 / 1 SKIP: инфраструктура green, модель исчерпала 15 итераций на живом
 10-серверном сценарии — поведение модели, не FAIL). Live: `GET
 /api/mcp/servers` на живом dev-процессе — ровно 12 серверов, старых 3
@@ -102,6 +102,9 @@ Challenge - видео» на рабочем столе) — ссылка в `LI
 
 ## Коммиты
 
+- `c63380d` — final-review — fixture references day-20 single-purpose server
+- `f02719c` — final-review — unique default ids, prefixed few-shot, spec habr patterns
+- `7131696` — final-review — sources arg in day-20 table, full commit list in RELEASE
 - `6fd2181` — README/RELEASE/openspec — Orchestration MCP day
 - `ad1aff6` — agent-steps badges render MCP tools as 'server · tool'
 - `313ce1e` — e2e_day20 Part B — SSE model error → SKIP (not FAIL); remove duplicate _NO_NET injection
