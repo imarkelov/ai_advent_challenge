@@ -874,5 +874,85 @@
       ]
     },
     "summary": "Сводка digest-20260926-0320: Самара 14.9°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20260926-1045",
+    "generated_at": "2026-09-26T10:45:35Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 20.7,
+      "feels_like_c": 19.1,
+      "description": "Переменная облачность",
+      "wind_ms": 9.3
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "В App Store появилось приложение Spotluma с функциями «Т-Банка»",
+          "url": "https://vc.ru/services/3158891-prilozhenie-spotluma-v-app-store-s-funkciyami-t-banka?from=rss"
+        },
+        {
+          "title": "Стартап, который продаёт «тупофоны», устал от однотипных сопроводительных ИИ-писем от кандидатов и попросил писать их от руки",
+          "url": "https://vc.ru/hr/3159698-startup-dumbco-rukopisy-soprovoditelnye-pisma?from=rss"
+        },
+        {
+          "title": "«АвтоВАЗ» запустил в Тольятти серийное производство кроссовера Lada Azimut",
+          "url": "https://vc.ru/transport/3157539-avtovaz-zapustil-proizvodstvo-krossovera-lada-azimut?from=rss"
+        },
+        {
+          "title": "Nielsen продала активы в России — на фоне закона, который запрещает заказывать исследования у компаний под контролем иностранцев",
+          "url": "https://vc.ru/legal/3158923-nielsen-prodala-aktivy-v-rossii?from=rss"
+        },
+        {
+          "title": "Wildberries расширил программу упрощённого открытия ПВЗ на города с населением больше 300 тысяч человек — разместить пункт выдачи можно в помещении кофейни или магазина",
+          "url": "https://vc.ru/marketplace/3159125-wildberries-rasshiril-uproschennoe-otkrytie-pvz?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Microsoft начала удалять устаревшие функции Windows Media Player Legacy",
+          "url": "https://habr.com/ru/news/1086922/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086922"
+        },
+        {
+          "title": "В РКН поручили операторам принять меры по борьбе с уязвимостями в MikroTik на своих сетях и у российских абонентов",
+          "url": "https://habr.com/ru/news/1086912/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086912"
+        },
+        {
+          "title": "Виртуализация PCI Express по воздуху: беспроводная внешняя видеокарта WiCi One",
+          "url": "https://habr.com/ru/companies/selectel/news/1086718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086718"
+        },
+        {
+          "title": "Microsoft Teams теперь может автоматически блокировать доступ внешних ботов ко встречам",
+          "url": "https://habr.com/ru/news/1086886/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086886"
+        },
+        {
+          "title": "Perfscale news #12. WASM-библиотеки, SDK для авторов и «живые» логи",
+          "url": "https://habr.com/ru/news/1086894/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086894"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Claude Code 2.1.283 получил аудит устаревших промптов и точную фиксацию моделей",
+          "url": "https://tproger.ru/news/claude-code-2-1-283-poluchil-audit-ustarevwih-promptov-i-tochnuyu-f"
+        },
+        {
+          "title": "Claude Code 2.1.282 исправил ошибки разрешений, восстановления сессий и симлинков в macOS",
+          "url": "https://tproger.ru/news/claude-code-2-1-282-ispravil-owibki-razrewenij-vosstanovleniya-s"
+        },
+        {
+          "title": "Курсы по видео с ИИ для детей: рейтинг 9 программ в 2026 году",
+          "url": "https://tproger.ru/articles/kursy-po-video-s-ii-dlya-detej-rejting-10-programm-v-2026-godu"
+        },
+        {
+          "title": "Databricks открыла Genie One MCP Server и закроет прежний бета-эндпоинт",
+          "url": "https://tproger.ru/news/databricks-otkryla-genie-one-mcp-server-i-zakroet-prezhnij-beta-e"
+        },
+        {
+          "title": "Как выбрать лучший хостинг для Telegram-бота в 2026–2027 году",
+          "url": "https://tproger.ru/articles/kak-vybrat-luchwij-hosting-dlya-telegram-bota-v-2026-2027-godu"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20260926-1045: Самара 20.7°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
