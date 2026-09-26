@@ -1,12 +1,12 @@
 {
-  "id": "digest-20260925-2103",
-  "generated_at": "2026-09-25T21:03:10Z",
+  "id": "digest-20260926-0320",
+  "generated_at": "2026-09-26T03:20:53Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 17.2,
-    "feels_like_c": 17.1,
+    "temp_c": 14.9,
+    "feels_like_c": 14.6,
     "description": "Переменная облачность",
-    "wind_ms": 4.7
+    "wind_ms": 4.0
   },
   "news": {
     "vc.ru": [
@@ -23,12 +23,12 @@
         "url": "https://vc.ru/transport/3157539-avtovaz-zapustil-proizvodstvo-krossovera-lada-azimut?from=rss"
       },
       {
-        "title": "Wildberries расширил программу упрощённого открытия ПВЗ на города с населением больше 300 тысяч человек — разместить пункт выдачи можно в помещении кофейни или магазина",
-        "url": "https://vc.ru/marketplace/3159125-wildberries-rasshiril-uproschennoe-otkrytie-pvz?from=rss"
-      },
-      {
         "title": "Стартап, который продаёт «тупофоны», устал от однотипных сопроводительных ИИ-писем от кандидатов и попросил писать их от руки",
         "url": "https://vc.ru/hr/3159698-startup-dumbco-rukopisy-soprovoditelnye-pisma?from=rss"
+      },
+      {
+        "title": "Wildberries расширил программу упрощённого открытия ПВЗ на города с населением больше 300 тысяч человек — разместить пункт выдачи можно в помещении кофейни или магазина",
+        "url": "https://vc.ru/marketplace/3159125-wildberries-rasshiril-uproschennoe-otkrytie-pvz?from=rss"
       }
     ],
     "habr": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20260925-2103: Самара 17.2°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260926-0320: Самара 14.9°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
