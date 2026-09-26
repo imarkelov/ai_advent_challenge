@@ -1,12 +1,12 @@
 {
-  "id": "digest-20260926-1045",
-  "generated_at": "2026-09-26T10:45:35Z",
+  "id": "digest-20260926-1541",
+  "generated_at": "2026-09-26T15:41:48Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 20.7,
-    "feels_like_c": 19.1,
+    "temp_c": 18.2,
+    "feels_like_c": 17.2,
     "description": "Переменная облачность",
-    "wind_ms": 9.3
+    "wind_ms": 4.4
   },
   "news": {
     "vc.ru": [
@@ -19,19 +19,31 @@
         "url": "https://vc.ru/hr/3159698-startup-dumbco-rukopisy-soprovoditelnye-pisma?from=rss"
       },
       {
+        "title": "День 1675: Минэнерго предложило ввести внешнее управление на сети АЗС «Трасса», Euroclear подал жалобы к ЦБ в российском суде",
+        "url": "https://vc.ru/money/3160736-minenrgo-predlozhilo-vneshnee-upravlenie-na-seti-azs-trassa?from=rss"
+      },
+      {
         "title": "«АвтоВАЗ» запустил в Тольятти серийное производство кроссовера Lada Azimut",
         "url": "https://vc.ru/transport/3157539-avtovaz-zapustil-proizvodstvo-krossovera-lada-azimut?from=rss"
       },
       {
         "title": "Nielsen продала активы в России — на фоне закона, который запрещает заказывать исследования у компаний под контролем иностранцев",
         "url": "https://vc.ru/legal/3158923-nielsen-prodala-aktivy-v-rossii?from=rss"
-      },
-      {
-        "title": "Wildberries расширил программу упрощённого открытия ПВЗ на города с населением больше 300 тысяч человек — разместить пункт выдачи можно в помещении кофейни или магазина",
-        "url": "https://vc.ru/marketplace/3159125-wildberries-rasshiril-uproschennoe-otkrytie-pvz?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "Codex CLI превращается в фоновый сервис",
+        "url": "https://habr.com/ru/companies/koda/news/1086932/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086932"
+      },
+      {
+        "title": "Гейтс: развитие ИИ без регулирования может привести к гибели миллиарда человек",
+        "url": "https://habr.com/ru/news/1086928/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086928"
+      },
+      {
+        "title": "ИИ‑агенты OpenAI опубликовали в интернете 53 пользовательских изображения без ведома компании",
+        "url": "https://habr.com/ru/news/1086924/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086924"
+      },
       {
         "title": "Microsoft начала удалять устаревшие функции Windows Media Player Legacy",
         "url": "https://habr.com/ru/news/1086922/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086922"
@@ -39,21 +51,13 @@
       {
         "title": "В РКН поручили операторам принять меры по борьбе с уязвимостями в MikroTik на своих сетях и у российских абонентов",
         "url": "https://habr.com/ru/news/1086912/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086912"
-      },
-      {
-        "title": "Виртуализация PCI Express по воздуху: беспроводная внешняя видеокарта WiCi One",
-        "url": "https://habr.com/ru/companies/selectel/news/1086718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086718"
-      },
-      {
-        "title": "Microsoft Teams теперь может автоматически блокировать доступ внешних ботов ко встречам",
-        "url": "https://habr.com/ru/news/1086886/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086886"
-      },
-      {
-        "title": "Perfscale news #12. WASM-библиотеки, SDK для авторов и «живые» логи",
-        "url": "https://habr.com/ru/news/1086894/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086894"
       }
     ],
     "tproger": [
+      {
+        "title": "Cloudflare Workers расширил API трассировки ручными спанами и регистрацией исключений",
+        "url": "https://tproger.ru/news/cloudflare-workers-raswiril-api-trassirovki-ruchnymi-spanami-i-re"
+      },
       {
         "title": "Claude Code 2.1.283 получил аудит устаревших промптов и точную фиксацию моделей",
         "url": "https://tproger.ru/news/claude-code-2-1-283-poluchil-audit-ustarevwih-promptov-i-tochnuyu-f"
@@ -69,12 +73,8 @@
       {
         "title": "Databricks открыла Genie One MCP Server и закроет прежний бета-эндпоинт",
         "url": "https://tproger.ru/news/databricks-otkryla-genie-one-mcp-server-i-zakroet-prezhnij-beta-e"
-      },
-      {
-        "title": "Как выбрать лучший хостинг для Telegram-бота в 2026–2027 году",
-        "url": "https://tproger.ru/articles/kak-vybrat-luchwij-hosting-dlya-telegram-bota-v-2026-2027-godu"
       }
     ]
   },
-  "summary": "Сводка digest-20260926-1045: Самара 20.7°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260926-1541: Самара 18.2°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
