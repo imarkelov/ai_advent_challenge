@@ -1,12 +1,12 @@
 {
-  "id": "digest-20260927-1620",
-  "generated_at": "2026-09-27T16:20:26Z",
+  "id": "digest-20260927-2048",
+  "generated_at": "2026-09-27T20:48:59Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 16.2,
-    "feels_like_c": 14.8,
-    "description": "Преимущественно ясно",
-    "wind_ms": 3.8
+    "temp_c": 12.2,
+    "feels_like_c": 11.5,
+    "description": "Переменная облачность",
+    "wind_ms": 2.9
   },
   "news": {
     "vc.ru": [
@@ -15,12 +15,12 @@
         "url": "https://vc.ru/food/3161296-kak-amerikanskiy-rynok-edy-menyayetsya-pod-vliyaniem-ozempic?from=rss"
       },
       {
-        "title": "День 1675: Минэнерго предложило ввести внешнее управление на сети АЗС «Трасса», Euroclear подал жалобы к ЦБ в российском суде",
-        "url": "https://vc.ru/money/3160736-minenrgo-predlozhilo-vneshnee-upravlenie-na-seti-azs-trassa?from=rss"
-      },
-      {
         "title": "День 1676: Nestlе изучает возможные действия после передачи её российского бизнеса во временное управление",
         "url": "https://vc.ru/money/3161653-nestle-izuchaet-dejstviya-posle-peredachi-biznesa?from=rss"
+      },
+      {
+        "title": "День 1675: Минэнерго предложило ввести внешнее управление на сети АЗС «Трасса», Euroclear подал жалобы к ЦБ в российском суде",
+        "url": "https://vc.ru/money/3160736-minenrgo-predlozhilo-vneshnee-upravlenie-na-seti-azs-trassa?from=rss"
       },
       {
         "title": "Апелляционный суд США оставил в силе решение о включении Anthropic в «черный список» Минобороны",
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
+        "title": "Учёные перепрограммировали нейроны мозга мышей, вернув им забытые воспоминания",
+        "url": "https://habr.com/ru/news/1087236/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087236"
+      },
+      {
+        "title": "В Boeing обнаружили сбой в софте самолетов 737 MAX",
+        "url": "https://habr.com/ru/news/1087198/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087198"
+      },
+      {
+        "title": "Пользователь задействовал ИИ для взлома Internet Download Manager",
+        "url": "https://habr.com/ru/news/1087194/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087194"
+      },
+      {
+        "title": "Apple выплатит более $5,7 млрд Taction Technology за нарушение двух патентов",
+        "url": "https://habr.com/ru/news/1087186/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087186"
+      },
+      {
         "title": "NVIDIA выпустила открытую модель, которая определяет, кто и когда говорил",
         "url": "https://habr.com/ru/companies/koda/news/1087142/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087142"
-      },
-      {
-        "title": "OpenAI может представить always-on агента на DevDay",
-        "url": "https://habr.com/ru/companies/bothub/news/1087112/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087112"
-      },
-      {
-        "title": "Новые солнечные панели на основе олова дольше удерживают тепло и могут показать рекордную эффективность",
-        "url": "https://habr.com/ru/news/1087110/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087110"
-      },
-      {
-        "title": "Julia 1: релиз модели в духе Jev с открытыми весами и запуском на CPU",
-        "url": "https://habr.com/ru/news/1087104/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087104"
-      },
-      {
-        "title": "В Outlook появится функция автоматической проверки орфографии перед отправкой писем",
-        "url": "https://habr.com/ru/news/1087076/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087076"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20260927-1620: Самара 16.2°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260927-2048: Самара 12.2°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
