@@ -1,22 +1,22 @@
 {
-  "id": "digest-20260927-0328",
-  "generated_at": "2026-09-27T03:28:54Z",
+  "id": "digest-20260927-1119",
+  "generated_at": "2026-09-27T11:19:40Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 12.3,
-    "feels_like_c": 11.5,
-    "description": "Переменная облачность",
-    "wind_ms": 3.7
+    "temp_c": 20.0,
+    "feels_like_c": 18.3,
+    "description": "Пасмурно",
+    "wind_ms": 4.7
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Апелляционный суд США оставил в силе решение о включении Anthropic в «черный список» Минобороны",
-        "url": "https://vc.ru/legal/3160504-apellyatsionnyy-sud-ssha-podtverdil-zapret-anthropic?from=rss"
-      },
-      {
         "title": "День 1675: Минэнерго предложило ввести внешнее управление на сети АЗС «Трасса», Euroclear подал жалобы к ЦБ в российском суде",
         "url": "https://vc.ru/money/3160736-minenrgo-predlozhilo-vneshnee-upravlenie-na-seti-azs-trassa?from=rss"
+      },
+      {
+        "title": "Апелляционный суд США оставил в силе решение о включении Anthropic в «черный список» Минобороны",
+        "url": "https://vc.ru/legal/3160504-apellyatsionnyy-sud-ssha-podtverdil-zapret-anthropic?from=rss"
       },
       {
         "title": "Стартап, который продаёт «тупофоны», устал от однотипных сопроводительных ИИ-писем от кандидатов и попросил писать их от руки",
@@ -33,27 +33,39 @@
     ],
     "habr": [
       {
-        "title": "Claude вместо копии проекта удалил 48 218 файлов за полторы минуты и потом признался, что «что‑то сломал»",
-        "url": "https://habr.com/ru/news/1086984/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086984"
+        "title": "OpenAI может представить always-on агента на DevDay",
+        "url": "https://habr.com/ru/companies/bothub/news/1087112/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087112"
       },
       {
-        "title": "Codex CLI превращается в фоновый сервис",
-        "url": "https://habr.com/ru/companies/koda/news/1086932/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086932"
+        "title": "Новые солнечные панели на основе олова дольше удерживают тепло и могут показать рекордную эффективность",
+        "url": "https://habr.com/ru/news/1087110/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087110"
       },
       {
-        "title": "Гейтс: развитие ИИ без регулирования может привести к гибели миллиарда человек",
-        "url": "https://habr.com/ru/news/1086928/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086928"
+        "title": "Julia 1: релиз модели в духе Jev с открытыми весами и запуском на CPU",
+        "url": "https://habr.com/ru/news/1087104/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087104"
       },
       {
-        "title": "ИИ‑агенты OpenAI опубликовали в интернете 53 пользовательских изображения без ведома компании",
-        "url": "https://habr.com/ru/news/1086924/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086924"
+        "title": "В Outlook появится функция автоматической проверки орфографии перед отправкой писем",
+        "url": "https://habr.com/ru/news/1087076/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087076"
       },
       {
-        "title": "Microsoft начала удалять устаревшие функции Windows Media Player Legacy",
-        "url": "https://habr.com/ru/news/1086922/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086922"
+        "title": "Microsoft подготовила проект кодекса, который описывает правила поведения и механизмы контроля ИИ",
+        "url": "https://habr.com/ru/news/1087074/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087074"
       }
     ],
     "tproger": [
+      {
+        "title": "protoAgent 0.183.1 устранил повторные ревью PR и дублирование команд агентам",
+        "url": "https://tproger.ru/news/protoagent-0-183-1-ustranil-povtornye-revyu-pr-i-dublirovanie-ko"
+      },
+      {
+        "title": "TanStack Query исправил очистку SSR-запросов и обновил адаптеры для популярных фреймворков",
+        "url": "https://tproger.ru/news/tanstack-query-ispravil-ochistku-ssr-zaprosov-i-obnovil-adaptery"
+      },
+      {
+        "title": "Qwen Code 0.24.6 получил управляемую среду выполнения и восстановление сессий",
+        "url": "https://tproger.ru/news/qwen-code-0-24-6-poluchil-upravlyaemuyu-sredu-vypolneniya-i-vosstano"
+      },
       {
         "title": "Anthropic открыла портал для публикации плагинов в каталоге Claude",
         "url": "https://tproger.ru/news/anthropic-otkryla-portal-dlya-publikacii-plaginov-v-kataloge-clau"
@@ -61,20 +73,8 @@
       {
         "title": "Cloudflare Workers расширил API трассировки ручными спанами и регистрацией исключений",
         "url": "https://tproger.ru/news/cloudflare-workers-raswiril-api-trassirovki-ruchnymi-spanami-i-re"
-      },
-      {
-        "title": "Claude Code 2.1.283 получил аудит устаревших промптов и точную фиксацию моделей",
-        "url": "https://tproger.ru/news/claude-code-2-1-283-poluchil-audit-ustarevwih-promptov-i-tochnuyu-f"
-      },
-      {
-        "title": "Claude Code 2.1.282 исправил ошибки разрешений, восстановления сессий и симлинков в macOS",
-        "url": "https://tproger.ru/news/claude-code-2-1-282-ispravil-owibki-razrewenij-vosstanovleniya-s"
-      },
-      {
-        "title": "Курсы по видео с ИИ для детей: рейтинг 9 программ в 2026 году",
-        "url": "https://tproger.ru/articles/kursy-po-video-s-ii-dlya-detej-rejting-10-programm-v-2026-godu"
       }
     ]
   },
-  "summary": "Сводка digest-20260927-0328: Самара 12.3°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260927-1119: Самара 20.0°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
