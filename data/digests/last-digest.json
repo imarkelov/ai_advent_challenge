@@ -1,15 +1,19 @@
 {
-  "id": "digest-20260926-2036",
-  "generated_at": "2026-09-26T20:36:39Z",
+  "id": "digest-20260927-0328",
+  "generated_at": "2026-09-27T03:28:54Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 14.8,
-    "feels_like_c": 13.8,
+    "temp_c": 12.3,
+    "feels_like_c": 11.5,
     "description": "Переменная облачность",
-    "wind_ms": 2.6
+    "wind_ms": 3.7
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Апелляционный суд США оставил в силе решение о включении Anthropic в «черный список» Минобороны",
+        "url": "https://vc.ru/legal/3160504-apellyatsionnyy-sud-ssha-podtverdil-zapret-anthropic?from=rss"
+      },
       {
         "title": "День 1675: Минэнерго предложило ввести внешнее управление на сети АЗС «Трасса», Euroclear подал жалобы к ЦБ в российском суде",
         "url": "https://vc.ru/money/3160736-minenrgo-predlozhilo-vneshnee-upravlenie-na-seti-azs-trassa?from=rss"
@@ -25,10 +29,6 @@
       {
         "title": "«АвтоВАЗ» запустил в Тольятти серийное производство кроссовера Lada Azimut",
         "url": "https://vc.ru/transport/3157539-avtovaz-zapustil-proizvodstvo-krossovera-lada-azimut?from=rss"
-      },
-      {
-        "title": "Nielsen продала активы в России — на фоне закона, который запрещает заказывать исследования у компаний под контролем иностранцев",
-        "url": "https://vc.ru/legal/3158923-nielsen-prodala-aktivy-v-rossii?from=rss"
       }
     ],
     "habr": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20260926-2036: Самара 14.8°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260927-0328: Самара 12.3°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
