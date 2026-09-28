@@ -1,12 +1,12 @@
 {
-  "id": "digest-20260927-2048",
-  "generated_at": "2026-09-27T20:48:59Z",
+  "id": "digest-20260928-0326",
+  "generated_at": "2026-09-28T03:26:40Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 12.2,
-    "feels_like_c": 11.5,
-    "description": "Переменная облачность",
-    "wind_ms": 2.9
+    "temp_c": 11.0,
+    "feels_like_c": 10.1,
+    "description": "Преимущественно ясно",
+    "wind_ms": 3.5
   },
   "news": {
     "vc.ru": [
@@ -33,6 +33,10 @@
     ],
     "habr": [
       {
+        "title": "Обновление UniText v3",
+        "url": "https://habr.com/ru/news/1087302/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087302"
+      },
+      {
         "title": "Учёные перепрограммировали нейроны мозга мышей, вернув им забытые воспоминания",
         "url": "https://habr.com/ru/news/1087236/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087236"
       },
@@ -47,10 +51,6 @@
       {
         "title": "Apple выплатит более $5,7 млрд Taction Technology за нарушение двух патентов",
         "url": "https://habr.com/ru/news/1087186/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087186"
-      },
-      {
-        "title": "NVIDIA выпустила открытую модель, которая определяет, кто и когда говорил",
-        "url": "https://habr.com/ru/companies/koda/news/1087142/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087142"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20260927-2048: Самара 12.2°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260928-0326: Самара 11.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
