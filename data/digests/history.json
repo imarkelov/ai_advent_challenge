@@ -1514,5 +1514,85 @@
       ]
     },
     "summary": "Сводка digest-20260928-0326: Самара 11.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20260928-1248",
+    "generated_at": "2026-09-28T12:48:52Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 20.9,
+      "feels_like_c": 18.9,
+      "description": "Ясно",
+      "wind_ms": 7.9
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Больше белка и особая маркировка: как американский рынок еды подстраивается под пользователей Ozempic",
+          "url": "https://vc.ru/food/3161296-kak-amerikanskiy-rynok-edy-menyayetsya-pod-vliyaniem-ozempic?from=rss"
+        },
+        {
+          "title": "Bloomberg: власти Китая расширили ограничения на выезд из страны — теперь они распространяются не только на ИИ-специалистов из DeepSeek и других компаний, но и на их семьи",
+          "url": "https://vc.ru/hr/3163639-bloomberg-vlasti-kitaya-rasshirili-ogranicheniya-na-vyezd-iz-strany-teper-oni-rasprostranyayutsya-ne-tolko-na-ii-specialistov-iz-deepseek-i-drugih-kompanii-no-i-na-ih-semi?from=rss"
+        },
+        {
+          "title": "Жители Санкт-Петербурга пожаловались на проблемы с домашним интернетом",
+          "url": "https://vc.ru/services/3163637-zhiteli-sankt-peterburga-pozhalovalis-na-problemy-s-domashnim-internetom?from=rss"
+        },
+        {
+          "title": "Правительство ввело мораторий на плановые и некоторые внеплановые проверки бизнеса, пострадавшего от атак беспилотников",
+          "url": "https://vc.ru/legal/3162803-moratoriy-na-proverki-biznesa-postradavshego-ot-atak-bespilotnikov?from=rss"
+        },
+        {
+          "title": "Ozon добавил возможность оплатить заказ наличными через свои банкоматы",
+          "url": "https://vc.ru/marketplace/3163546-ozon-oplata-nalichnymi-cherez-bankomaty?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Очередной рекорд Resident Evil Requiem: 73% игроков прошли игру до конца",
+          "url": "https://habr.com/ru/companies/ggsel/news/1087576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087576"
+        },
+        {
+          "title": "Разработчик ZCode объявил об удалении пользовательских данных после обвинений в утечке",
+          "url": "https://habr.com/ru/news/1087566/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087566"
+        },
+        {
+          "title": "Truecaller расширяет деятельность и выводит инструмент для выявления мошенничества в открытый веб",
+          "url": "https://habr.com/ru/news/1087556/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087556"
+        },
+        {
+          "title": "Объединённая микроэлектронная компания рассматривает покупку долей в китайских фабриках",
+          "url": "https://habr.com/ru/news/1087548/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087548"
+        },
+        {
+          "title": "В Blizzard рассказали о пользе постоянного обучения в Overwatch",
+          "url": "https://habr.com/ru/companies/ggsel/news/1087538/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087538"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "TanStack Router исправил восстановление прокрутки и обработку серверных маршрутов",
+          "url": "https://tproger.ru/news/tanstack-router-ispravil-vosstanovlenie-prokrutki-i-obrabotku-se"
+        },
+        {
+          "title": "FreshRSS 1.27.1 исправил CSRF-уязвимости и добавил Docker healthcheck",
+          "url": "https://tproger.ru/news/freshrss-1-27-1-ispravil-csrf-uyazvimosti-i-dobavil-docker-health"
+        },
+        {
+          "title": "workerd 1.20260926.1 исправил обработку TCP-соединений и отмену TransformStream",
+          "url": "https://tproger.ru/news/workerd-1-20260926-1-ispravil-obrabotku-tcp-soedinenij-i-otmenu"
+        },
+        {
+          "title": "Buda 1.29.1 добавила редактирование публикаций через API",
+          "url": "https://tproger.ru/news/buda-1-29-1-dobavila-redaktirovanie-publikacij-cherez-api"
+        },
+        {
+          "title": "GitHub Agentic Workflows 0.89.22 перешёл на Cloud Hypervisor и усилил сетевую изоляцию",
+          "url": "https://tproger.ru/news/github-agentic-workflows-0-89-22-perewyol-na-cloud-hypervisor-i-u"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20260928-1248: Самара 20.9°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
