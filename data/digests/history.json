@@ -1594,5 +1594,85 @@
       ]
     },
     "summary": "Сводка digest-20260928-1248: Самара 20.9°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20260928-2254",
+    "generated_at": "2026-09-28T22:54:37Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 10.7,
+      "feels_like_c": 9.5,
+      "description": "Пасмурно",
+      "wind_ms": 4.7
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Bloomberg: власти Китая расширили ограничения на выезд из страны — теперь они распространяются не только на ИИ-специалистов из DeepSeek и других компаний, но и на их семьи",
+          "url": "https://vc.ru/hr/3163639-kitay-rasshiryaet-ogranicheniya-na-vyezd-dlya-specialistov-ii?from=rss"
+        },
+        {
+          "title": "«Культурный ренессанс»: Bose выпустила проводные наушники с шумоподавлением за $99",
+          "url": "https://vc.ru/tech/3164066-bose-vypustila-provodnye-naushniki-s-shumopodavleniem?from=rss"
+        },
+        {
+          "title": "«М.Видео» с 1 октября 2026 года повысит комиссии для продавцов маркетплейса для «дальнейшего развития сервиса»",
+          "url": "https://vc.ru/marketplace/3163782-mvideo-povysit-komissii-dlia-prodavtsov-marketpleisa?from=rss"
+        },
+        {
+          "title": "Ozon добавил возможность оплатить заказ наличными через свои банкоматы",
+          "url": "https://vc.ru/marketplace/3163546-ozon-oplata-nalichnymi-cherez-bankomaty?from=rss"
+        },
+        {
+          "title": "Жители Санкт-Петербурга пожаловались на проблемы с домашним интернетом",
+          "url": "https://vc.ru/services/3163637-problemy-s-internetom-v-sankt-peterburge?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Разработчик выпустил Taiga‑S1 — компактную модель с 1,2 млн параметров для управления FreeCAD",
+          "url": "https://habr.com/ru/news/1087800/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087800"
+        },
+        {
+          "title": "Delta Intelligence представила Δ₀ — модель для человекоподобных роботов, которая управляет всем телом",
+          "url": "https://habr.com/ru/news/1087798/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087798"
+        },
+        {
+          "title": "Исследователи представили ткань, которая охлаждает на солнце и вырабатывает электричество от движений",
+          "url": "https://habr.com/ru/news/1087796/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087796"
+        },
+        {
+          "title": "Anthropic выкатила Claude Sonnet 5.5: на 30% быстрее и дешевле. Что изменилось?",
+          "url": "https://habr.com/ru/companies/gptunnel/news/1087786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087786"
+        },
+        {
+          "title": "Amazon планирует запустить доставку дронами в Австралии",
+          "url": "https://habr.com/ru/news/1087776/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087776"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "TanStack Router исправил восстановление прокрутки и обработку серверных маршрутов",
+          "url": "https://tproger.ru/news/tanstack-router-ispravil-vosstanovlenie-prokrutki-i-obrabotku-se"
+        },
+        {
+          "title": "FreshRSS 1.27.1 исправил CSRF-уязвимости и добавил Docker healthcheck",
+          "url": "https://tproger.ru/news/freshrss-1-27-1-ispravil-csrf-uyazvimosti-i-dobavil-docker-health"
+        },
+        {
+          "title": "workerd 1.20260926.1 исправил обработку TCP-соединений и отмену TransformStream",
+          "url": "https://tproger.ru/news/workerd-1-20260926-1-ispravil-obrabotku-tcp-soedinenij-i-otmenu"
+        },
+        {
+          "title": "Buda 1.29.1 добавила редактирование публикаций через API",
+          "url": "https://tproger.ru/news/buda-1-29-1-dobavila-redaktirovanie-publikacij-cherez-api"
+        },
+        {
+          "title": "GitHub Agentic Workflows 0.89.22 перешёл на Cloud Hypervisor и усилил сетевую изоляцию",
+          "url": "https://tproger.ru/news/github-agentic-workflows-0-89-22-perewyol-na-cloud-hypervisor-i-u"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20260928-2254: Самара 10.7°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

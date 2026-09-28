@@ -1,56 +1,56 @@
 {
-  "id": "digest-20260928-1248",
-  "generated_at": "2026-09-28T12:48:52Z",
+  "id": "digest-20260928-2254",
+  "generated_at": "2026-09-28T22:54:37Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 20.9,
-    "feels_like_c": 18.9,
-    "description": "Ясно",
-    "wind_ms": 7.9
+    "temp_c": 10.7,
+    "feels_like_c": 9.5,
+    "description": "Пасмурно",
+    "wind_ms": 4.7
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Больше белка и особая маркировка: как американский рынок еды подстраивается под пользователей Ozempic",
-        "url": "https://vc.ru/food/3161296-kak-amerikanskiy-rynok-edy-menyayetsya-pod-vliyaniem-ozempic?from=rss"
-      },
-      {
         "title": "Bloomberg: власти Китая расширили ограничения на выезд из страны — теперь они распространяются не только на ИИ-специалистов из DeepSeek и других компаний, но и на их семьи",
-        "url": "https://vc.ru/hr/3163639-bloomberg-vlasti-kitaya-rasshirili-ogranicheniya-na-vyezd-iz-strany-teper-oni-rasprostranyayutsya-ne-tolko-na-ii-specialistov-iz-deepseek-i-drugih-kompanii-no-i-na-ih-semi?from=rss"
+        "url": "https://vc.ru/hr/3163639-kitay-rasshiryaet-ogranicheniya-na-vyezd-dlya-specialistov-ii?from=rss"
       },
       {
-        "title": "Жители Санкт-Петербурга пожаловались на проблемы с домашним интернетом",
-        "url": "https://vc.ru/services/3163637-zhiteli-sankt-peterburga-pozhalovalis-na-problemy-s-domashnim-internetom?from=rss"
+        "title": "«Культурный ренессанс»: Bose выпустила проводные наушники с шумоподавлением за $99",
+        "url": "https://vc.ru/tech/3164066-bose-vypustila-provodnye-naushniki-s-shumopodavleniem?from=rss"
       },
       {
-        "title": "Правительство ввело мораторий на плановые и некоторые внеплановые проверки бизнеса, пострадавшего от атак беспилотников",
-        "url": "https://vc.ru/legal/3162803-moratoriy-na-proverki-biznesa-postradavshego-ot-atak-bespilotnikov?from=rss"
+        "title": "«М.Видео» с 1 октября 2026 года повысит комиссии для продавцов маркетплейса для «дальнейшего развития сервиса»",
+        "url": "https://vc.ru/marketplace/3163782-mvideo-povysit-komissii-dlia-prodavtsov-marketpleisa?from=rss"
       },
       {
         "title": "Ozon добавил возможность оплатить заказ наличными через свои банкоматы",
         "url": "https://vc.ru/marketplace/3163546-ozon-oplata-nalichnymi-cherez-bankomaty?from=rss"
+      },
+      {
+        "title": "Жители Санкт-Петербурга пожаловались на проблемы с домашним интернетом",
+        "url": "https://vc.ru/services/3163637-problemy-s-internetom-v-sankt-peterburge?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Очередной рекорд Resident Evil Requiem: 73% игроков прошли игру до конца",
-        "url": "https://habr.com/ru/companies/ggsel/news/1087576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087576"
+        "title": "Разработчик выпустил Taiga‑S1 — компактную модель с 1,2 млн параметров для управления FreeCAD",
+        "url": "https://habr.com/ru/news/1087800/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087800"
       },
       {
-        "title": "Разработчик ZCode объявил об удалении пользовательских данных после обвинений в утечке",
-        "url": "https://habr.com/ru/news/1087566/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087566"
+        "title": "Delta Intelligence представила Δ₀ — модель для человекоподобных роботов, которая управляет всем телом",
+        "url": "https://habr.com/ru/news/1087798/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087798"
       },
       {
-        "title": "Truecaller расширяет деятельность и выводит инструмент для выявления мошенничества в открытый веб",
-        "url": "https://habr.com/ru/news/1087556/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087556"
+        "title": "Исследователи представили ткань, которая охлаждает на солнце и вырабатывает электричество от движений",
+        "url": "https://habr.com/ru/news/1087796/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087796"
       },
       {
-        "title": "Объединённая микроэлектронная компания рассматривает покупку долей в китайских фабриках",
-        "url": "https://habr.com/ru/news/1087548/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087548"
+        "title": "Anthropic выкатила Claude Sonnet 5.5: на 30% быстрее и дешевле. Что изменилось?",
+        "url": "https://habr.com/ru/companies/gptunnel/news/1087786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087786"
       },
       {
-        "title": "В Blizzard рассказали о пользе постоянного обучения в Overwatch",
-        "url": "https://habr.com/ru/companies/ggsel/news/1087538/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087538"
+        "title": "Amazon планирует запустить доставку дронами в Австралии",
+        "url": "https://habr.com/ru/news/1087776/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087776"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20260928-1248: Самара 20.9°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260928-2254: Самара 10.7°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
