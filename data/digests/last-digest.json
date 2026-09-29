@@ -1,12 +1,12 @@
 {
-  "id": "digest-20260929-1203",
-  "generated_at": "2026-09-29T12:03:51Z",
+  "id": "digest-20260929-2148",
+  "generated_at": "2026-09-29T21:48:33Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 19.4,
-    "feels_like_c": 16.7,
-    "description": "Пасмурно",
-    "wind_ms": 8.6
+    "temp_c": 9.2,
+    "feels_like_c": 7.4,
+    "description": "Ясно",
+    "wind_ms": 4.7
   },
   "news": {
     "vc.ru": [
@@ -23,37 +23,41 @@
         "url": "https://vc.ru/tech/3165122-naushniki-nothing-headphone-1-pro-s-tremya-dinamika?from=rss"
       },
       {
-        "title": "Bloomberg: власти Китая расширили ограничения на выезд из страны — теперь они распространяются не только на ИИ-специалистов из DeepSeek и других компаний, но и на их семьи",
-        "url": "https://vc.ru/hr/3163639-kitay-rasshiryaet-ogranicheniya-na-vyezd-dlya-specialistov-ii?from=rss"
+        "title": "Исследователи из Венского университета впервые запустили квантовый компьютер на орбите — чтобы протестировать обработку спутниковых данных в космосе",
+        "url": "https://vc.ru/future/3166094-kvantovyy-kompyuter-iz-venskogo-universiteta-v-kosmose?from=rss"
       },
       {
-        "title": "День 1678: число издателей видеоигр в России за год выросло на 59,2%",
-        "url": "https://vc.ru/money/3164692-chislo-izdateley-videoigr-v-rossii-uvelichilos?from=rss"
+        "title": "Bloomberg: власти Китая расширили ограничения на выезд из страны — теперь они распространяются не только на ИИ-специалистов из DeepSeek и других компаний, но и на их семьи",
+        "url": "https://vc.ru/hr/3163639-kitay-rasshiryaet-ogranicheniya-na-vyezd-dlya-specialistov-ii?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Вслед за Ubisoft к программе оцифровки дисков Xbox Disc‑to‑Digital присоединилась Sega",
-        "url": "https://habr.com/ru/news/1088098/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088098"
+        "title": "Raspberry Pi выпустила адаптер для встраивания Compute Module 5 в дисплеи",
+        "url": "https://habr.com/ru/news/1088298/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088298"
       },
       {
-        "title": "Можно ли разработать расширение 1С с ИИ-агентом без дорогой модели?",
-        "url": "https://habr.com/ru/companies/infostart/news/1088096/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088096"
+        "title": "Nothing выпустила флагманские наушники Headphone (1) Pro с тремя драйверами в каждой чашке",
+        "url": "https://habr.com/ru/news/1088294/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088294"
       },
       {
-        "title": "Хакеры получили доступ к конфиденциальным данным более 3 млн человек из кадровой системы Пентагона",
-        "url": "https://habr.com/ru/news/1088092/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088092"
+        "title": "OpenAI представили GPT‑6.1 Sol с тарифами API в пять раз ниже, чем у Astra",
+        "url": "https://habr.com/ru/news/1088286/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088286"
       },
       {
-        "title": "Трой Бейкер завершил съёмки в Intergalactic и сравнил главную героиню с Элли из The Last of Us",
-        "url": "https://habr.com/ru/companies/ggsel/news/1088090/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088090"
+        "title": "OpenAI представили Dots: персональных ИИ-агентов на базе GPT-6 Astra",
+        "url": "https://habr.com/ru/news/1088282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088282"
       },
       {
-        "title": "Tesla перенесла демонстрацию Roadster с 1 на 15 октября из‑за погоды",
-        "url": "https://habr.com/ru/news/1088052/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088052"
+        "title": "Выпуск Mozilla Thunderbird 157.0",
+        "url": "https://habr.com/ru/news/1087864/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087864"
       }
     ],
     "tproger": [
+      {
+        "title": "OpenAI на DevDay выпустила GPT-6.1 Sol по цене в пять раз ниже Astra",
+        "url": "https://tproger.ru/news/openai-na-devday-vypustila-gpt-6-1-sol-po-cene-v-pyat-raz-nizhe-a"
+      },
       {
         "title": "LLM в проде — это не модель: как спроектировать доступы, контроль качества и стоимость AI-сервиса",
         "url": "https://tproger.ru/articles/llm-v-prode-eto-ne-model-kak-sproektirovat-dostupy-kontrol"
@@ -69,12 +73,8 @@
       {
         "title": "Cloudflare Browser Run разрешил нескольким Workers подключаться к одной сессии",
         "url": "https://tproger.ru/news/cloudflare-browser-run-razrewil-neskolkim-workers-podklyuchatsya"
-      },
-      {
-        "title": "Google добавила ИИ-помощника Ask в Earth Engine",
-        "url": "https://tproger.ru/news/google-dobavila-ii-pomoshhnika-ask-v-earth-engine"
       }
     ]
   },
-  "summary": "Сводка digest-20260929-1203: Самара 19.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260929-2148: Самара 9.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

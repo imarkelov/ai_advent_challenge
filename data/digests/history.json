@@ -1834,5 +1834,85 @@
       ]
     },
     "summary": "Сводка digest-20260929-1203: Самара 19.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20260929-2148",
+    "generated_at": "2026-09-29T21:48:33Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 9.2,
+      "feels_like_c": 7.4,
+      "description": "Ясно",
+      "wind_ms": 4.7
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Владимир Путин ограничил для физлиц вывоз в ЕАЭС, Азербайджан, Таджикистан и Узбекистан наличных на сумму больше 1 млн рублей",
+          "url": "https://vc.ru/money/3165515-putin-ogranichil-vyvoz-nalichnyh-v-eaes?from=rss"
+        },
+        {
+          "title": "«Додо Пицца» сообщила о взломе и возможной утечке имён, адресов, телефонов, электронных почт и дат рождения «части» клиентов",
+          "url": "https://vc.ru/services/3164642-dodo-pizza-kiberataka-utechka-dannyh?from=rss"
+        },
+        {
+          "title": "Nothing представила полноразмерные наушники Headphone (1) Pro с тремя динамиками за $399",
+          "url": "https://vc.ru/tech/3165122-naushniki-nothing-headphone-1-pro-s-tremya-dinamika?from=rss"
+        },
+        {
+          "title": "Исследователи из Венского университета впервые запустили квантовый компьютер на орбите — чтобы протестировать обработку спутниковых данных в космосе",
+          "url": "https://vc.ru/future/3166094-kvantovyy-kompyuter-iz-venskogo-universiteta-v-kosmose?from=rss"
+        },
+        {
+          "title": "Bloomberg: власти Китая расширили ограничения на выезд из страны — теперь они распространяются не только на ИИ-специалистов из DeepSeek и других компаний, но и на их семьи",
+          "url": "https://vc.ru/hr/3163639-kitay-rasshiryaet-ogranicheniya-na-vyezd-dlya-specialistov-ii?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Raspberry Pi выпустила адаптер для встраивания Compute Module 5 в дисплеи",
+          "url": "https://habr.com/ru/news/1088298/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088298"
+        },
+        {
+          "title": "Nothing выпустила флагманские наушники Headphone (1) Pro с тремя драйверами в каждой чашке",
+          "url": "https://habr.com/ru/news/1088294/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088294"
+        },
+        {
+          "title": "OpenAI представили GPT‑6.1 Sol с тарифами API в пять раз ниже, чем у Astra",
+          "url": "https://habr.com/ru/news/1088286/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088286"
+        },
+        {
+          "title": "OpenAI представили Dots: персональных ИИ-агентов на базе GPT-6 Astra",
+          "url": "https://habr.com/ru/news/1088282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088282"
+        },
+        {
+          "title": "Выпуск Mozilla Thunderbird 157.0",
+          "url": "https://habr.com/ru/news/1087864/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087864"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "OpenAI на DevDay выпустила GPT-6.1 Sol по цене в пять раз ниже Astra",
+          "url": "https://tproger.ru/news/openai-na-devday-vypustila-gpt-6-1-sol-po-cene-v-pyat-raz-nizhe-a"
+        },
+        {
+          "title": "LLM в проде — это не модель: как спроектировать доступы, контроль качества и стоимость AI-сервиса",
+          "url": "https://tproger.ru/articles/llm-v-prode-eto-ne-model-kak-sproektirovat-dostupy-kontrol"
+        },
+        {
+          "title": "В n8n 2.42.0 агентов включили по умолчанию",
+          "url": "https://tproger.ru/news/v-n8n-2-42-0-agentov-vklyuchili-po-umolchaniyu"
+        },
+        {
+          "title": "DuckDB 1.5.6 исправил гонку запросов и ошибки восстановления WAL",
+          "url": "https://tproger.ru/news/duckdb-1-5-6-ispravil-gonku-zaprosov-i-owibki-vosstanovleniya-wal"
+        },
+        {
+          "title": "Cloudflare Browser Run разрешил нескольким Workers подключаться к одной сессии",
+          "url": "https://tproger.ru/news/cloudflare-browser-run-razrewil-neskolkim-workers-podklyuchatsya"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20260929-2148: Самара 9.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
