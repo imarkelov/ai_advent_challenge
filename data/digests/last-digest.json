@@ -1,12 +1,12 @@
 {
-  "id": "digest-20260928-2254",
-  "generated_at": "2026-09-28T22:54:37Z",
+  "id": "digest-20260929-0402",
+  "generated_at": "2026-09-29T04:02:28Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 10.7,
-    "feels_like_c": 9.5,
+    "temp_c": 10.4,
+    "feels_like_c": 8.5,
     "description": "Пасмурно",
-    "wind_ms": 4.7
+    "wind_ms": 7.2
   },
   "news": {
     "vc.ru": [
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
+        "title": "Сеть ресторанов «Додо Пицца» сообщила о кибератаке на свою IT‑систему и возможной утечке данных клиентов",
+        "url": "https://habr.com/ru/news/1087830/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087830"
+      },
+      {
+        "title": "Вышло обновление WinDirStat 2.9.0 — открытой утилиты для Windows, которая помогает анализировать использование дисков",
+        "url": "https://habr.com/ru/news/1087498/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087498"
+      },
+      {
+        "title": "Выпуск обновления видеоредактора с открытым исходным кодом Shotcut 26.9",
+        "url": "https://habr.com/ru/news/1087334/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087334"
+      },
+      {
         "title": "Разработчик выпустил Taiga‑S1 — компактную модель с 1,2 млн параметров для управления FreeCAD",
         "url": "https://habr.com/ru/news/1087800/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087800"
       },
       {
         "title": "Delta Intelligence представила Δ₀ — модель для человекоподобных роботов, которая управляет всем телом",
         "url": "https://habr.com/ru/news/1087798/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087798"
-      },
-      {
-        "title": "Исследователи представили ткань, которая охлаждает на солнце и вырабатывает электричество от движений",
-        "url": "https://habr.com/ru/news/1087796/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087796"
-      },
-      {
-        "title": "Anthropic выкатила Claude Sonnet 5.5: на 30% быстрее и дешевле. Что изменилось?",
-        "url": "https://habr.com/ru/companies/gptunnel/news/1087786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087786"
-      },
-      {
-        "title": "Amazon планирует запустить доставку дронами в Австралии",
-        "url": "https://habr.com/ru/news/1087776/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087776"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20260928-2254: Самара 10.7°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260929-0402: Самара 10.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
