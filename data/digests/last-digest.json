@@ -1,59 +1,63 @@
 {
-  "id": "digest-20260930-0349",
-  "generated_at": "2026-09-30T03:49:31Z",
+  "id": "digest-20260930-1151",
+  "generated_at": "2026-09-30T11:51:53Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 7.8,
-    "feels_like_c": 5.9,
-    "description": "Преимущественно ясно",
-    "wind_ms": 3.5
+    "temp_c": 19.0,
+    "feels_like_c": 16.4,
+    "description": "Пасмурно",
+    "wind_ms": 6.5
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Запрет на продажу предоплаченных SIM-карт и единая платформа согласий на обработку персональных данных: Минцифры представило третий пакет мер по борьбе с мошенниками",
+        "url": "https://vc.ru/legal/3167525-zapret-na-prodazhu-predoplachennyh-sim-kart?from=rss"
+      },
+      {
+        "title": "Wildberries запустил сервис для поиска частных специалистов «WB Услуги»",
+        "url": "https://vc.ru/marketplace/3167509-wildberries-zapustil-wb-uslugi-dlya-poiska-chastnykh-spetsialistov?from=rss"
+      },
       {
         "title": "Владимир Путин ограничил для физлиц вывоз в ЕАЭС, Азербайджан, Таджикистан и Узбекистан наличных на сумму больше 1 млн рублей",
         "url": "https://vc.ru/money/3165515-putin-ogranichil-vyvoz-nalichnyh-v-eaes?from=rss"
       },
       {
+        "title": "«Сбер» второй год подряд возглавил рейтинг российских компаний Forbes по размеру чистой прибыли",
+        "url": "https://vc.ru/money/3167384-sber-vozglavil-rejting-kompanij-forbes-po-chistoj-pribyl?from=rss"
+      },
+      {
         "title": "«Додо Пицца» сообщила о взломе и возможной утечке имён, адресов, телефонов, электронных почт и дат рождения «части» клиентов",
         "url": "https://vc.ru/services/3164642-dodo-pizza-kiberataka-utechka-dannyh?from=rss"
-      },
-      {
-        "title": "Nothing представила полноразмерные наушники Headphone (1) Pro с тремя динамиками за $399",
-        "url": "https://vc.ru/tech/3165122-naushniki-nothing-headphone-1-pro-s-tremya-dinamika?from=rss"
-      },
-      {
-        "title": "Исследователи из Венского университета впервые запустили квантовый компьютер на орбите — чтобы протестировать обработку спутниковых данных в космосе",
-        "url": "https://vc.ru/future/3166094-kvantovyy-kompyuter-iz-venskogo-universiteta-v-kosmose?from=rss"
-      },
-      {
-        "title": "Bloomberg: власти Китая расширили ограничения на выезд из страны — теперь они распространяются не только на ИИ-специалистов из DeepSeek и других компаний, но и на их семьи",
-        "url": "https://vc.ru/hr/3163639-kitay-rasshiryaet-ogranicheniya-na-vyezd-dlya-specialistov-ii?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "PlayStation 5 взломали: эксплойт работает с версиями прошивок 7.00–13.60 и даёт доступ к памяти ядра консоли",
-        "url": "https://habr.com/ru/news/1088342/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088342"
+        "title": "Backblaze: процент отказов дисков вырос",
+        "url": "https://habr.com/ru/companies/cloud4y/news/1088528/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088528"
       },
       {
-        "title": "Представлен Git 2.56",
-        "url": "https://habr.com/ru/news/1088256/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088256"
+        "title": "Как вернуть контроль после взлома: разбор шагов",
+        "url": "https://habr.com/ru/companies/jetinfosystems/news/1088522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088522"
       },
       {
-        "title": "Релиз Firefox 157.0",
-        "url": "https://habr.com/ru/news/1087774/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087774"
+        "title": "Харбинский университет вынес 20 студентам предупреждения за использование VPN",
+        "url": "https://habr.com/ru/news/1088502/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088502"
       },
       {
-        "title": "Raspberry Pi выпустила адаптер для встраивания Compute Module 5 в дисплеи",
-        "url": "https://habr.com/ru/news/1088298/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088298"
+        "title": "В Dyson признали проблемы с водонепроницаемостью зубной щётки CameraJet и свернули её продажи",
+        "url": "https://habr.com/ru/news/1088498/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088498"
       },
       {
-        "title": "Nothing выпустила флагманские наушники Headphone (1) Pro с тремя драйверами в каждой чашке",
-        "url": "https://habr.com/ru/news/1088294/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088294"
+        "title": "«Баллады прошлого» для «Ведьмака 3» свяжут с прошлыми DLC",
+        "url": "https://habr.com/ru/companies/ggsel/news/1088496/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088496"
       }
     ],
     "tproger": [
+      {
+        "title": "5 российских облаков для запуска своих ИИ-моделей в 2026 году",
+        "url": "https://tproger.ru/digest/5-rossijskih-oblakov-dlya-zapuska-svoih-ii-modelej-v-2026-godu"
+      },
       {
         "title": "OpenAI на DevDay выпустила GPT-6.1 Sol по цене в пять раз ниже Astra",
         "url": "https://tproger.ru/news/openai-na-devday-vypustila-gpt-6-1-sol-po-cene-v-pyat-raz-nizhe-a"
@@ -69,12 +73,8 @@
       {
         "title": "DuckDB 1.5.6 исправил гонку запросов и ошибки восстановления WAL",
         "url": "https://tproger.ru/news/duckdb-1-5-6-ispravil-gonku-zaprosov-i-owibki-vosstanovleniya-wal"
-      },
-      {
-        "title": "Cloudflare Browser Run разрешил нескольким Workers подключаться к одной сессии",
-        "url": "https://tproger.ru/news/cloudflare-browser-run-razrewil-neskolkim-workers-podklyuchatsya"
       }
     ]
   },
-  "summary": "Сводка digest-20260930-0349: Самара 7.8°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260930-1151: Самара 19.0°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
