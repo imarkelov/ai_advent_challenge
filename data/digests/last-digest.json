@@ -1,12 +1,12 @@
 {
-  "id": "digest-20260930-1732",
-  "generated_at": "2026-09-30T17:32:55Z",
+  "id": "digest-20260930-2149",
+  "generated_at": "2026-09-30T21:49:59Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 12.4,
-    "feels_like_c": 10.4,
+    "temp_c": 11.8,
+    "feels_like_c": 10.8,
     "description": "Пасмурно",
-    "wind_ms": 5.0
+    "wind_ms": 9.1
   },
   "news": {
     "vc.ru": [
@@ -19,38 +19,38 @@
         "url": "https://vc.ru/marketplace/3167509-wildberries-zapustil-wb-uslugi-dlya-poiska-chastnykh-spetsialistov?from=rss"
       },
       {
-        "title": "Apple 13 октября 2026 года представит дисплей для управления «умным» домом, новую колонку HomePod mini и приставку Apple TV — Bloomberg",
-        "url": "https://vc.ru/tech/3167682-apple-predstavit-displey-dlya-umnogo-doma?from=rss"
-      },
-      {
         "title": "Dyson объяснила проблемы с «умной» зубной щёткой «сбоем на производстве» — из-за этого вода просачивалась в батарейный отсек, что приводило к поломке",
         "url": "https://vc.ru/tech/3168223-problemy-s-zubnoj-shhetkoj-dyson?from=rss"
       },
       {
-        "title": "«Сбер» второй год подряд возглавил рейтинг российских компаний Forbes по размеру чистой прибыли",
-        "url": "https://vc.ru/money/3167384-sber-vozglavil-rejting-kompanij-forbes-po-chistoj-pribyl?from=rss"
+        "title": "Apple 13 октября 2026 года представит дисплей для управления «умным» домом, новую колонку HomePod mini и приставку Apple TV — Bloomberg",
+        "url": "https://vc.ru/tech/3167682-apple-predstavit-displey-dlya-umnogo-doma?from=rss"
+      },
+      {
+        "title": "Samsung представила маячок Galaxy SmartTag 3 — он работает с iOS",
+        "url": "https://vc.ru/tech/3167917-samsung-galaxy-smarttag-3-novyj-treker-s-podderzhkoy-ios?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Исследователи представили модель для анимации 3D‑моделей людей, животных и предметов по текстовому описанию",
-        "url": "https://habr.com/ru/news/1088748/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088748"
+        "title": "Gemini 4 Argon уже оптимизирует инфраструктуру Google и переписывает код",
+        "url": "https://habr.com/ru/companies/bothub/news/1088822/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088822"
       },
       {
-        "title": "День Интернета: почему корзина означает «удалить», а шестерёнка — «настройки»",
-        "url": "https://habr.com/ru/companies/yoomoney/news/1088744/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088744"
+        "title": "Reuters получила доступ к заявке Anthropic на IPO. Что внутри? Убытки",
+        "url": "https://habr.com/ru/news/1088800/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088800"
       },
       {
-        "title": "Тем, кто размещает на хостинге VPN, будут запрещать на год пользоваться абсолютно любыми российскими хостингами",
-        "url": "https://habr.com/ru/news/1088742/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088742"
+        "title": "В HeyPCB добавили функцию совместного проектирования печатных плат в браузере",
+        "url": "https://habr.com/ru/news/1088812/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088812"
       },
       {
-        "title": "Reasoning-версию GigaChat 3.5 теперь можно подключить в Evolution Foundation Models",
-        "url": "https://habr.com/ru/companies/cloud_ru/news/1088712/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088712"
+        "title": "Take‑Two добилась закрытия сторонних портов GTA 5 для Nintendo Switch и Android",
+        "url": "https://habr.com/ru/news/1088794/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088794"
       },
       {
-        "title": "AMD поглощает World Labs: к команде присоединится «крестная мать ИИ»",
-        "url": "https://habr.com/ru/companies/selectel/news/1088694/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088694"
+        "title": "Астрономы связали загадочные вспышки в космосе со столкновениями останков звёзд",
+        "url": "https://habr.com/ru/news/1088786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088786"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20260930-1732: Самара 12.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260930-2149: Самара 11.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
