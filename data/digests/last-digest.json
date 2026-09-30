@@ -1,12 +1,12 @@
 {
-  "id": "digest-20260930-1151",
-  "generated_at": "2026-09-30T11:51:53Z",
+  "id": "digest-20260930-1732",
+  "generated_at": "2026-09-30T17:32:55Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 19.0,
-    "feels_like_c": 16.4,
+    "temp_c": 12.4,
+    "feels_like_c": 10.4,
     "description": "Пасмурно",
-    "wind_ms": 6.5
+    "wind_ms": 5.0
   },
   "news": {
     "vc.ru": [
@@ -19,41 +19,45 @@
         "url": "https://vc.ru/marketplace/3167509-wildberries-zapustil-wb-uslugi-dlya-poiska-chastnykh-spetsialistov?from=rss"
       },
       {
-        "title": "Владимир Путин ограничил для физлиц вывоз в ЕАЭС, Азербайджан, Таджикистан и Узбекистан наличных на сумму больше 1 млн рублей",
-        "url": "https://vc.ru/money/3165515-putin-ogranichil-vyvoz-nalichnyh-v-eaes?from=rss"
+        "title": "Apple 13 октября 2026 года представит дисплей для управления «умным» домом, новую колонку HomePod mini и приставку Apple TV — Bloomberg",
+        "url": "https://vc.ru/tech/3167682-apple-predstavit-displey-dlya-umnogo-doma?from=rss"
+      },
+      {
+        "title": "Dyson объяснила проблемы с «умной» зубной щёткой «сбоем на производстве» — из-за этого вода просачивалась в батарейный отсек, что приводило к поломке",
+        "url": "https://vc.ru/tech/3168223-problemy-s-zubnoj-shhetkoj-dyson?from=rss"
       },
       {
         "title": "«Сбер» второй год подряд возглавил рейтинг российских компаний Forbes по размеру чистой прибыли",
         "url": "https://vc.ru/money/3167384-sber-vozglavil-rejting-kompanij-forbes-po-chistoj-pribyl?from=rss"
-      },
-      {
-        "title": "«Додо Пицца» сообщила о взломе и возможной утечке имён, адресов, телефонов, электронных почт и дат рождения «части» клиентов",
-        "url": "https://vc.ru/services/3164642-dodo-pizza-kiberataka-utechka-dannyh?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Backblaze: процент отказов дисков вырос",
-        "url": "https://habr.com/ru/companies/cloud4y/news/1088528/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088528"
+        "title": "Исследователи представили модель для анимации 3D‑моделей людей, животных и предметов по текстовому описанию",
+        "url": "https://habr.com/ru/news/1088748/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088748"
       },
       {
-        "title": "Как вернуть контроль после взлома: разбор шагов",
-        "url": "https://habr.com/ru/companies/jetinfosystems/news/1088522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088522"
+        "title": "День Интернета: почему корзина означает «удалить», а шестерёнка — «настройки»",
+        "url": "https://habr.com/ru/companies/yoomoney/news/1088744/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088744"
       },
       {
-        "title": "Харбинский университет вынес 20 студентам предупреждения за использование VPN",
-        "url": "https://habr.com/ru/news/1088502/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088502"
+        "title": "Тем, кто размещает на хостинге VPN, будут запрещать на год пользоваться абсолютно любыми российскими хостингами",
+        "url": "https://habr.com/ru/news/1088742/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088742"
       },
       {
-        "title": "В Dyson признали проблемы с водонепроницаемостью зубной щётки CameraJet и свернули её продажи",
-        "url": "https://habr.com/ru/news/1088498/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088498"
+        "title": "Reasoning-версию GigaChat 3.5 теперь можно подключить в Evolution Foundation Models",
+        "url": "https://habr.com/ru/companies/cloud_ru/news/1088712/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088712"
       },
       {
-        "title": "«Баллады прошлого» для «Ведьмака 3» свяжут с прошлыми DLC",
-        "url": "https://habr.com/ru/companies/ggsel/news/1088496/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088496"
+        "title": "AMD поглощает World Labs: к команде присоединится «крестная мать ИИ»",
+        "url": "https://habr.com/ru/companies/selectel/news/1088694/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088694"
       }
     ],
     "tproger": [
+      {
+        "title": "Почему команда растёт, а фичи выходят медленнее",
+        "url": "https://tproger.ru/articles/pochemu-komanda-rastyot-a-fichi-vyhodyat-medlennee"
+      },
       {
         "title": "5 российских облаков для запуска своих ИИ-моделей в 2026 году",
         "url": "https://tproger.ru/digest/5-rossijskih-oblakov-dlya-zapuska-svoih-ii-modelej-v-2026-godu"
@@ -69,12 +73,8 @@
       {
         "title": "В n8n 2.42.0 агентов включили по умолчанию",
         "url": "https://tproger.ru/news/v-n8n-2-42-0-agentov-vklyuchili-po-umolchaniyu"
-      },
-      {
-        "title": "DuckDB 1.5.6 исправил гонку запросов и ошибки восстановления WAL",
-        "url": "https://tproger.ru/news/duckdb-1-5-6-ispravil-gonku-zaprosov-i-owibki-vosstanovleniya-wal"
       }
     ]
   },
-  "summary": "Сводка digest-20260930-1151: Самара 19.0°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260930-1732: Самара 12.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
