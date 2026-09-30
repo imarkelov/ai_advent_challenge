@@ -1,12 +1,12 @@
 {
-  "id": "digest-20260929-2148",
-  "generated_at": "2026-09-29T21:48:33Z",
+  "id": "digest-20260930-0349",
+  "generated_at": "2026-09-30T03:49:31Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 9.2,
-    "feels_like_c": 7.4,
-    "description": "Ясно",
-    "wind_ms": 4.7
+    "temp_c": 7.8,
+    "feels_like_c": 5.9,
+    "description": "Преимущественно ясно",
+    "wind_ms": 3.5
   },
   "news": {
     "vc.ru": [
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
+        "title": "PlayStation 5 взломали: эксплойт работает с версиями прошивок 7.00–13.60 и даёт доступ к памяти ядра консоли",
+        "url": "https://habr.com/ru/news/1088342/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088342"
+      },
+      {
+        "title": "Представлен Git 2.56",
+        "url": "https://habr.com/ru/news/1088256/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088256"
+      },
+      {
+        "title": "Релиз Firefox 157.0",
+        "url": "https://habr.com/ru/news/1087774/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087774"
+      },
+      {
         "title": "Raspberry Pi выпустила адаптер для встраивания Compute Module 5 в дисплеи",
         "url": "https://habr.com/ru/news/1088298/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088298"
       },
       {
         "title": "Nothing выпустила флагманские наушники Headphone (1) Pro с тремя драйверами в каждой чашке",
         "url": "https://habr.com/ru/news/1088294/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088294"
-      },
-      {
-        "title": "OpenAI представили GPT‑6.1 Sol с тарифами API в пять раз ниже, чем у Astra",
-        "url": "https://habr.com/ru/news/1088286/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088286"
-      },
-      {
-        "title": "OpenAI представили Dots: персональных ИИ-агентов на базе GPT-6 Astra",
-        "url": "https://habr.com/ru/news/1088282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088282"
-      },
-      {
-        "title": "Выпуск Mozilla Thunderbird 157.0",
-        "url": "https://habr.com/ru/news/1087864/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1087864"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20260929-2148: Самара 9.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20260930-0349: Самара 7.8°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
