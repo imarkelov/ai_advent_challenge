@@ -488,13 +488,39 @@ button {
   opacity: 0.6;
 }
 
-/* Правая часть шапки чата: токен-гейдж + бейдж профиля + кнопки панелей */
+/* Правая часть шапки чата: свитч RAG + токен-гейдж + бейдж профиля + кнопки панелей */
 .chat-head-actions {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
   flex-wrap: wrap; /* на узких окнах ряд не ломает шапку */
   flex-shrink: 0;
+}
+
+/* ── День 22: свитч «RAG» в шапке чата (per-диалог) ─────────────────────── */
+/* Подпись + switch (.layer-toggle — тот же паттерн, что у слоёв памяти);
+   лейбл mono 11px — как у чипов шапки (.model-select/.kb-field-label).
+   Выключенное состояние читается двойным приёмом: ползунок свитча слева
+   + приглушённый лейбл (var(--muted)) */
+.chat-rag-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.chat-rag-toggle-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  transition: color var(--t-fast) var(--ease);
+}
+
+.chat-rag-toggle:has(input:checked) .chat-rag-toggle-label {
+  color: var(--text);
 }
 
 /* Токен-гейдж: SVG-кольцо (fill = total последнего запроса / лимит

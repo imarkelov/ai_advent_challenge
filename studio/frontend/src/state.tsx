@@ -29,6 +29,8 @@ import {
   disconnectMcpServer as apiDisconnectMcpServer,
   deleteInvariant as apiDeleteInvariant,
   deleteMcpServer as apiDeleteMcpServer,
+  apiKbSettings,
+  apiSetDialogueRag,
   getInvariants,
   getMcpServers,
   getMcpTools,
@@ -95,6 +97,9 @@ export interface DialogueMeta {
   // Задача в диалоге использовалась (день 13b): персистентный флаг —
   // ставится при task/start, task/reset его не сбрасывает
   used_task?: boolean
+  // RAG-режим (день 22, per-диалог): null/нет поля — следовать глобальной
+  // настройке БЗ (settings['rag']); true/false — override этого диалога
+  rag?: boolean | null
 }
 
 export interface MemoryLayer {
@@ -203,6 +208,10 @@ export interface StudioState {
   // MCP-серверы (день 16): реестр с runtime-статусом + инструменты
   mcpServers: McpServer[]
   mcpTools: McpTool[]
+  // Глобальная настройка RAG (день 22): из GET /api/kb/settings, кэш в
+  // состоянии; null — ещё не загружена; сбой загрузки → fallback true
+  // (дефолт settings.json дня 21)
+  globalRag: boolean | null
 }
 
 // Ключ localStorage для тумблера «Показывать запросы»
@@ -252,6 +261,7 @@ export function initialState(): StudioState {
     invariantViolation: null,
     mcpServers: [],
     mcpTools: [],
+    globalRag: null,
   }
 }
 
@@ -357,6 +367,8 @@ export type StudioAction =
   | { type: 'invariants'; invariants: Invariant[] }
   | { type: 'invariant-violation'; patterns: string[] }
   | { type: 'mcp'; mcpServers: McpServer[]; mcpTools: McpTool[] }
+  // Глобальная настройка RAG (день 22): кэш из GET /api/kb/settings
+  | { type: 'global-rag'; rag: boolean }
 
 // Чистый reducer: все переходы состояния без побочных эффектов
 export function reducer(state: StudioState, action: StudioAction): StudioState {
@@ -528,6 +540,8 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
     case 'invariant-violation':
       // SSE invariant_violation (до done): бейдж нарушения в шапке чата
       return { ...state, invariantViolation: action.patterns }
+    case 'global-rag':
+      return { ...state, globalRag: action.rag }
   }
 }
 
@@ -606,6 +620,10 @@ export interface StudioApi {
   reloadDialogue: () => Promise<void>
   deleteDialogues: (ids: string[]) => Promise<void>
   renameDialogue: (id: string, title: string) => Promise<void>
+  // RAG-режим (день 22, per-диалог): глобальная настройка (кэш; null —
+  // загружается, сбой — fallback true) и переключатель активного диалога
+  globalRag: boolean | null
+  setDialogueRag: (id: string, rag: boolean) => Promise<void>
 }
 
 const StudioCtx = createContext<StudioApi | null>(null)
@@ -912,6 +930,19 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     void loadAll().catch((err) => console.error('loadAll:', err))
   }, [loadAll])
 
+  // Глобальная настройка RAG (день 22): ленивая загрузка отдельным запросом
+  // (не в батче loadAll — недоступность /api/kb/settings старым бэкендом
+  // не ломает загрузку, паттерн models/invariants/mcp). Кэш в state;
+  // сбой — fallback true (дефолт settings.json дня 21).
+  useEffect(() => {
+    apiKbSettings()
+      .then((s) => dispatch({ type: 'global-rag', rag: s.rag }))
+      .catch((err) => {
+        console.error('kb-settings:', err)
+        dispatch({ type: 'global-rag', rag: true })
+      })
+  }, [])
+
   // Новый диалог: POST /api/dialogues → 201 {dialogue, active_id}
   const newDialogue = useCallback(async () => {
     const r = await apiPost<{ dialogue: DialogueMeta; active_id: string }>('/dialogues')
@@ -1159,6 +1190,35 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // RAG-тумблер (день 22, per-диалог): POST /api/dialogues/{id}/rag {rag}.
+  // Оптимистично обновляем локальный список; после ответа — авторитетное
+  // перечитывание /api/dialogues. Ошибка — откат оптимистичного изменения
+  // + сообщение об ошибке в ленте (стандартный error-паттерн чата),
+  // UI не зависает.
+  const setDialogueRag = useCallback(async (id: string, rag: boolean) => {
+    const patchRag = (value: boolean) => {
+      dispatch({
+        type: 'dialogues-refresh',
+        dialogues: stateRef.current.dialogues.map((d) =>
+          d.id === id ? { ...d, rag: value } : d,
+        ),
+      })
+    }
+    patchRag(rag)
+    try {
+      await apiSetDialogueRag(id, rag)
+      const d = await apiGet<DialoguesResponse>('/dialogues')
+      dispatch({ type: 'dialogues-refresh', dialogues: d.dialogues })
+    } catch (err) {
+      console.error('setDialogueRag:', err)
+      patchRag(!rag)
+      dispatch({
+        type: 'error-message',
+        text: `Ошибка: ${err instanceof Error ? err.message : String(err)}`,
+      })
+    }
+  }, [])
+
   const api: StudioApi = {
     state,
     activeProfile,
@@ -1204,6 +1264,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     reloadDialogue,
     deleteDialogues,
     renameDialogue,
+    globalRag: state.globalRag,
+    setDialogueRag,
   }
 
   return <StudioCtx.Provider value={api}>{children}</StudioCtx.Provider>

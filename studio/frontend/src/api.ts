@@ -604,6 +604,14 @@ export function apiKbSettings(): Promise<KbSettings> {
   return apiGet('/kb/settings')
 }
 
+// ── День 22: RAG-режим per-диалог ───────────────────────────────────────────
+// POST /api/dialogues/{id}/rag {rag} → 200. dialogue.rag = null → диалог
+// следует глобальной настройке БЗ (settings['rag']); true/false —
+// per-диалог override. non-2xx — ApiError с RU-detail (паттерн хелперов выше).
+export function apiSetDialogueRag(id: string, rag: boolean): Promise<{ rag: boolean }> {
+  return apiPost(`/dialogues/${encodeURIComponent(id)}/rag`, { rag })
+}
+
 // Частичное обновление настроек: POST /api/kb/settings {…} → актуальные настройки
 export function apiKbSettingsPost(patch: Partial<KbSettings>): Promise<KbSettings> {
   return apiPost('/kb/settings', patch)

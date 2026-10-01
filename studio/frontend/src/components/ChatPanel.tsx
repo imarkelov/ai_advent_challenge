@@ -280,7 +280,7 @@ export default function ChatPanel() {
     state, activeProfile, sendMessage, setModel,
     openSettings, closeSettings, openMcp, closeMcp,
     activeTask, chatMode, setChatMode, sendTaskMessage,
-    callMcpTool,
+    callMcpTool, setDialogueRag,
   } = useStudio()
   const [draft, setDraft] = useState('')
   const [saveMsg, setSaveMsg] = useState<Message | null>(null)
@@ -414,6 +414,12 @@ export default function ChatPanel() {
       </div>
     )
   }
+
+  // RAG-режим (день 22, per-диалог): effective = dialogue.rag ?? globalRag.
+  // globalRag ещё грузится (null) → показываем дефолт дня 21 (true),
+  // после ответа GET /api/kb/settings переключится на реальное значение.
+  // При смене диалога пересчитывается — свитч показывает режим его диалога.
+  const ragOn = active ? (active.rag ?? state.globalRag ?? true) : false
 
   const currentModel = state.config?.model ?? ''
   const currentInList = state.models.some((m) => m.id === currentModel)
@@ -549,6 +555,22 @@ export default function ChatPanel() {
       <header className="chat-head">
         <h1 className="chat-title">{active ? active.title : 'Нет активного диалога'}</h1>
         <div className="chat-head-actions">
+          {active && (
+            <label
+              className="chat-rag-toggle"
+              title="RAG-режим этого диалога: по умолчанию — глобальная настройка базы знаний (вкладка «База знаний»)"
+            >
+              <span className="chat-rag-toggle-label">RAG</span>
+              <input
+                type="checkbox"
+                className="layer-toggle"
+                role="switch"
+                aria-checked={ragOn}
+                checked={ragOn}
+                onChange={(e) => void setDialogueRag(active.id, e.target.checked)}
+              />
+            </label>
+          )}
           <TokenGauge />
           {state.invariantViolation != null && state.invariantViolation.length > 0 && (
             <span
