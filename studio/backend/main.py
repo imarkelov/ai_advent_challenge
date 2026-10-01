@@ -785,6 +785,25 @@ def create_app(agent: StudioAgent | None = None,
         except ValueError as e:
             raise HTTPException(400, str(e))
 
+    # ---------- сравнение RAG (день 22) ----------
+
+    @app.post("/api/rag/compare")
+    def rag_compare(body: dict):
+        """День 22: ответ на вопрос двумя способами — без RAG и с RAG —
+        одним вызовом: оба LLM-вызова non-stream (T=0, max_tokens=1024,
+        голый system-промпт), retrieval из search_rag по настройкам БЗ
+        (флаг settings['rag'] не consulted — сравнение явное).
+        Журнал requests.json НЕ пишется — non-stream паттерн, как
+        `_task_llm_call`. Ответ: {answer_plain, answer_rag, kb_block,
+        chunks, rag_context}. 400 — вопрос пустой/не строка;
+        404 — индекс не построен."""
+        q = body.get("question")
+        if not isinstance(q, str) or not q.strip():
+            raise HTTPException(400, "Вопрос не может быть пустым")
+        if kb.load_index() is None:
+            raise HTTPException(404, "Индекс не построен")
+        return agent.rag_compare(q)
+
     # ---------- токены ----------
 
     @app.get("/api/tokens")

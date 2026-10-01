@@ -501,6 +501,44 @@ class StudioAgent:
                 "reranked": bool(rag.get("reranked")),
                 "chunks": chunks}
 
+    def rag_compare(self, question: str) -> dict:
+        """День 22: сравнение «без RAG / с RAG» в одном вызове — два
+        non-stream LLM-вызова (`_task_llm_call`, в requests.json не
+        входят) на ОДИН вопрос: plain — голый config.system_prompt;
+        rag — тот же промпт + блок «База знаний» из двухэтапного поиска
+        (`search_rag`, настройки rag_recall/rag_top_k/reranker; флаг
+        settings['rag'] НЕ consulted — сравнение явное). Параметры
+        детерминированные: temperature=0, max_tokens=1024
+        (переопределение значений конфига); модель — из конфига.
+        Руки вызовы последовательные; сбой LLM на одной руке НЕ роняет
+        другую — в ответе сбойной руки человекочитаемое НЕПУСТОЕ
+        строка-ошибка «Ошибка: …» (фронтенд рендерит ответ как текст,
+        отдельного error-поля в контракте нет).
+
+        Возврат: {answer_plain, answer_rag, kb_block, chunks
+        (results search_rag — та же форма, что GET /api/kb/search),
+        rag_context (из `_kb_context`; None, если чанков нет)}."""
+        s = self.kb.settings()
+        rag = self._rag_retrieve(question, s["rag_recall"],
+                                 s["rag_top_k"], s["reranker"])
+        kb_block = self._render_kb_block(question, rag["results"])
+        rag_context = self._kb_context(question, rag)
+        cfg = {**self.get_config(), "temperature": 0, "max_tokens": 1024}
+        base = cfg["system_prompt"]
+
+        def _arm(system: str) -> str:
+            try:
+                content, _usage = self._task_llm_call(cfg, system, question)
+                return content
+            except Exception as e:
+                return f"Ошибка: {e}"
+
+        return {"answer_plain": _arm(base),
+                "answer_rag": _arm(base + kb_block),
+                "kb_block": kb_block,
+                "chunks": rag["results"],
+                "rag_context": rag_context}
+
     def build_payload(self, dialogue_id: str) -> list:
         """Список сообщений для LLM: [system (промпт + профиль + инварианты
         + блоки ВКЛЮЧЁННЫХ слоёв памяти + правила при наличии)] + история
