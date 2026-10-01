@@ -1,3 +1,114 @@
+# Release Notes — day22-ui-rework (день 22, UI-rework)
+
+Ветка: [`day22-ui-rework`](https://github.com/imarkelov/ai_advent_challenge/tree/day22-ui-rework)
+(от `day22-rag-query`).
+
+## Что в релизе
+
+**Реорганизация UI Студии** по утверждённому мокапу
+(`.omo/mockup/ui-rework-v3.html`): стройный сайдбар,
+токен-статистика на кольце TokenGauge (hover-поповер) и
+inline-представление обработки запроса в ленте чата (строка
+«📡 Обработка» под assistant-сообщением с раскрытием
+RAG → Prompt-сборка → LLM → Ответ и реальным телом LLM-запроса
+из журнала). Data-driven: строка и JSON — только где данные
+есть, без фейковых данных.
+
+- `studio/frontend/src/components/Sidebar.tsx` — убран блок
+  «Инструменты» (вкладки «Токены»/«Запрос», перенесённые в
+  день 15); управление диалогами (активация/ренейм/удаление/
+  режим выбора, бейдж непрочитанных, флаг «Проект
+  использовался») и сводка слоёв памяти со свитчами — без
+  изменений.
+- `studio/frontend/src/components/TokenGauge.tsx` +
+  `TokenPopover.tsx` (новый) — по hover на кольцо (grace-период
+  закрытия 300 ms, клик вне закрывает) открывается поповер:
+  лимит контекста (progress-бар по total последнего запроса),
+  последний usage (prompt/completion/total), сессионные токены,
+  модель. Окно растягивается drag-grip (паттерн модалки JSON дня
+  8: pointer events; min 320×200, max — вьюпорт минус отступы);
+  размер — `localStorage` `token-pop-size` (JSON `{w,h}`, дефолт
+  340×240), восстанавливается после перезагрузки страницы.
+- `studio/frontend/src/components/FlowInspector.tsx` (новый) +
+  `flow.css` (новый, самодостаточный, классы `.flow-*`, импорт в
+  самом компоненте) — inline-строка «📡 Обработка» под
+  assistant-сообщением (рендер в `ChatPanel.tsx` только при
+  `assistant && (request_id != null || rag_context.chunks.length
+  > 0)` — у task-сообщений строки нет). Свёрнутая строка —
+  сегменты « → » (часть без данных не рендерится): «RAG N
+  чанк/чанка/чанков», «Prompt ≈N tok», model, total из `usage`.
+  Раскрытие — шаги: **RAG** (query, recall, чанки `file ·
+  section` + score-чипы 🟢/🟡/🔴 + «из #N» и 🚨 при
+  `stage1_rank > 20`), **Prompt-сборка** (чипы блоков
+  system-промпта с оценкой токенов: базовый / профиль /
+  инварианты — ленивый `GET /api/rules` по первому раскрытию,
+  кэш / память WM-LT / RAG-блок; клиентская эвристика 0.44
+  токена/символ), **LLM** (модель + пункт «📄 Запрос JSON ·
+  req_N»: ленивый `GET /api/requests/{id}` по первому раскрытию,
+  кэш, тело — поле `request` записи журнала, `<pre>` + bottom-
+  fade, «Скопировать» — clipboard с execCommand-фолбэком,
+  «Скопировано» 1.5 с), **Ответ** (usage или «—»).
+- `studio/backend/memory.py` + `agent.py` (TDD) — финальное
+  chat assistant-сообщение хранит `request_id` и `usage`
+  (`append_message` — явные kwargs, merge только при `not
+  None`; финальная ветка `ask_stream` передаёт значения из SSE
+  `done`). Сообщения raw в `dialogues.json` → поля
+  автоматически отдаются `GET /api/dialogues[/{id}]` (роуты не
+  тронуты) — строка «Обработка» и JSON доступны после
+  перезагрузки страницы.
+- Мёртвый код: удалены `TokensTab.tsx`, `RequestsTab.tsx` (+ их
+  тесты). Тесты: бэкенд `test_agent.py`/`test_api.py` (+2 на
+  request_id/usage, обновлены 2 точных equality-ассерта);
+  фронтенд `tests/flow-inspector.test.tsx` (новый, 14
+  сценариев: строка+сегменты, условие ChatPanel, шаги, lazy
+  fetch + «Загрузка…», кэш без рефетча, clipboard,
+  execCommand-фолбэк, 404, без request_id → нет JSON-пункта).
+
+## API
+
+Новых REST-эндпоинтов нет. `GET /api/dialogues` и
+`GET /api/dialogues/{id}` — assistant-сообщения финального чата
+дополнены полями `request_id` (int) и `usage`
+(`prompt_tokens`/`completion_tokens`/`total_tokens`, возможны
+доп. поля usage-чанка). Тело `POST /api/chat` не изменилось.
+
+## Проверка задания
+
+Полный прогон (все exit 0): бэкенд — **539 тестов PASS**
+(`python -m pytest -q`, офлайн); фронтенд — **288 тестов PASS**
+(`npm test` / Vitest) + `tsc -b` clean + `npm run build` clean
+(dist собран). Live-верификация в браузере (prod-сервер
+:8107, модель deepseek-v4-flash): **поповер** — hover на кольцо
+→ окно (лимит 16384, последний usage 773/133/906, сессионные
+906, модель), drag-grip 340×240 → 460×320
+(`token-pop-size` = `{"w":460,"h":320}` в localStorage), размер
+восстанавливается после перезагрузки; **флоу** — live-ответ
+(2+2) → строка «Обработка: RAG 3 чанка → Prompt ≈600 tok → LLM
+deepseek-v4-flash → 906 tok», **после перезагрузки страницы
+строка и карточка на месте** (request_id пережил reload —
+критерий T2), раскрытие: RAG (3 чанка, score-чипы, «из
+#50/#35/#30» + 🚨), Prompt-сборка (базовый ≈192, память LT ≈12,
+RAG-блок ≈396), LLM → «Запрос JSON · req_386» с реальным телом
+из журнала + «Скопировано»; **сайдбар** — без «Инструментов»,
+диалоги/память на месте; **регресс** — панель «Контекст»
+(вкладка Память рендерит 3 слоя), MCP «🧩» (overlay, 12
+серверов), RAG-инспектор («▼ Показать извлечённый контекст RAG
+(3 чанков из 50)» → 3 чанка со score), консоль — 0 ошибок.
+Скриншоты — `.omo/evidence/ui-rework/` (task4-popover-open.png,
+task4-popover-resized.png, task4-flow-after-reload.png,
+task4-sidebar.png).
+
+## Коммиты
+
+- `2ac86de` — sidebar без «Инструментов» + токен-поповер
+  (hover, resize, localStorage); assistant-сообщение хранит
+  request_id/usage
+- `8fc2866` — FlowInspector: inline-флоу «Обработка» в ленте
+  (RAG/Prompt/LLM/Ответ + Запрос JSON из журнала с
+  копированием); удалён мёртвый RequestsTab
+
+---
+
 # Release Notes — day22-rag-query (день 22)
 
 Ветка: [`day22-rag-query`](https://github.com/imarkelov/ai_advent_challenge/tree/day22-rag-query)
