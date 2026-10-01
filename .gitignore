@@ -43,3 +43,6 @@ data/pipeline/
 
 # День 20: runtime-состояние задач (task store) — сид регенерируется из кода, не в git
 data/tasks.json
+
+# День 21: база знаний (индекс эмбеддингов + загрузки) — runtime, не в git
+data/kb/

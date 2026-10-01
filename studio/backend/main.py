@@ -4,21 +4,28 @@
 валидация (400/404 с RU detail) и формат ответа.
 """
 import json
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
 import httpx
 
 try:  # пакетный режим: uvicorn studio.backend.main:app из корня репозитория
-    from .agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE, StudioAgent
+    from .agent import (CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE,
+                        PROFILE_INTERVIEW_TEXT, StudioAgent)
+    from .kb import (APIEmbedder, HashEmbedder, KBError, KnowledgeBase,
+                     UPLOAD_EXTS)
     from .memory import PROFILE_ACTIONS, MemoryStore
     from .mcp import MCPError
 except ImportError:  # dev-режим: uvicorn main:app из studio/backend
-    from agent import CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE, StudioAgent
+    from agent import (CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE,
+                       PROFILE_INTERVIEW_TEXT, StudioAgent)
+    from kb import (APIEmbedder, HashEmbedder, KBError, KnowledgeBase,
+                    UPLOAD_EXTS)
     from memory import PROFILE_ACTIONS, MemoryStore, PROFILE_ACTIONS
     from mcp import MCPError
 
@@ -27,6 +34,10 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 # Данные лежат в studio/data (создаётся при первой записи, в git не коммитится).
 DATA_DIR = str(Path(__file__).resolve().parents[1] / "data")
+
+# База знаний (день 21): <repo>/data/kb — тот же корень репозитория, что и
+# дефолтный repo_root в kb.py (два уровня вверх от studio/backend).
+KB_DIR = str(Path(__file__).resolve().parents[2] / "data" / "kb")
 
 # Максимальная длина текста результата tools/call в сообщении диалога.
 MCP_RESULT_MAX = 8000
@@ -47,10 +58,24 @@ def _format_mcp_result(result: dict) -> str:
     return text
 
 
-def create_app(agent: StudioAgent | None = None) -> FastAPI:
-    """Создаёт FastAPI-приложение. agent inject-ится для тестов;
-    по умолчанию — StudioAgent(DATA_DIR) с настройками из окружения."""
+def _list_kb_uploads(kb_dir: str) -> list:
+    """Загрузки пользователя (kb_dir/uploads): отсортированные имена,
+    только файлы, {name, size}. Каталога нет → пустой список (список
+    работает и до сборки индекса)."""
+    up_dir = os.path.join(kb_dir, "uploads")
+    if not os.path.isdir(up_dir):
+        return []
+    return [{"name": fn, "size": os.path.getsize(os.path.join(up_dir, fn))}
+            for fn in sorted(os.listdir(up_dir))
+            if os.path.isfile(os.path.join(up_dir, fn))]
+
+
+def create_app(agent: StudioAgent | None = None,
+               kb: "KnowledgeBase | None" = None) -> FastAPI:
+    """Создаёт FastAPI-приложение. agent и kb inject-ятся для тестов;
+    по умолчанию — StudioAgent(DATA_DIR) и KnowledgeBase(KB_DIR) (день 21)."""
     agent = agent or StudioAgent(DATA_DIR)
+    kb = kb or KnowledgeBase(KB_DIR)
     app = FastAPI(title="Студия")
 
     @app.on_event("shutdown")
@@ -109,7 +134,9 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
     @app.post("/api/profile/action")
     def profile_action(body: dict):
         """Действие с профилем: interview / decline / reset (день 12).
-        Body: {dialogue_id, action}."""
+        Body: {dialogue_id, action}. Ответ: {profile, interview_text} —
+        interview_text = константа с 4 вопросами анкеты (день 20), чтобы
+        вкладка «Профили» UI показывала вопросы при явном интервью."""
         if "dialogue_id" not in body or "action" not in body:
             raise HTTPException(400, "Не указаны dialogue_id или action")
         if body["action"] not in PROFILE_ACTIONS:
@@ -118,7 +145,7 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
             p = agent.store.profile_action(body["dialogue_id"], body["action"])
         except ValueError as e:
             raise HTTPException(404, str(e))
-        return {"profile": p}
+        return {"profile": p, "interview_text": PROFILE_INTERVIEW_TEXT}
 
     # ---------- задача: FSM + stage-агенты (день 13) ----------
 
@@ -608,6 +635,155 @@ def create_app(agent: StudioAgent | None = None) -> FastAPI:
         agent.store.append_message(dialogue_id, "system", block,
                                    mcp_tool={"server": sid, "tool": tool})
         return {"ok": True}
+
+    # ---------- база знаний (день 21) ----------
+
+    @app.get("/api/kb/stats")
+    def kb_stats():
+        """Статистика индекса базы знаний; 404 «Индекс не построен» —
+        если index.json отсутствует."""
+        idx = kb.load_index()
+        if idx is None:
+            raise HTTPException(404, "Индекс не построен")
+        files = sorted({c.get("file") for c in idx.get("chunks", [])
+                        if c.get("file")})
+        # Загрузки пользователя (data/kb/uploads): видны сразу после
+        # upload, даже до пересборки индекса (в files попадают только
+        # после «Индексировать»)
+        uploads = _list_kb_uploads(kb.kb_dir)
+        # Корпус, который ещё не попал в индекс (новые загрузки/доки)
+        try:
+            corpus = {d.path for d in kb.corpus_files()}
+        except Exception:
+            corpus = set()
+        pending_files = sorted(corpus - set(files))
+        return {"exists": True, "strategy": idx.get("strategy"),
+                "embedder": idx.get("embedder"), "dim": idx.get("dim"),
+                "built_at": idx.get("built_at"), "stats": idx.get("stats"),
+                "comparison": idx.get("comparison"), "files": files,
+                "uploads": uploads, "pending_files": pending_files,
+                # Ключ реранкера (GPUSTACK_KEY_RERANK) настроен — для
+                # бейджа «ключ не настроен» в UI при reranker=api
+                "reranker_key_configured":
+                    bool(os.environ.get("GPUSTACK_KEY_RERANK", ""))}
+
+    @app.get("/api/kb/uploads")
+    def kb_uploads():
+        """Список загруженных файлов (data/kb/uploads):
+        {uploads: [{name, size}]}. Работает БЕЗ собранного индекса
+        (stats при этом 404); загрузок нет — пустой список."""
+        return {"uploads": _list_kb_uploads(kb.kb_dir)}
+
+    @app.get("/api/kb/build-status")
+    def kb_build_status():
+        """Прогресс сборки индекса (polling из UI): {running, phase,
+        done, total}. Вне сборки — running: False."""
+        return kb.progress()
+
+    @app.delete("/api/kb/uploads/{name}")
+    def kb_delete_upload(name: str):
+        """Удалить загруженный файл (data/kb/uploads) + его чанки из
+        индекса. 400 — некорректное имя (traversal), 404 — файла нет."""
+        if kb.progress().get("running"):
+            raise HTTPException(409, "Сборка индекса уже идёт")
+        try:
+            return kb.delete_upload(name)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        except FileNotFoundError as e:
+            raise HTTPException(404, str(e))
+
+    @app.delete("/api/kb")
+    def kb_wipe():
+        """Полная очист базы знаний: все загрузки + index.json
+        (settings сохраняются). Ответ: {ok, uploads_removed}."""
+        if kb.progress().get("running"):
+            raise HTTPException(409, "Сборка индекса уже идёт")
+        return kb.wipe()
+
+    @app.post("/api/kb/index")
+    def kb_index(body: dict):
+        """Построить индекс: body {strategy: fixed|structural,
+        embedder: hash|api, mode?: auto|full|incremental}.
+        mode auto (дефолт): совпадении strategy+embedder с индексом —
+        инкрементальная сборка (только новые файлы), иначе полная.
+        400 — некорректные значения / ключ API-эмбеддера не настроен;
+        409 — сборка уже идёт; 502 — сбой эмбеддинг-API. Ответ — результат
+        сборки {stats, comparison, strategy, mode, added}."""
+        strategy = body.get("strategy")
+        embedder_name = body.get("embedder")
+        mode = body.get("mode", "auto")
+        if strategy not in ("fixed", "structural"):
+            raise HTTPException(400, "strategy: fixed|structural")
+        if embedder_name not in ("hash", "api"):
+            raise HTTPException(400, "embedder: hash|api")
+        if mode not in ("auto", "full", "incremental"):
+            raise HTTPException(400, "mode: auto|full|incremental")
+        if kb.progress().get("running"):
+            raise HTTPException(409, "Сборка индекса уже идёт")
+        if embedder_name == "hash":
+            embedder = HashEmbedder()
+        else:
+            key = os.environ.get("GPUSTACK_KEY_EMBED", "")
+            if not key:
+                raise HTTPException(
+                    400, "Ключ эмбеддингов не настроен (GPUSTACK_KEY_EMBED)")
+            base = os.environ.get("GPUSTACK_BASE_URL",
+                                  "https://gpustack.data.lmru.tech/v1")
+            embedder = APIEmbedder(base, key)
+        try:
+            return kb.build(strategy, embedder, mode=mode)
+        except KBError as e:
+            raise HTTPException(502, f"Не удалось построить индекс: {e}")
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+
+    @app.post("/api/kb/upload")
+    async def kb_upload(file: UploadFile = File(...)):
+        """Загрузить файл в kb_dir/uploads (multipart, поле «file»).
+        400 — неподдерживаемый формат; имя — только basename
+        (traversal-safe). Ответ: {ok, file, size}."""
+        name = os.path.basename(file.filename or "")
+        if not name or os.path.splitext(name)[1].lower() not in UPLOAD_EXTS:
+            raise HTTPException(400, "Неподдерживаемый формат файла")
+        data = await file.read()
+        dest = os.path.join(kb.kb_dir, "uploads", name)
+        with open(dest, "wb") as f:
+            f.write(data)
+        return {"ok": True, "file": name, "size": len(data)}
+
+    @app.get("/api/kb/search")
+    def kb_search(q: str = "", k: int = 5):
+        """Двухэтапный поиск RAG: этап 1 — гибридный top-rag_recall
+        (настройка), этап 2 — реранкер (настройка reranker) и top-k.
+        Ответ: {results, recall_total, reranked}. 400 — пустой q;
+        404 — индекс не построен; 400 — прочие ошибки БЗ."""
+        if not q.strip():
+            raise HTTPException(400, "Запрос (q) не может быть пустым")
+        try:
+            s = kb.settings()
+            rag = kb.search_rag(q, s["rag_recall"], k, s["reranker"])
+        except KBError as e:
+            if str(e) == "Индекс не построен":
+                raise HTTPException(404, "Индекс не построен")
+            raise HTTPException(400, str(e))
+        return {"results": rag["results"],
+                "recall_total": rag["recall_total"],
+                "reranked": rag["reranked"]}
+
+    @app.get("/api/kb/settings")
+    def kb_settings_get():
+        """Текущие настройки БЗ (agent_loop, rag, rag_top_k, strategy,
+        embedder)."""
+        return kb.settings()
+
+    @app.post("/api/kb/settings")
+    def kb_settings_set(body: dict):
+        """Частичное обновление настроек БЗ; 400 — некорректное значение."""
+        try:
+            return kb.update_settings(body)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
 
     # ---------- токены ----------
 

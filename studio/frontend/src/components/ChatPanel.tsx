@@ -1,14 +1,15 @@
-// Центральная панель: шапка (название + бейдж профиля + дропдаун модели),
+// Центральная панель: шапка (название + токен-гейдж + бейдж профиля),
 // лента сообщений (включая карточки процесса задачи, день 13b, и карточки
 // результатов MCP-инструментов, день 16), тумблер режимов чат/задача и
 // инпут-капсула. В режиме «чат» команда «/» открывает автодополнение
 // MCP-серверов/инструментов (день 16, tool-loop).
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { useStudio, type Message } from '../state'
-import type { McpServer, McpTool } from '../api'
+import type { McpServer, McpTool, RagContext } from '../api'
 import TaskCard, { taskFromMarkers } from './TaskCard'
 import SaveMessageModal from './SaveMessageModal'
 import ToolCallModal from './ToolCallModal'
+import TokenGauge from './TokenGauge'
 
 // Строка автодополнения «/» (день 16): сервер (tier-1), инструмент
 // (tier-2) или подсказка (сервер не подключён)
@@ -78,20 +79,25 @@ function formatToolName(n: string): string {
   return i > 0 ? `${n.slice(0, i)} · ${n.slice(i + 2)}` : n
 }
 
+// Узел горизонтальной ленты «цикла агента» (день 20, уточнение):
+// 🧠 — решение модели (итерация tool-loop) или 🔧 — вызов инструмента
+// со статусом: ok — результат пришёл, error — в результате "error",
+// active — результата ещё нет (в процессе)
+type FlowNode =
+  | { kind: 'brain'; key: string; n: number; isLive: boolean }
+  | { kind: 'tool'; key: string; raw: string; label: string; status: 'ok' | 'error' | 'active' }
+
 // Сворачиваемый блок «Шаги агента»: подряд идущие tool-сообщения
 // (assistant.tool_calls / role:"tool") — в одной группе, свёрнута по
 // умолчанию; в развёрнутом теле каждый шаг — свой сворачиваемый ряд (StepRow).
-function AgentSteps({ messages }: { messages: Message[] }) {
+// Над шапкой — горизонтальная лента цикла (.agent-flow), всегда видна
+// (даже свёрнутая группа): показывает порядок вызовов (с повторами),
+// статус каждого и «модель думает» (pulse на 🧠 при live).
+function AgentSteps({ messages, live }: { messages: Message[]; live: boolean }) {
   const [open, setOpen] = useState(false)
   const calls = messages.flatMap((m) =>
     Array.isArray(m.tool_calls) ? (m.tool_calls as LlmToolCall[]) : [],
   )
-  // Уникальные имена тулов в порядке первого появления (для бейджей)
-  const names: string[] = []
-  for (const tc of calls) {
-    const n = tc.function?.name
-    if (n && !names.includes(n)) names.push(n)
-  }
   // Суммарная оценка токенов группы: аргументы всех вызовов + содержимое
   // всех результатов
   const totalTokens = messages.reduce((sum, m) => {
@@ -102,8 +108,67 @@ function AgentSteps({ messages }: { messages: Message[] }) {
     }
     return sum
   }, 0)
+  // ── Лента цикла: узлы из сообщений группы в хронологическом порядке ──
+  // 🧠 «Решение {n}» — на каждое assistant-сообщение с tool_calls (n —
+  // порядковый номер итерации, с 1); затем 🔧 на каждый вызов (formatToolName:
+  // {server}__{tool} → «server · tool»). Статус 🔧 — по совпадающему
+  // role:"tool"-результату: tool_call_id (фолбэк — name); в содержимом
+  // результата "error" (best-effort детект) — ошибка; результата нет — узел
+  // активен (спиннер). 🧠 пульсирует (live), когда live && группа заканчивается
+  // ЭТИМ сообщением — решение принято, следующий шаг в полёте («модель думает»).
+  const lastMsg = messages[messages.length - 1]
+  const nodes: FlowNode[] = []
+  let brainN = 0
+  for (let i = 0; i < messages.length; i++) {
+    const m = messages[i]
+    if (!Array.isArray(m.tool_calls) || m.tool_calls.length === 0) continue
+    brainN += 1
+    nodes.push({ kind: 'brain', key: `b-${i}`, n: brainN, isLive: live && m === lastMsg })
+    for (const tc of m.tool_calls as LlmToolCall[]) {
+      const raw = tc.function?.name ?? 'инструмент'
+      // Совпадение результата: сначала по tool_call_id, фолбэк — по имени
+      const res = messages.find((r) => r.role === 'tool' && r.tool_call_id === tc.id)
+        ?? messages.find((r) => r.role === 'tool' && r.name === raw)
+      const status: 'ok' | 'error' | 'active' = res
+        ? (res.content.includes('"error"') ? 'error' : 'ok')
+        : 'active'
+      nodes.push({
+        kind: 'tool',
+        key: `t-${tc.id ?? `${i}-${raw}`}`,
+        raw,
+        label: formatToolName(raw),
+        status,
+      })
+    }
+  }
   return (
     <div className="agent-steps">
+      {/* Лента цикла — над шапкой, всегда видна (порядок + статусы) */}
+      <div className="agent-flow" aria-label="Цикл агента">
+        {nodes.map((node, i) => (
+          <Fragment key={node.key}>
+            {i > 0 && <span className="agent-flow-link" aria-hidden>›</span>}
+            {node.kind === 'brain' ? (
+              <span
+                className={`agent-flow-node agent-flow-node--brain${node.isLive ? ' agent-flow-node--live' : ''}`}
+                title="Решение модели (итерация цикла)"
+              >
+                🧠 <span className="agent-flow-label">Решение {node.n}</span>
+              </span>
+            ) : (
+              <span
+                className={`agent-flow-node agent-flow-node--tool agent-flow-node--${node.status}`}
+                title={node.raw}
+              >
+                🔧 <span className="agent-flow-label">{node.label}</span>
+                {node.status === 'ok' && <span className="agent-flow-mark">✓</span>}
+                {node.status === 'error' && <span className="agent-flow-mark">✗</span>}
+                {node.status === 'active' && <span className="agent-flow-spin" />}
+              </span>
+            )}
+          </Fragment>
+        ))}
+      </div>
       <button
         type="button"
         className="agent-steps-header"
@@ -111,11 +176,6 @@ function AgentSteps({ messages }: { messages: Message[] }) {
         onClick={() => setOpen((v) => !v)}
       >
         <span className="agent-steps-title">🧩 Шаги агента · {calls.length}</span>
-        {names.map((n) => (
-          <span key={n} className="tool-badge" title={n}>
-            {formatToolName(n)}
-          </span>
-        ))}
         <span className="step-tokens" title="Оценка токенов (эвристика)">≈ {totalTokens} tok</span>
         <span className="agent-steps-caret" aria-hidden>{open ? '▴' : '▾'}</span>
       </button>
@@ -154,6 +214,60 @@ function AgentSteps({ messages }: { messages: Message[] }) {
               )
             }
             return null
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Инспектор RAG-контекста (день 21, реранкер): сворачиваемый блок под
+// assistant-сообщением — какие чанки базы знаний ушли в system-промпт
+// (rank/score/источник/отрывок). Свёрнут по умолчанию: не двигает
+// авто-скролл ленты и не шумит, пока пользователь не раскроет.
+function RagContextInspector({ ctx }: { ctx: RagContext }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="rag-ctx">
+      <button
+        type="button"
+        className="rag-ctx-toggle"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {open
+          ? '▲ Скрыть контекст RAG'
+          : `▼ Показать извлечённый контекст RAG (${ctx.chunks.length} чанков из ${ctx.recall_total})`}
+      </button>
+      {open && (
+        <div className="rag-ctx-list">
+          {ctx.chunks.map((c) => {
+            // Цвет точки — по финальному score (0..1, если реранкено):
+            // зелёный ≥0.8, жёлтый 0.5..0.8, красный <0.5, серый — без реранка
+            const dotClass = c.reranked
+              ? (c.score >= 0.8 ? 'rag-dot-green' : c.score >= 0.5 ? 'rag-dot-yellow' : 'rag-dot-red')
+              : 'rag-dot-neutral'
+            return (
+              <div key={c.rank} className="rag-ctx-item">
+                <span className="rag-ctx-line">
+                  <span className={`rag-dot ${dotClass}`} />
+                  {c.reranked && (c.stage1_rank ?? 0) > 20 && (
+                    <span
+                      className="rag-alert"
+                      title={`Реранкер поднял с позиции этапа 1 #${c.stage1_rank}`}
+                    >
+                      🚨
+                    </span>
+                  )}
+                  <span className="rag-ctx-meta">
+                    [Чанк #{c.rank}] Score: {c.score.toFixed(2)}
+                    {c.stage1_rank != null ? ` (Reranked из #${c.stage1_rank})` : ''}
+                  </span>
+                </span>
+                <span className="rag-ctx-src">{c.file}{c.section ? ` · ${c.section}` : ''}</span>
+                <p className="rag-ctx-text">{c.text}</p>
+              </div>
+            )
           })}
         </div>
       )}
@@ -230,6 +344,21 @@ export default function ChatPanel() {
       feedItems.push({ kind: 'msg', index: i })
     }
   })
+  // День 20 (уточнение): «стримирующаяся» группа — последняя группа ленты,
+  // пока ход чата в полёте (state.streaming): её ленте цикла передаём
+  // live (пульс на последнем 🧠). Стрим не активен — все группы live={false}.
+  let lastGroupKey: number | null = null
+  for (let i = feedItems.length - 1; i >= 0; i--) {
+    const it = feedItems[i]
+    if (it.kind === 'group') { lastGroupKey = it.key; break }
+  }
+
+  // AI Pulse: стрим открыт, но assistant-сообщение в хвоте ленты ещё нет
+  // (оно создаётся только на первом дельта) — строка «модель думает».
+  // Производная величина, без собственного состояния.
+  const last = state.messages[state.messages.length - 1]
+  const waitingForFirstToken =
+    state.streaming && !(last?.role === 'assistant' && last.content.trim() !== '')
 
   // Обычное сообщение (user/assistant) или карточка MCP (день 16);
   // key = исходный индекс сообщения
@@ -273,6 +402,9 @@ export default function ChatPanel() {
             <span className="msg-model-chip" title="Модель, которой выполнен запрос">
               {m.model}
             </span>
+          )}
+          {m.role === 'assistant' && m.rag_context && m.rag_context.chunks.length > 0 && (
+            <RagContextInspector ctx={m.rag_context} />
           )}
         </div>
         {cardAt.has(i) && (() => {
@@ -417,6 +549,7 @@ export default function ChatPanel() {
       <header className="chat-head">
         <h1 className="chat-title">{active ? active.title : 'Нет активного диалога'}</h1>
         <div className="chat-head-actions">
+          <TokenGauge />
           {state.invariantViolation != null && state.invariantViolation.length > 0 && (
             <span
               className="invariant-badge"
@@ -437,17 +570,6 @@ export default function ChatPanel() {
               {activeProfile.status === 'declined' ? 'Профиль отключён' : 'Профиль не заполнен'}
             </button>
           )}
-          <select
-            className="model-select"
-            title="Модель LLM"
-            value={currentModel}
-            disabled={state.streaming || modelOptions.length === 0}
-            onChange={(e) => void setModel(e.target.value)}
-          >
-            {modelOptions.map((m) => (
-              <option key={m.id} value={m.id}>{m.id}</option>
-            ))}
-          </select>
           <button
             type="button"
             className="btn-icon mcp-toggle"
@@ -473,10 +595,25 @@ export default function ChatPanel() {
         {state.messages.length === 0 && <p className="chat-empty">Отправьте первое сообщение…</p>}
         {feedItems.map((item) =>
           item.kind === 'group' ? (
-            <AgentSteps key={`steps-${item.key}`} messages={item.messages} />
+            <AgentSteps
+              key={`steps-${item.key}`}
+              messages={item.messages}
+              live={state.streaming && item.key === lastGroupKey}
+            />
           ) : (
             renderMsg(state.messages[item.index], item.index)
           ),
+        )}
+        {waitingForFirstToken && (
+          // AI Pulse: «модель думает…» — пока нет первого токена
+          // (каретка появится вместе с текстом, в .msg-text)
+          <div className="msg assistant" role="status" aria-live="polite">
+            <div className="msg-role">модель</div>
+            <div className="msg-text ai-pulse-row">
+              <span className="ai-pulse-orb" aria-hidden="true" />
+              <span className="ai-pulse-text">Модель думает…</span>
+            </div>
+          </div>
         )}
         {task && !cardAt.has(state.messages.findIndex((m) => m.task_id === task.task_id)) && (
           // Живая задача, якорь ещё не в ленте (start в процессе) — карточка хвостом
@@ -562,6 +699,17 @@ export default function ChatPanel() {
         <button type="button" className="btn send" onClick={submit} disabled={!canSend}>
           {chatMode === 'chat' ? 'Отправить' : task?.stage === 'paused' ? 'Сохранить' : 'Запустить'}
         </button>
+        <select
+          className="model-select"
+          title="Модель LLM"
+          value={currentModel}
+          disabled={state.streaming || modelOptions.length === 0}
+          onChange={(e) => void setModel(e.target.value)}
+        >
+          {modelOptions.map((m) => (
+            <option key={m.id} value={m.id}>{m.id}</option>
+          ))}
+        </select>
       </div>
 
       {saveMsg && (

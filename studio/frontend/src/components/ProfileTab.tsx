@@ -189,9 +189,13 @@ export default function ProfileTab() {
     void (async () => {
       setBusy(true)
       try {
-        const { profile } = await apiPostProfileAction(dialogueId, a)
+        const { profile, interview_text } = await apiPostProfileAction(dialogueId, a)
         setProfile(dialogueId, profile)
-        if (a === 'interview') setHint('Напишите «интервью» в чате, чтобы начать')
+        if (a === 'interview') {
+          // Бэкенд вернул текст интервью (4 вопроса) — показываем его;
+          // поле отсутствует (старый бэкенд) — прежняя подсказка
+          setHint(interview_text || 'Напишите «интервью» в чате, чтобы начать')
+        }
       } catch (err) {
         console.error('profile action:', err)
       } finally {

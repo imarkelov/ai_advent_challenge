@@ -6,9 +6,16 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from agent import StudioAgent, TASK_STAGE_USER
+from agent import PROFILE_INTERVIEW_TEXT, StudioAgent, TASK_STAGE_USER
 from conftest import delta_chunk, sse_body, usage_chunk
+from kb import KnowledgeBase
 from mcp import MCPRegistry
+
+
+def _tmp_kb(d):
+    """Изоляция от реального data/kb: tmp-каталог без индекса →
+    build_kb_block не ходит в сеть (api-эмбеддер) в офлайн-тестах."""
+    return KnowledgeBase(str(d / "kb"))
 
 
 @pytest.fixture
@@ -36,7 +43,8 @@ def agent_env(tmp_path):
 
     http_client = httpx.Client(transport=httpx.MockTransport(handler))
     return StudioAgent(str(d), base_url="https://mock.local/v1",
-                       api_key="test-key", client=http_client)
+                       api_key="test-key", client=http_client,
+                       kb=_tmp_kb(d))
 
 
 @pytest.fixture
@@ -446,7 +454,8 @@ def test_chat_invariant_violation_post_guard(tmp_path):
     from main import create_app
     agent = StudioAgent(str(d), base_url="https://mock.local/v1",
                         api_key="test-key",
-                        client=httpx.Client(transport=httpx.MockTransport(handler)))
+                        client=httpx.Client(transport=httpx.MockTransport(handler)),
+                        kb=_tmp_kb(d))
     client = TestClient(create_app(agent))
     did = client.post("/api/dialogues").json()["dialogue"]["id"]
     client.post("/api/profile/action", json={"dialogue_id": did,
@@ -608,6 +617,64 @@ def test_profile_action_interview_decline_reset(client, dialogue_id):
         "dialogue_id": dialogue_id, "action": "reset"})
     assert r.json()["profile"]["status"] == "pending"
     assert r.json()["profile"]["name"] == ""
+
+
+def test_profile_action_response_includes_interview_text(client, dialogue_id):
+    # День 20: ответ /api/profile/action дополнен interview_text
+    # (константа с 4 вопросами анкеты) для вкладки «Профили» UI
+    r = client.post("/api/profile/action", json={
+        "dialogue_id": dialogue_id, "action": "interview"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["profile"]["interview"] is True
+    assert body["interview_text"] == PROFILE_INTERVIEW_TEXT
+    assert "имя" in body["interview_text"]
+    assert "стоп-слова" in body["interview_text"] or "табу" in body["interview_text"]
+    # поле присутствует и для decline/reset
+    r2 = client.post("/api/profile/action", json={
+        "dialogue_id": dialogue_id, "action": "decline"})
+    assert r2.json()["interview_text"] == PROFILE_INTERVIEW_TEXT
+
+
+def test_chat_pending_profile_goes_to_llm_normally(client, dialogue_id):
+    # День 20: обязательное приглашение удалено — первое сообщение нового
+    # диалога (pending, без interview) уходит в обычный LLM-стрим
+    with client.stream("POST", "/api/chat",
+                       json={"dialogue_id": dialogue_id,
+                             "message": "объясни лямбды"}) as resp:
+        assert resp.status_code == 200
+        lines = list(resp.iter_lines())
+    events = parse_sse(lines)
+    assert [e["type"] for e in events] == ["delta", "delta", "done"]
+    done = events[-1]
+    assert done["answer"] == "Привет"
+    assert "инициализировать профиль" not in done["answer"]
+    assert done["usage"]["total_tokens"] == 15
+    assert done["request_id"] == 1
+    r = client.get(f"/api/dialogues/{dialogue_id}")
+    assert r.json()["dialogue"]["profile"]["status"] == "pending"
+
+
+def test_chat_after_api_interview_runs_extraction(client, dialogue_id):
+    # Явное интервью через API → следующий чат-ход = ответ анкеты:
+    # идёт extraction-путь (не LLM-стрим). Mock-handler не отдаёт
+    # JSON-профиль → retry-текст, статус остаётся pending+interview
+    r = client.post("/api/profile/action", json={
+        "dialogue_id": dialogue_id, "action": "interview"})
+    assert r.status_code == 200
+    assert r.json()["profile"]["interview"] is True
+    assert r.json()["interview_text"] == PROFILE_INTERVIEW_TEXT
+    with client.stream("POST", "/api/chat",
+                       json={"dialogue_id": dialogue_id,
+                             "message": "Иван, backend, кратко, мат"}) as resp:
+        lines = list(resp.iter_lines())
+    events = parse_sse(lines)
+    assert events[-1]["type"] == "done"
+    assert "повтор" in events[-1]["answer"].lower()
+    assert events[-1]["usage"] is None
+    r = client.get(f"/api/dialogues/{dialogue_id}")
+    p = r.json()["dialogue"]["profile"]
+    assert p["status"] == "pending" and p["interview"] is True
 
 
 def test_profile_action_unknown_400(client, dialogue_id):
@@ -866,7 +933,8 @@ def test_run_on_failed_retries(tmp_path):
     d.mkdir()
     agent = StudioAgent(str(d), base_url="https://mock.local/v1",
                         api_key="test-key",
-                        client=httpx.Client(transport=httpx.MockTransport(handler)))
+                        client=httpx.Client(transport=httpx.MockTransport(handler)),
+                        kb=_tmp_kb(d))
     from main import create_app
     c = TestClient(create_app(agent))
     did = c.post("/api/dialogues").json()["dialogue"]["id"]
@@ -933,7 +1001,8 @@ def test_pause_during_validation_verdict_fail(tmp_path):
     d.mkdir()
     agent = StudioAgent(str(d), base_url="https://mock.local/v1",
                         api_key="test-key",
-                        client=httpx.Client(transport=httpx.MockTransport(handler)))
+                        client=httpx.Client(transport=httpx.MockTransport(handler)),
+                        kb=_tmp_kb(d))
     holder["agent"] = agent
     from main import create_app
     c = TestClient(create_app(agent))

@@ -48,7 +48,9 @@ export function apiDelete<T>(path: string): Promise<T> {
 // ── Профиль пользователя (день 12) ──────────────────────────────────────────
 // Профиль привязан к диалогу: 4 текстовых поля + статус + флаг интервью.
 // POST /api/profile      {dialogue_id, name, role, tone, taboos} → {profile}
-// POST /api/profile/action {dialogue_id, action: interview|decline|reset} → {profile}
+// POST /api/profile/action {dialogue_id, action: interview|decline|reset} →
+// {profile, interview_text?} — interview_text: текст интервью (4 вопроса),
+// приходит только для action=interview (старый бэкенд — без поля)
 
 export interface UserProfile {
   status: 'pending' | 'active' | 'declined'
@@ -74,7 +76,7 @@ export function apiPostProfile(
 export function apiPostProfileAction(
   dialogue_id: string,
   action: 'interview' | 'decline' | 'reset',
-): Promise<{ profile: UserProfile }> {
+): Promise<{ profile: UserProfile; interview_text?: string }> {
   return apiPost('/profile/action', { dialogue_id, action })
 }
 
@@ -422,6 +424,190 @@ export type ChatEvent =
   | { type: 'invariant_violation'; patterns: string[] }
   | { type: 'done'; answer: string; usage: Record<string, unknown> | null; request_id: number }
   | { type: 'error'; message: string }
+
+// ── База знаний (день 21): индекс документов + RAG ──────────────────────────
+// GET    /api/kb/stats                → KbStats (404 {detail} — индекс не построен)
+// GET    /api/kb/uploads              → {uploads: [{name, size}]} (работает без индекса)
+// POST   /api/kb/index {strategy, embedder} → KbBuildResult (400 — некорректные параметры)
+// POST   /api/kb/upload (multipart "file")  → {ok, file, size} (400 — неподдерживаемое расширение)
+// GET    /api/kb/search?q=&k=         → {results, recall_total, reranked} (404 — нет индекса)
+// GET/POST /api/kb/settings           → KbSettings (POST — частичное обновление)
+
+export type KbStrategy = 'fixed' | 'structural'
+export type KbEmbedder = 'hash' | 'api'
+// Реранкер этапа 2 (день 21): cross-encoder поверх гибридного поиска
+export type KbReranker = 'off' | 'api'
+
+// Метрики стратегии чанкинга (бенчмарк при сборке индекса)
+export interface StrategyMetric {
+  chunks: number
+  avg_chars: number
+  max_chars: number
+  hit_at_3: number
+  precision_at_3: number
+  mrr: number
+}
+
+export interface StrategyMetrics {
+  fixed: StrategyMetric
+  structural: StrategyMetric
+}
+
+// Загрузка пользователя (data/kb/uploads): {name, size}. Несёт отдельный
+// GET /api/kb/uploads — работает ДО сборки индекса (stats при этом 404)
+export type KbUpload = { name: string; size: number }
+
+export interface KbStats {
+  exists: true
+  strategy: KbStrategy
+  embedder: KbEmbedder
+  dim: number
+  built_at: string
+  stats: {
+    docs: number
+    files: number
+    chunks: number
+    total_chars: number
+    build_ms: number
+    corpus_words: number
+  }
+  comparison: StrategyMetrics
+  files: string[]
+  // Загрузки пользователя (data/kb/uploads): видны до пересборки индекса;
+  // в files попадают только после «Индексировать»
+  uploads?: KbUpload[]
+  // Корпус, который ещё не попал в индекс (новые загрузки/доки)
+  pending_files?: string[]
+  // День 21 (реранкер): ключ GPUSTACK_KEY_RERANK настроен (false — только
+  // гибридный поиск, даже если settings.reranker === 'api')
+  reranker_key_configured: boolean
+}
+
+// Прогресс сборки индекса (GET /api/kb/build-status, polling из UI).
+// phase: corpus | chunking | embedding | metrics | save | idle | done
+export interface KbBuildStatus {
+  running: boolean
+  phase: string
+  done: number
+  total: number
+}
+
+export interface KbSearchResult {
+  chunk_id: string
+  source: string
+  file: string
+  section: string
+  score: number
+  text: string
+  // День 21 (реранкер): cross-encoder score 0..1 (только при реранке)
+  rerank_score?: number
+  // Позиция (1-based) чанка в результатах этапа 1; есть только при реранке
+  stage1_rank?: number
+}
+
+// День 21 (реранкер): извлечённый RAG-контекст ответа ассистента — какие
+// чанки ушли в system-промпт (видно в инспекторе под сообщением)
+export interface RagContextChunk {
+  rank: number          // 1-based финальный ранг
+  file: string
+  section: string
+  score: number         // rerank_score при реранке, иначе гибридный score
+  stage1_rank: number | null   // null, если не реранкено
+  reranked: boolean
+  text: string          // отрывок ≤300 символов (срезает бэкенд)
+}
+export interface RagContext {
+  recall_total: number
+  reranked: boolean
+  chunks: RagContextChunk[]
+}
+
+export interface KbSettings {
+  agent_loop: boolean
+  rag: boolean
+  rag_top_k: number
+  strategy: KbStrategy
+  embedder: KbEmbedder
+  // День 21 (реранкер): реранкер этапа 2 (off — только гибридный поиск)
+  reranker: KbReranker
+  // Этап 1: число кандидатов (recall), по которому идёт реранк (1..200)
+  rag_recall: number
+}
+
+export interface KbBuildResult {
+  stats: Record<string, unknown>
+  comparison: StrategyMetrics
+  strategy: KbStrategy
+  // full — полная пересборка; incremental — только новые файлы
+  mode: 'full' | 'incremental'
+  // число добавленных файлов (full — весь корпус)
+  added: number
+}
+
+// Статистика индекса. 404 «индекс не построен» — НЕ ошибка: возвращаем
+// {exists:false} (узел-пусто). Другие коды — ApiError с RU-detail.
+export async function apiKbStats(): Promise<KbStats | { exists: false }> {
+  try {
+    return await apiGet<KbStats>('/kb/stats')
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return { exists: false }
+    throw err
+  }
+}
+
+// Список загрузок: GET /api/kb/uploads → {uploads: [{name, size}]}.
+// Независим от индекса: файл виден сразу после upload (stats — 404).
+export function apiKbUploads(): Promise<KbUpload[]> {
+  return apiGet<{ uploads: KbUpload[] }>('/kb/uploads').then((r) => r.uploads)
+}
+
+// Прогресс сборки (polling, пока идёт «Индексировать»)
+export function apiKbBuildStatus(): Promise<KbBuildStatus> {
+  return apiGet<KbBuildStatus>('/kb/build-status')
+}
+
+// Собрать (пересобрать) индекс: POST /api/kb/index {strategy, embedder}
+export function apiKbIndex(strategy: KbStrategy, embedder: KbEmbedder): Promise<KbBuildResult> {
+  return apiPost('/kb/index', { strategy, embedder })
+}
+
+// Загрузить файл в каталог знаний: multipart-запрос, поле "file".
+// Content-Type НЕ задаём вручную — браузер поставит boundary.
+export function apiKbUpload(file: File): Promise<{ ok: boolean; file: string; size: number }> {
+  const fd = new FormData()
+  fd.append('file', file)
+  return fetch(`${BASE}/kb/upload`, { method: 'POST', body: fd }).then((r) => parseJson(r))
+}
+
+// Удалить загруженный файл + его чанки из индекса:
+// DELETE /api/kb/uploads/{name} → {ok, file, chunks_removed}
+export function apiKbDeleteUpload(name: string): Promise<{ ok: boolean; file: string; chunks_removed: number }> {
+  return apiDelete(`/kb/uploads/${encodeURIComponent(name)}`)
+}
+
+// Полная очист базы знаний (все загрузки + индекс; settings сохраняются):
+// DELETE /api/kb → {ok, uploads_removed}
+export function apiKbWipe(): Promise<{ ok: boolean; uploads_removed: number }> {
+  return apiDelete('/kb')
+}
+
+// Поиск по базе (день 21, двухэтапный): GET /api/kb/search?q=&k= →
+// {results, recall_total, reranked} (404 — нет индекса). results — top-k
+// финальных (после реранкера, если включён); recall_total — кандидатов
+// этапа 1, reranked — применялся ли реранкер
+export function apiKbSearch(q: string, k: number = 5): Promise<{ results: KbSearchResult[]; recall_total: number; reranked: boolean }> {
+  return apiGet(`/kb/search?q=${encodeURIComponent(q)}&k=${k}`)
+}
+
+// Текущие настройки RAG/агента: GET /api/kb/settings
+export function apiKbSettings(): Promise<KbSettings> {
+  return apiGet('/kb/settings')
+}
+
+// Частичное обновление настроек: POST /api/kb/settings {…} → актуальные настройки
+export function apiKbSettingsPost(patch: Partial<KbSettings>): Promise<KbSettings> {
+  return apiPost('/kb/settings', patch)
+}
 
 // EventSource не умеет POST, поэтому — fetch + ReadableStream.
 // Буфер разбиваем по '\n\n' (кадр SSE), внутри ищем строки `data: {json}`.

@@ -38,6 +38,7 @@ import {
   type Invariant,
   type McpServer,
   type McpTool,
+  type RagContext,
   type TaskEvent,
   type TaskPlanStatus,
   type TaskState,
@@ -74,9 +75,12 @@ export interface Message {
   // который сохранил бэкенд для контекста LLM (служебные, не bubble)
   tool_call_id?: string
   name?: string
-  // Assistant-сообщения с вызовами инструментов (день 17):
-  // [{id, type, function:{name, arguments}}] (старые — без поля)
-  tool_calls?: unknown
+   // Assistant-сообщения с вызовами инструментов (день 17):
+   // [{id, type, function:{name, arguments}}] (старые — без поля)
+   tool_calls?: unknown
+   // День 21 (реранкер): извлечённый RAG-контекст ответа (какие чанки
+   // ушли в system-промпт; старые сообщения — без поля)
+   rag_context?: RagContext
 }
 
 export interface DialogueMeta {
@@ -158,7 +162,7 @@ export interface ModelInfo {
 
 // Активная вкладка правой панели «Контекст» (день 12: бейдж в шапке чата
 // открывает вкладку «Профили» извне панели)
-export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile' | 'invariants'
+export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile' | 'invariants' | 'kb'
 
 export interface StudioState {
   loaded: boolean

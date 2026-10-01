@@ -28,9 +28,11 @@ for _stream in (sys.stdout, sys.stderr):
         pass
 
 try:  # пакетный режим: studio.backend.agent
+    from .kb import KnowledgeBase, _STOPWORDS, _tokenize
     from .memory import MemoryStore, atomic_write_json, read_json
     from .mcp import MCPRegistry, MCPError
 except ImportError:  # dev-режим: импорт из studio/backend
+    from kb import KnowledgeBase, _STOPWORDS, _tokenize
     from memory import MemoryStore, atomic_write_json, read_json
     from mcp import MCPRegistry, MCPError
 
@@ -291,7 +293,8 @@ class StudioAgent:
     """Агент-обёртка над LLM API (OpenAI-совместимое) с памятью и журналом."""
 
     def __init__(self, data_dir: str, base_url: str = None, api_key: str = None,
-                 client=None, env=None, verify_ssl: bool = None, mcp=None):
+                 client=None, env=None, verify_ssl: bool = None, mcp=None,
+                 kb: KnowledgeBase | None = None):
         """Создаёт агента.
 
         data_dir — каталог данных (MemoryStore + config.json + requests.json);
@@ -304,9 +307,17 @@ class StudioAgent:
           сертификат, поэтому проверка отключена. Для продакшена верните True.
         mcp — MCPRegistry (в тестах — с fake-launcher); по умолчанию
           MCPRegistry(self.store).
+        kb — KnowledgeBase (день 21, в тестах — с tmp-каталогом); по
+          умолчанию — KnowledgeBase(<repo>/data/kb) (тот же корень
+          репозитория, что дефолтный repo_root в kb.py).
         """
         self.store = MemoryStore(data_dir)
         self.mcp = mcp or MCPRegistry(self.store)
+        if kb is None:
+            base = os.path.dirname(os.path.abspath(__file__))
+            repo_root = os.path.dirname(os.path.dirname(base))
+            kb = KnowledgeBase(os.path.join(repo_root, "data", "kb"))
+        self.kb = kb
         self.base_url = (base_url or os.environ.get("GPUSTACK_BASE_URL",
                         "https://gpustack.data.lmru.tech/v1")).rstrip("/")
         self.api_key = api_key if api_key is not None else os.environ.get("GPUSTACK_API_KEY", "")
@@ -399,6 +410,96 @@ class StudioAgent:
         инвариантов нет. Порядок в build_payload: базовый промпт →
         профиль → инварианты → блоки памяти → правило конфликтов."""
         return self.store.build_invariants_block()
+
+    @staticmethod
+    def _focus_snippet(text: str, query: str, limit: int = 300) -> str:
+        """День 21 (hybrid RAG): окно выдержки `limit` символов.
+
+        Чанк может быть длиннее (1200+ симв.) — слепой срез text[:limit]
+        утопляет факт в середине/хвосте чанка (пасхалка «...телефон ...»,
+        66 симв. на 1200, LLM «не видела» и отвечала, что телефона не
+        было). Окно центрируется на первом вхождении самого
+        дискриминативного (длинейшего) некраткого query-токена;
+        инфлексия срезается (до 2 симв. — «телефона» → «телефон»).
+        Ни один токен не найден — первые `limit` символов (как раньше)."""
+        qterms = sorted({t for t in _tokenize(query)
+                         if t not in _STOPWORDS and len(t) >= 5},
+                        key=len, reverse=True)
+        low = text.lower()
+        for t in qterms:
+            for cand in (t, t[:-1], t[:-2]):
+                if len(cand) < 5:
+                    continue
+                i = low.find(cand)
+                if i != -1:
+                    start = max(0, i - limit // 3)
+                    return text[start:start + limit]
+        return text[:limit]
+
+    def _rag_retrieve(self, query: str, recall: int, top_k: int,
+                      reranker_mode: str = "off") -> dict:
+        """День 21 (реранкер): двухэтапный RAG-поиск — гибридный
+        top-`recall` (этап 1), при включённом реранкере — cross-encoder
+        (этап 2) и top-`top_k`. Возврат:
+        {"results": [...], "recall_total": N, "reranked": bool}.
+        Индекс не построен / поиск не удался (KBError и пр. — сбой не
+        ломает чат, только лог) — пустые results."""
+        try:
+            return self.kb.search_rag(query, recall, top_k, reranker_mode)
+        except Exception as e:
+            print("[KB] RAG: поиск не удался: " + str(e), flush=True)
+            return {"results": [], "recall_total": 0, "reranked": False}
+
+    def build_kb_block(self, query: str, top_k: int = 3) -> str:
+        """День 21: RAG-блок базы знаний для system-промпта — top-k
+        релевантных выдержек (двухэтапный поиск: гибридный top-rag_recall
+        + реранкер по настройкам БЗ), каждая ≤ 300 символов; окно
+        выдержки центрируется на характерном токене запроса
+        (`_focus_snippet`). Пусто, если индекс не построен, поиск не
+        удался (KBError и пр. — сбой не ломает чат, только лог) или
+        результатов нет."""
+        s = self.kb.settings()
+        rag = self._rag_retrieve(query, s["rag_recall"], top_k,
+                                 s["reranker"])
+        return self._render_kb_block(query, rag["results"])
+
+    def _render_kb_block(self, query: str, results: list) -> str:
+        """RAG-блок для system-промпта из результатов поиска; пусто —
+        при отсутствии результатов."""
+        if not results:
+            return ""
+        lines = ["\n\nБаза знаний (релевантные выдержки из документов — "
+                 "используй их, если релевантно запросу; цитируй источник "
+                 "(file, section)):"]
+        for i, r in enumerate(results, 1):
+            text = self._focus_snippet(r.get("text") or "", query)
+            lines.append(f"{i}. [{r.get('file')} · {r.get('section')}] — "
+                         f"{text}")
+        return "\n".join(lines)
+
+    def _kb_context(self, query: str, rag: dict) -> dict | None:
+        """День 21 (реранкер): контекст RAG для инспектора во фронтенде —
+        final top-k чанков: ранг, file·section, score (rerank_score, если
+        реранк применялся, иначе гибридный), stage1_rank (ранг этапа 1,
+        если реранк применялся), окно выдержки. None — без результатов;
+        служебное поле assistant-сообщения, в LLM-payload не уходит."""
+        results = rag.get("results") or []
+        if not results:
+            return None
+        chunks = []
+        for i, r in enumerate(results, 1):
+            chunks.append({
+                "rank": i,
+                "file": r.get("file"),
+                "section": r.get("section"),
+                "score": r.get("rerank_score", r.get("score")),
+                "stage1_rank": r.get("stage1_rank"),
+                "reranked": bool(r.get("reranked")),
+                "text": self._focus_snippet(r.get("text") or "", query),
+            })
+        return {"recall_total": rag.get("recall_total", 0),
+                "reranked": bool(rag.get("reranked")),
+                "chunks": chunks}
 
     def build_payload(self, dialogue_id: str) -> list:
         """Список сообщений для LLM: [system (промпт + профиль + инварианты
@@ -554,10 +655,16 @@ class StudioAgent:
                     self.store.rename_dialogue(dialogue_id, new_title)
                 except ValueError:
                     pass
-        # День 12: pending-профиль — служебный ход без LLM-стрима
-        # (приглашение/интервью/отказ); первый запрос не выполняется.
+        # День 12 (обновлено в дне 20): pending-профиль — обязательное
+        # приглашение удалено, первое сообщение нового диалога уходит в LLM
+        # обычным потоком. Служебный ход инициализации профиля (без
+        # LLM-стрима) выполняется ТОЛЬКО если пользователь явно запустил
+        # интервью через POST /api/profile/action {action: "interview"}
+        # (флаг interview в профиле): сообщение трактуется как ответ на
+        # анкету. Вручную/отказ по-прежнему доступны через тот же API
+        # (decline/reset) и вкладку «Профили» в UI.
         profile = self.store.profile_get(dialogue_id)
-        if profile["status"] == "pending":
+        if profile["status"] == "pending" and profile.get("interview"):
             answer, remainder = self._profile_init_turn(dialogue_id, message,
                                                         cfg["model"])
             self.store.append_message(dialogue_id, "assistant", answer)
@@ -569,11 +676,31 @@ class StudioAgent:
             # отказ + содержательное дополнение (баг №2): подтверждаем отказ,
             # затем выполняем остаток запроса обычным chat-потоком.
             message = remainder
+        # День 21: база знаний — настройки ОДИН раз за ход.
+        # agent_loop=false — без tools-пейлоада и без tool-loop (один
+        # LLM-вызов, как без MCP-серверов в дне 16); rag — RAG-блок
+        # выдержек в system-промпте.
+        s = self.kb.settings()
+        kb_block = ""
+        kb_context = None
+        if s["rag"]:
+            # Двухэтапный поиск один раз за ход: top-`rag_recall` (этап 1,
+            # гибрид) → реранкер (этап 2, если включён) → top-`rag_top_k`.
+            # kb_block — в system-промпт; kb_context — инспектор контекста
+            # RAG под assistant-ответом (служебное поле, в LLM не уходит).
+            rag = self._rag_retrieve(message, s["rag_recall"],
+                                     s["rag_top_k"], s["reranker"])
+            kb_block = self._render_kb_block(message, rag["results"])
+            kb_context = self._kb_context(message, rag)
         # День 17: tool-loop. Инструменты подключённых MCP-серверов
         # (OpenAI-формат) и карта llm_name -> (server_id, real_name);
         # вычисляем один раз — за ход состав подключённых серверов
-        # не меняется.
-        llm_tools, tool_map = self._llm_tools()
+        # не меняется. День 21: при agent_loop=false — пропускаем
+        # (llm_tools None — в body ключ tools не уходит).
+        if s["agent_loop"]:
+            llm_tools, tool_map = self._llm_tools()
+        else:
+            llm_tools, tool_map = None, {}
         cap = _tool_loop_cap()
         for iteration in range(cap):
             # Каждая итерация: пересобираем пейлоад (в истории появились
@@ -581,6 +708,10 @@ class StudioAgent:
             # гарда по исходному пользовательскому сообщению.
             messages = self._apply_guards(self.build_payload(dialogue_id),
                                           dialogue_id, message)
+            # День 21: RAG-блок — в конец system-промпта (messages[0] —
+            # всегда system, см. build_payload).
+            if kb_block:
+                messages[0]["content"] += kb_block
             body = {
                 "model": cfg["model"],
                 "temperature": cfg["temperature"],
@@ -682,7 +813,8 @@ class StudioAgent:
                 if violation:
                     answer = self._invariant_refusal(hits)
                 self.store.append_message(dialogue_id, "assistant", answer,
-                                          model=cfg["model"])
+                                          model=cfg["model"],
+                                          rag_context=kb_context)
                 print("[Final Response] " + answer[:200], flush=True)
                 if violation:
                     yield {"type": "invariant_violation", "patterns": hits}

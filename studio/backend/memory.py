@@ -327,13 +327,14 @@ class MemoryStore:
             self._write_dialogues(data)
 
     def append_message(self, dialogue_id: str, role: str, content: str,
-                       model: str | None = None,
-                       task_stage: str | None = None,
-                       task_id: str | None = None,
-                       task_step: str | None = None,
-                        task_usage: dict | None = None,
-                        task_duration: int | None = None,
-                        mcp_tool: dict | None = None) -> None:
+                        model: str | None = None,
+                        task_stage: str | None = None,
+                        task_id: str | None = None,
+                        task_step: str | None = None,
+                         task_usage: dict | None = None,
+                         task_duration: int | None = None,
+                         mcp_tool: dict | None = None,
+                         rag_context: dict | None = None) -> None:
         """Добавить сообщение в диалог; ValueError, если диалог не существует.
 
         model — метка модели (assistant); task_stage/task_id/task_step —
@@ -342,7 +343,11 @@ class MemoryStore:
         для восстановления карточки после перезагрузки;
         mcp_tool — MCP-маркер (день 16, tool-loop): {server, tool};
         в отличие от task_-маркеров это сообщение ВИДИМО LLM (role=system,
-        уходит в payload).
+        уходит в payload);
+        rag_context — извлечённый RAG-контекст (день 21, реранкер):
+        {recall_total, reranked, chunks: [{rank, file, section, score,
+        stage1_rank, reranked, text}]}; служебное поле, в тело LLM-запроса
+        НЕ уходит (инспектор контекста во фронтенде).
         """
         with self._lock:
             data = self._read_dialogues()
@@ -364,6 +369,8 @@ class MemoryStore:
                 msg["task_duration"] = task_duration
             if mcp_tool is not None:
                 msg["mcp_tool"] = mcp_tool
+            if rag_context is not None:
+                msg["rag_context"] = rag_context
             d.setdefault("messages", []).append(msg)
             self._write_dialogues(data)
 

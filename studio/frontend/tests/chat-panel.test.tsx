@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useEffect, useRef } from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { StudioProvider, useStudio } from '../src/state'
-import type { McpServer, McpTool, TaskState, UserProfile } from '../src/api'
+import type { McpServer, McpTool, RagContext, TaskState, UserProfile } from '../src/api'
 import ChatPanel from '../src/components/ChatPanel'
 import Sidebar from '../src/components/Sidebar'
 
@@ -122,6 +122,26 @@ describe('ChatPanel — выбор модели из выпадающего сп
     await screen.findByRole('option', { name: 'qwen3.8-27b' })
     expect(Array.from(select.options).map((o) => o.value)).toEqual(['qwen3.8-27b'])
     expect(select.value).toBe('qwen3.8-27b')
+  })
+})
+
+describe('ChatPanel — дропдаун модели в нижней строке ввода', () => {
+  it('model-select — в .chat-input, в шапке (.chat-head) его нет', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) =>
+        jsonResponse(API_FIXTURES[normalizeUrl(input)] ?? { ok: true })),
+    )
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const select = (await screen.findByRole('combobox')) as HTMLSelectElement
+    expect(select).toHaveClass('model-select')
+    // дропдаун перенесён из шапки в строку ввода (правее кнопки отправки)
+    expect(select.closest('.chat-input')).toBeTruthy()
+    expect(select.closest('.chat-head')).toBeNull()
   })
 })
 
@@ -729,6 +749,84 @@ describe('ChatPanel — отправка в режиме задачи (день 
   })
 })
 
+// ── AI Pulse: строка «модель думает» между отправкой и первым токеном ──
+
+describe('ChatPanel — AI Pulse: строка «модель думает»', () => {
+  // loadAll-контракты + активный диалог d1; POST /api/chat — открытый
+  // SSE-поток (не закрывается → state.streaming остаётся true)
+  function stubPulseFetch(chatResponse: Response) {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = normalizeUrl(input)
+        const method = init?.method ?? 'GET'
+        if (method === 'POST' && url === '/api/chat') return chatResponse
+        if (url === '/api/dialogues') {
+          return jsonResponse({
+            active_id: 'd1',
+            dialogues: [{ id: 'd1', title: 'Д', created: '', message_count: 0 }],
+          })
+        }
+        if (url === '/api/dialogues/d1') return jsonResponse({ dialogue: { messages: [] } })
+        return jsonResponse(API_FIXTURES[url] ?? { ok: true })
+      }),
+    )
+  }
+
+  it('стрим открыт, в хвоте нет текста assistant — сфера + «Модель думает…» (каретки нет)', async () => {
+    // поток без дельт: assistant-сообщение ещё не создано
+    stubPulseFetch(openSse([]))
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const ta = (await screen.findByPlaceholderText(/Сообщение…/)) as HTMLTextAreaElement
+    fireEvent.change(ta, { target: { value: 'привет' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Отправить' }))
+
+    expect(await screen.findByText('Модель думает…')).toBeTruthy()
+    expect(container.querySelector('.ai-pulse-row')).toBeTruthy()
+    expect(container.querySelector('.ai-pulse-orb')).toBeTruthy()
+    // текста ещё нет — каретка в .msg-text не рендерится
+    expect(container.querySelector('.caret')).toBeNull()
+  })
+
+  it('стрим открыт, в хвоте текст assistant — пульс-строки нет, только каретка', async () => {
+    // первый дельта пришёл, но поток не закрыт (стриминг продолжается)
+    stubPulseFetch(openSse(['data: {"type":"delta","text":"Привет"}\n\n']))
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const ta = (await screen.findByPlaceholderText(/Сообщение…/)) as HTMLTextAreaElement
+    fireEvent.change(ta, { target: { value: 'привет' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Отправить' }))
+
+    await screen.findByText('Привет')
+    expect(screen.queryByText('Модель думает…')).toBeNull()
+    expect(container.querySelector('.ai-pulse-orb')).toBeNull()
+    // стрим ещё идёт — каретка на стримирующемся сообщении
+    await waitFor(() => expect(container.querySelector('.caret')).toBeTruthy())
+  })
+
+  it('стрим не активен — пульс-строки нет', async () => {
+    stubDialogueFetch([
+      { role: 'user', content: 'привет' },
+      { role: 'assistant', content: 'ответ' },
+    ])
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('ответ')
+    expect(screen.queryByText('Модель думает…')).toBeNull()
+    expect(container.querySelector('.ai-pulse-orb')).toBeNull()
+  })
+})
+
 // ── день 16: tool-loop — MCP-команды «/» в режиме чата ──
 
 const FC: McpServer = {
@@ -1029,8 +1127,8 @@ describe('ChatPanel — «Шаги агента»: сворачиваемая г
     )
     // финальный assistant-ответ в ленте (обычный bubble)
     expect(await screen.findByText('Финальный ответ: in_progress')).toBeTruthy()
-    // группа свёрнута: заголовок-кнопка + бейдж тула + суммарные токены
-    // (аргументы 22 символа ≈ 10, результат 15 ≈ 7 → сумма ≈ 17)
+    // группа свёрнута: ленте цикла (подпись узла 🔧) + заголовок-кнопка
+    // с суммарными токенами (аргументы 22 символа ≈ 10, результат 15 ≈ 7 → ≈ 17)
     const header = await screen.findByRole('button', { name: /🧩 Шаги агента/ })
     expect(header).toHaveAttribute('aria-expanded', 'false')
     expect(screen.getByText('task_get · get_task_details')).toBeTruthy()
@@ -1085,7 +1183,8 @@ describe('ChatPanel — «Шаги агента»: сворачиваемая г
       </StudioProvider>,
     )
     const header = await screen.findByRole('button', { name: /🧩 Шаги агента/ })
-    // группа свёрнута: заметки и JSON аргументов не видно; бейдж search — виден
+    // группа свёрнута: заметки и JSON аргументов не видно;
+    // подпись узла search в ленте цикла — видна
     expect(screen.queryByText('Ищу данные по запросу')).toBeNull()
     expect(screen.queryByText('{"query":"ИИ"}')).toBeNull()
     expect(screen.getByText('search')).toBeTruthy()
@@ -1109,7 +1208,7 @@ describe('ChatPanel — «Шаги агента»: сворачиваемая г
     expect(out.closest('pre.tool-card-pre')).toBeTruthy()
   })
 
-  it('заголовок: счётчик вызовов «· 3»; бейджи — уникальные тулы в порядке появления', async () => {
+  it('лента: счётчик вызовов «· 3»; подписи — в порядке вызовов (повторы видны)', async () => {
     stubDialogueFetch([
       { role: 'assistant', content: '', tool_calls: [{ id: 'a', type: 'function', function: { name: 'search', arguments: '{"query":"Самара"}' } }] },
       { role: 'tool', content: 'r1', tool_call_id: 'a', name: 'search' },
@@ -1126,9 +1225,14 @@ describe('ChatPanel — «Шаги агента»: сворачиваемая г
     )
     // три вызова (search, search, summarize) — одна группа, счётчик «· 3»
     expect(await screen.findByRole('button', { name: /🧩 Шаги агента · 3/ })).toBeTruthy()
-    // бейджи: search и summarize по одному (уникальные), порядок первого появления
-    const badges = screen.getAllByText(/^(search|summarize)$/)
-    expect(badges.map((b) => b.textContent)).toEqual(['search', 'summarize'])
+    // лента: подписи в порядке вызовов — повтор (search) виден как отдельный узел
+    const labels = screen.getAllByText(/^(search|summarize)$/)
+    expect(labels.map((b) => b.textContent)).toEqual(['search', 'search', 'summarize'])
+    // все 3 узла тулов со статусом ok (результаты пришли); 🧠 — 3 итерации
+    // (каждый вызов — своё assistant-сообщение с tool_calls)
+    const flow = labels[0].closest('.agent-flow') as HTMLElement
+    expect(flow.querySelectorAll('.agent-flow-node--tool.agent-flow-node--ok')).toHaveLength(3)
+    expect(flow.querySelectorAll('.agent-flow-node--brain')).toHaveLength(3)
     // суммарная оценка токенов группы (аргументы ≈ 8+8+5, результаты ≈ 1+1+1)
     expect(screen.getByText('≈ 24 tok')).toBeTruthy()
     expect(screen.getByText('Готово')).toBeTruthy()
@@ -1155,10 +1259,11 @@ describe('ChatPanel — «Шаги агента»: сворачиваемая г
       </StudioProvider>,
     )
     await screen.findByText('готово')
+    // лента: имя без префикса «__» — как есть; с префиксом — «server · tool»
     expect(screen.getByText('plain_tool')).toBeTruthy()
     expect(screen.getByText('digest_search · search')).toBeTruthy()
-    // дубль бейджей нет (уникальные имена)
-    expect(container.querySelectorAll('.tool-badge')).toHaveLength(2)
+    // ровно 2 узла тулов (повтор одного тула был бы отдельным узлом)
+    expect(container.querySelectorAll('.agent-flow-node--tool')).toHaveLength(2)
   })
 })
 
@@ -1187,5 +1292,332 @@ describe('ChatPanel — кнопка MCP в шапке чата (день 16)', 
     // повторный клик — toggle (close-mcp)
     fireEvent.click(btn)
     await waitFor(() => expect(mcpOpen).toBe(false))
+  })
+})
+
+describe('ChatPanel — «Шаги агента»: лента цикла агента (.agent-flow, день 20, уточнение)', () => {
+  it('лента: 🧠 + 🔧 в порядке вызовов; результат пришёл — статус ok (✓)', async () => {
+    stubDialogueFetch([
+      {
+        role: 'assistant',
+        content: '',
+        tool_calls: [
+          { id: 'c1', type: 'function', function: { name: 'alpha__x', arguments: '{}' } },
+          { id: 'c2', type: 'function', function: { name: 'beta__y', arguments: '{}' } },
+        ],
+      },
+      { role: 'tool', content: 'r1', tool_call_id: 'c1', name: 'alpha__x' },
+      { role: 'tool', content: 'r2', tool_call_id: 'c2', name: 'beta__y' },
+      { role: 'assistant', content: 'готово', model: 'qwen3.8-27b' },
+    ])
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('готово')
+    // лента видна без раскрытия группы: узлы в хронологическом порядке
+    const header = screen.getByRole('button', { name: /🧩 Шаги агента/ })
+    expect(header).toHaveAttribute('aria-expanded', 'false')
+    const flow = container.querySelector('.agent-flow')
+    expect(flow).toBeTruthy()
+    const labels = Array.from(flow.querySelectorAll('.agent-flow-label')).map((el) => el.textContent)
+    expect(labels).toEqual(['Решение 1', 'alpha · x', 'beta · y'])
+    // оба узла тулов — ok (✓), без ✗ и спиннера
+    const tools = flow.querySelectorAll('.agent-flow-node--tool')
+    expect(tools).toHaveLength(2)
+    tools.forEach((t) => {
+      expect(t).toHaveClass('agent-flow-node--ok')
+      expect(t.textContent).toContain('✓')
+      expect(t.textContent).not.toContain('✗')
+      expect(t.querySelector('.agent-flow-spin')).toBeNull()
+    })
+    // 🧠 — нейтральный (стрим не активен: live=false)
+    const brain = flow.querySelector('.agent-flow-node--brain')
+    expect(brain).not.toHaveClass('agent-flow-node--live')
+  })
+
+  it('лента: вызов без результата — узел активен (спиннер, без ✓)', async () => {
+    stubDialogueFetch([
+      {
+        role: 'assistant',
+        content: '',
+        tool_calls: [
+          { id: 'c1', type: 'function', function: { name: 'weather__get_weather', arguments: '{}' } },
+          { id: 'c2', type: 'function', function: { name: 'news__get_news', arguments: '{}' } },
+        ],
+      },
+      // результата c2 нет (второй вызов ещё «в полёте»)
+      { role: 'tool', content: 'r1', tool_call_id: 'c1', name: 'weather__get_weather' },
+      { role: 'assistant', content: 'ок', model: 'qwen3.8-27b' },
+    ])
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('ок')
+    const flow = container.querySelector('.agent-flow')
+    const tools = flow.querySelectorAll('.agent-flow-node--tool')
+    expect(tools).toHaveLength(2)
+    // первый вызов — результат есть (ok), второй — результата нет (active)
+    expect(tools[0]).toHaveClass('agent-flow-node--ok')
+    expect(tools[1]).toHaveClass('agent-flow-node--active')
+    expect(tools[1].querySelector('.agent-flow-spin')).toBeTruthy()
+    expect(tools[1].textContent).not.toContain('✓')
+    expect(tools[1].textContent).not.toContain('✗')
+  })
+
+  it('лента: "error" в содержимом результата — узел error (✗)', async () => {
+    stubDialogueFetch([
+      {
+        role: 'assistant',
+        content: '',
+        tool_calls: [
+          { id: 'c1', type: 'function', function: { name: 'task_get__get_task_details', arguments: '{"task_id": "NOPE"}' } },
+        ],
+      },
+      { role: 'tool', content: '{"error": "Задача не найдена: NOPE"}', tool_call_id: 'c1', name: 'task_get__get_task_details' },
+      { role: 'assistant', content: 'ок', model: 'qwen3.8-27b' },
+    ])
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('ок')
+    const flow = container.querySelector('.agent-flow')
+    const tool = flow.querySelector('.agent-flow-node--tool')
+    expect(tool).toHaveClass('agent-flow-node--error')
+    expect(tool.textContent).toContain('✗')
+    expect(tool.textContent).not.toContain('✓')
+    expect(tool.querySelector('.agent-flow-spin')).toBeNull()
+  })
+
+  it('лента: тул без префикса «__» — подпись как есть', async () => {
+    stubDialogueFetch([
+      {
+        role: 'assistant',
+        content: '',
+        tool_calls: [{ id: 'c1', type: 'function', function: { name: 'plain_tool', arguments: '{}' } }],
+      },
+      { role: 'tool', content: 'r', tool_call_id: 'c1', name: 'plain_tool' },
+      { role: 'assistant', content: 'ок', model: 'qwen3.8-27b' },
+    ])
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('ок')
+    const flow = container.querySelector('.agent-flow')
+    const label = flow.querySelector('.agent-flow-node--tool .agent-flow-label')
+    expect(label).toBeTruthy()
+    expect(label.textContent).toBe('plain_tool')
+  })
+
+  it('лента: один тул в двух итерациях — два 🔧 с одной подписью и два 🧠', async () => {
+    stubDialogueFetch([
+      { role: 'assistant', content: '', tool_calls: [{ id: 'a', type: 'function', function: { name: 'digest_search__search', arguments: '{"query":"A"}' } }] },
+      { role: 'tool', content: 'r1', tool_call_id: 'a', name: 'digest_search__search' },
+      { role: 'assistant', content: '', tool_calls: [{ id: 'b', type: 'function', function: { name: 'digest_search__search', arguments: '{"query":"B"}' } }] },
+      { role: 'tool', content: 'r2', tool_call_id: 'b', name: 'digest_search__search' },
+      { role: 'assistant', content: 'готово', model: 'qwen3.8-27b' },
+    ])
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('готово')
+    const flow = container.querySelector('.agent-flow')
+    // 🧠: две итерации — «Решение 1» и «Решение 2»
+    const brains = Array.from(flow.querySelectorAll('.agent-flow-node--brain .agent-flow-label'))
+      .map((el) => el.textContent)
+    expect(brains).toEqual(['Решение 1', 'Решение 2'])
+    // 🔧: два узла с ОДНОЙ и той же подписью, оба ok
+    const tools = flow.querySelectorAll('.agent-flow-node--tool')
+    expect(tools).toHaveLength(2)
+    tools.forEach((t) => {
+      expect(t.querySelector('.agent-flow-label').textContent).toBe('digest_search · search')
+      expect(t).toHaveClass('agent-flow-node--ok')
+    })
+  })
+
+  it('live: последний 🧠 без результата после — pulse (стрим в полёте)', async () => {
+    // SSE-стрим, который НЕ закрывается: ход «в полёте» (state.streaming=true),
+    // tool-сообщения в ленте — из истории (группа заканчивается решением модели)
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = normalizeUrl(input)
+        const method = init?.method ?? 'GET'
+        if (method === 'POST' && url === '/api/chat') {
+          return new Response(
+            new ReadableStream<Uint8Array>({ start() { /* кадров нет, close нет */ } }),
+            { headers: { 'Content-Type': 'text/event-stream' } },
+          )
+        }
+        if (url === '/api/dialogues') {
+          return jsonResponse({
+            active_id: 'd1',
+            dialogues: [{ id: 'd1', title: 'Д', created: '', message_count: 0 }],
+          })
+        }
+        if (url === '/api/dialogues/d1') {
+          return jsonResponse({
+            dialogue: {
+              messages: [
+                {
+                  role: 'assistant',
+                  content: '',
+                  tool_calls: [{ id: 'c1', type: 'function', function: { name: 'weather__get_weather', arguments: '{}' } }],
+                },
+              ],
+            },
+          })
+        }
+        return jsonResponse(API_FIXTURES[url] ?? { ok: true })
+      }),
+    )
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    // до отправки: 🧠 без пульса (стрим не активен), 🔧 — активен (нет результата)
+    await screen.findByRole('button', { name: /🧩 Шаги агента/ })
+    const brainOf = () => container.querySelector('.agent-flow-node--brain') as HTMLElement
+    expect(brainOf()).not.toHaveClass('agent-flow-node--live')
+    // отправляем сообщение — стрим остаётся открытым (streaming=true);
+    // группа — последняя в ленте и заканчивается решением без результата
+    const ta = document.querySelector('.input-capsule') as HTMLTextAreaElement
+    fireEvent.change(ta, { target: { value: 'статус?' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Отправить' }))
+    await waitFor(() => expect(brainOf()).toHaveClass('agent-flow-node--live'))
+    // 🔧 при этом остаётся активным (результат ещё не пришёл)
+    expect(container.querySelector('.agent-flow-node--tool')).toHaveClass('agent-flow-node--active')
+  })
+})
+
+// ── День 21: инспектор RAG-контекста (реранкер) под assistant-сообщением ──
+
+const RAG_CTX: RagContext = {
+  recall_total: 50,
+  reranked: true,
+  chunks: [
+    { rank: 1, file: 'a.md', section: 'Секция', score: 0.94, stage1_rank: 14, reranked: true, text: 'Текст чанка 1' },
+    { rank: 2, file: 'b.md', section: '', score: 0.62, stage1_rank: 3, reranked: true, text: 'Текст чанка 2' },
+    { rank: 3, file: 'c.md', section: 'Хвост', score: 0.41, stage1_rank: 42, reranked: true, text: 'Текст чанка 3' },
+  ],
+}
+
+// Чанки для проверки цветов точек: green/yellow/red (reranked) + neutral (без реранка)
+const RAG_DOT: RagContext = {
+  recall_total: 10,
+  reranked: false,
+  chunks: [
+    { rank: 1, file: 'a.md', section: '', score: 0.9, stage1_rank: null, reranked: true, text: 'g' },
+    { rank: 2, file: 'b.md', section: '', score: 0.6, stage1_rank: null, reranked: true, text: 'y' },
+    { rank: 3, file: 'c.md', section: '', score: 0.3, stage1_rank: null, reranked: true, text: 'r' },
+    { rank: 4, file: 'd.md', section: '', score: 0.9, stage1_rank: null, reranked: false, text: 'n' },
+  ],
+}
+
+describe('ChatPanel — инспектор RAG-контекста (день 21, реранкер)', () => {
+  it('assistant с rag_context — свёрнутый toggle «(3 чанков из 50)», чанки скрыты', async () => {
+    stubDialogueFetch([
+      { role: 'user', content: 'вопрос' },
+      { role: 'assistant', content: 'Ответ с RAG', model: 'm', rag_context: RAG_CTX },
+    ])
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('Ответ с RAG')
+    const toggle = screen.getByRole('button', { name: /Показать извлечённый контекст RAG \(3 чанков из 50\)/ })
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    // свёрнут: чанки не видны
+    expect(screen.queryByText('Текст чанка 1')).toBeNull()
+    expect(screen.queryByText(/\[Чанк #1\]/)).toBeNull()
+  })
+
+  it('клик по toggle — разворачивает: строка чанка #1 со score + (Reranked из #14)', async () => {
+    stubDialogueFetch([
+      { role: 'user', content: 'вопрос' },
+      { role: 'assistant', content: 'Ответ с RAG', model: 'm', rag_context: RAG_CTX },
+    ])
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('Ответ с RAG')
+    const toggle = screen.getByRole('button', { name: /Показать извлечённый контекст RAG/ })
+    fireEvent.click(toggle)
+    await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'true'))
+    expect(await screen.findByText(/\[Чанк #1\] Score: 0\.94 \(Reranked из #14\)/)).toBeInTheDocument()
+    expect(screen.getByText('a.md · Секция')).toBeInTheDocument()
+    expect(screen.getByText('Текст чанка 1')).toBeInTheDocument()
+    // toggle переключился на «▲ Скрыть контекст RAG»
+    expect(screen.getByRole('button', { name: /Скрыть контекст RAG/ })).toBeInTheDocument()
+  })
+
+  it('🚨 — только у чанка с stage1_rank > 20', async () => {
+    stubDialogueFetch([
+      { role: 'user', content: 'вопрос' },
+      { role: 'assistant', content: 'Ответ с RAG', model: 'm', rag_context: RAG_CTX },
+    ])
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('Ответ с RAG')
+    fireEvent.click(screen.getByRole('button', { name: /Показать извлечённый контекст RAG/ }))
+    await screen.findByText('Текст чанка 1')
+    // chunk #3 (stage1_rank 42 > 20) — сигнал; #1 (14) и #2 (3) — нет
+    expect(screen.getByTitle('Реранкер поднял с позиции этапа 1 #42')).toHaveTextContent('🚨')
+    expect(screen.queryByTitle('Реранкер поднял с позиции этапа 1 #14')).toBeNull()
+    expect(screen.queryByTitle('Реранкер поднял с позиции этапа 1 #3')).toBeNull()
+    // ровно один сигнал в развёрнутом списке
+    expect(screen.getAllByText('🚨')).toHaveLength(1)
+  })
+
+  it('сообщение без rag_context — инспектора (toggle) нет', async () => {
+    stubDialogueFetch([
+      { role: 'user', content: 'привет' },
+      { role: 'assistant', content: 'обычный ответ', model: 'm' },
+    ])
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('обычный ответ')
+    expect(screen.queryByRole('button', { name: /контекст RAG/ })).toBeNull()
+  })
+
+  it('класс точки: green ≥0.8, yellow 0.5..0.8, red <0.5, neutral без реранка', async () => {
+    stubDialogueFetch([
+      { role: 'user', content: 'вопрос' },
+      { role: 'assistant', content: 'Ответ с RAG', model: 'm', rag_context: RAG_DOT },
+    ])
+    const { container } = render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    await screen.findByText('Ответ с RAG')
+    fireEvent.click(screen.getByRole('button', { name: /Показать извлечённый контекст RAG/ }))
+    await screen.findByText('g')
+    const dots = Array.from(container.querySelectorAll('.rag-dot')).map((d) => d.className)
+    expect(dots).toEqual([
+      'rag-dot rag-dot-green',
+      'rag-dot rag-dot-yellow',
+      'rag-dot rag-dot-red',
+      'rag-dot rag-dot-neutral',
+    ])
   })
 })

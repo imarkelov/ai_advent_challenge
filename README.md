@@ -25,6 +25,7 @@
 | День 18 | [`day18-mcp-digest`](https://github.com/imarkelov/ai_advent_challenge/tree/day18-mcp-digest) | Периодический дайджест 24/7: свой stdio MCP-сервер `news_weather` (4 инструмента: `get_weather`/`get_news`/`make_digest`/`get_latest_digest`), общий stdlib-коллектор `collector.py` (погода Open-Meteo + новости vc.ru/habr/tproger, дедуп, top-5), JSON-хранилище `data/digests/` (last-digest.json + история, кап 96, атомарная запись), GitHub Actions cron раз в 6 часов — сбор и коммит дайджеста; агент отвечает «покажи сводку» через tool-loop дня 17 (`get_latest_digest`) |
 | День 19 | [`day19-mcp-pipeline`](https://github.com/imarkelov/ai_advent_challenge/tree/day19-mcp-pipeline) | Композиция MCP-инструментов: stdio MCP-сервер `pipeline_tools` (3 компонуемых инструмента `search`→`summarize`→`saveToFile`), stdlib-PDF-движок `pdf_writer` (полный PDF с кириллицей, встроенный TTF, детерминированные байты), LLM-driven цепочка через tool-loop дня 17 — модель сама решает, какие инструменты вызвать и сколько; `saveToFile` в форматах md/txt/json/pdf; e2e-гибрид проверяет передачу данных между этапами |
 | День 20 | [`day20-mcp-orchestration`](https://github.com/imarkelov/ai_advent_challenge/tree/day20-mcp-orchestration) | Orchestration MCP: 10 едицельных локальных MCP-серверов (1 сервер = 1 тул, каркас `_mcp_base.py`), always-префикс `{server}__{tool}` + каталог серверов в system-промпте, кап tool-loop 15 (`TOOL_LOOP_CAP`), реестр 12 дефолтов с миграцией старых мультитул-серверов, бейджи «server · tool», e2e_day20 — 10-шаговый кросс-серверный флоу (порт 8104) |
+| День 21 | [day21-doc-indexing](https://github.com/imarkelov/ai_advent_challenge/tree/day21-doc-indexing) | База знаний: пайплайн индексации документов (2 стратегии chunking, эмбеддинги, локальный SQLite-индекс, метаданные, сравнение стратегий), гибридный поиск (вектор+BM25, RRF) с опциональным 2-м этапом — cross-encoder-реранкером (qwen3-reranker-4b), RAG-инъект в чат + инспектор RAG-контекста в сообщениях + тумблеры RAG/реранкер/цикл-агента, вкладка «База знаний» (индексация, upload файлов, статистика, сравнение, 2-этапный поиск) |
 
 ## День 7: как работает сервис
 
@@ -1326,3 +1327,327 @@ digest_summarize__summarize {"text": <поле text из search>}` (переда
 ### Статус
 
 Ветка `day20-mcp-orchestration` (от `day19-mcp-pipeline`).
+
+## День 21: База знаний (индексация документов + RAG)
+
+### Что это
+
+База знаний Студии поверх дня 20: пайплайн индексации документов —
+корпус (доки репозитория + код бэкенда + файлы пользователя),
+2 стратегии chunking, 2 эмбеддера, локальный SQLite-индекс с метаданными
+и сравнением стратегий, **гибридный поиск** (векторный + лексический
+BM25, фузия Reciprocal Rank Fusion) с опциональным **2-м этапом —
+реранкером** (cross-encoder `qwen3-reranker-4b`: гибридный recall
+top-`rag_recall` → пересчёт пар (query, doc) → top-`rag_top_k`) — и
+RAG-инъект в агентский чат: на каждое сообщение пользователя в
+system-промпт добавляется блок «База знаний» с top-k релевантными
+выдержками (`agent.build_kb_block`, окно выдержки центрируется на
+характерном токене запроса), RAG-контекст ответа сохраняется в
+assistant-сообщении (инспектор в чате). Управление индексом:
+загрузка/удаление файлов, полная очистка (wipe). Тумблеры: RAG
+вкл/выкл, реранкер off/api и цикл-агента (MCP-тулы tool-loop дня 17)
+вкл/выкл.
+
+Корпус — документы самого репозитория: `README.md`, `RELEASE.md`,
+`docs/superpowers/**/*.md`, `openspec/**/*.md`, `studio/backend/*.py`
++ загрузки пользователя `data/kb/uploads/` (whitelist расширений).
+Замеренный корпус: **67 файлов, 139 261 слово** (~в 11 раз больше
+минимума задания 20–30 страниц).
+
+### Архитектура
+
+- **`studio/backend/kb.py`** (новый, stdlib + httpx для API-эмбеддера
+  и API-реранкера) — RAG-ядро: `KBError`, `CorpusDoc`, `Chunk`,
+  `FixedChunker`, `StructuredChunker`, `HashEmbedder`, `APIEmbedder`,
+  `APIReranker`, `search_rag`, `cosine`, `GOLD_QUERIES`,
+  `KnowledgeBase`.
+- **Сборка корпуса** — 3 источника: `docs` (README.md, RELEASE.md,
+  `docs/superpowers/**/*.md`, `openspec/**/*.md`), `code`
+  (`studio/backend/*.py`), `upload` (`data/kb/uploads/*`, только
+  `UPLOAD_EXTS`).
+- **Две стратегии chunking**:
+  - **FixedChunker** — фиксированный размер **1200** символов,
+    перекрытие **200** (хвост предыдущего чанка = голова следующего);
+  - **StructuredChunker** — markdown: секции по заголовкам `#..######`
+    (заголовок — в метаданных `section`; текст до первого заголовка —
+    «(без заголовка)»); секция длиннее **2400** символов — суб-чанки
+    через FixedChunker; не-markdown (код) — целый файл одним чанком,
+    длиннее 2400 → суб-чанки.
+- **Метаданные чанка** — `{chunk_id, source, file, section, chars,
+  text, vector, terms}`; `terms` — dict терм → tf (для BM25-ноги
+  поиска; пересчитывается при инкрементальной сборке — апгрейд
+  старых индексов без переэмбеддинга); `chunk_id =
+  "<stem>-<strategy>-NNNN"` (индекс в пределах файла).
+- **Два эмбеддера**:
+  - **HashEmbedder** (дефолт) — stdlib: char 3-граммы → `md5` → 256
+    бакетов, L2-нормировка; детерминированный (только hashlib —
+    встроенный `hash()` salted per-process), офлайн/CI;
+  - **APIEmbedder** — GPustack OpenAI-совместимый `POST /embeddings`,
+    модель `qwen3-vl-embedding-8b`, dim **4096**, батчи по **16**;
+    ключ — новая переменная `.env` `GPUSTACK_KEY_EMBED` (400, если не
+    настроен; сбой API при сборке — 502).
+- **Индекс-хранилище** — `data/kb/index.db` (SQLite, stdlib sqlite3;
+  в `.gitignore`): таблица `meta` (key/value — version, strategy,
+  embedder, model, dim, built_at + stats/comparison как JSON) и
+  `chunks` (chunk_id, source, file, section, chars, text, vector —
+  BLOB float32 little-endian, terms — JSON); одна транзакция на
+  полную сборку/миграцию, инкрементальная сборка — INSERT новых
+  чанков + UPDATE meta (старые строки не переписываются), удаление —
+  DELETE по файлу; авто-миграция из legacy `index.json` при первой
+  сборке; активная стратегия — одна (`strategy` в метаданных
+  индекса); в
+  индексе встроен **сравнительный отчёт** по обеим стратегиям: число
+  чанков, среднее/максимальное число символов, hit@3, precision@3, MRR
+  по 8 встроенным gold-запросам (`GOLD_QUERIES`, ожидаемый файл — из
+  реального корпуса).
+- **Поиск — гибридный (вектор + BM25, RRF)**: две ноги, фузия
+  Reciprocal Rank Fusion (`score = Σ 1/(60+rank)`):
+  - **векторная нога** — косинусная близость top-N (чистый stdlib,
+    `cosine`); эмбеддер запроса берётся из индекса (hash — офлайн,
+    api — из env);
+  - **BM25-нога** — Okapi BM25 (k1=1.5, b=0.75) по `terms` чанков;
+    запрос токенизуется (`[a-zа-я0-9]+`, «ё»→«е»), **stopwords
+    отбрасываются** (~100 RU/EN служебных слов — иначе частые
+    «была/какая» суммой tf обгоняют редкие токены), матчинг — точный
+    + substring (короче ≥ 5 симв.) для инфлексий («телефона» ↔
+    «телефон»);
+  - сбой векторной ноги (например, api-эмбеддер без ключа) —
+    деградация на лексический, не ошибка;
+  - зачем: скрытый факт в длинном чанке (строка 66 симв. в чанке
+    1200) вектором «размывается» до rank 1500+, BM25 с редким токеном
+    (idf ~7.6) поднимает его в top-1.
+- **2-й этап — реранкер (`APIReranker`)** — опциональный (тумблер
+  `reranker: off|api`, дефолт `off`), модель `qwen3-reranker-4b`
+  (GPustack, Jina-совместимый `POST /v1/rerank`), ключ
+  `GPUSTACK_KEY_RERANK`; **нет ключа или API-сбой — деградация на
+  этап 1** (`reranked=false`, лог, не ошибка). Пайплайн
+  (`search_rag`): этап 1 — гибридный recall top-`rag_recall`
+  (дефолт **50**, 1..200) → cross-encoder считает пары (query, doc):
+  документ срезается до **1024** символов, батчи по **16** →
+  сортировка по `rerank_score` → top-`top_k`. Ответ
+  `/api/kb/search` при `reranked=true`: у результата дополнительно
+  `rerank_score` и `stage1_rank` (позиция на этапе 1), наверху —
+  `recall_total` и `reranked`. **Live-факт дня 21**: иголка в
+  длинном чанке cross-encoder'ом не всегда поднимается (пасхалка
+  66 симв. в чанке 1200: этап 1 №2 → после реранкера №10; слово
+  «модель» в запросе буквально матчит спека «модель вызывает
+  инструмент») — этап 1 находит редкий токен, реранкер —
+  precision-слой для общих запросов.
+- **RAG** (`agent.py`) — `StudioAgent(..., kb=None)`; поиск —
+  2-этапный (`search_rag`, тумблеры `reranker`/`rag_recall` из
+  settings), top-k (настройка `rag_top_k`, дефолт **3**) выдержек,
+  `build_kb_block` — блок в system-промпт на каждый пользовательский
+  запрос (с указанием источника `file · section`); **RAG-контекст
+  ответа** (`rag_context`: `query`, `reranked`, `recall_total`,
+  `chunks`) сохраняется в assistant-сообщении (в LLM-пейлоад не
+  уходит — в пейлоад только блок в system-промпте), фронтенд
+  рендерит его инспектором под сообщением; нет индекса / сбой
+  поиска / нет результатов — блок пуст, **чат не ломается** (только
+  лог `[KB]`).
+- **Окно выдержки** (`agent._focus_snippet`) — чанк может быть
+  длиннее 300 символов, и слепой срез `text[:300]` «утоняет» факт в
+  середине чанка (пасхалка 66 симв. на 1200 — LLM «не видела» и
+  отвечала, что телефона не было). Окно 300 символов центрируется на
+  первом вхождении самого дискриминативного (длинейшего)
+  некратного токена запроса, инфлексия срезается (до 2 симв. —
+  «телефона» → «телефон»); токен не найден — первые 300, как раньше.
+- **Тумблеры** — `data/kb/settings.json` (в `.gitignore`), дефолты
+  `{agent_loop: true, rag: true, rag_top_k: 3, strategy: "structural",
+  embedder: "hash", reranker: "off", rag_recall: 50}`; читаются
+  **на каждый запрос**. `rag=false` — без RAG-блока;
+  `agent_loop=false` — в LLM-payload нет `tools` и нет tool-loop
+  (один LLM-вызов, паттерн дня 16 «без MCP-серверов»), MCP-каталог
+  дня 20 не инжектится; `reranker=api` — 2-й этап поиска
+  (cross-encoder), `rag_recall` — глубина recall на этапе 1
+  (1..200).
+- **`main.py`** — `create_app(agent, kb)` (DI для тестов) + 8
+  маршрутов `/api/kb/*` (400/404/409/502 с RU-detail, паттерн дня 11).
+- **Фронтенд** — KB-хелперы в `api.ts` (+`KbReranker`, `RagContext`,
+  `reranker`/`rag_recall` в `KbSettings`), `KbTab.tsx` (select
+  реранкера + recall, поиск с чипами score/`stage1_rank`), вкладка
+  «База знаний» в `ContextPanel` (состояние — `'kb'`),
+  `RagContextInspector` в `ChatPanel.tsx` (RAG-контекст под
+  assistant-сообщением), стили.
+- **Зависимости** — `requirements.txt`: + `python-multipart`
+  (multipart-upload).
+
+### API
+
+| Метод | Путь | Назначение |
+| --- | --- | --- |
+| GET | `/api/kb/stats` | Статистика индекса: strategy, embedder, dim, built_at, stats (docs/files/chunks/chars/corpus_words/build_ms), comparison, files, `reranker_key_configured` (настроен ли `GPUSTACK_KEY_RERANK`); 404 — «Индекс не построен» |
+| GET | `/api/kb/uploads` | Список загруженных файлов (data/kb/uploads) — работает без индекса: {uploads: [{name, size}]} |
+| POST | `/api/kb/index` | Построить индекс `{strategy: fixed\|structural, embedder: hash\|api}` → `{stats, comparison, strategy}`; 400 — некорректные значения / нет ключа `GPUSTACK_KEY_EMBED`, 502 — сбой эмбеддинг-API |
+| POST | `/api/kb/upload` | Загрузить файл в `data/kb/uploads/` (multipart, поле `file`): whitelist `UPLOAD_EXTS`, имя — только basename (traversal-safe) → `{ok, file, size}`; 400 — неподдерживаемый формат |
+| GET | `/api/kb/search?q=&k=5` | 2-этапный top-k: этап 1 — гибридный (вектор + BM25, RRF) top-`rag_recall`, этап 2 — cross-encoder (если `reranker=api`) → `{results: [{chunk_id, source, file, section, score, text, + rerank_score, stage1_rank}], recall_total, reranked}`; 400 — пустой q / сбой БЗ, 404 — индекс не построен |
+| DELETE | `/api/kb/uploads/{name}` | Удалить загруженный файл: с диска + его чанки из индекса + stats (incremental); 400 — basename-гард, 404 — файла нет в uploads, 409 — идёт сборка |
+| DELETE | `/api/kb` | Очистить базу: все uploads + `index.db` (settings сохраняются); 409 — идёт сборка |
+| GET / POST | `/api/kb/settings` | Настройки БЗ `{agent_loop, rag, rag_top_k, strategy, embedder, reranker, rag_recall}` / частичное обновление с валидацией (лишние ключи игнорируются); 400 — RU-detail (`rag_top_k` 1..10, bool-тумблеры, `strategy: fixed\|structural`, `embedder: hash\|api`, `reranker: off\|api`, `rag_recall` 1..200) |
+
+### UI
+
+Новая вкладка **«База знаний»** в панели «Контекст» (после
+«Инвариантов») — `KbTab.tsx`:
+
+- **«Включить»**: тумблеры «RAG в диалоге» и «цикл-агента» + число
+  «Топ-K в диалоге» + select «Реранкер» (off / API
+  qwen3-reranker-4b; если ключ не настроен — предупреждение по
+  `stats.reranker_key_configured`) + число «Этап 1: кандидатов
+  (recall)» (1..200);
+- **«Индексация»**: select стратегии (fixed/structural) + select
+  эмбеддера (hash/api) + кнопка «Индексировать» (в процессе —
+  «Индексация…»);
+- **«Файлы»**: список загруженных файлов (чипы с именем) +
+  «+ Добавить файл» (upload в `data/kb/uploads/`); у каждого файла —
+  кнопка «×» (удалить: файл с диска + его чанки из индекса, с
+  confirm); кнопка **«Очистить базу»** (danger, disabled без загрузок)
+  — wipe: все uploads + `index.db`, settings сохраняются (confirm);
+- **«Статистика»**: документы / файлы / чанки / символов / слов в
+  корпусе / dim / время сборки;
+- **«Сравнение стратегий»**: таблица fixed vs structural — чанки,
+  среднее/макс. символов, hit@3, precision@3, MRR; активная стратегия
+  подсвечена;
+- **«Поиск по базе»**: поле запроса → top-5 результатов (чип score
+  с цветом 🟢 ≥0.8 / 🟡 0.5–0.8 / 🔴 <0.5 + `file · section` +
+  отрывок 300 символов; при `reranked` — чип `rerank_score` +
+  «из #N» (позиция на этапе 1) с 🚨 при `stage1_rank > 20`);
+- **RAG-контекст в чате** (`RagContextInspector`): под
+  assistant-сообщением с непустыми `rag_context.chunks` — блок с
+  чанками (`file · section` + отрывок), score (та же цветовая шкала),
+  «(Reranked из #N)» + 🚨 при `stage1_rank > 20`; служебное поле
+  сообщения — в LLM-пейлоад не уходит.
+
+### E2E — `scripts/e2e_day21.py`
+
+Гибрид (паттерн e2e_day17–20, stdlib, порт **8105**; 8100 —
+`e2e_studio.py`, 8101–8104 — дни 17–20): **Part A** — офлайн-
+детерминированное ядро (без uvicorn и без сети, MUST PASS),
+**15 шагов**: сборка корпуса (3 источника), оба чанкера (1200/200;
+md-заголовки, суб-чанки > 2400), hash-сборка/пересборка/поиск,
+**A4b** — миграция `index.json` → `index.db` (legacy-файл
+потребляется и удаляется, поиск жив), валидация settings
+(`rag_top_k=11` → 400), все `/api/kb/*` через TestClient,
+**A8b** — инкрементальная сборка (только новый файл,
+`added=1`) + `build-status`, **A8c** — удаление файла (чанки+stats,
+повторно → 404) и wipe (uploads+index, settings живы), **A8d** —
+гибридный поиск: в «книгу» спрятан редкий токен, вопрос в другой
+форме («телефона» vs «телефон») → BM25 substring-матч, чанк-пасхалка
+top-1, **A8e** — 2-этапный поиск с fake-`APIReranker` (patch, без
+сети): `reranked=true`, чанк-пасхалка top-1 (`rerank_score=0.99` +
+`stage1_rank`), сортировка по `rerank_score` desc, `recall_total`;
+тумблер `agent_loop` с fake-MCP (без `tools` в payload), RAG-блок
+on/off в LLM-payload. **Part B** — live (uvicorn :8105, реальный
+GPustack LLM + API-эмбеддер + **API-реранкер**), **28 PASS / 0
+FAIL / 0 SKIP на этой машине**: модели, сборка индекса с реальными
+эмбеддингами (dim 4096), статистика (`reranker_key_configured`),
+поиск «tool-loop» — top hit в корпусе, MCP-connect + live RAG-чат
+(B5) — на вопрос «Какой лимит итераций tool-loop у агента
+(TOOL_LOOP_CAP)?» модель ответила **«15»**, KB-блок подтверждён в
+журнале LLM-запросов, **B7** — live-реранкер: settings
+`reranker=api, rag_recall=50` → 2-этапный поиск (механизм:
+`reranked=true`, `rerank_score`/`stage1_rank`, сортировка,
+`recall_total=50`) + **этап 1 нашёл пасхалку** (`stage1_rank=2`) +
+`rag_context` в assistant-сообщении (`reranked=true`, 5 чанков);
+ранк пасхалки после реранкера (№10 — cross-encoder размывает
+иголку в длинном чанке; слово «модель» в запросе матчит спека
+«модель вызывает инструмент») — informational, не assertion; без
+ключа реранкера / сбой реранкер-API — SKIP (best-effort);
+`agent_loop=false` → в payload нет `tools`. Port-busy — ожидание до
+10 мин (чужой сервер не убивается, паттерн дня 20); cleanup
+всегда; exit 0 для PASS/SKIP, 1 для FAIL.
+
+### Проверка задания
+
+- **Корпус 20–30 страниц** — доки репозитория (README, RELEASE,
+  `docs/superpowers`, `openspec`, `studio/backend/*.py`) +
+  пользовательские загрузки: **67 файлов, 139 261 слово** (~в 11 раз
+  больше минимума).
+- **Chunking: 2 стратегии** — FixedChunker (1200 символов / overlap
+  200) и StructuredChunker (markdown-заголовки `#..######`, суб-чанки
+  секций > 2400; код — файл/суб-чанки).
+- **Эмбеддинги** — HashEmbedder (stdlib: char 3-граммы → md5 → 256,
+  L2, детерминированный — офлайн/CI) и APIEmbedder (GPustack
+  `qwen3-vl-embedding-8b`, dim 4096, батчи 16, ключ
+  `GPUSTACK_KEY_EMBED`).
+- **Хранилище индекса** — локальный `data/kb/index.db` (SQLite):
+  схема `meta` + `chunks`, вектор — BLOB float32, транзакция на
+  сборку/удаление, авто-миграция из legacy `index.json`.
+- **Метаданные чанков** — `chunk_id` (stem-strategy-NNNN), `source`
+  (docs/code/upload), `file`, `section`, `chars`, `text`, `vector`.
+- **Сравнение двух стратегий** — отчёт в индексе (чанки, avg/max
+  символов, hit@3, precision@3, MRR по 8 gold-запросам) + таблица в
+  UI (активная подсвечена). Честный замер на реальном корпусе с
+  реальными эмбеддингами: **fixed hit@3 = 0.5, structural hit@3 =
+  0.25** — structural-чанки больше и их меньше (целостность секции),
+  на этом gold-наборе по метрикам поиска впереди fixed; сравнительная
+  таблица — то, что видит пользователь после индексации.
+- **Гибридный поиск** — векторная нога (косинус) + BM25-нога
+  (stopwords, substring-инфлексии) с фузией RRF; live-доказательство:
+  в загруженную книгу (1,9 МБ) спрятана строка «У него был телефон
+  IPhone 17Promax…» (66 симв. в чанке 1200) — чистый вектор держал
+  её за rank 1500+; с BM25 + фокусным окном выдержки live-чат на
+  вопрос «какая модель телефона была у героя» ответил
+  **«У героя (Раскольникова) был iPhone 17 Pro Max»**.
+- **2-й этап — реранкер** — optional cross-encoder
+  `qwen3-reranker-4b` (GPustack, Jina-совместимый `POST /v1/rerank`,
+  батчи 16, срез документа 1024 симв.): гибридный recall
+  top-`rag_recall` (50) → пересчёт (query, doc) → top-k; в выдаче
+  поиска `rerank_score`/`stage1_rank` + `recall_total`/`reranked`;
+  нет ключа `GPUSTACK_KEY_RERANK` / API-сбой — деградация на этап 1
+  (не ошибка); UI — select в «Базе знаний» + чипы score/«из #N»/🚨
+  в поиске; RAG-контекст ответа сохраняется в assistant-сообщении —
+  инспектор в чате. Честный live-факт: иголка в длинном чанке
+  cross-encoder'ом не всегда поднимается (этап 1 №2 → реранк №10) —
+  этапы решают разные задачи (BM25 — редкий токен, реранкер —
+  precision на общих запросах).
+- **RAG в агентском чате** — top-k выдержек (окно ≤ 300 символов,
+  центрируется на характерном токене запроса) в system-промпт на
+  каждое сообщение; live-проверки: «15» на вопрос про лимит
+  tool-loop и IPhone 17 Pro Max на «пасхалку» в книге.
+- **Локальный индекс как результат** — собранный индекс остаётся на
+  диске: `data/kb/index.db` (SQLite; structural, api,
+  `qwen3-vl-embedding-8b`, dim 4096; последний e2e-прогон оставил
+  **372 чанка, 1 файл** — загруженная e2e-книга, корпус = только
+  загрузки; gitignored runtime-артефакт).
+
+### Исправление после релиза
+
+- **В индекс попадают ТОЛЬКО загрузки из «+ Добавить файл»
+  (`data/kb/uploads/`).** По требованию пользователя: файлы, не
+  добавленные кнопкой, индексироваться не могут — в списке документов
+  после «Индексировать» оказывались ~80 документов репозитория.
+  Корпус (`kb.corpus_files`) — теперь только `uploads/*` (whitelist
+  `UPLOAD_EXTS`, путь «uploads/\<имя\>»); документы репозитория
+  (README/RELEASE/docs/superpowers/openspec) и код бэкенда
+  (studio/backend/*.py) в авто-корпус больше не входят. Gold-метрики
+  (hit@3/precision@3/mrr) считаются по gold-файлам `GOLD_QUERIES`,
+  присутствующим в корпусе (uploads-only корпус → обычно 0 пригодных
+  запросов → нули; механизм сохранён). Блок «Документы репозитория в
+  индексе» из вкладки «База знаний» убран (смысл — только «Ещё не в
+  индексе»: загрузки, попавшие в corpus до пересборки). E2E Part B
+  стартует с `DELETE /api/kb` (wipe) + upload книги-фикстуры — корпус
+  live-индекса = только загрузка.
+
+### Статус
+
+Бэкенд — **505 тестов PASS** (офлайн: 64 `kb.py` включая
+`_IndexStore` (BLOB roundtrip 256/4096, миграция JSON→SQLite,
+incremental без full-rewrite, corrupt db → None), гибридный
+поиск/stopwords/fallback + `APIReranker` (MockTransport: батчи
+35→3×16/3, срез 1024, 500/битый payload) + `search_rag`
+(2-этап/reorder/top_k/деградация без ключа и при API-сбое/no-index),
+5 delete/wipe-роутов, 2 фокусного окна, 131 agent (включая 3
+rag_context: в сообщении, не в LLM-пейлоаде, reranked), 36 kb-API
+(включая `reranker`/`rag_recall`-настройки, 2-stage shape поиска,
+`stats.reranker_key_configured`)); фронтенд — **263 теста PASS**
+(Vitest, включая kb-tab: прогресс, файлы, delete/wipe,
+реранкер/recall, search-чипы + `RagContextInspector`) + `tsc -b` +
+build clean. E2E `scripts/e2e_day21.py` на этой машине: **28 PASS /
+0 FAIL / 0 SKIP** (A4b миграция JSON→SQLite, A8b incremental,
+A8c delete/wipe, A8d hybrid-«пасхалка» top-1, A8e 2-этап с fake
+cross-encoder; live: индекс `index.db` 372 чанков / dim 4096 / 1
+файл; RAG-чат B5 — ответ «15»
+на вопрос про `TOOL_LOOP_CAP`, MCP подключён + tool-loop; B7
+live-реранкер — механизм + этап 1 `stage1_rank=2` + `rag_context`
+в сообщении). Ветка `day21-doc-indexing` (от
+`day20-mcp-orchestration`).

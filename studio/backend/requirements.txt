@@ -3,3 +3,4 @@ uvicorn
 httpx
 pytest
 python-dotenv
+python-multipart

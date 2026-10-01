@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.join(REPO, "studio", "backend"))
 import agent as agent_mod  # noqa: E402
 from agent import StudioAgent  # noqa: E402
 from conftest import USAGE, delta_chunk, sse_body, usage_chunk  # noqa: E402
+from kb import KnowledgeBase  # noqa: E402
 from memory import MemoryStore  # noqa: E402
 
 BASE = "https://mock.local/v1"
@@ -119,9 +120,12 @@ def _day20_handler(always_tool_calls=False):
 
 
 def _fake_mcp_agent(data_dir, handler, mcp):
+    # kb — tmp-каталог: изоляция от реальных data/kb/settings.json
+    # (тумблер agent_loop в UI не должен ломать офлайн-тесты tool-loop)
     client = httpx.Client(transport=httpx.MockTransport(handler))
     return StudioAgent(str(data_dir), base_url=BASE, api_key="test-key",
-                       client=client, mcp=mcp)
+                       client=client, mcp=mcp,
+                       kb=KnowledgeBase(str(data_dir / "kb")))
 
 
 def test_stored_names_are_llm_names_and_mcp_uses_real(tmp_path, monkeypatch):

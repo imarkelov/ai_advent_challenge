@@ -9,6 +9,7 @@ import pytest
 
 from agent import CONTEXT_LIMITS, INVARIANTS_RULE, MEMORY_RULE, StudioAgent
 from conftest import USAGE, delta_chunk, sse_body, usage_chunk
+from kb import HashEmbedder, KnowledgeBase
 from mcp import MCPRegistry
 from memory import MemoryStore
 from tests.test_mcp import make_fake_launcher
@@ -24,10 +25,14 @@ def data_dir(tmp_path):
 
 
 def make_agent(data_dir, handler, env=None):
-    """Агент на MockTransport с данным handler(request) -> httpx.Response."""
+    """Агент на MockTransport с данным handler(request) -> httpx.Response.
+
+    kb — tmp-каталог (БЕЗ индекса): RAG-блок дня 21 не читает реальный
+    data/kb (иначе api-индекс → сетевой эмбеддинг в офлайн-тестах)."""
     client = httpx.Client(transport=httpx.MockTransport(handler))
     return StudioAgent(str(data_dir), base_url=BASE, api_key="test-key",
-                       client=client, env=env)
+                       client=client, env=env,
+                       kb=KnowledgeBase(str(data_dir / "kb")))
 
 
 def ready(agent, d):
@@ -1012,103 +1017,117 @@ def _profile_handler(extract_content, calls, streams):
     return handler
 
 
-def test_pending_first_message_gets_invite_not_llm(data_dir):
+def test_pending_first_message_goes_to_llm_normally(data_dir):
+    # День 20: обязательное приглашение удалено — первое сообщение нового
+    # диалога (pending, без interview-флага) уходит в LLM обычным потоком.
     calls, streams = {"n": 0}, []
     agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
     d = agent.store.new_dialogue()
     events = list(agent.ask_stream(d["id"], "объясни лямбды"))
-    assert len(streams) == 0  # LLM-стрим НЕ вызывался
+    assert len(streams) == 1  # обычный LLM-стрим вызвался
     done = events[-1]
     assert done["type"] == "done"
-    assert done["usage"] is None and done["request_id"] is None
-    assert "инициализировать профиль" in done["answer"]
-    assert "вручную" in done["answer"] and "интервью" in done["answer"]
-    assert "отказ" in done["answer"]
-    # user + assistant сохранены; запрос в journal не ушёл
+    assert done["answer"] == "ок"
+    assert "инициализировать профиль" not in done["answer"]
+    # профиль остался pending (ничего не инициализировалось)
+    assert agent.store.profile_get(d["id"])["status"] == "pending"
+    # user + assistant сохранены; запрос ушёл в журнал
     msgs = agent.store.get_messages(d["id"])
     assert msgs[0] == {"role": "user", "content": "объясни лямбды"}
     assert msgs[1]["role"] == "assistant"
-    assert agent.requests_list() == []
+    assert len(agent.requests_list()) == 1
 
 
-def test_pending_unrecognized_repeats_invite(data_dir):
+def test_pending_second_message_also_goes_to_llm(data_dir):
+    # pending без интервью — ни первый, ни второй ход не перехватываются
     calls, streams = {"n": 0}, []
     agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
     d = agent.store.new_dialogue()
     list(agent.ask_stream(d["id"], "привет"))
     events = list(agent.ask_stream(d["id"], "расскажи про акул"))
-    assert len(streams) == 0
-    assert "инициализировать профиль" in events[-1]["answer"]
+    assert len(streams) == 2
+    assert events[-1]["answer"] == "ок"
     assert agent.store.profile_get(d["id"])["status"] == "pending"
 
 
-def test_pending_manual_marker_points_to_tab(data_dir):
+def test_chat_markers_no_longer_intercepted(data_dir):
+    # День 20: маркеры «интервью»/«вручную» в чате больше не активируют
+    # служебный ход — сообщение уходит в LLM, профиль не меняется
     calls, streams = {"n": 0}, []
     agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
     d = agent.store.new_dialogue()
-    list(agent.ask_stream(d["id"], "вручную"))
-    assert len(streams) == 0
+    e1 = list(agent.ask_stream(d["id"], "давай интервью"))
+    p = agent.store.profile_get(d["id"])
+    assert p["status"] == "pending" and p["interview"] is False
+    e2 = list(agent.ask_stream(d["id"], "вручную"))
+    assert len(streams) == 2
+    assert e1[-1]["answer"] == "ок" and e2[-1]["answer"] == "ок"
     assert agent.store.profile_get(d["id"])["status"] == "pending"
-    assert agent.store.profile_get(d["id"])["interview"] is False
 
 
-def test_pending_decline_marker_sets_declined_then_normal_flow(data_dir):
+def test_decline_marker_unit_level_sets_declined_then_normal_flow(data_dir):
+    # Маркерная ветка _profile_init_turn (unit-level): чистый отказ —
+    # declined + без остатка; следующий чат-ход — обычный LLM-поток
     calls, streams = {"n": 0}, []
     agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
     d = agent.store.new_dialogue()
-    events = list(agent.ask_stream(d["id"], "отказ"))
+    text, remainder = agent._profile_init_turn(d["id"], "отказ",
+                                               "qwen3.8-27b")
     assert agent.store.profile_get(d["id"])["status"] == "declined"
-    assert "отказ" in events[-1]["answer"].lower() or "обычно" in events[-1]["answer"]
-    # следующий ход — уже обычный LLM-поток, без блока профиля
+    assert remainder is None
+    assert "отказ" in text.lower() or "обычно" in text.lower()
     list(agent.ask_stream(d["id"], "привет"))
     assert len(streams) == 1
     assert "Профиль пользователя" not in streams[0]["messages"][0]["content"]
 
 
-def test_pending_decline_with_remainder_executes(data_dir):
+def test_decline_with_remainder_unit_level_executes(data_dir):
+    # «отказ, теперь объясни лямбды» (баг №2): unit-level отказ +
+    # возврат содержательного остатка для обычного чат-потока
     calls, streams = {"n": 0}, []
     agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
     d = agent.store.new_dialogue()
-    events = list(agent.ask_stream(d["id"], "отказ, теперь объясни лямбды"))
-    # отказ зафиксирован…
+    text, remainder = agent._profile_init_turn(d["id"],
+                                               "отказ, теперь объясни лямбды",
+                                               "qwen3.8-27b")
     assert agent.store.profile_get(d["id"])["status"] == "declined"
-    # …но содержательный остаток «теперь объясни лямбды» выполнен LLM-потоком
+    assert remainder is not None and "объясни лямбды" in remainder
+    # остаток выполняется обычным LLM-потоком (declined → без блока профиля)
+    events = list(agent.ask_stream(d["id"], remainder))
     assert len(streams) == 1
-    done = events[-1]
-    assert done["type"] == "done"
-    # сообщение пользователя сохранено целиком, следом — ответ отказа + ответ LLM
-    msgs = agent.store.get_messages(d["id"])
-    assert msgs[0]["role"] == "user"
-    assert "объясни лямбды" in msgs[0]["content"]
+    assert events[-1]["type"] == "done"
 
 
-def test_pending_decline_pure_single_word_closes_without_stream(data_dir):
-    # «отказ» без дополнения — чистый отказ, LLM не вызывается (регресс бага №2)
+def test_decline_pure_single_word_unit_level_closes(data_dir):
+    # «не хочу» без дополнения — чистый отказ: остаток None (регресс бага №2)
     calls, streams = {"n": 0}, []
     agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
     d = agent.store.new_dialogue()
-    list(agent.ask_stream(d["id"], "не хочу"))
-    assert len(streams) == 0
+    text, remainder = agent._profile_init_turn(d["id"], "не хочу",
+                                               "qwen3.8-27b")
     assert agent.store.profile_get(d["id"])["status"] == "declined"
+    assert remainder is None
+    assert len(streams) == 0  # LLM не вызывался
 
 
-def test_pending_interview_flow_creates_active_profile(data_dir):
+def test_interview_flow_via_api_creates_active_profile(data_dir):
+    # День 20: интервью запускается явно (API), не чат-маркером.
+    # answer → экстракт → active.
     extract = ('{"name": "Иван", "role": "backend", "tone": "кратко", '
                '"taboos": "мат"}')
     calls, streams = {"n": 0}, []
     agent = make_agent(data_dir, _profile_handler(extract, calls, streams))
     d = agent.store.new_dialogue()
-    # 1) выбор интервью
-    e1 = list(agent.ask_stream(d["id"], "интервью"))
+    # 1) явный запуск интервью (путь API: POST /api/profile/action)
+    agent.store.profile_action(d["id"], "interview")
     p = agent.store.profile_get(d["id"])
     assert p["status"] == "pending" and p["interview"] is True
-    assert "имя" in e1[-1]["answer"].lower()
-    assert "стоп-слова" in e1[-1]["answer"].lower() or "табу" in e1[-1]["answer"].lower()
-    # 2) ответ на анкету → экстракт → active
+    # 2) следующий чат-ход = ответ на анкету → экстракт → active
     e2 = list(agent.ask_stream(d["id"], "Иван, backend-разработчик, кратко, не мат"))
     p = agent.store.profile_get(d["id"])
     assert p["status"] == "active" and p["name"] == "Иван" and p["taboos"] == "мат"
     assert "сохранён" in e2[-1]["answer"].lower() or "профиль" in e2[-1]["answer"].lower()
+    assert len(streams) == 0  # на ответ анкеты LLM-стрим не шёл (только экстракт)
     # 3) следующий ход — обычный LLM-поток С блоком профиля
     list(agent.ask_stream(d["id"], "привет"))
     assert len(streams) == 1
@@ -1116,11 +1135,12 @@ def test_pending_interview_flow_creates_active_profile(data_dir):
     assert "Иван" in streams[0]["messages"][0]["content"]
 
 
-def test_pending_interview_failed_extraction_repeats_questions(data_dir):
+def test_interview_failed_extraction_repeats_questions(data_dir):
+    # interview-флаг + неразборчивый ответ → просьба повторить, без LLM-стрима
     calls, streams = {"n": 0}, []
     agent = make_agent(data_dir, _profile_handler("не разобрать", calls, streams))
     d = agent.store.new_dialogue()
-    list(agent.ask_stream(d["id"], "интервью"))
+    agent.store.profile_action(d["id"], "interview")
     events = list(agent.ask_stream(d["id"], "мусор без полей"))
     p = agent.store.profile_get(d["id"])
     assert p["status"] == "pending" and p["interview"] is True
@@ -1128,7 +1148,9 @@ def test_pending_interview_failed_extraction_repeats_questions(data_dir):
     assert len(streams) == 0
 
 
-def test_reset_back_to_pending_repeats_invite(data_dir):
+def test_reset_back_to_pending_no_intercept(data_dir):
+    # После reset профиль снова pending — но без интервью чат-ход уже
+    # не перехватывается (день 20): обычный LLM-поток
     calls, streams = {"n": 0}, []
     agent = make_agent(data_dir, _profile_handler("{}", calls, streams))
     d = agent.store.new_dialogue()
@@ -1136,8 +1158,9 @@ def test_reset_back_to_pending_repeats_invite(data_dir):
     assert agent.store.profile_get(d["id"])["status"] == "active"
     agent.store.profile_action(d["id"], "reset")
     events = list(agent.ask_stream(d["id"], "привет"))
-    assert len(streams) == 0
-    assert "инициализировать профиль" in events[-1]["answer"]
+    assert len(streams) == 1
+    assert "инициализировать профиль" not in events[-1]["answer"]
+    assert agent.store.profile_get(d["id"])["status"] == "pending"
 
 
 # ---------- ask_stream: ошибки ----------
@@ -1953,12 +1976,15 @@ class TestTaskRun13b:
 
 def _tool_loop_agent(data_dir, handler):
     """Агент с офлайн MCPRegistry: fake stdio-процесс (mock_echo/mock_ping,
-    call_tool — эхо str(args)), MockTransport для LLM."""
+    call_tool — эхо str(args)), MockTransport для LLM. kb — tmp-каталог
+    (изоляция от реальных data/kb/settings.json: тумблер agent_loop в
+    UI не должен ломать офлайн-тесты tool-loop)."""
     client = httpx.Client(transport=httpx.MockTransport(handler))
     store = MemoryStore(str(data_dir))
     reg = MCPRegistry(store, launcher=make_fake_launcher())
     agent = StudioAgent(str(data_dir), base_url=BASE, api_key="test-key",
-                        client=client, mcp=reg)
+                        client=client, mcp=reg,
+                        kb=KnowledgeBase(str(data_dir / "kb")))
     return agent, reg
 
 
@@ -2130,3 +2156,143 @@ def test_mcp_tools_rule_only_when_tools_connected(data_dir):
         assert "композиция" in system
     finally:
         reg.close_all()
+
+
+# ---------- День 21 (hybrid RAG): фокусное окно выдержки ----------
+
+def test_focus_snippet_centers_on_query_token():
+    """Факт в ~990-м символе чанка (слепой text[:300] его утопляет);
+    запрос в другой форме («телефона» vs «телефон» в тексте) — окно
+    центрируется на токене с обрезанной инфлексией."""
+    text = ("x" * 990 + "телефон Zubravichka-9000 " + "y" * 200)
+    snip = StudioAgent._focus_snippet(text, "какая модель телефона была")
+    assert "Zubravichka-9000" in snip
+    assert len(snip) <= 300
+    # без некратных токенов в тексте — первые 300 символов (как раньше)
+    snip2 = StudioAgent._focus_snippet("абв" * 200, "привет")
+    assert snip2 == ("абв" * 200)[:300]
+
+
+def test_kb_block_hidden_fact_in_long_chunk(tmp_path):
+    """Полный путь: индекс (hash) → гибридный поиск → RAG-блок:
+    факт в середине ~1900-символьного чанка доходит до LLM-выдержки."""
+    repo = tmp_path / "repo"
+    (repo / "data" / "kb" / "uploads").mkdir(parents=True)
+    book = ("Жил-был герой, и был он не злой. " * 30
+            + "У героя был телефон Zubravichka-9000, на который "
+              "он делал много фото. "
+            + "Герой шёл по улице медленно. " * 30)
+    (repo / "data" / "kb" / "uploads" / "book.txt").write_text(
+        book, encoding="utf-8")
+    kb = KnowledgeBase(str(repo / "data" / "kb"), str(repo))
+    kb.build("structural", HashEmbedder())
+
+    data = tmp_path / "data"
+    data.mkdir()
+    agent = make_agent(data, ok_handler)
+    agent.kb = kb
+    block = agent.build_kb_block("какая модель телефона была у героя",
+                                  top_k=5)
+    assert block
+    assert "Zubravichka-9000" in block
+
+
+# ---------- День 21 (реранкер): rag_context в assistant-сообщении ----------
+
+def _fact_repo(tmp_path, name):
+    """Репозиторий с одной «книгой» (факт про телефон) + собранный индекс."""
+    repo = tmp_path / name
+    (repo / "data" / "kb" / "uploads").mkdir(parents=True)
+    book = ("Жил-был герой, и был он не злой. " * 30
+            + "У героя был телефон Zubravichka-9000, на который "
+              "он делал много фото. "
+            + "Герой шёл по улице медленно. " * 30)
+    (repo / "data" / "kb" / "uploads" / "book.txt").write_text(book,
+                                                              encoding="utf-8")
+    kb = KnowledgeBase(str(repo / "data" / "kb"), str(repo))
+    kb.build("structural", HashEmbedder())
+    return kb
+
+
+def test_ask_stream_attaches_rag_context(data_dir, tmp_path):
+    """RAG вкл + индекс: assistant-сообщение сохраняется с rag_context
+    (final top-k чанки для инспектора): rank, file, section, score,
+    stage1_rank, reranked, text; reranked=False (реранкер off)."""
+    kb = _fact_repo(tmp_path, "repo_ctx")
+    agent = make_agent(data_dir, ok_handler)
+    agent.kb = kb
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    events = list(agent.ask_stream(d["id"],
+                                   "какая модель телефона была у героя"))
+    assert events[-1]["type"] == "done"
+    msgs = agent.store.get_messages(d["id"])
+    asst = [m for m in msgs if m["role"] == "assistant"]
+    assert asst, "нет assistant-сообщения"
+    last = asst[-1]
+    assert "rag_context" in last
+    ctx = last["rag_context"]
+    assert ctx["reranked"] is False  # реранкер по умолчанию off
+    assert ctx["recall_total"] >= 1
+    assert ctx["chunks"], "чанки не пусты"
+    c0 = ctx["chunks"][0]
+    assert set(c0) >= {"rank", "file", "section", "score",
+                       "stage1_rank", "reranked", "text"}
+    assert c0["rank"] == 1
+    assert c0["stage1_rank"] is None  # без реранка поле не заполняется
+    assert c0["reranked"] is False
+    # факт — в окне выдержки одного из чанков
+    assert any("Zubravichka-9000" in c["text"] for c in ctx["chunks"])
+
+
+def test_rag_context_not_in_llm_payload(data_dir, tmp_path):
+    """rag_context — служебное поле: в LLM-payload (build_payload) не
+    уходит (следующий ход видит assistant, но поля rag_context нет)."""
+    kb = _fact_repo(tmp_path, "repo_nopayload")
+    agent = make_agent(data_dir, ok_handler)
+    agent.kb = kb
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    list(agent.ask_stream(d["id"], "какая модель телефона была у героя"))
+    # на диске assistant — с rag_context
+    msgs = agent.store.get_messages(d["id"])
+    asst = [m for m in msgs if m["role"] == "assistant"]
+    assert asst and asst[0].get("rag_context") is not None
+    # в payload следующего хода — без rag_context
+    for m in agent.build_payload(d["id"]):
+        assert "rag_context" not in m
+
+
+def test_ask_stream_rag_context_reranked(data_dir, tmp_path, monkeypatch):
+    """reranker=api + ключ + fake APIReranker: rag_context с reranked=True,
+    stage1_rank заполнен (score = rerank_score)."""
+    import kb as kb_module
+
+    class FakeReranker:
+        def __init__(self, base_url, api_key, client=None):
+            pass
+
+        def rerank(self, query, texts):
+            return [round((i + 1) / 100.0, 6) for i in range(len(texts))]
+
+    monkeypatch.setenv("GPUSTACK_KEY_RERANK", "fake-key")
+    monkeypatch.setattr(kb_module, "APIReranker", FakeReranker)
+
+    kb = _fact_repo(tmp_path, "repo_reranked")
+    kb.update_settings({"reranker": "api", "rag_recall": 5})
+    agent = make_agent(data_dir, ok_handler)
+    agent.kb = kb
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    events = list(agent.ask_stream(d["id"],
+                                   "какая модель телефона была у героя"))
+    assert events[-1]["type"] == "done"
+    msgs = agent.store.get_messages(d["id"])
+    asst = [m for m in msgs if m["role"] == "assistant"]
+    assert asst
+    ctx = asst[-1]["rag_context"]
+    assert ctx["reranked"] is True
+    assert ctx["chunks"]
+    for c in ctx["chunks"]:
+        assert c["reranked"] is True
+        assert c["stage1_rank"] is not None

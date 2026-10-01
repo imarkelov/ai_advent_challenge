@@ -65,7 +65,13 @@ function normalizeUrl(input: RequestInfo | URL): string {
 // GET-запросы — фикстуры; POST /api/profile и /api/profile/action —
 // отвечают по контракту бэкенда (непустое содержимое → active) и
 // записываются в calls {url, body} для ассертов
-function mockApi(fx: Record<string, unknown>, calls: { url: string; body: unknown }[]) {
+// interviewText — поле interview_text в ответе /api/profile/action для
+// action=interview (новый бэкенд); undefined — поле отсутствует (старый)
+function mockApi(
+  fx: Record<string, unknown>,
+  calls: { url: string; body: unknown }[],
+  interviewText?: string,
+) {
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -95,7 +101,10 @@ function mockApi(fx: Record<string, unknown>, calls: { url: string; body: unknow
           })
         }
         if (body.action === 'interview') {
-          return jsonResponse({ profile: { status: 'pending', interview: true, name: '', role: '', tone: '', taboos: '' } })
+          return jsonResponse({
+            profile: { status: 'pending', interview: true, name: '', role: '', tone: '', taboos: '' },
+            ...(interviewText !== undefined ? { interview_text: interviewText } : {}),
+          })
         }
         return jsonResponse({ profile: pendingProfile() })
       }
@@ -104,10 +113,10 @@ function mockApi(fx: Record<string, unknown>, calls: { url: string; body: unknow
   )
 }
 
-async function renderTab(profile?: Profile) {
+async function renderTab(profile?: Profile, interviewText?: string) {
   const fx = fixtures(profile)
   const calls: { url: string; body: unknown }[] = []
-  mockApi(fx, calls)
+  mockApi(fx, calls, interviewText)
   render(
     <StudioProvider>
       <ProfileTab />
@@ -172,7 +181,7 @@ describe('ProfileTab — вкладка «Профили»', () => {
     expect(await screen.findByText('отказан')).toBeInTheDocument()
   })
 
-  it('«Провести интервью» → POST {action: interview} + подсказка в чат', async () => {
+  it('«Провести интервью» → POST {action: interview}; без interview_text — подсказка в чат', async () => {
     const calls = await renderTab()
     fireEvent.click(screen.getByTitle('Провести интервью'))
     await waitFor(() =>
@@ -181,7 +190,31 @@ describe('ProfileTab — вкладка «Профили»', () => {
         body: { dialogue_id: DIALOGUE_ID, action: 'interview' },
       }),
     )
+    // бэкенд не вернул interview_text — прежняя подсказка
     expect(await screen.findByText(/напишите «интервью» в чате/i)).toBeInTheDocument()
+  })
+
+  it('«Провести интервью» → interview_text из API показывается как подсказка', async () => {
+    const questions = [
+      '1. Как к вам обращаться?',
+      '2. Какова ваша профессиональная роль и сфера?',
+      '3. Какой тон и стиль общения вам ближе?',
+      '4. Есть ли стоп-слова или темы, которых стоит избегать?',
+    ].join('\n')
+    const calls = await renderTab(undefined, questions)
+    fireEvent.click(screen.getByTitle('Провести интервью'))
+    await waitFor(() =>
+      expect(calls).toContainEqual({
+        url: '/api/profile/action',
+        body: { dialogue_id: DIALOGUE_ID, action: 'interview' },
+      }),
+    )
+    // текст интервью (4 вопроса) — в блоке подсказки (.profile-hint)
+    const hint = await screen.findByText(/как к вам обращаться/i)
+    expect(hint.closest('.profile-hint')).toBeTruthy()
+    expect(hint.closest('.profile-hint')?.textContent).toBe(questions)
+    // старая подсказка при этом не показывается
+    expect(screen.queryByText(/напишите «интервью» в чате/i)).not.toBeInTheDocument()
   })
 
   it('«Заполнить заново» → POST {action: reset}, поля очищаются', async () => {
