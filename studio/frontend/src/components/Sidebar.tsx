@@ -5,8 +5,6 @@
 // массовое удаление «Удалить (N)»; иконки-действия в этом режиме скрыты.
 import { useRef, useState } from 'react'
 import { useStudio } from '../state'
-import TokensTab from './TokensTab'
-import RequestsTab from './RequestsTab'
 
 // Inline-SVG иконки 15px (stroke: currentColor) — без icon-библиотек
 function PencilIcon() {
@@ -108,8 +106,6 @@ export default function Sidebar() {
   // Открывается ТОЛЬКО по клику на иконку карандаша.
   const [renaming, setRenaming] = useState<{ id: string; value: string } | null>(null)
   const renameCancelled = useRef(false)
-  // Локальный таб «Токены»/«Запрос» в сайдбаре (перенесён из ContextPanel)
-  const [toolTab, setToolTab] = useState<'tokens' | 'request'>('tokens')
   // Список диалогов: по умолчанию — 5 свежих (массив oldest→newest,
   // свежие внизу); старые свёрнуты за «Показать ещё». В режиме выбора —
   // все строки (чекбоксы должны быть доступны)
@@ -283,35 +279,6 @@ export default function Sidebar() {
         <button type="button" className="btn new-dialogue" onClick={() => void newDialogue()}>
           + Новый диалог
         </button>
-      </section>
-
-      {/* Инструменты: вкладки «Токены»/«Запрос», перенесённые из ContextPanel */}
-      <section className="side-block">
-        <h2 className="side-title">Инструменты</h2>
-        <nav className="tabs" role="tablist" aria-label="Инструменты">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={toolTab === 'tokens'}
-            className={toolTab === 'tokens' ? 'tab active' : 'tab'}
-            onClick={() => setToolTab('tokens')}
-          >
-            Токены
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={toolTab === 'request'}
-            className={toolTab === 'request' ? 'tab active' : 'tab'}
-            onClick={() => setToolTab('request')}
-          >
-            Запрос
-          </button>
-        </nav>
-        <div className="context-body">
-          {toolTab === 'tokens' && <TokensTab />}
-          {toolTab === 'request' && <RequestsTab />}
-        </div>
       </section>
 
       <section className="side-block">

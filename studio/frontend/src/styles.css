@@ -569,39 +569,105 @@ button {
   color: var(--accent);
 }
 
-/* Tooltip: открывается вниз, растёт влево (right: 0) — не уходит за
-   правый край вьюпорта; скрыт, пока гейдж не под курсором */
-.token-gauge-tip {
+/* Токен-поповер: окно рядом с гейджем по hover (вместо CSS-tooltip и
+   блока «Токены» в сайдбаре). Открывается вниз, растёт влево (right: 0)
+   — не уходит за правый край вьюпорта. Размер задаёт JS (inline-style):
+   дефолт/сохранённый из localStorage, drag-grip в углу растягивает */
+.token-pop {
   position: absolute;
   top: calc(100% + var(--sp-2));
   right: 0;
   z-index: 900; /* ниже модалок (1000) и оверлеев настроек (1100) */
-  min-width: 280px;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-1);
   background: var(--panel-2);
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent-line);
   border-radius: var(--r-md);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-  padding: var(--sp-2) var(--sp-3);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity var(--t-fast) var(--ease), visibility var(--t-fast) var(--ease);
+  padding: var(--sp-3);
+  animation: token-pop-in var(--t-fast) var(--ease) both;
 }
 
-.token-gauge:hover .token-gauge-tip {
-  opacity: 1;
-  visibility: visible;
+@keyframes token-pop-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
 }
 
-.token-gauge-tip .tok-row {
+.token-pop-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: var(--sp-1); /* grip не наезжает на строки */
+}
+
+.pop-title {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--sp-2);
+}
+
+/* Progress-бар лимита: та же семантика, что .progress-fill (ок/акцент) */
+.pop-progress {
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  overflow: hidden;
+  margin: 0 0 var(--sp-2);
+}
+
+.pop-fill {
+  height: 100%;
+  background: var(--ok);
+  border-radius: var(--r-pill);
+  transition: width var(--t-med) var(--ease);
+}
+
+.pop-fill.warn {
+  background: var(--accent);
+}
+
+.pop-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
   font-size: 12px;
+  color: var(--muted);
+  padding: var(--sp-1) 0;
 }
 
-.token-gauge-tip .tok-value {
+.pop-row b {
+  font-family: var(--font-mono);
   font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* Drag-grip в правом нижнем углу: растягивание поповера (pointer events) */
+.token-pop-grip {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+  z-index: 1;
+}
+
+.token-pop-grip::before {
+  content: '';
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
 }
 
 .chat-feed {

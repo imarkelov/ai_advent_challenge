@@ -7,7 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from agent import PROFILE_INTERVIEW_TEXT, StudioAgent, TASK_STAGE_USER
-from conftest import delta_chunk, sse_body, usage_chunk
+from conftest import USAGE, delta_chunk, sse_body, usage_chunk
 from kb import KnowledgeBase
 from mcp import MCPRegistry
 
@@ -92,6 +92,26 @@ def test_chat_unknown_dialogue_404(client):
     r = client.post("/api/chat", json={"dialogue_id": "nope", "message": "привет"})
     assert r.status_code == 404
     assert "не найден" in r.json()["detail"]
+
+
+def test_chat_dialogue_stores_request_id_and_usage(client, dialogue_id):
+    """GET /api/dialogues/{id} после POST /api/chat: assistant-сообщение
+    содержит request_id и usage — совпадают с done-событием стрима."""
+    client.post("/api/profile/action", json={"dialogue_id": dialogue_id,
+                                             "action": "decline"})
+    with client.stream("POST", "/api/chat",
+                       json={"dialogue_id": dialogue_id,
+                             "message": "привет"}) as resp:
+        assert resp.status_code == 200
+        lines = list(resp.iter_lines())
+    done = parse_sse(lines)[-1]
+    assert done["type"] == "done"
+    body = client.get(f"/api/dialogues/{dialogue_id}").json()
+    last = body["dialogue"]["messages"][-1]
+    assert last["role"] == "assistant"
+    assert last["request_id"] == done["request_id"]
+    assert last["usage"] == done["usage"]
+    assert {"prompt_tokens", "completion_tokens", "total_tokens"} <= set(last["usage"])
 
 
 def test_chat_empty_message_400(client, dialogue_id):
@@ -198,9 +218,10 @@ def test_chat_auto_titles_new_dialogue(client, dialogue_id):
     assert r.status_code == 200
     d = client.get(f"/api/dialogues/{dialogue_id}").json()["dialogue"]
     assert d["title"] == "E2E-название"
-    # assistant-сообщение хранится с model
+    # assistant-сообщение хранится с model + request_id/usage (ui-rework)
     assert d["messages"][-1] == {"role": "assistant", "content": "Привет",
-                                 "model": "qwen3.8-27b"}
+                                 "model": "qwen3.8-27b",
+                                 "request_id": 1, "usage": USAGE}
 
 
 # ---------- /api/dialogues: rename ----------

@@ -859,7 +859,8 @@ class StudioAgent:
                     answer = self._invariant_refusal(hits)
                 self.store.append_message(dialogue_id, "assistant", answer,
                                           model=cfg["model"],
-                                          rag_context=kb_context)
+                                          rag_context=kb_context,
+                                          request_id=rid, usage=usage)
                 print("[Final Response] " + answer[:200], flush=True)
                 if violation:
                     yield {"type": "invariant_violation", "patterns": hits}

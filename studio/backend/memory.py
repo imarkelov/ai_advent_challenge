@@ -352,7 +352,9 @@ class MemoryStore:
                          task_usage: dict | None = None,
                          task_duration: int | None = None,
                          mcp_tool: dict | None = None,
-                         rag_context: dict | None = None) -> None:
+                         rag_context: dict | None = None,
+                         request_id: int | None = None,
+                         usage: dict | None = None) -> None:
         """Добавить сообщение в диалог; ValueError, если диалог не существует.
 
         model — метка модели (assistant); task_stage/task_id/task_step —
@@ -366,6 +368,10 @@ class MemoryStore:
         {recall_total, reranked, chunks: [{rank, file, section, score,
         stage1_rank, reranked, text}]}; служебное поле, в тело LLM-запроса
         НЕ уходит (инспектор контекста во фронтенде).
+        request_id — id записи журнала requests.json последнего LLM-вызова
+        (ui-rework, FlowInspector: связь ответа с журналом без live-done);
+        usage — usage {prompt_tokens, completion_tokens, total_tokens, ...}
+        того же LLM-ответа; оба опциональны (старые записи без них читаются).
         """
         with self._lock:
             data = self._read_dialogues()
@@ -389,6 +395,10 @@ class MemoryStore:
                 msg["mcp_tool"] = mcp_tool
             if rag_context is not None:
                 msg["rag_context"] = rag_context
+            if request_id is not None:
+                msg["request_id"] = request_id
+            if usage is not None:
+                msg["usage"] = usage
             d.setdefault("messages", []).append(msg)
             self._write_dialogues(data)
 

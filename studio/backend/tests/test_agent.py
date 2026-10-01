@@ -354,7 +354,8 @@ def test_ask_stream_success(data_dir):
     # SSE и на non-stream, поэтому авто-заголовок не сгенерирован)
     assert agent.store.get_messages(d["id"]) == [
         {"role": "user", "content": "привет"},
-        {"role": "assistant", "content": "Привет", "model": "qwen3.8-27b"},
+        {"role": "assistant", "content": "Привет", "model": "qwen3.8-27b",
+         "request_id": 1, "usage": USAGE},
     ]
     assert agent.store.get_dialogue(d["id"])["title"] == "Новый диалог"
     # запрос ушёл с auth и полными параметрами
@@ -367,6 +368,29 @@ def test_ask_stream_success(data_dir):
     # сессионные токены
     assert agent.session_tokens() == {"prompt": 10, "completion": 5, "total": 15}
     assert agent.last_usage() == USAGE
+
+
+# ---------- день 23 (ui-rework): request_id/usage в assistant-сообщении ----------
+
+def test_ask_stream_saves_request_id_and_usage(data_dir):
+    """Финальная ветка chat-стрима: последнее assistant-сообщение хранит
+    request_id (== rid из done) и usage (== usage из done: prompt/
+    completion/total tokens) — фронтенд FlowInspector читает их из
+    диалога после перезагрузки, без live-done."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    events = list(agent.ask_stream(d["id"], "привет"))
+    done = events[-1]
+    assert done["type"] == "done"
+    msgs = agent.store.get_messages(d["id"])
+    last = msgs[-1]
+    assert last["role"] == "assistant"
+    assert last["request_id"] == done["request_id"] == 1
+    assert last["usage"] == done["usage"]
+    assert last["usage"]["prompt_tokens"] == 10
+    assert last["usage"]["completion_tokens"] == 5
+    assert last["usage"]["total_tokens"] == 15
 
 
 # ---------- тумблеры слоёв памяти ----------

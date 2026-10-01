@@ -98,6 +98,39 @@ describe('Sidebar — клик по строке = активация', () => {
   })
 })
 
+describe('Sidebar — без блока «Инструменты» (ui-rework, задача 1)', () => {
+  it('блока «Инструменты» и вкладок Токены/Запрос нет; диалоги и память на месте', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = normalizeUrl(input)
+        if (url === '/api/dialogues') {
+          return jsonResponse({ active_id: 'd1', dialogues: [d1] })
+        }
+        if (url === '/api/memory') {
+          return jsonResponse(memoryFor('d1', {}))
+        }
+        return jsonResponse(BASE_FIXTURES[url] ?? { ok: true })
+      }),
+    )
+    render(
+      <StudioProvider>
+        <Sidebar />
+      </StudioProvider>,
+    )
+
+    await screen.findByText('Первый')
+    // блок «Инструменты» удалён: ни заголовка, ни табов
+    expect(screen.queryByText('Инструменты')).toBeNull()
+    expect(screen.queryByRole('tablist', { name: 'Инструменты' })).toBeNull()
+    expect(screen.queryByRole('tab')).toBeNull()
+    // остальное сайдбара без изменений: бренд, диалоги, память
+    expect(screen.getByText('Диалоги')).toBeInTheDocument()
+    expect(screen.getByText('Память')).toBeInTheDocument()
+    expect(screen.getByText('Первый')).toBeInTheDocument()
+  })
+})
+
 describe('Sidebar — ренейм по карандашу', () => {
   function renameFetchMock(server: { dialogues: DialogueMeta[]; renamed: unknown[] }) {
     return vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {

@@ -1,9 +1,9 @@
 // Токен-гейдж в шапке чата (TokenGauge): SVG-кольцо + компактное число
-// (short form) + tooltip с полной токен-статистикой (по :hover, чистый
-// CSS — в DOM строки tooltip всегда, видимость — на CSS). Данные — из
-// state (memory/tokens/config), без новых API-вызовов.
+// (short form). По hover — TokenPopover (лимит + progress-бар, последний
+// usage, сессионные токены, модель). Данные — из state (tokens/config),
+// без новых API-вызовов.
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { StudioProvider } from '../src/state'
 import ChatPanel from '../src/components/ChatPanel'
 import TokenGauge from '../src/components/TokenGauge'
@@ -77,36 +77,39 @@ describe('TokenGauge — в шапке чата', () => {
     await waitFor(() => expect(gauge).toHaveAttribute('aria-valuenow', '4'))
     // компактное число рядом с кольцом: «1.2k»
     expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('1.2k')
-    // без warn при малом заполнении
+    // без warn при малом заполнении; до hover поповера нет
     expect(container.querySelector('.token-gauge.warn')).toBeNull()
+    expect(container.querySelector('.token-pop')).toBeNull()
   })
 
-  it('tooltip в DOM: строки диалога/запроса/сессии/лимита/модели', async () => {
+  it('hover → поповер открывается с данными (usage, сессия, лимит, модель); без hover — нет', async () => {
     stubFetch({
       last: { prompt: 1000, completion: 200, reasoning: 120, total: 1240 },
       session: { prompt: 5000, completion: 2500, total: 7500 },
       context_limit: 32768,
     })
-    render(
+    const { container } = render(
       <StudioProvider>
         <ChatPanel />
       </StudioProvider>,
     )
     const gauge = await screen.findByRole('progressbar', { name: 'Лимит контекста' })
-    const tip = gauge.querySelector('.token-gauge-tip')
-    expect(tip).toBeTruthy()
-    // строки tooltip: подписи и значения текущего диалога (ждём loadAll)
-    expect(await screen.findByText('Диалог (оценка)')).toBeInTheDocument()
-    expect(await screen.findByText('1234 · 8 сообщений')).toBeInTheDocument()
-    expect(
-      await screen.findByText('prompt 1000 / reasoning 120 / total 1240'),
-    ).toBeInTheDocument()
-    expect(
-      await screen.findByText('prompt 5000 / completion 2500 / total 7500'),
-    ).toBeInTheDocument()
-    expect(await screen.findByText('1240 / 32768')).toBeInTheDocument()
-    // модель из конфига (в tooltip; в дропдауне такое же имя — смотрим строку)
-    await waitFor(() => expect(tip?.textContent).toContain('qwen3.8-27b'))
+    // ждём loadAll: число «1.2k» из загруженных токенов
+    await waitFor(() => expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('1.2k'))
+    // до hover поповера в DOM нет
+    expect(container.querySelector('.token-pop')).toBeNull()
+
+    fireEvent.mouseEnter(gauge)
+    const pop = (await screen.findByText('последний запрос')).closest('.token-pop')
+    expect(pop).toBeTruthy()
+    // строки: последний запрос (total/лимит), usage, сессия, модель
+    expect(screen.getByText('1240 / 32768')).toBeInTheDocument()
+    expect(screen.getByText('prompt', { selector: '.pop-row span' })).toBeInTheDocument()
+    expect(screen.getByText('7500')).toBeInTheDocument()
+    await waitFor(() => expect(pop?.textContent).toContain('qwen3.8-27b'))
+    // progress-бар поповера: 1240 / 32768 → aria-valuenow 4
+    const bar = pop?.querySelector('[role="progressbar"]')
+    expect(bar?.getAttribute('aria-valuenow')).toBe('4')
   })
 
   it('pct > 90% — warn-класс и aria; число ≥1000 — short form', async () => {
@@ -128,7 +131,7 @@ describe('TokenGauge — в шапке чата', () => {
     expect(container.querySelector('.token-gauge.warn .token-gauge-fill')).toBeTruthy()
   })
 
-  it('данных нет (last: null) — «—», заполнение 0, без warn', async () => {
+  it('данных нет (last: null) — «—», заполнение 0, без warn; поповер — «—»', async () => {
     stubFetch({
       last: null,
       session: { prompt: 0, completion: 0, total: 0 },
@@ -140,14 +143,20 @@ describe('TokenGauge — в шапке чата', () => {
       </StudioProvider>,
     )
     const gauge = await screen.findByRole('progressbar', { name: 'Лимит контекста' })
-    // ждём загрузку: строка лимита «— / 32768» (last null, limit из API)
-    expect(await screen.findByText('— / 32768')).toBeInTheDocument()
     expect(gauge).toHaveAttribute('aria-valuenow', '0')
     expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('—')
     expect(container.querySelector('.token-gauge.warn')).toBeNull()
+
+    // поповер при пустом usage: «последний запрос» — «—», за сессию — 0
+    fireEvent.mouseEnter(gauge)
+    const pop = (await screen.findByText('последний запрос')).closest('.token-pop')
+    expect(pop).toBeTruthy()
+    const rows = pop?.querySelectorAll('.pop-row b')
+    expect(rows?.[0]?.textContent).toBe('—')
+    expect(rows?.[4]?.textContent).toBe('0')
   })
 
-  it('сам по себе (вне ChatPanel) — строки tooltip при пустых данных', async () => {
+  it('сам по себе (вне ChatPanel) — гейдж и поповер при пустых данных', async () => {
     stubFetch({
       last: null,
       session: { prompt: 0, completion: 0, total: 0 },
@@ -159,12 +168,14 @@ describe('TokenGauge — в шапке чата', () => {
       </StudioProvider>,
     )
     const gauge = await screen.findByRole('progressbar', { name: 'Лимит контекста' })
-    // лимит 0 — «— / —» (ждём loadAll, чтобы исключить «до загрузки»)
-    expect(await screen.findByText('— / —')).toBeInTheDocument()
-    const tip = gauge.querySelector('.token-gauge-tip')
-    expect(tip).toBeTruthy()
-    expect(tip?.textContent).toContain('Диалог (оценка)')
-    // модель — из загруженного конфига
-    await waitFor(() => expect(tip?.textContent).toContain('qwen3.8-27b'))
+    expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('—')
+
+    fireEvent.mouseEnter(gauge)
+    const pop = (await screen.findByText('последний запрос')).closest('.token-pop')
+    expect(pop).toBeTruthy()
+    // лимит 0 — «последний запрос» «—»; модель — из загруженного конфига
+    const rows = pop?.querySelectorAll('.pop-row b')
+    expect(rows?.[0]?.textContent).toBe('—')
+    await waitFor(() => expect(pop?.textContent).toContain('qwen3.8-27b'))
   })
 })
