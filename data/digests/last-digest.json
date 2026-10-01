@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261001-0357",
-  "generated_at": "2026-10-01T03:57:27Z",
+  "id": "digest-20261001-1221",
+  "generated_at": "2026-10-01T12:21:54Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 11.2,
-    "feels_like_c": 9.3,
+    "temp_c": 13.8,
+    "feels_like_c": 10.2,
     "description": "Пасмурно",
-    "wind_ms": 12.3
+    "wind_ms": 17.0
   },
   "news": {
     "vc.ru": [
       {
+        "title": "День 1680: за семь месяцев 2026 года сальдированная прибыль российских компаний уменьшилась на 15,7%, до 13,02 трлн рублей",
+        "url": "https://vc.ru/money/3168845-pribyl-rossiiskikh-kompanii-sokratilas-na-15-7?from=rss"
+      },
+      {
+        "title": "«Умное» кольцо «Сбера» получило функцию бесконтактной оплаты",
+        "url": "https://vc.ru/tech/3169260-umnoe-kolco-sbera-beskontaktnaya-oplata?from=rss"
+      },
+      {
+        "title": "Max добавил для владельцев каналов возможность подключать донаты",
+        "url": "https://vc.ru/services/3169383-podklyuchenie-donatov-dlya-vladeletsej-kanalov-na-max?from=rss"
+      },
+      {
+        "title": "Японское подразделение Google показало ежегодный шуточный дизайн клавиатуры — на этот раз она вертикальная, а кнопки находятся на движущейся ленте",
+        "url": "https://vc.ru/tech/3169669-yaponskoe-podrazdelenie-google-pokazalo-ezhegodnyi-shutochnyi-dizain-klaviatury-na-etot-raz-ona-vertikalnaya-a-knopki-nahodyatsya-na-dvizhusheisya-lente?from=rss"
+      },
+      {
         "title": "Запрет на продажу предоплаченных SIM-карт и единая платформа согласий на обработку персональных данных: Минцифры представило третий пакет мер по борьбе с мошенниками",
         "url": "https://vc.ru/legal/3167525-zapret-na-prodazhu-predoplachennyh-sim-kart?from=rss"
-      },
-      {
-        "title": "Wildberries запустил сервис для поиска частных специалистов «WB Услуги»",
-        "url": "https://vc.ru/marketplace/3167509-wildberries-zapustil-wb-uslugi-dlya-poiska-chastnykh-spetsialistov?from=rss"
-      },
-      {
-        "title": "Dyson объяснила проблемы с «умной» зубной щёткой «сбоем на производстве» — из-за этого вода просачивалась в батарейный отсек, что приводило к поломке",
-        "url": "https://vc.ru/tech/3168223-problemy-s-zubnoj-shhetkoj-dyson?from=rss"
-      },
-      {
-        "title": "Apple 13 октября 2026 года представит дисплей для управления «умным» домом, новую колонку HomePod mini и приставку Apple TV — Bloomberg",
-        "url": "https://vc.ru/tech/3167682-apple-predstavit-displey-dlya-umnogo-doma?from=rss"
-      },
-      {
-        "title": "Samsung представила маячок Galaxy SmartTag 3 — он работает с iOS",
-        "url": "https://vc.ru/tech/3167917-samsung-galaxy-smarttag-3-novyj-treker-s-podderzhkoy-ios?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Microsoft представила WSL 3.0 с поддержкой запуска Linux-контейнеров в Windows",
-        "url": "https://habr.com/ru/news/1088392/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088392"
+        "title": "За Bare Metal — тоже к нам: RUVDS вышел на рынок аренды физических серверов",
+        "url": "https://habr.com/ru/companies/ruvds/news/1089112/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089112"
       },
       {
-        "title": "Вышел FreeCAD 1.1.4",
-        "url": "https://habr.com/ru/news/1088728/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088728"
+        "title": "Еврокомиссия развернёт меры против 10 видеоигровых компаний в рамках борьбы с проблемами внутриигровых покупок",
+        "url": "https://habr.com/ru/news/1089116/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089116"
       },
       {
-        "title": "Выпуск обновления планетария с открытым кодом Stellarium 26.3",
-        "url": "https://habr.com/ru/news/1088508/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088508"
+        "title": "Слух: Naughty Dog работает над новой частью Uncharted",
+        "url": "https://habr.com/ru/companies/ggsel/news/1089086/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089086"
       },
       {
-        "title": "Gemini 4 Argon уже оптимизирует инфраструктуру Google и переписывает код",
-        "url": "https://habr.com/ru/companies/bothub/news/1088822/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088822"
+        "title": "В OpenAI раскрыли новый тип атак на ИИ‑агентов",
+        "url": "https://habr.com/ru/news/1089072/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089072"
       },
       {
-        "title": "Reuters получила доступ к заявке Anthropic на IPO. Что внутри? Убытки",
-        "url": "https://habr.com/ru/news/1088800/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088800"
+        "title": "Лучшее за неделю (21.09 — 27.09)",
+        "url": "https://habr.com/ru/companies/ruvds/news/1088676/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088676"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261001-0357: Самара 11.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261001-1221: Самара 13.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
