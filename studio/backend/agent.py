@@ -719,9 +719,16 @@ class StudioAgent:
         # LLM-вызов, как без MCP-серверов в дне 16); rag — RAG-блок
         # выдержек в system-промпте.
         s = self.kb.settings()
+        # Follow-up дня 22: эффективный RAG-режим — per-диалог флаг
+        # (запись диалога загружена в начале ask_stream); null/отсутствие
+        # ключа (старые записи) — глобальный settings['rag']. Механика
+        # дня 21 (блоки, retrieval, rag_context) не меняется.
+        rag_enabled = s["rag"]
+        if d is not None and d.get("rag") is not None:
+            rag_enabled = d["rag"]
         kb_block = ""
         kb_context = None
-        if s["rag"]:
+        if rag_enabled:
             # Двухэтапный поиск один раз за ход: top-`rag_recall` (этап 1,
             # гибрид) → реранкер (этап 2, если включён) → top-`rag_top_k`.
             # kb_block — в system-промпт; kb_context — инспектор контекста

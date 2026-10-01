@@ -23,7 +23,9 @@ def store(data_dir):
 
 def test_new_dialogue_auto_activate(store):
     d = store.new_dialogue()
-    assert set(d) == {"id", "title", "created", "messages", "profile"}
+    assert set(d) == {"id", "title", "created", "messages", "profile",
+                      "rag"}
+    assert d["rag"] is None  # follow-up дня 22: per-диалог RAG (null = по глобальному)
     assert d["messages"] == []
     assert store.active_id() == d["id"]
 
@@ -37,7 +39,8 @@ def test_list_dialogues_order_and_shape(store):
     assert lst[0] == {"id": a["id"], "title": a["title"],
                       "created": a["created"], "message_count": 1,
                       "used_task": False,
-                      "profile": new_profile(), "task": new_task()}
+                      "profile": new_profile(), "task": new_task(),
+                      "rag": None}
     assert lst[1]["message_count"] == 0
 
 

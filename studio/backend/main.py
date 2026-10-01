@@ -366,6 +366,19 @@ def create_app(agent: StudioAgent | None = None,
                              "created": d["created"],
                              "message_count": len(d["messages"])}}
 
+    @app.post("/api/dialogues/{dialogue_id}/rag")
+    def dialogues_set_rag(dialogue_id: str, body: dict):
+        """Per-диалог RAG-режим (follow-up дня 22, body: {rag: bool}).
+        400 — rag отсутствует или не настоящий bool (1/0/строки);
+        404 — диалог не найден."""
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        if "rag" not in body or not isinstance(body["rag"], bool):
+            raise HTTPException(400,
+                                 "RAG-режим должен быть boolean (true/false)")
+        agent.store.set_dialogue_rag(dialogue_id, body["rag"])
+        return {"dialogue": agent.store.get_dialogue(dialogue_id)}
+
     @app.post("/api/dialogues/{dialogue_id}/activate")
     def dialogues_activate(dialogue_id: str):
         """Сделать диалог активным."""

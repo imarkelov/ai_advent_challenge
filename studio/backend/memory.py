@@ -248,7 +248,8 @@ class MemoryStore:
         with self._lock:
             data = self._read_dialogues()
             d = {"id": uuid.uuid4().hex, "title": "Новый диалог",
-                 "created": _now(), "messages": [], "profile": new_profile()}
+                 "created": _now(), "messages": [], "profile": new_profile(),
+                 "rag": None}
             data["dialogues"].append(d)
             data["active_id"] = d["id"]
             self._write_dialogues(data)
@@ -256,7 +257,9 @@ class MemoryStore:
 
     def list_dialogues(self) -> list:
         """Список диалогов в порядке создания: {id,title,created,message_count}
-        + used_task (персистентный флаг: задача в диалоге использовалась)."""
+        + used_task (персистентный флаг: задача в диалоге использовалась)
+        + rag (follow-up дня 22: per-диалог RAG-режим; отсутствие ключа
+        в старой записи — None, т.е. «следовать глобальному settings['rag']»)."""
         with self._lock:
             data = self._read_dialogues()
             return [{"id": d["id"], "title": d.get("title", ""),
@@ -264,7 +267,8 @@ class MemoryStore:
                       "message_count": len(d.get("messages", [])),
                       "used_task": _used_task_of(d),
                       "profile": self._profile_of(d),
-                      "task": self._task_of(d)}
+                      "task": self._task_of(d),
+                      "rag": d.get("rag")}
                      for d in data["dialogues"]]
 
     def get_dialogue(self, dialogue_id: str) -> dict | None:
@@ -279,7 +283,8 @@ class MemoryStore:
                     "messages": list(d.get("messages", [])),
                     "used_task": _used_task_of(d),
                     "profile": self._profile_of(d),
-                    "task": self._task_of(d)}
+                    "task": self._task_of(d),
+                    "rag": d.get("rag")}
 
     def get_messages(self, dialogue_id: str) -> list:
         """Сообщения диалога [{role,content}] ([] если диалог не найден)."""
@@ -324,6 +329,19 @@ class MemoryStore:
             if d is None:
                 raise ValueError(f"Диалог «{dialogue_id}» не найден")
             d["title"] = title.strip()
+            self._write_dialogues(data)
+
+    def set_dialogue_rag(self, dialogue_id: str, rag: bool) -> None:
+        """Per-диалог RAG-режим (follow-up дня 22); ValueError, если
+        диалог не существует или rag не bool."""
+        with self._lock:
+            if not isinstance(rag, bool):
+                raise ValueError("RAG-режим должен быть boolean")
+            data = self._read_dialogues()
+            d = self._find(data, dialogue_id)
+            if d is None:
+                raise ValueError(f"Диалог «{dialogue_id}» не найден")
+            d["rag"] = rag
             self._write_dialogues(data)
 
     def append_message(self, dialogue_id: str, role: str, content: str,
