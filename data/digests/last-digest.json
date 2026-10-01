@@ -1,15 +1,27 @@
 {
-  "id": "digest-20261001-1221",
-  "generated_at": "2026-10-01T12:21:54Z",
+  "id": "digest-20261001-2218",
+  "generated_at": "2026-10-01T22:18:01Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 13.8,
-    "feels_like_c": 10.2,
+    "temp_c": 7.4,
+    "feels_like_c": 3.9,
     "description": "Пасмурно",
-    "wind_ms": 17.0
+    "wind_ms": 12.6
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "BMW планирует сократить 20% управленческих должностей, внедрив ИИ в разработку, закупки, маркетинг и другие сферы",
+        "url": "https://vc.ru/transport/3170264-bmw-sokrashchaet-upravlencheskie-dolzhnosti-vnedryaya-ii?from=rss"
+      },
+      {
+        "title": "Генпрокуратура подала иск к Freedom Holding и его основателю и главе Тимуру Турлову",
+        "url": "https://vc.ru/legal/3170127-genprokuratura-podala-isk-k-freedom-holding-i-timuru-turlovu?from=rss"
+      },
+      {
+        "title": "Нью-Йорк стал первым городом в США, в котором вступило в силу правило упрощённой отмены подписок «в один клик»",
+        "url": "https://vc.ru/services/3170096-nyu-york-uproschennaya-otmena-podpisok-v-odin-klik?from=rss"
+      },
       {
         "title": "День 1680: за семь месяцев 2026 года сальдированная прибыль российских компаний уменьшилась на 15,7%, до 13,02 трлн рублей",
         "url": "https://vc.ru/money/3168845-pribyl-rossiiskikh-kompanii-sokratilas-na-15-7?from=rss"
@@ -17,40 +29,28 @@
       {
         "title": "«Умное» кольцо «Сбера» получило функцию бесконтактной оплаты",
         "url": "https://vc.ru/tech/3169260-umnoe-kolco-sbera-beskontaktnaya-oplata?from=rss"
-      },
-      {
-        "title": "Max добавил для владельцев каналов возможность подключать донаты",
-        "url": "https://vc.ru/services/3169383-podklyuchenie-donatov-dlya-vladeletsej-kanalov-na-max?from=rss"
-      },
-      {
-        "title": "Японское подразделение Google показало ежегодный шуточный дизайн клавиатуры — на этот раз она вертикальная, а кнопки находятся на движущейся ленте",
-        "url": "https://vc.ru/tech/3169669-yaponskoe-podrazdelenie-google-pokazalo-ezhegodnyi-shutochnyi-dizain-klaviatury-na-etot-raz-ona-vertikalnaya-a-knopki-nahodyatsya-na-dvizhusheisya-lente?from=rss"
-      },
-      {
-        "title": "Запрет на продажу предоплаченных SIM-карт и единая платформа согласий на обработку персональных данных: Минцифры представило третий пакет мер по борьбе с мошенниками",
-        "url": "https://vc.ru/legal/3167525-zapret-na-prodazhu-predoplachennyh-sim-kart?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "За Bare Metal — тоже к нам: RUVDS вышел на рынок аренды физических серверов",
-        "url": "https://habr.com/ru/companies/ruvds/news/1089112/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089112"
+        "title": "Арнольд Шварценеггер поучаствовал в утилизации Figure 02 в расплавленном металле",
+        "url": "https://habr.com/ru/news/1089380/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089380"
       },
       {
-        "title": "Еврокомиссия развернёт меры против 10 видеоигровых компаний в рамках борьбы с проблемами внутриигровых покупок",
-        "url": "https://habr.com/ru/news/1089116/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089116"
+        "title": "Астрономы обнаружили планету, которая обращается вокруг звезды не в ту сторону",
+        "url": "https://habr.com/ru/news/1089352/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089352"
       },
       {
-        "title": "Слух: Naughty Dog работает над новой частью Uncharted",
-        "url": "https://habr.com/ru/companies/ggsel/news/1089086/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089086"
+        "title": "Учёные обнаружили, что есть (и быть) в одиночестве вредно для здоровья",
+        "url": "https://habr.com/ru/news/1089334/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089334"
       },
       {
-        "title": "В OpenAI раскрыли новый тип атак на ИИ‑агентов",
-        "url": "https://habr.com/ru/news/1089072/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089072"
+        "title": "В Steam началась масштабная Осенняя распродажа",
+        "url": "https://habr.com/ru/companies/ggsel/news/1089316/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089316"
       },
       {
-        "title": "Лучшее за неделю (21.09 — 27.09)",
-        "url": "https://habr.com/ru/companies/ruvds/news/1088676/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088676"
+        "title": "OpenAI связала Moonshot AI с попытками извлечь скрытые рассуждения моделей",
+        "url": "https://habr.com/ru/companies/bothub/news/1089282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089282"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261001-1221: Самара 13.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261001-2218: Самара 7.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
