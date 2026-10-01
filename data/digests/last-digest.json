@@ -1,12 +1,12 @@
 {
-  "id": "digest-20260930-2149",
-  "generated_at": "2026-09-30T21:49:59Z",
+  "id": "digest-20261001-0357",
+  "generated_at": "2026-10-01T03:57:27Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 11.8,
-    "feels_like_c": 10.8,
+    "temp_c": 11.2,
+    "feels_like_c": 9.3,
     "description": "Пасмурно",
-    "wind_ms": 9.1
+    "wind_ms": 12.3
   },
   "news": {
     "vc.ru": [
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
+        "title": "Microsoft представила WSL 3.0 с поддержкой запуска Linux-контейнеров в Windows",
+        "url": "https://habr.com/ru/news/1088392/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088392"
+      },
+      {
+        "title": "Вышел FreeCAD 1.1.4",
+        "url": "https://habr.com/ru/news/1088728/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088728"
+      },
+      {
+        "title": "Выпуск обновления планетария с открытым кодом Stellarium 26.3",
+        "url": "https://habr.com/ru/news/1088508/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088508"
+      },
+      {
         "title": "Gemini 4 Argon уже оптимизирует инфраструктуру Google и переписывает код",
         "url": "https://habr.com/ru/companies/bothub/news/1088822/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088822"
       },
       {
         "title": "Reuters получила доступ к заявке Anthropic на IPO. Что внутри? Убытки",
         "url": "https://habr.com/ru/news/1088800/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088800"
-      },
-      {
-        "title": "В HeyPCB добавили функцию совместного проектирования печатных плат в браузере",
-        "url": "https://habr.com/ru/news/1088812/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088812"
-      },
-      {
-        "title": "Take‑Two добилась закрытия сторонних портов GTA 5 для Nintendo Switch и Android",
-        "url": "https://habr.com/ru/news/1088794/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088794"
-      },
-      {
-        "title": "Астрономы связали загадочные вспышки в космосе со столкновениями останков звёзд",
-        "url": "https://habr.com/ru/news/1088786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088786"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20260930-2149: Самара 11.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261001-0357: Самара 11.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
