@@ -80,9 +80,17 @@ export interface Message {
    // Assistant-сообщения с вызовами инструментов (день 17):
    // [{id, type, function:{name, arguments}}] (старые — без поля)
    tool_calls?: unknown
-   // День 21 (реранкер): извлечённый RAG-контекст ответа (какие чанки
-   // ушли в system-промпт; старые сообщения — без поля)
-   rag_context?: RagContext
+    // День 21 (реранкер): извлечённый RAG-контекст ответа (какие чанки
+    // ушли в system-промпт; старые сообщения — без поля)
+    rag_context?: RagContext
+    // ui-rework (задача 2): id LLM-запроса в журнале (GET /api/requests/{id})
+    // + сырой usage-чанк LLM (chat-сообщения; старые — без полей)
+    request_id?: number
+    usage?: {
+      prompt_tokens?: number
+      completion_tokens?: number
+      total_tokens?: number
+    }
 }
 
 export interface DialogueMeta {

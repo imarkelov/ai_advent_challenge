@@ -10,6 +10,7 @@ import TaskCard, { taskFromMarkers } from './TaskCard'
 import SaveMessageModal from './SaveMessageModal'
 import ToolCallModal from './ToolCallModal'
 import TokenGauge from './TokenGauge'
+import FlowInspector from './FlowInspector'
 
 // Строка автодополнения «/» (день 16): сервер (tier-1), инструмент
 // (tier-2) или подсказка (сервер не подключён)
@@ -405,6 +406,12 @@ export default function ChatPanel() {
           )}
           {m.role === 'assistant' && m.rag_context && m.rag_context.chunks.length > 0 && (
             <RagContextInspector ctx={m.rag_context} />
+          )}
+          {/* Флоу обработки (ui-rework, задача 3): строка-чип «📡 Обработка…» —
+              если есть request_id (журнал) или RAG-чанки в сообщении */}
+          {m.role === 'assistant' && (m.request_id != null
+            || (m.rag_context != null && m.rag_context.chunks.length > 0)) && (
+            <FlowInspector msg={m} />
           )}
         </div>
         {cardAt.has(i) && (() => {

@@ -517,6 +517,9 @@ export interface RagContextChunk {
   text: string          // отрывок ≤300 символов (срезает бэкенд)
 }
 export interface RagContext {
+  // Запрос пользователя, по которому шёл retrieval (бэкенд отдаёт;
+  // старые сообщения — без поля)
+  query?: string
   recall_total: number
   reranked: boolean
   chunks: RagContextChunk[]

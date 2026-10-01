@@ -1,0 +1,271 @@
+/* ============================================================================
+   FlowInspector (ui-rework, задача 3) — инлайн-флоу обработки под
+   assistant-сообщением в ленте чата. Самодостаточный файл: все классы с
+   префиксом .flow- (styles.css не трогаем), дизайн — только токены :root.
+   Мокап-источник: .omo/mockup/ui-rework-v3.html, кадры 4-5 (.flow-row /
+   .flow-card / шаги / .json-pre с bottom-fade).
+   ========================================================================== */
+
+/* ── Свёрнутая строка-чип: одна строка с суммарным флоу, стрелка ▸ ───────── */
+/* Панель с акцентной левой границей, моно-шрифт мелкий (паттерн .msg-model-
+   chip / .rag-ctx-toggle). Части без данных не рендерятся — стрелок
+   «в никуда» нет. */
+.flow-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: fit-content;
+  max-width: 100%;
+  margin-top: var(--sp-1);
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent);
+  border-radius: var(--r-sm);
+  background: var(--panel);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--t-fast) var(--ease),
+              color var(--t-fast) var(--ease);
+}
+.flow-row:hover {
+  border-color: var(--accent-line);
+  color: var(--text);
+}
+.flow-row-ic {
+  flex: none;
+  color: var(--accent);
+}
+.flow-row-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.flow-row-arr {
+  flex: none;
+  margin-left: auto;
+  color: var(--muted);
+}
+
+/* ── Раскрытая карточка: шаги RAG → Prompt → LLM → Ответ ─────────────────── */
+.flow-card {
+  margin-top: var(--sp-1);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent);
+  border-radius: var(--r-md);
+  background: var(--panel);
+  padding: var(--sp-2) var(--sp-3);
+}
+.flow-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  margin-bottom: var(--sp-1);
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  cursor: pointer;
+  text-align: left;
+}
+.flow-head-arr {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+/* Шаг: иконка (20px) + тело (заголовок mono-мелкий + детали) */
+.flow-step {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
+.flow-step:first-of-type {
+  border-top: none;
+}
+.flow-step-ic {
+  flex: none;
+  width: 20px;
+  text-align: center;
+}
+.flow-step-body {
+  flex: 1;
+  min-width: 0;
+}
+.flow-step-title {
+  margin-bottom: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.flow-step-detail {
+  color: var(--text);
+  font-size: 12px;
+  word-break: break-word;
+}
+.flow-step-meta {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* ── Чипы: RAG-чанки и блоки Prompt-сборки ───────────────────────────────── */
+.flow-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+/* Чанк RAG: {file} · {section} + score-чип; акцент RAG — --lt */
+.flow-chunk {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border: 1px solid var(--lt);
+  border-radius: var(--r-pill);
+  background: var(--panel-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text);
+}
+/* Цветовая шкала score (паттерн RagContextInspector/KbTab):
+   зелёный ≥0.8, жёлтый 0.5–0.8, красный <0.5 */
+.flow-score {
+  font-weight: 500;
+}
+.flow-score-g {
+  color: var(--ok);
+}
+.flow-score-y {
+  color: var(--wm);
+}
+.flow-score-r {
+  color: var(--danger);
+}
+/* Реранкер поднял чанок с низкой позиции этапа 1 (>20) */
+.flow-chunk-from {
+  color: var(--accent);
+  cursor: help;
+}
+/* Чип блока Prompt-сборки с оценкой токенов (эвристика ≈0.44 tok/символ) */
+.flow-pb {
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--panel-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+.flow-pb--base {
+  color: var(--st);
+}
+.flow-pb--rag {
+  border-color: var(--lt);
+  color: var(--lt);
+}
+
+/* ── Пункт «Запрос JSON» (LLM-шаг): ленивый fetch тела из журнала ────────── */
+.flow-json {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: 4px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--panel-2);
+}
+.flow-json-toggle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+.flow-json-copy {
+  flex: none;
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease),
+              border-color var(--t-fast) var(--ease);
+}
+.flow-json-copy:hover,
+.flow-json-copy--done {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+.flow-json-arr {
+  flex: none;
+  font-size: 10px;
+  color: var(--muted);
+}
+.flow-json-wait {
+  margin: 4px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.flow-json-err {
+  margin: 4px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--danger);
+}
+
+/* Тело запроса: pretty-JSON в <pre>, max-height ~220px, скролл + bottom-fade
+   (паттерн .json-pre мокапа; фон — var(--bg) как самый тёмный слой) */
+.flow-json-wrap {
+  position: relative;
+  margin-top: 6px;
+}
+.flow-json-pre {
+  margin: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre;
+}
+.flow-json-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34px;
+  pointer-events: none;
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+  background: linear-gradient(transparent, var(--bg));
+}
