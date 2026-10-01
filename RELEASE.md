@@ -1,3 +1,133 @@
+# Release Notes — day22-rag-query (день 22)
+
+Ветка: [`day22-rag-query`](https://github.com/imarkelov/ai_advent_challenge/tree/day22-rag-query)
+(от `day21-doc-indexing`).
+
+## Что в релизе
+
+**Первый RAG-запрос.** Студия отвечает на вопрос двумя способами
+(без RAG и с RAG) **в одном HTTP-вызове** (`POST /api/rag/compare`):
+оба LLM-вызова делает эндпоинт (T=0, max_tokens=1024 — пин, не из
+конфига; симметричный голый system-промпт — у plain руки промпт как
+есть, у RAG-руки + блок «База знаний» из `kb.search_rag`: recall
+top-50 → cross-encoder top-3). Тумблер `rag` из settings не
+consulted (сравнение явное); сбой руки — «Ошибка: …» в ответе этой
+руки (статус 200); non-stream `_task_llm_call` — журнал
+`requests.json` не пишется. Качество на 10 контрольных вопросах
+(committed-фикстуры `expect_facts` + `expected_sources`) — скрипт
+сравнения с отчётом (детерминированный факт-чек + источники,
+LLM-judge), оба ответа рядом в UI (секция «Сравнение RAG» в
+KbTab). Корпус — 5-книжный каталог (Пушкин «Евгений Онегин»,
+Чехов «Вишнёвый сад», Толстой «Война и мир» (том 1), Гоголь
+«Мёртвые души», Чехов «Дама с собачкой» (seed 34KB)):
+primary → fallback → committed seed, stdlib only.
+
+- `studio/backend/agent.py` — +38: `StudioAgent.rag_compare(question)`
+  (retrieval `kb.search_rag` из settings `rag_recall`/`rag_top_k`/
+  `reranker`, `kb_block` через `_render_kb_block`, два non-stream
+  LLM-вызова `_task_llm_call` T=0/max_tokens=1024, каждая рука в
+  try/except; возвращает `{answer_plain, answer_rag, kb_block,
+  chunks, rag_context}`). `ask_stream`/чат-пайплайн не тронуты.
+- `studio/backend/main.py` — +19: маршрут `POST /api/rag/compare`
+  (400 пустой вопрос, 404 «Индекс не построен», RU-detail).
+- `studio/backend/tests/test_rag_compare.py` (новый, 235 строк, 9
+  тестов: shape 200, plain без KB-блока, rag с блоком, T=0/
+  max_tokens=1024 в обоих payload, bare system-промпт, игнор
+  `settings["rag"]`, 400/404, изоляция ошибки одной руки).
+- Фикстуры (committed): `tests/fixtures/control_questions.json`
+  (10 вопросов: `id`, `question`, `expect_facts[]`,
+  `expected_sources[]`), `tests/fixtures/egg_book.txt` (2.6KB —
+  ксилофон, IPhone 17Promax, имя/профессия/город/кот),
+  `tests/fixtures/seed_corpus/` (chekhov_chameleon 54KB,
+  chekhov_horse_first 11KB).
+- `scripts/fetch_books.py` (новый, 338 строк, stdlib urllib) —
+  5-книжный каталог: primary-источник → fallback (Гоголь / «Дама с
+  собачкой») → seed-copy при полном провале; декодирование по
+  частотным служебным словам (utf-8/koi8-r/cp1251), size sanity >
+  50KB, атомарная запись; exit 0 даже при провале (JSON-сводка).
+- `scripts/compare_day22.py` (новый, 867 строк, stdlib) — uvicorn
+  :8106, probe GPustack (down → SKIP), wipe → fetch → upload +
+  egg_book → index (api-эмбеддер) → 10 × `POST /api/rag/compare` →
+  факт-чек (hard) + `sources_ok` (hard) + LLM-judge (soft, T=0
+  strict JSON, никогда не фейлит); отчёт compare.json + report.md
+  **всегда** (try/finally) с settings-эхом и честным итогом.
+- `scripts/e2e_day22.py` (новый, 724 строк, stdlib, :8106) — Part A
+  офлайн MUST PASS (net cut, TestClient + fake-LLM-захват + tmp-БЗ
+  egg_book + HashEmbedder, 7 шагов), Part B live (wipe → upload →
+  index → compare, B4 easter-egg — WARNING, не FAIL); port-busy —
+  ожидание до 10 мин; cleanup всегда.
+- Фронтенд: `src/api.ts` (+18) — `RagCompareResult` + `apiRagCompare`;
+  `components/KbTab.tsx` (+117) — секция «Сравнение RAG» (textarea +
+  «Сравнить» + две панели «Без RAG»/«С RAG» + чанки + `kb_block` в
+  `<details>`); `src/styles.css` (+83); `tests/kb-tab.test.tsx`
+  (+139, 3 теста секции).
+- `openspec/changes/day22-rag-query/` (5 файлов: .openspec.yaml,
+  proposal, design, tasks, specs) +
+  `docs/superpowers/specs/2026-10-01-day22-rag-query-design.md` +
+  `docs/superpowers/plans/2026-10-01-day22-rag-query.md`.
+
+## API
+
+| Метод | Путь | Назначение |
+| --- | --- | --- |
+| POST | `/api/rag/compare` | `{question}` → `{answer_plain, answer_rag, kb_block, chunks, rag_context}`: два non-stream LLM-вызова (T=0, max_tokens=1024, bare симметричный system-промпт; у RAG-руки + `kb_block` из search_rag recall top-50 → reranker top-3); 400 — пустой вопрос, 404 — «Индекс не построен» (RU-detail); журнал `requests.json` не пишется (non-stream) |
+
+## Проверка задания
+
+Бэкенд — **529 тестов PASS** (pytest, офлайн; замер на момент
+написания). Фронтенд — **266 тестов PASS** (Vitest, 20 файлов) +
+`tsc -b` clean (замер); build `dist` — clean (T5-проверка, коммит
+a73ddcc). E2E `scripts/e2e_day22.py` на этой машине: **Part A 7/7
+PASS** (net-cut: TestClient + fake-LLM-захват payload + tmp-БЗ
+egg_book + HashEmbedder), **Part B live 12 PASS / 0 FAIL / 0 SKIP**
+(B4 easter-egg — best-effort WARNING: на 3-файловом live-корпусе
+top-chunk на вопрос про телефон — Чехов, не egg_book; контракт формы
+соблюдён, семантика мелких моделей не гарантируем). Compare-отчёт
+(`.omo/evidence/day22-rag-compare/`, compare.json + report.md; live:
+qwen3.8-27b, embedder/reranker api, recall 50, top_k 3, T=0,
+max_tokens=1024, корпус 6 файлов / 1666 чанков, индексация 177s):
+**10/10 вопросов, 0 ошибок, 0 пропусков**; факт-чек (полное
+покрытие expect_facts) — RAG **2/10**, plain **2/10**; совпадений
+фактов — RAG **11/22**, plain **10/22**; sources_ok (chunks ∩
+expected_sources) — **7/10**; LLM-judge — **rag_wins=2, plain_wins=3,
+tie=5**. Честный итог (как в отчёте): на этом наборе вопросов
+plain-ответ **чаще не хуже** RAG — retrieval (recall top-50 →
+reranker top-3) не вытащил одиночный egg_book-чанк в top-k на
+1666-чанковом корпусе; чанки в индексе есть (содержат «ксилофон» и
+«IPhone») — проигрыш retrieval, не индексации. Демо-видео (live,
+15.92 s, 601 365 байт ≈ 587 КБ, h264 1440×900):
+`C:\Users\migor\OneDrive\Рабочий стол\AI Advent Challenge -
+видео\day22_demo.mp4` (desktop, **не в репозитории** — единственное
+хранилище демо по конвенции проекта). Сценарий: studio →
+«Настройки» → вкладка «База знаний» → секция «Сравнение RAG» →
+вопрос «Какой телефон был у героя?» → «Сравнить» → две панели
+«Без RAG» / «С RAG» + чанки → hold (корпус записи: 3 файла / 94
+чанка, api-эмбеддер dim 4096, api-реранкер; LLM qwen3.8-27b,
+GPustack). Лог-цитаты (вербатим, `$TEMP\opencode\demo_video_server.log`):
+`INFO:     127.0.0.1:65521 - "POST /api/rag/compare HTTP/1.1"
+200 OK` (сравнение доведено до конца — ответ 200 возвращается только
+после двух LLM-вызовов рук и 2-этапного search_rag) и
+`INFO:     127.0.0.1:65521 - "GET /api/kb/stats HTTP/1.1" 200 OK`
+(индекс жив — 94 чанка в момент записи). Честная пометка: LLM-вызовы
+обеих рук зафиксированы DOM-захватом в момент записи (рука «Без
+RAG» не знает фактов корпуса; рука «С RAG» цитирует выдержку Чехова
+«Вишнёвый сад») — отдельных [LLM]-тегов в логах нет (фича дня 17).
+
+## Безопасность
+
+Секреты — только в `.env` (корень, в `.gitignore`):
+`GPUSTACK_BASE_URL`, `GPUSTACK_API_KEY`, `GPUSTACK_KEY_EMBED`,
+`GPUSTACK_KEY_RERANK` — все уже существовали к дню 21, **новых
+`.env`-ключей нет**. Скан по новым day22-файлам (scripts/
+fetch_books|compare_day22|e2e_day22.py, tests/fixtures/*,
+test_rag_compare.py, test_fixtures.py, openspec change,
+docs/superpowers specs+plans): литеральные ключи `gpustack_*` —
+**0 совпадений**; `Bearer {key}` — только шаблоны с
+`os.environ["GPUSTACK_API_KEY"]` (тот же паттерн, что в
+e2e_day9/17–21) — **0 утечек**.
+
+---
+
 # Release Notes — day21-doc-indexing (день 21)
 
 Ветка: [`day21-doc-indexing`](https://github.com/imarkelov/ai_advent_challenge/tree/day21-doc-indexing)

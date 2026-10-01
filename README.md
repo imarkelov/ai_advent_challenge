@@ -26,6 +26,7 @@
 | День 19 | [`day19-mcp-pipeline`](https://github.com/imarkelov/ai_advent_challenge/tree/day19-mcp-pipeline) | Композиция MCP-инструментов: stdio MCP-сервер `pipeline_tools` (3 компонуемых инструмента `search`→`summarize`→`saveToFile`), stdlib-PDF-движок `pdf_writer` (полный PDF с кириллицей, встроенный TTF, детерминированные байты), LLM-driven цепочка через tool-loop дня 17 — модель сама решает, какие инструменты вызвать и сколько; `saveToFile` в форматах md/txt/json/pdf; e2e-гибрид проверяет передачу данных между этапами |
 | День 20 | [`day20-mcp-orchestration`](https://github.com/imarkelov/ai_advent_challenge/tree/day20-mcp-orchestration) | Orchestration MCP: 10 едицельных локальных MCP-серверов (1 сервер = 1 тул, каркас `_mcp_base.py`), always-префикс `{server}__{tool}` + каталог серверов в system-промпте, кап tool-loop 15 (`TOOL_LOOP_CAP`), реестр 12 дефолтов с миграцией старых мультитул-серверов, бейджи «server · tool», e2e_day20 — 10-шаговый кросс-серверный флоу (порт 8104) |
 | День 21 | [day21-doc-indexing](https://github.com/imarkelov/ai_advent_challenge/tree/day21-doc-indexing) | База знаний: пайплайн индексации документов (2 стратегии chunking, эмбеддинги, локальный SQLite-индекс, метаданные, сравнение стратегий), гибридный поиск (вектор+BM25, RRF) с опциональным 2-м этапом — cross-encoder-реранкером (qwen3-reranker-4b), RAG-инъект в чат + инспектор RAG-контекста в сообщениях + тумблеры RAG/реранкер/цикл-агента, вкладка «База знаний» (индексация, upload файлов, статистика, сравнение, 2-этапный поиск) |
+| День 22 | [day22-rag-query](https://github.com/imarkelov/ai_advent_challenge/tree/day22-rag-query) | Первый RAG-запрос: POST /api/rag/compare — ответ с RAG и без в одном вызове (T=0, max_tokens=1024, симметричный промпт), 10 контрольных вопросов с ожиданиями и источниками, скрипт сравнения с отчётом (факт-чек + LLM-judge) и UI-секция «Сравнение RAG» |
 
 ## День 7: как работает сервис
 
@@ -1651,3 +1652,117 @@ cross-encoder; live: индекс `index.db` 372 чанков / dim 4096 / 1
 live-реранкер — механизм + этап 1 `stage1_rank=2` + `rag_context`
 в сообщении). Ветка `day21-doc-indexing` (от
 `day20-mcp-orchestration`).
+
+## День 22: Первый RAG-запрос
+
+### Что это
+
+Первый RAG-запрос поверх базы знаний дня 21: студия отвечает на вопрос
+**двумя способами (без RAG и с RAG) в одном HTTP-вызове**
+(`POST /api/rag/compare`) и показывает оба ответа рядом в UI (секция
+«Сравнение RAG» во вкладке «База знаний»). Эндпоинт делает оба
+LLM-вызова сам: **T=0, max_tokens=1024 (пин, не из конфига)**,
+симметричный голый system-промпт (`config.system_prompt` как есть —
+без памяти, профиля и инвариантов); у RAG-руки к промпту
+добавляется блок «База знаний» из `kb.search_rag` (recall top-50 →
+cross-encoder top-3). Тумблер `rag` из settings **не consulted** —
+сравнение явное, обе руки всегда. Сбой одной руки не роняет вторую:
+ответ сбойной руки — строка «Ошибка: …» (статус остаётся 200).
+Корпус — 5-книжный каталог (`scripts/fetch_books.py`, stdlib):
+Пушкин «Евгений Онегин», Чехов «Вишнёвый сад», Толстой «Война и мир»
+(том 1), Гоголь «Мёртвые души», Чехов «Дама с собачкой» (seed-копия
+34KB) — primary-источник → fallback → committed seed-корпус при
+полном провале сети.
+
+### Архитектура
+
+```
+вопрос
+  → kb.search_rag(query, recall=50, top_k=3, reranker)
+      (этап 1 — гибридный recall top-50; этап 2 — cross-encoder top-3)
+  → agent._render_kb_block(results)
+      (блок «База знаний»: top-k выдержек с file · section)
+  → 2 non-stream LLM-вызова (agent._task_llm_call, T=0, max_tokens=1024)
+      plain: system = config.system_prompt          (голый промпт)
+      rag:   system = config.system_prompt + kb_block
+  → {answer_plain, answer_rag, kb_block, chunks, rag_context}
+```
+
+- **`agent.rag_compare(question)`** (новый метод, +38 строк):
+  retrieval → kb_block → два LLM-вызова, каждый в try/except (сбой
+  руки → «Ошибка: …» в ответе этой руки). Вызовы — non-stream
+  `_task_llm_call`: **журнал `requests.json` НЕ пишется** (паттерн
+  авто-заголовка дня 11).
+- **`main.py`** — маршрут `POST /api/rag/compare` (+19 строк): 400
+  пустой вопрос, 404 «Индекс не построен» (RU-detail).
+- Чат-пайплайн (`ask_stream`) и `kb.py` **не тронуты** — день 22
+  только добавляет потребителя `search_rag`.
+
+### API
+
+| Метод | Путь | Назначение |
+| --- | --- | --- |
+| POST | `/api/rag/compare` | `{question}` → `{answer_plain, answer_rag, kb_block, chunks, rag_context}`: два ответа на один вопрос (plain / RAG, T=0, max_tokens=1024), чанки retrieval (форма `GET /api/kb/search`) и RAG-контекст; 400 — пустой вопрос, 404 — индекс не построен |
+
+### UI
+
+Секция **«Сравнение RAG»** во вкладке «База знаний» (`KbTab.tsx`):
+поле вопроса (textarea) + кнопка «Сравнить» → две панели рядом
+«Без RAG» / «С RAG» + чанки retrieval (chip score, `file ·
+section`, отрывок) + `kb_block` в `<details>`; без индекса —
+«Индекс не построен»; 400/404/500 → RU-сообщение из `detail`.
+
+### E2E — `scripts/e2e_day22.py`
+
+Гибрид (паттерн e2e_day17–21, stdlib, порт **8106**): **Part A** —
+офлайн-детерминированное ядро, **MUST PASS** (net cut `_NO_NET`,
+TestClient + fake-LLM-захват payload + tmp-БЗ = только
+`egg_book.txt`, HashEmbedder): A1..A7 — shape ответа, plain без
+KB-блока, rag с блоком, T=0/max_tokens=1024 в обоих payload, bare
+system-промпт, игнор `settings["rag"]`, 400/404. **Part B** — live
+(uvicorn :8106, реальный GPustack LLM + api-эмбеддер): wipe → upload
+→ index → compare: B1..B4; B4 (easter-egg-факт в RAG-ответе) —
+best-effort WARNING, не FAIL; GPustack down → SKIP, port-busy —
+ожидание до 10 мин (чужой сервер не убивается). Cleanup всегда; exit
+0 для PASS/SKIP, 1 для FAIL.
+
+### Проверка задания
+
+- **Один вызов, два ответа** — `POST /api/rag/compare`: plain (голый
+  system-промпт) и RAG (system-промпт + блок «База знаний» из
+  search_rag: recall top-50 → реранкер top-3), T=0, max_tokens=1024;
+  флаг `rag` из settings не consulted (сравнение явное); сбой руки —
+  «Ошибка: …» в ответе этой руки, не пустая строка (статус 200).
+- **10 контрольных вопросов** (committed-фикстуры
+  `control_questions.json`, каждая с `expect_facts` и
+  `expected_sources`): Онегин ×2, Вишнёвый сад ×2, Война и мир,
+  Мёртвые души, пересечение жанров + 3 вопроса по egg-книге
+  (телефон, профессия/инструмент, имя/город/кот).
+- **Скрипт сравнения** (`scripts/compare_day22.py`) — live-прогон
+  10 × compare по корпусу (6 файлов, 1666 чанков, индексация 177s:
+  structural + api-эмбеддер `qwen3-vl-embedding-8b`, dim 4096) →
+  отчёт `.omo/evidence/day22-rag-compare/` (compare.json + report.md):
+  **10/10 вопросов, 0 ошибок**; факт-чек — RAG 11/22 vs plain 10/22
+  совпадений (полное покрытие expect_facts 2/10 у обоих); sources_ok
+  7/10; LLM-judge: rag_wins=2, plain_wins=3, tie=5. Честный итог: на
+  этом наборе plain-ответ чаще не хуже RAG — retrieval не вытащил
+  egg_book-чанки в top-k на 1666-чанковом корпусе (чанки в индексе
+  есть — проигрыш retrieval, не индексации).
+- **E2E** — Part A 7/7 PASS (net-cut); Part B live — 12 PASS / 0 FAIL /
+  0 SKIP (B4 WARNING: на 3-файловом корпусе top-chunk — Чехов, не
+  egg_book; контракт формы соблюдён, семантика моделей — best-effort).
+- **Демо-видео** (live, qwen3.8-27b):
+  `C:\Users\migor\OneDrive\Рабочий стол\AI Advent Challenge -
+  видео\day22_demo.mp4` (desktop, **НЕ в репозитории**), 15.92s,
+  ~587 КБ — studio → «База знаний» → «Сравнение RAG» → вопрос
+  «Какой телефон был у героя?» → «Сравнить» → две панели «Без
+  RAG» / «С RAG» + чанки; лог записи:
+  `INFO:     127.0.0.1:65521 - "POST /api/rag/compare HTTP/1.1"
+  200 OK`.
+
+### Статус
+
+Бэкенд — **529 тестов PASS**; фронтенд — **266 тестов PASS** (Vitest)
++ `tsc -b` clean. E2E `scripts/e2e_day22.py`: Part A 7/7 PASS, Part B
+live 12 PASS / 0 FAIL / 0 SKIP. Ветка `day22-rag-query` (от
+`day21-doc-indexing`).
