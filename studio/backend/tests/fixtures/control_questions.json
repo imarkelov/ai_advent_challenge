@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "question": "Как зовут друга Евгения Онегина, с которым он познакомился в деревне?",
+    "expect_facts": ["Владимир Ленский", "Евгений Онегин"],
+    "expected_sources": ["pushkin_oneygin.txt"]
+  },
+  {
+    "id": 2,
+    "question": "Какой жанр у «Евгения Онегина» Пушкина?",
+    "expect_facts": ["роман в стихах", "Пушкин"],
+    "expected_sources": ["pushkin_oneygin.txt"]
+  },
+  {
+    "id": 3,
+    "question": "Кто купил вишнёвый сад в финале пьесы Чехова «Вишнёвый сад»?",
+    "expect_facts": ["Вишневый сад продан", "Лопахин"],
+    "expected_sources": ["chekhov_cherry_orchard.txt"]
+  },
+  {
+    "id": 4,
+    "question": "Какой звук слышится в финале «Вишнёвого сада» и что происходит с деревьями сада?",
+    "expect_facts": ["лопнувшей струны", "топор"],
+    "expected_sources": ["chekhov_cherry_orchard.txt"]
+  },
+  {
+    "id": 5,
+    "question": "В каких сражениях 1805 года участвовал князь Андрей Болконский в «Войне и мире»?",
+    "expect_facts": ["Андрей Болконский", "Шенграбен", "Аустерлиц"],
+    "expected_sources": ["tolstoy_war_peace.txt"]
+  },
+  {
+    "id": 6,
+    "question": "Кто скупал мёртвые души у помещиков в поэме Гоголя «Мёртвые души»?",
+    "expect_facts": ["Чичиков", "мертвые души", "поэма"],
+    "expected_sources": ["gogol_dead_souls.txt"]
+  },
+  {
+    "id": 7,
+    "question": "Какие жанры у «Евгения Онегина» Пушкина и у «Мёртвых душ» Гоголя?",
+    "expect_facts": ["роман в стихах", "поэма"],
+    "expected_sources": ["pushkin_oneygin.txt", "gogol_dead_souls.txt"]
+  },
+  {
+    "id": 8,
+    "question": "Какой телефон был у героя книги про настройщика ксилофонов Аркадия?",
+    "expect_facts": ["IPhone 17Promax"],
+    "expected_sources": ["egg_book.txt"]
+  },
+  {
+    "id": 9,
+    "question": "Какая профессия была у Аркадия Фонарёва и на каком инструменте он работал?",
+    "expect_facts": ["настройщиком ксилофонов", "ксилофон"],
+    "expected_sources": ["egg_book.txt"]
+  },
+  {
+    "id": 10,
+    "question": "Как зовут героя книги про настройщика, в каком городе он живёт и как зовут его кота?",
+    "expect_facts": ["Аркадий Фонарёв", "Тамбов", "Персик"],
+    "expected_sources": ["egg_book.txt"]
+  }
+]
