@@ -609,6 +609,24 @@ export function apiKbSettingsPost(patch: Partial<KbSettings>): Promise<KbSetting
   return apiPost('/kb/settings', patch)
 }
 
+// День 22 (сравнение RAG): ответ POST /api/rag/compare — один вопрос, два
+// ответа LLM (без KB-блока / с чанками), non-stream. chunks — тот же тип,
+// что у двухэтапного поиска (KbSearchResult), rag_context — RagContext.
+export interface RagCompareResult {
+  answer_plain: string
+  answer_rag: string
+  kb_block: string
+  chunks: KbSearchResult[]
+  rag_context: RagContext
+}
+
+// Сравнение RAG: POST /api/rag/compare {question} → оба ответа одним
+// запросом (non-stream, стриминга нет). 400/404/500 — ApiError с RU-detail
+// (детерминированный из тела ответа — паттерн соседних KB-хелперов).
+export function apiRagCompare(question: string): Promise<RagCompareResult> {
+  return apiPost('/rag/compare', { question })
+}
+
 // EventSource не умеет POST, поэтому — fetch + ReadableStream.
 // Буфер разбиваем по '\n\n' (кадр SSE), внутри ищем строки `data: {json}`.
 export async function chatStream(

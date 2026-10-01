@@ -4,7 +4,8 @@
 // кандидатов этапа 1. Секции: «Включить» (тумблеры RAG/агент-цикл + реранкер
 // + этапы 1/2), «Индексация» (стратегия + эмбеддер + «Индексировать»),
 // «Файлы» (загрузка), «Статистика», «Сравнение стратегий» (таблица fixed vs
-// structural), «Поиск по базе».
+// structural), «Поиск по базе», «Сравнение RAG» (день 22: один вопрос —
+// два ответа LLM рядом, «Без RAG» / «С RAG» + чанки + KB-блок).
 // Данные локальны в компоненте (паттерн ProfileTab): при открытии читаем
 // GET /api/kb/stats + /api/kb/settings + /api/kb/uploads (список загрузок
 // независим от индекса), после каждого действия перечитываем.
@@ -20,6 +21,7 @@ import {
   apiKbUpload,
   apiKbUploads,
   apiKbWipe,
+  apiRagCompare,
   type KbBuildStatus,
   type KbEmbedder,
   type KbReranker,
@@ -28,6 +30,7 @@ import {
   type KbStats,
   type KbStrategy,
   type KbUpload,
+  type RagCompareResult,
 } from '../api'
 
 // Рисунок метрики сравнения: hit@3/precision@3/MRR — 3 знака, длины — целое
@@ -140,6 +143,13 @@ export default function KbTab() {
   const [searching, setSearching] = useState(false)
   const [results, setResults] = useState<KbSearchResult[] | null>(null)
   const [searchError, setSearchError] = useState('')
+
+  // Сравнение RAG (день 22): один вопрос → два ответа LLM одним
+  // non-stream запросом (стриминга нет — простой spinner)
+  const [ragQ, setRagQ] = useState('')
+  const [comparing, setComparing] = useState(false)
+  const [ragResult, setRagResult] = useState<RagCompareResult | null>(null)
+  const [ragError, setRagError] = useState('')
 
   // Стратегия/эмбеддер синхронизируются из настроек один раз (пока
   // пользователь не трогал селекты — локальное состояние побеждает)
@@ -325,6 +335,26 @@ export default function KbTab() {
         setSearchError(err instanceof Error ? err.message : String(err))
       } finally {
         setSearching(false)
+      }
+    })()
+  }
+
+  // Сравнение RAG (день 22): POST /api/rag/compare {question} — оба ответа
+  // (без KB-блока / с чанками) одним non-stream запросом. Ошибка (400/404/
+  // 500) — RU-detail в message; результат сбрасываем, как в doSearch.
+  const doCompare = () => {
+    const question = ragQ.trim()
+    if (!question || comparing) return
+    setComparing(true)
+    setRagError('')
+    void (async () => {
+      try {
+        setRagResult(await apiRagCompare(question))
+      } catch (err) {
+        setRagResult(null)
+        setRagError(err instanceof Error ? err.message : String(err))
+      } finally {
+        setComparing(false)
       }
     })()
   }
@@ -655,6 +685,91 @@ export default function KbTab() {
                 </p>
               </div>
             ))}
+          </>
+        )}
+      </section>
+
+      {/* ── Сравнение RAG (день 22) ── */}
+      <section className="ctx-card" title="Сравнение RAG">
+        <h3>Сравнение RAG</h3>
+        {/* Свой текст-подсказка (не «Сначала создайте индекс» — тот текст
+            уже в секции «Поиск по базе», двойной match ломал бы тесты) */}
+        {!s && stats !== null && <p className="kv-empty">Индекс не построен</p>}
+        {stats === null && <p className="kv-empty">Загрузка…</p>}
+        {s && (
+          <>
+            <div className="kb-compare">
+              <textarea
+                className="input kb-compare-textarea"
+                aria-label="Вопрос"
+                placeholder="Вопрос"
+                rows={3}
+                value={ragQ}
+                onChange={(e) => setRagQ(e.target.value)}
+                onKeyDown={(e) => {
+                  // Enter в textarea — перенос строки; отправляем Ctrl/Cmd+Enter
+                  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) doCompare()
+                }}
+              />
+              <div className="kb-compare-actions">
+                <button
+                  type="button"
+                  className="btn"
+                  disabled={comparing || !ragQ.trim()}
+                  onClick={doCompare}
+                >
+                  {comparing ? 'Сравнение…' : 'Сравнить'}
+                </button>
+                {comparing && (
+                  <span className="kb-compare-spin" aria-hidden="true" />
+                )}
+              </div>
+            </div>
+            {ragError && <p className="kb-error">{ragError}</p>}
+            {ragResult && (
+              <>
+                <div className="kb-compare-panels">
+                  <div className="kb-compare-panel">
+                    <span className="kb-compare-label">Без RAG</span>
+                    <pre className="kb-compare-answer">{ragResult.answer_plain}</pre>
+                  </div>
+                  <div className="kb-compare-panel">
+                    <span className="kb-compare-label">С RAG</span>
+                    <pre className="kb-compare-answer">{ragResult.answer_rag}</pre>
+                  </div>
+                </div>
+                {ragResult.chunks.length > 0 && (
+                  <>
+                    <p className="kb-hint">Чанки, ушедшие в ответ «С RAG»:</p>
+                    {ragResult.chunks.map((c) => (
+                      <div key={c.chunk_id} className="kb-result">
+                        <div className="kb-result-head">
+                          <span className="kb-score">
+                            {c.rerank_score != null ? metric3(c.rerank_score) : metric3(c.score)}
+                          </span>
+                          {c.rerank_score != null && c.stage1_rank != null && (
+                            <span
+                              className="kb-chip"
+                              title={`Позиция на этапе 1: #${c.stage1_rank}`}
+                            >
+                              из #{c.stage1_rank}
+                            </span>
+                          )}
+                          <span className="kb-result-src">{c.file}{c.section ? ` · ${c.section}` : ''}</span>
+                        </div>
+                        <p className="kb-excerpt">
+                          {c.text.slice(0, 300)}{c.text.length > 300 ? '…' : ''}
+                        </p>
+                      </div>
+                    ))}
+                  </>
+                )}
+                <details className="kb-compare-kbblock">
+                  <summary>KB-блок (в system-промпт)</summary>
+                  <pre className="kb-compare-answer">{ragResult.kb_block}</pre>
+                </details>
+              </>
+            )}
           </>
         )}
       </section>

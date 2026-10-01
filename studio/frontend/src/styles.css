@@ -2561,3 +2561,86 @@ button {
   line-height: 1.4;
   color: var(--muted);
 }
+
+/* ── Сравнение RAG (день 22): один вопрос — два ответа рядом ──────────────── */
+/* Вопрос (textarea 3 строки) + кнопка «Сравнить»; запрос non-stream —
+   пока висит, показываем простой индетерминированный спиннер
+   (тот же вращающийся-дуги паттерн, что у .agent-flow-spin) */
+.kb-compare {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.kb-compare-textarea {
+  width: 100%;
+  min-height: 56px;
+  resize: vertical;
+  line-height: 1.4;
+}
+.kb-compare-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.kb-compare-spin {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: kb-compare-spin 0.9s linear infinite;
+}
+@keyframes kb-compare-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Две панели рядом (flex: 1 1 240px — при узкой ширине сами встают
+   колонкой, без media-запроса) */
+.kb-compare-panels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.kb-compare-panel {
+  flex: 1 1 240px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-1) var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+.kb-compare-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+/* Ответ модели как есть: сохраняем переводы строк и пробелы */
+.kb-compare-answer {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+}
+/* KB-блок (system-промпт RAG-стороны) — сворачиваемые details */
+.kb-compare-kbblock {
+  padding: var(--sp-1) var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+.kb-compare-kbblock summary {
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.kb-compare-kbblock .kb-compare-answer {
+  margin-top: var(--sp-1);
+}

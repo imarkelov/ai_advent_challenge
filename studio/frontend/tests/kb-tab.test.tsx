@@ -564,3 +564,142 @@ describe('KbTab — день 21: двухэтапный поиск + реран�
     expect(screen.queryByText(/из #/)).not.toBeInTheDocument()
   })
 })
+
+// ── День 22: сравнение RAG (один вопрос — два ответа рядом) ──────────────────
+
+// Ответ POST /api/rag/compare (RagCompareResult): оба ответа + чанки
+// (KbSearchResult, у r1 — реранк: score чип показывает rerank_score)
+// + KB-блок, ушедший в system-промпт RAG-стороны
+const RAG_COMPARE_OK = {
+  answer_plain:
+    'Не знаю: информации о телефоне героя в предоставленных данных нет.',
+  answer_rag:
+    'У героя был телефон IPhone 17Promax.\n(Источник: egg_book.txt)',
+  kb_block:
+    'База знаний (топ-3 выдержки):\n1. egg_book.txt · Гл. 1: …телефон IPhone 17Promax…',
+  chunks: [
+    {
+      chunk_id: 'r1',
+      source: 'upload',
+      file: 'egg_book.txt',
+      section: 'Гл. 1',
+      score: 0.86,
+      rerank_score: 0.93,
+      stage1_rank: 4,
+      text: 'У героя был телефон IPhone 17Promax.',
+    },
+    {
+      chunk_id: 'r2',
+      source: 'upload',
+      file: 'egg_book.txt',
+      section: '',
+      score: 0.52,
+      text: 'Он работал игроком на ксилофоне.',
+    },
+  ],
+  rag_context: { recall_total: 50, reranked: true, chunks: [] },
+}
+
+function stubRagCompareFetch(mode: 'ok' | 'no-index', calls: Call[] = []) {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = normalizeUrl(input)
+      if (init?.method === 'POST' && url === '/api/rag/compare') {
+        const body = JSON.parse(String(init.body))
+        calls.push({ url, body })
+        if (mode === 'no-index') {
+          return new Response(JSON.stringify({ detail: 'Индекс не построен' }), {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' },
+          })
+        }
+        return jsonResponse(RAG_COMPARE_OK)
+      }
+      if (url.startsWith('/api/kb/stats')) {
+        return jsonResponse(kbStatsBody(['egg_book.txt'], []))
+      }
+      if (url === '/api/kb/settings') {
+        return jsonResponse({
+          agent_loop: false,
+          rag: true,
+          rag_top_k: 3,
+          strategy: 'fixed',
+          embedder: 'hash',
+          reranker: 'api',
+          rag_recall: 50,
+        })
+      }
+      return jsonResponse(FIXTURES[url] ?? { ok: true })
+    }),
+  )
+}
+
+describe('KbTab — день 22: «Сравнение RAG»', () => {
+  it('вопрос → POST /api/rag/compare, две панели (Без RAG / С RAG) + чанки + KB-блок', async () => {
+    const calls: Call[] = []
+    stubRagCompareFetch('ok', calls)
+    render(
+      <StudioProvider>
+        <KbTab />
+      </StudioProvider>,
+    )
+    const ta = await screen.findByLabelText('Вопрос')
+    fireEvent.change(ta, { target: { value: 'Какая модель телефона была у героя?' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Сравнить' }))
+    await waitFor(() =>
+      expect(calls).toContainEqual({
+        url: '/api/rag/compare',
+        body: { question: 'Какая модель телефона была у героя?' },
+      }),
+    )
+    // Обе панели с ответами (текст как есть, включая перевод строки).
+    // Для RAG-ответа с \n — function-matcher на <pre>: обычный string-matcher
+    // не работает (TL: текст ноды нормализуется, а matcher — нет)
+    expect(screen.getByText('Без RAG')).toBeInTheDocument()
+    expect(screen.getByText('С RAG')).toBeInTheDocument()
+    expect(
+      await screen.findByText(
+        (_content, el) =>
+          el?.tagName === 'PRE' && el.textContent === RAG_COMPARE_OK.answer_rag,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByText(RAG_COMPARE_OK.answer_plain)).toBeInTheDocument()
+    // Чанки: file · section + score-чип (при реранке — rerank_score) + «из #N»
+    expect(screen.getByText('egg_book.txt · Гл. 1')).toBeInTheDocument()
+    expect(screen.getByText('0.930')).toBeInTheDocument()
+    expect(screen.getByText('из #4')).toBeInTheDocument()
+    // второй чанк без секции — только файл
+    expect(screen.getByText('egg_book.txt')).toBeInTheDocument()
+    expect(screen.getByText('Он работал игроком на ксилофоне.')).toBeInTheDocument()
+    // KB-блок — сворачиваемая строка
+    expect(screen.getByText('KB-блок (в system-промпт)')).toBeInTheDocument()
+  })
+
+  it('404 → RU-сообщение «Индекс не построен», без краха и без панелей', async () => {
+    stubRagCompareFetch('no-index')
+    render(
+      <StudioProvider>
+        <KbTab />
+      </StudioProvider>,
+    )
+    const ta = await screen.findByLabelText('Вопрос')
+    fireEvent.change(ta, { target: { value: 'Какая модель телефона была у героя?' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Сравнить' }))
+    expect(await screen.findByText('Индекс не построен')).toBeInTheDocument()
+    // ответ не рендерится, кнопка снова активна
+    expect(screen.queryByText('Без RAG')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Сравнить' })).toBeEnabled()
+  })
+
+  it('кнопка «Сравнить» отключена без вопроса', async () => {
+    stubRagCompareFetch('ok')
+    render(
+      <StudioProvider>
+        <KbTab />
+      </StudioProvider>,
+    )
+    await screen.findByLabelText('Вопрос')
+    expect(screen.getByRole('button', { name: 'Сравнить' })).toBeDisabled()
+  })
+})
