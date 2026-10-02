@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261001-2218",
-  "generated_at": "2026-10-01T22:18:01Z",
+  "id": "digest-20261002-0354",
+  "generated_at": "2026-10-02T03:54:05Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 7.4,
-    "feels_like_c": 3.9,
-    "description": "Пасмурно",
-    "wind_ms": 12.6
+    "temp_c": 5.0,
+    "feels_like_c": 0.4,
+    "description": "Преимущественно ясно",
+    "wind_ms": 16.5
   },
   "news": {
     "vc.ru": [
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
-        "title": "Арнольд Шварценеггер поучаствовал в утилизации Figure 02 в расплавленном металле",
-        "url": "https://habr.com/ru/news/1089380/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089380"
+        "title": "Amazon обновила линейку Kindle и представила пульт для перелистывания страниц",
+        "url": "https://habr.com/ru/news/1089402/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089402"
       },
       {
-        "title": "Астрономы обнаружили планету, которая обращается вокруг звезды не в ту сторону",
-        "url": "https://habr.com/ru/news/1089352/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089352"
+        "title": "Вышло обновление инструмента мониторинга HWiNFO 8.54",
+        "url": "https://habr.com/ru/news/1089308/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089308"
       },
       {
-        "title": "Учёные обнаружили, что есть (и быть) в одиночестве вредно для здоровья",
-        "url": "https://habr.com/ru/news/1089334/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089334"
+        "title": "Состоялся выпуск платформы совместной разработки Gitea 28.0 с отказом от нумерации версий 1.x (после 1.27 вышла не 1.28)",
+        "url": "https://habr.com/ru/news/1089268/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089268"
       },
       {
-        "title": "В Steam началась масштабная Осенняя распродажа",
-        "url": "https://habr.com/ru/companies/ggsel/news/1089316/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089316"
+        "title": "Вышел Qt 6.12",
+        "url": "https://habr.com/ru/news/1089140/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089140"
       },
       {
-        "title": "OpenAI связала Moonshot AI с попытками извлечь скрытые рассуждения моделей",
-        "url": "https://habr.com/ru/companies/bothub/news/1089282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089282"
+        "title": "Gartner: расходы на использование LLM превысят среднюю зарплату разработчика к 2028 году",
+        "url": "https://habr.com/ru/news/1089384/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089384"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261001-2218: Самара 7.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261002-0354: Самара 5.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
