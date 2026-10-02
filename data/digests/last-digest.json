@@ -1,15 +1,27 @@
 {
-  "id": "digest-20261002-0354",
-  "generated_at": "2026-10-02T03:54:05Z",
+  "id": "digest-20261002-1149",
+  "generated_at": "2026-10-02T11:49:35Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 5.0,
-    "feels_like_c": 0.4,
-    "description": "Преимущественно ясно",
-    "wind_ms": 16.5
+    "temp_c": 6.4,
+    "feels_like_c": 1.3,
+    "description": "Небольшой дождь",
+    "wind_ms": 18.0
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "РЖД с 1 декабря 2026 года будет взимать за возврат билетов от 1% до 10% их стоимости — размер сбора будет зависеть от времени, оставшегося до отправления",
+        "url": "https://vc.ru/transport/3171705-rzhd-s-1-dekabrya-2026-goda-budet-vzimat-za-vozvrat-biletov-ot-1-do-10-ih-stoimosti-razmer-sbora-budet-zaviset-ot-vremeni-ostavshegosya-do-otpravleniya?from=rss"
+      },
+      {
+        "title": "США ввели санкции против российской платёжной системы А7 — предлогом для этого стали обвинения в обходе санкций против Ирана",
+        "url": "https://vc.ru/money/3171030-sanktsii-ssha-protiv-platezhnoy-sistemy-a7?from=rss"
+      },
+      {
+        "title": "Онлайн-кинотеатр Wink планирует закрыть запущенный в 2024 году музыкальный сервис «Wink Музыка» — «Ъ»",
+        "url": "https://vc.ru/services/3171097-wink-zakryvaet-muzykalnyy-servis-wink-muzyka?from=rss"
+      },
       {
         "title": "BMW планирует сократить 20% управленческих должностей, внедрив ИИ в разработку, закупки, маркетинг и другие сферы",
         "url": "https://vc.ru/transport/3170264-bmw-sokrashchaet-upravlencheskie-dolzhnosti-vnedryaya-ii?from=rss"
@@ -17,40 +29,28 @@
       {
         "title": "Генпрокуратура подала иск к Freedom Holding и его основателю и главе Тимуру Турлову",
         "url": "https://vc.ru/legal/3170127-genprokuratura-podala-isk-k-freedom-holding-i-timuru-turlovu?from=rss"
-      },
-      {
-        "title": "Нью-Йорк стал первым городом в США, в котором вступило в силу правило упрощённой отмены подписок «в один клик»",
-        "url": "https://vc.ru/services/3170096-nyu-york-uproschennaya-otmena-podpisok-v-odin-klik?from=rss"
-      },
-      {
-        "title": "День 1680: за семь месяцев 2026 года сальдированная прибыль российских компаний уменьшилась на 15,7%, до 13,02 трлн рублей",
-        "url": "https://vc.ru/money/3168845-pribyl-rossiiskikh-kompanii-sokratilas-na-15-7?from=rss"
-      },
-      {
-        "title": "«Умное» кольцо «Сбера» получило функцию бесконтактной оплаты",
-        "url": "https://vc.ru/tech/3169260-umnoe-kolco-sbera-beskontaktnaya-oplata?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Amazon обновила линейку Kindle и представила пульт для перелистывания страниц",
-        "url": "https://habr.com/ru/news/1089402/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089402"
+        "title": "Activision Blizzard ищет разработчиков для новой StarCraft",
+        "url": "https://habr.com/ru/companies/ggsel/news/1089628/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089628"
       },
       {
-        "title": "Вышло обновление инструмента мониторинга HWiNFO 8.54",
-        "url": "https://habr.com/ru/news/1089308/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089308"
+        "title": "Яндекс выпускает собственную мобильную ОС на базе AOSP вместе с китайским партнёром: независимый разбор",
+        "url": "https://habr.com/ru/news/1089626/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089626"
       },
       {
-        "title": "Состоялся выпуск платформы совместной разработки Gitea 28.0 с отказом от нумерации версий 1.x (после 1.27 вышла не 1.28)",
-        "url": "https://habr.com/ru/news/1089268/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089268"
+        "title": "Космический инференс возможен, Google посчитала для себя. Нужно 1 800 запусков Starship",
+        "url": "https://habr.com/ru/companies/selectel/news/1089592/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089592"
       },
       {
-        "title": "Вышел Qt 6.12",
-        "url": "https://habr.com/ru/news/1089140/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089140"
+        "title": "Первую в мире усовершенствованную геотермальную электростанцию построили всего за 23 месяца",
+        "url": "https://habr.com/ru/news/1089620/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089620"
       },
       {
-        "title": "Gartner: расходы на использование LLM превысят среднюю зарплату разработчика к 2028 году",
-        "url": "https://habr.com/ru/news/1089384/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089384"
+        "title": "Unit 42 нашли уязвимость в IBM Turbonomic и избыточные права у 5% операторов Kubernetes",
+        "url": "https://habr.com/ru/companies/selectel/news/1089056/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089056"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261002-0354: Самара 5.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261002-1149: Самара 6.4°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

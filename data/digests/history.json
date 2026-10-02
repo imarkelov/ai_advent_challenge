@@ -2554,5 +2554,85 @@
       ]
     },
     "summary": "Сводка digest-20261002-0354: Самара 5.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261002-1149",
+    "generated_at": "2026-10-02T11:49:35Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 6.4,
+      "feels_like_c": 1.3,
+      "description": "Небольшой дождь",
+      "wind_ms": 18.0
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "РЖД с 1 декабря 2026 года будет взимать за возврат билетов от 1% до 10% их стоимости — размер сбора будет зависеть от времени, оставшегося до отправления",
+          "url": "https://vc.ru/transport/3171705-rzhd-s-1-dekabrya-2026-goda-budet-vzimat-za-vozvrat-biletov-ot-1-do-10-ih-stoimosti-razmer-sbora-budet-zaviset-ot-vremeni-ostavshegosya-do-otpravleniya?from=rss"
+        },
+        {
+          "title": "США ввели санкции против российской платёжной системы А7 — предлогом для этого стали обвинения в обходе санкций против Ирана",
+          "url": "https://vc.ru/money/3171030-sanktsii-ssha-protiv-platezhnoy-sistemy-a7?from=rss"
+        },
+        {
+          "title": "Онлайн-кинотеатр Wink планирует закрыть запущенный в 2024 году музыкальный сервис «Wink Музыка» — «Ъ»",
+          "url": "https://vc.ru/services/3171097-wink-zakryvaet-muzykalnyy-servis-wink-muzyka?from=rss"
+        },
+        {
+          "title": "BMW планирует сократить 20% управленческих должностей, внедрив ИИ в разработку, закупки, маркетинг и другие сферы",
+          "url": "https://vc.ru/transport/3170264-bmw-sokrashchaet-upravlencheskie-dolzhnosti-vnedryaya-ii?from=rss"
+        },
+        {
+          "title": "Генпрокуратура подала иск к Freedom Holding и его основателю и главе Тимуру Турлову",
+          "url": "https://vc.ru/legal/3170127-genprokuratura-podala-isk-k-freedom-holding-i-timuru-turlovu?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Activision Blizzard ищет разработчиков для новой StarCraft",
+          "url": "https://habr.com/ru/companies/ggsel/news/1089628/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089628"
+        },
+        {
+          "title": "Яндекс выпускает собственную мобильную ОС на базе AOSP вместе с китайским партнёром: независимый разбор",
+          "url": "https://habr.com/ru/news/1089626/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089626"
+        },
+        {
+          "title": "Космический инференс возможен, Google посчитала для себя. Нужно 1 800 запусков Starship",
+          "url": "https://habr.com/ru/companies/selectel/news/1089592/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089592"
+        },
+        {
+          "title": "Первую в мире усовершенствованную геотермальную электростанцию построили всего за 23 месяца",
+          "url": "https://habr.com/ru/news/1089620/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089620"
+        },
+        {
+          "title": "Unit 42 нашли уязвимость в IBM Turbonomic и избыточные права у 5% операторов Kubernetes",
+          "url": "https://habr.com/ru/companies/selectel/news/1089056/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089056"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Почему команда растёт, а фичи выходят медленнее",
+          "url": "https://tproger.ru/articles/pochemu-komanda-rastyot-a-fichi-vyhodyat-medlennee"
+        },
+        {
+          "title": "5 российских облаков для запуска своих ИИ-моделей в 2026 году",
+          "url": "https://tproger.ru/digest/5-rossijskih-oblakov-dlya-zapuska-svoih-ii-modelej-v-2026-godu"
+        },
+        {
+          "title": "OpenAI на DevDay выпустила GPT-6.1 Sol по цене в пять раз ниже Astra",
+          "url": "https://tproger.ru/news/openai-na-devday-vypustila-gpt-6-1-sol-po-cene-v-pyat-raz-nizhe-a"
+        },
+        {
+          "title": "LLM в проде — это не модель: как спроектировать доступы, контроль качества и стоимость AI-сервиса",
+          "url": "https://tproger.ru/articles/llm-v-prode-eto-ne-model-kak-sproektirovat-dostupy-kontrol"
+        },
+        {
+          "title": "В n8n 2.42.0 агентов включили по умолчанию",
+          "url": "https://tproger.ru/news/v-n8n-2-42-0-agentov-vklyuchili-po-umolchaniyu"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261002-1149: Самара 6.4°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
