@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261002-1149",
-  "generated_at": "2026-10-02T11:49:35Z",
+  "id": "digest-20261002-1723",
+  "generated_at": "2026-10-02T17:23:16Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 6.4,
-    "feels_like_c": 1.3,
-    "description": "Небольшой дождь",
-    "wind_ms": 18.0
+    "temp_c": 3.8,
+    "feels_like_c": 0.3,
+    "description": "Переменная облачность",
+    "wind_ms": 6.4
   },
   "news": {
     "vc.ru": [
       {
         "title": "РЖД с 1 декабря 2026 года будет взимать за возврат билетов от 1% до 10% их стоимости — размер сбора будет зависеть от времени, оставшегося до отправления",
-        "url": "https://vc.ru/transport/3171705-rzhd-s-1-dekabrya-2026-goda-budet-vzimat-za-vozvrat-biletov-ot-1-do-10-ih-stoimosti-razmer-sbora-budet-zaviset-ot-vremeni-ostavshegosya-do-otpravleniya?from=rss"
+        "url": "https://vc.ru/transport/3171705-rzhd-novyy-sbor-za-vozvrat-biletov?from=rss"
+      },
+      {
+        "title": "Прыгнули в чан с расплавленным металлом, как в «Терминаторе»: Figure выпустила рекламу с Арнольдом Шварценеггером о списании предыдущего поколения роботов",
+        "url": "https://vc.ru/marketing/3172043-reklama-figure-s-shvarceneggerom-o-rasplavke-robotov?from=rss"
+      },
+      {
+        "title": "Аргентина запустила программу получения гражданства за инвестиции — можно внести $350 тысяч в казну или купить облигации на $800 тысяч",
+        "url": "https://vc.ru/migration/3172466-argentina-programma-grazhdanstva-za-investitsii?from=rss"
       },
       {
         "title": "США ввели санкции против российской платёжной системы А7 — предлогом для этого стали обвинения в обходе санкций против Ирана",
         "url": "https://vc.ru/money/3171030-sanktsii-ssha-protiv-platezhnoy-sistemy-a7?from=rss"
       },
       {
-        "title": "Онлайн-кинотеатр Wink планирует закрыть запущенный в 2024 году музыкальный сервис «Wink Музыка» — «Ъ»",
-        "url": "https://vc.ru/services/3171097-wink-zakryvaet-muzykalnyy-servis-wink-muzyka?from=rss"
-      },
-      {
-        "title": "BMW планирует сократить 20% управленческих должностей, внедрив ИИ в разработку, закупки, маркетинг и другие сферы",
-        "url": "https://vc.ru/transport/3170264-bmw-sokrashchaet-upravlencheskie-dolzhnosti-vnedryaya-ii?from=rss"
-      },
-      {
-        "title": "Генпрокуратура подала иск к Freedom Holding и его основателю и главе Тимуру Турлову",
-        "url": "https://vc.ru/legal/3170127-genprokuratura-podala-isk-k-freedom-holding-i-timuru-turlovu?from=rss"
+        "title": "Bloomberg: Apple разрабатывает камеру для «умного» дома, которая вместо видео будет показывать пользователям текстовое описание происходящего",
+        "url": "https://vc.ru/tech/3171873-apple-kamera-dlya-umnogo-doma?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Activision Blizzard ищет разработчиков для новой StarCraft",
-        "url": "https://habr.com/ru/companies/ggsel/news/1089628/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089628"
+        "title": "Sony добавила нейросетевое улучшение графики на обычную PS5",
+        "url": "https://habr.com/ru/companies/ggsel/news/1089736/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089736"
       },
       {
-        "title": "Яндекс выпускает собственную мобильную ОС на базе AOSP вместе с китайским партнёром: независимый разбор",
-        "url": "https://habr.com/ru/news/1089626/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089626"
+        "title": "Неделя OCR для LLM — в Telegram-канале Smart Engines",
+        "url": "https://habr.com/ru/companies/smartengines/news/1089732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089732"
       },
       {
-        "title": "Космический инференс возможен, Google посчитала для себя. Нужно 1 800 запусков Starship",
-        "url": "https://habr.com/ru/companies/selectel/news/1089592/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089592"
+        "title": "Metro 2033 и Last Light получат бесплатное обновление с улучшенной графикой и поддержкой 120 FPS",
+        "url": "https://habr.com/ru/companies/ggsel/news/1089716/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089716"
       },
       {
-        "title": "Первую в мире усовершенствованную геотермальную электростанцию построили всего за 23 месяца",
-        "url": "https://habr.com/ru/news/1089620/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089620"
+        "title": "Perfscale news #13. Выжигание WASM модулей, http3 и первый postmortem",
+        "url": "https://habr.com/ru/news/1089710/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089710"
       },
       {
-        "title": "Unit 42 нашли уязвимость в IBM Turbonomic и избыточные права у 5% операторов Kubernetes",
-        "url": "https://habr.com/ru/companies/selectel/news/1089056/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089056"
+        "title": "Мы прошли все стадии принятия ИИ: вышел новый сезон подкаста «Свободный слот»",
+        "url": "https://habr.com/ru/companies/avito/news/1089684/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089684"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261002-1149: Самара 6.4°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261002-1723: Самара 3.8°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
