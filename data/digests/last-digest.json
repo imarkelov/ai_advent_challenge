@@ -1,15 +1,19 @@
 {
-  "id": "digest-20261002-1723",
-  "generated_at": "2026-10-02T17:23:16Z",
+  "id": "digest-20261002-2146",
+  "generated_at": "2026-10-02T21:46:40Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 3.8,
-    "feels_like_c": 0.3,
-    "description": "Переменная облачность",
-    "wind_ms": 6.4
+    "temp_c": 3.3,
+    "feels_like_c": 0.1,
+    "description": "Пасмурно",
+    "wind_ms": 7.7
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Аргентина запустила программу получения гражданства за инвестиции — можно внести $350 тысяч в казну или купить облигации на $800 тысяч",
+        "url": "https://vc.ru/migration/3172466-argentina-programma-grazhdanstva-za-investitsii?from=rss"
+      },
       {
         "title": "РЖД с 1 декабря 2026 года будет взимать за возврат билетов от 1% до 10% их стоимости — размер сбора будет зависеть от времени, оставшегося до отправления",
         "url": "https://vc.ru/transport/3171705-rzhd-novyy-sbor-za-vozvrat-biletov?from=rss"
@@ -19,16 +23,12 @@
         "url": "https://vc.ru/marketing/3172043-reklama-figure-s-shvarceneggerom-o-rasplavke-robotov?from=rss"
       },
       {
-        "title": "Аргентина запустила программу получения гражданства за инвестиции — можно внести $350 тысяч в казну или купить облигации на $800 тысяч",
-        "url": "https://vc.ru/migration/3172466-argentina-programma-grazhdanstva-za-investitsii?from=rss"
+        "title": "Отсрочки по налогам и страховым взносам: правительство утвердило меры поддержки для продавцов Ozon, пострадавших от атак беспилотников",
+        "url": "https://vc.ru/marketplace/3172554-podderzhka-prodavtsov-ozon-otsrochki-po-nalogam?from=rss"
       },
       {
         "title": "США ввели санкции против российской платёжной системы А7 — предлогом для этого стали обвинения в обходе санкций против Ирана",
         "url": "https://vc.ru/money/3171030-sanktsii-ssha-protiv-platezhnoy-sistemy-a7?from=rss"
-      },
-      {
-        "title": "Bloomberg: Apple разрабатывает камеру для «умного» дома, которая вместо видео будет показывать пользователям текстовое описание происходящего",
-        "url": "https://vc.ru/tech/3171873-apple-kamera-dlya-umnogo-doma?from=rss"
       }
     ],
     "habr": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261002-1723: Самара 3.8°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261002-2146: Самара 3.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
