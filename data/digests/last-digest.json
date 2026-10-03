@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261003-0339",
-  "generated_at": "2026-10-03T03:39:05Z",
+  "id": "digest-20261003-1102",
+  "generated_at": "2026-10-03T11:02:38Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.8,
-    "feels_like_c": -0.7,
+    "temp_c": 4.2,
+    "feels_like_c": 0.7,
     "description": "Небольшой дождь",
-    "wind_ms": 10.2
+    "wind_ms": 12.5
   },
   "news": {
     "vc.ru": [
@@ -23,34 +23,34 @@
         "url": "https://vc.ru/transport/3171705-rzhd-novyy-sbor-za-vozvrat-biletov?from=rss"
       },
       {
-        "title": "Отсрочки по налогам и страховым взносам: правительство утвердило меры поддержки для продавцов Ozon, пострадавших от атак беспилотников",
-        "url": "https://vc.ru/marketplace/3172554-podderzhka-prodavtsov-ozon-otsrochki-po-nalogam?from=rss"
+        "title": "День 1683: с января по сентябрь 2026 года индекс Мосбиржи снизился на 18,07%",
+        "url": "https://vc.ru/money/3173101-indeks-mosbirzhi-snizilsya-kursy-valyut?from=rss"
       },
       {
-        "title": "США ввели санкции против российской платёжной системы А7 — предлогом для этого стали обвинения в обходе санкций против Ирана",
-        "url": "https://vc.ru/money/3171030-sanktsii-ssha-protiv-platezhnoy-sistemy-a7?from=rss"
+        "title": "Отсрочки по налогам и страховым взносам: правительство утвердило меры поддержки для продавцов Ozon, пострадавших от атак беспилотников",
+        "url": "https://vc.ru/marketplace/3172554-podderzhka-prodavtsov-ozon-otsrochki-po-nalogam?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Sony добавила нейросетевое улучшение графики на обычную PS5",
-        "url": "https://habr.com/ru/companies/ggsel/news/1089736/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089736"
+        "title": "Tesla снижает объем RAM в чипах AI5 и AI6",
+        "url": "https://habr.com/ru/companies/selectel/news/1089738/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089738"
       },
       {
-        "title": "Неделя OCR для LLM — в Telegram-канале Smart Engines",
-        "url": "https://habr.com/ru/companies/smartengines/news/1089732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089732"
+        "title": "Выпущен порт файлового менеджера DOS Navigator на Free Pascal",
+        "url": "https://habr.com/ru/news/1089942/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089942"
       },
       {
-        "title": "Metro 2033 и Last Light получат бесплатное обновление с улучшенной графикой и поддержкой 120 FPS",
-        "url": "https://habr.com/ru/companies/ggsel/news/1089716/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089716"
+        "title": "В OpenIDE Pro появилась публичная бета поддержки C#",
+        "url": "https://habr.com/ru/companies/haulmont/news/1089888/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089888"
       },
       {
-        "title": "Perfscale news #13. Выжигание WASM модулей, http3 и первый postmortem",
-        "url": "https://habr.com/ru/news/1089710/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089710"
+        "title": "Microsoft упростила доступ к директориям в Windows 11 с помощью спецсимвола",
+        "url": "https://habr.com/ru/news/1089884/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089884"
       },
       {
-        "title": "Мы прошли все стадии принятия ИИ: вышел новый сезон подкаста «Свободный слот»",
-        "url": "https://habr.com/ru/companies/avito/news/1089684/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089684"
+        "title": "Chrome для Android тестирует функцию биометрии перед автозаполнением паролей",
+        "url": "https://habr.com/ru/news/1089878/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089878"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261003-0339: Самара 2.8°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261003-1102: Самара 4.2°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
