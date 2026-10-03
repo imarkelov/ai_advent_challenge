@@ -267,6 +267,12 @@ MAX_TASK_RETRIES = 1  # один повтор execution после fail-верд
 # GPustack отдаёт 403 «Api key not allowed», если ключу модель не доступна.
 MODEL_PROBE_TTL = 600
 
+# День 23: перефраз вопроса для точного поиска по базе знаний (compare-arm).
+REWRITE_QUERY_PROMPT = ("Ты перефразируешь вопрос пользователя для точного "
+                        "поиска по корпоративной базе документов. Ответь "
+                        "ОДНИМ предложением, ключевыми словами, без "
+                        "приветствий и объяснений.")
+
 
 def _now() -> str:
     """Текущее время в формате 'YYYY-MM-DD HH:MM:SS'."""
@@ -542,6 +548,33 @@ class StudioAgent:
                 "kb_block": kb_block,
                 "chunks": rag["results"],
                 "rag_context": rag_context}
+
+    def rewrite_query(self, question: str) -> tuple:
+        """День 23: перефраз вопроса для точного поиска по БЗ.
+
+        ОДИН non-stream LLM-вызов (`_task_llm_call` — тот же механизм, что
+        `rag_compare`, в requests.json не входит): T=0, max_tokens=200
+        (переопределение значений конфига); system — REWRITE_QUERY_PROMPT,
+        user — исходный вопрос. Вызывается ТОЛЬКО из compare-arm (день 23,
+        задача 5) — из `ask_stream` (живой чат) НЕ вызывается.
+
+        Возврат: (rewritten.strip(), True), если ответ модели непустой
+        после strip и НЕ идентичен исходному вопросу (case-insensitive);
+        иначе (question, False). Любое исключение LLM (httpx.HTTPError,
+        RuntimeError) — (question, False) + лог warning, исключение НЕ
+        пробрасывается, «Ошибка:» НЕ возвращается."""
+        cfg = {**self.get_config(), "temperature": 0, "max_tokens": 200}
+        try:
+            content, _usage = self._task_llm_call(
+                cfg, REWRITE_QUERY_PROMPT, question)
+        except Exception as e:
+            print("[Agent] Rewrite: LLM-вызов не удался: " + str(e),
+                  flush=True)
+            return (question, False)
+        rewritten = content.strip()
+        if not rewritten or rewritten.casefold() == question.strip().casefold():
+            return (question, False)
+        return (rewritten, True)
 
     def build_payload(self, dialogue_id: str) -> list:
         """Список сообщений для LLM: [system (промпт + профиль + инварианты

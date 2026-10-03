@@ -2320,3 +2320,118 @@ def test_ask_stream_rag_context_reranked(data_dir, tmp_path, monkeypatch):
     for c in ctx["chunks"]:
         assert c["reranked"] is True
         assert c["stage1_rank"] is not None
+
+
+# ---------- День 23: rewrite_query ----------
+
+from agent import REWRITE_QUERY_PROMPT  # noqa: E402
+
+REWRITE_Q = "какой отпуск у инженера"
+
+
+def _rewrite_handler(captured, reply):
+    """Fake-LLM для rewrite_query: non-stream — 200 со скриптованным
+    ответом, каждый non-stream payload сохраняется в captured (spy на
+    параметры). Stream (остальные эндпоинты) — стандартные дельты."""
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = json.loads(request.content)
+        if "stream" in payload:
+            return httpx.Response(
+                200, content=sse_body([delta_chunk("Ок"), usage_chunk(),
+                                       "[DONE]"]).encode("utf-8"))
+        captured.append(payload)
+        return httpx.Response(200, json={"choices": [
+            {"message": {"content": reply}}]})
+    return handler
+
+
+def test_rewrite_query_success_and_params(data_dir):
+    """Успех: (rewrite.strip(), True); вызов — T=0, max_tokens=200,
+    system=REWRITE_QUERY_PROMPT, user=исходный вопрос (один вызов)."""
+    captured = []
+    agent = make_agent(data_dir, _rewrite_handler(captured,
+                                                  "  отпуск инженера дни  "))
+    rewritten, ok = agent.rewrite_query(REWRITE_Q)
+    assert ok is True
+    assert rewritten == "отпуск инженера дни"
+    assert len(captured) == 1  # ровно один LLM-вызов
+    p = captured[0]
+    assert p["temperature"] == 0
+    assert p["max_tokens"] == 200
+    assert "stream" not in p  # non-stream, как в rag_compare
+    assert p["messages"][0] == {"role": "system",
+                                "content": REWRITE_QUERY_PROMPT}
+    assert p["messages"][1] == {"role": "user", "content": REWRITE_Q}
+
+
+@pytest.mark.parametrize("reply", ["", "   "])
+def test_rewrite_query_empty_reply_falls_back(data_dir, reply):
+    """Пустой/whitespace-ответ модели → (question, False), без исключения."""
+    agent = make_agent(data_dir, _rewrite_handler([], reply))
+    assert agent.rewrite_query(REWRITE_Q) == (REWRITE_Q, False)
+
+
+@pytest.mark.parametrize("q,reply", [
+    ("какой отпуск у инженера", "какой отпуск у инженера"),
+    ("Какой отпуск у инженера?", "какой отпуск у инженера?"),
+])
+def test_rewrite_query_identical_falls_back(data_dir, q, reply):
+    """Ответ идентичен вопросу (case-insensitive) → (question, False)."""
+    agent = make_agent(data_dir, _rewrite_handler([], reply))
+    assert agent.rewrite_query(q) == (q, False)
+
+
+def test_rewrite_query_http_error_falls_back(data_dir):
+    """LLM-сбой (httpx.ConnectError — HTTPError) → (question, False),
+    исключение наружу НЕ пробрасывается."""
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = json.loads(request.content)
+        if "stream" in payload:
+            return httpx.Response(
+                200, content=sse_body([delta_chunk("Ок"), usage_chunk(),
+                                       "[DONE]"]).encode("utf-8"))
+        raise httpx.ConnectError("LLM down")
+    agent = make_agent(data_dir, handler)
+    assert agent.rewrite_query(REWRITE_Q) == (REWRITE_Q, False)
+
+
+def test_rewrite_query_http_500_falls_back(data_dir):
+    """LLM вернул 500 (RuntimeError из _task_llm_call) → (question, False)."""
+    captured = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        payload = json.loads(request.content)
+        if "stream" in payload:
+            return httpx.Response(
+                200, content=sse_body([delta_chunk("Ок"), usage_chunk(),
+                                       "[DONE]"]).encode("utf-8"))
+        captured.append(payload)
+        return httpx.Response(500, json={"error": "LLM down"})
+    agent = make_agent(data_dir, handler)
+    assert agent.rewrite_query(REWRITE_Q) == (REWRITE_Q, False)
+    assert "Ошибка:" not in repr(agent.rewrite_query(REWRITE_Q))
+
+
+# ---------- День 23: guardrail — rewrite_query вне ask_stream ----------
+
+def test_ask_stream_does_not_call_rewrite_query(data_dir, monkeypatch):
+    """Спиц на rewrite_query: ask_stream (живой чат) его НЕ вызывает."""
+    agent = make_agent(data_dir, ok_handler)
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    calls = []
+
+    def spy(question):
+        calls.append(question)
+        raise AssertionError("rewrite_query вызван из ask_stream")
+    monkeypatch.setattr(agent, "rewrite_query", spy)
+    events = list(agent.ask_stream(d["id"], "привет"))
+    assert events[-1]["type"] == "done"
+    assert calls == []
+
+
+def test_ask_stream_source_has_no_rewrite_query_reference():
+    """Статический гард: в теле ask_stream нет ссылок на rewrite_query."""
+    import inspect
+    src = inspect.getsource(StudioAgent.ask_stream)
+    assert "rewrite_query" not in src
