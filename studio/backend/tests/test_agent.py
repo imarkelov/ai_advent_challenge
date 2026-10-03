@@ -2322,6 +2322,58 @@ def test_ask_stream_rag_context_reranked(data_dir, tmp_path, monkeypatch):
         assert c["stage1_rank"] is not None
 
 
+# ---------- День 23 (f2): min_score в live-чате (ask_stream) ----------
+
+def test_ask_stream_passes_min_score_to_search_rag(data_dir, tmp_path,
+                                                   monkeypatch):
+    """Живой чат с порогом: settings['min_score'] > 0 — ask_stream
+    передаёт порог в kb.search_rag (консистентность фильтра на всех
+    3 потребителях search_rag: live-чат, /api/kb/search, rag_compare)."""
+    kb = _fact_repo(tmp_path, "repo_minscore")
+    kb.update_settings({"min_score": 0.5})
+    seen = []
+    orig = kb.search_rag
+
+    def spy(query, recall, top_k, reranker_mode="off", **kwargs):
+        seen.append(kwargs.get("min_score"))
+        return orig(query, recall, top_k, reranker_mode, **kwargs)
+
+    monkeypatch.setattr(kb, "search_rag", spy)
+    agent = make_agent(data_dir, ok_handler)
+    agent.kb = kb
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    events = list(agent.ask_stream(d["id"],
+                                   "какая модель телефона была у героя"))
+    assert events[-1]["type"] == "done"
+    # retrieval — ровно один раз за ход, с точным порогом из настроек
+    assert seen == [0.5]
+
+
+def test_ask_stream_min_score_default_zero(data_dir, tmp_path,
+                                           monkeypatch):
+    """Дефолт min_score=0.0 (настройки без переопределения): ask_stream
+    передаёт ровно 0.0 — поведение байт-в-байт как до дня 23 (0.0 в
+    search_rag — no-op по контракту дня 23)."""
+    kb = _fact_repo(tmp_path, "repo_minscore0")
+    seen = []
+    orig = kb.search_rag
+
+    def spy(query, recall, top_k, reranker_mode="off", **kwargs):
+        seen.append(kwargs.get("min_score"))
+        return orig(query, recall, top_k, reranker_mode, **kwargs)
+
+    monkeypatch.setattr(kb, "search_rag", spy)
+    agent = make_agent(data_dir, ok_handler)
+    agent.kb = kb
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    events = list(agent.ask_stream(d["id"],
+                                   "какая модель телефона была у героя"))
+    assert events[-1]["type"] == "done"
+    assert seen == [0.0]
+
+
 # ---------- День 23: rewrite_query ----------
 
 from agent import REWRITE_QUERY_PROMPT  # noqa: E402

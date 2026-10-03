@@ -514,9 +514,10 @@ class StudioAgent:
     def rag_compare(self, question: str,
                     min_score: float | None = None) -> dict:
         """День 22 (+ день 23): сравнение 4 режимов в одном вызове —
-        plain / rag / rag+filter / rag+rewrite; четыре non-stream
-        LLM-вызова (`_task_llm_call`, в requests.json не входят) на
-        ОДИН вопрос: plain — голый config.system_prompt; rag — тот же
+        plain / rag / rag+filter / rag+rewrite; пять non-stream
+        LLM-вызовов (4 руки + rewrite; `_task_llm_call`, в
+        requests.json не входят) на ОДИН вопрос: plain — голый
+        config.system_prompt; rag — тот же
         промпт + блок «База знаний» из двухэтапного поиска
         (`search_rag`, настройки rag_recall/rag_top_k/reranker; флаг
         settings['rag'] НЕ consulted — сравнение явное).
@@ -819,7 +820,8 @@ class StudioAgent:
             # kb_block — в system-промпт; kb_context — инспектор контекста
             # RAG под assistant-ответом (служебное поле, в LLM не уходит).
             rag = self._rag_retrieve(message, s["rag_recall"],
-                                     s["rag_top_k"], s["reranker"])
+                                     s["rag_top_k"], s["reranker"],
+                                     s["min_score"])
             kb_block = self._render_kb_block(message, rag["results"])
             kb_context = self._kb_context(message, rag)
         # День 17: tool-loop. Инструменты подключённых MCP-серверов
