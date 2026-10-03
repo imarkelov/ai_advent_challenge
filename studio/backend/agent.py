@@ -437,15 +437,19 @@ class StudioAgent:
         return text[:limit]
 
     def _rag_retrieve(self, query: str, recall: int, top_k: int,
-                      reranker_mode: str = "off") -> dict:
+                      reranker_mode: str = "off",
+                      min_score: float = 0.0) -> dict:
         """День 21 (реранкер): двухэтапный RAG-поиск — гибридный
         top-`recall` (этап 1), при включённом реранкере — cross-encoder
         (этап 2) и top-`top_k`. Возврат:
         {"results": [...], "recall_total": N, "reranked": bool}.
-        Индекс не построен / поиск не удался (KBError и пр. — сбой не
-        ломает чат, только лог) — пустые results."""
+        День 23: `min_score` — порог релевантности (pass-through из
+        настроек БЗ в search_rag). Индекс не построен / поиск не
+        удался (KBError и пр. — сбой не ломает чат, только лог) —
+        пустые results."""
         try:
-            return self.kb.search_rag(query, recall, top_k, reranker_mode)
+            return self.kb.search_rag(query, recall, top_k, reranker_mode,
+                                      min_score=min_score)
         except Exception as e:
             print("[KB] RAG: поиск не удался: " + str(e), flush=True)
             return {"results": [], "recall_total": 0, "reranked": False}
@@ -460,7 +464,7 @@ class StudioAgent:
         результатов нет."""
         s = self.kb.settings()
         rag = self._rag_retrieve(query, s["rag_recall"], top_k,
-                                 s["reranker"])
+                                  s["reranker"], s["min_score"])
         return self._render_kb_block(query, rag["results"])
 
     def _render_kb_block(self, query: str, results: list) -> str:

@@ -775,14 +775,19 @@ def create_app(agent: StudioAgent | None = None,
             raise HTTPException(400, "Запрос (q) не может быть пустым")
         try:
             s = kb.settings()
-            rag = kb.search_rag(q, s["rag_recall"], k, s["reranker"])
+            rag = kb.search_rag(q, s["rag_recall"], k, s["reranker"],
+                                min_score=s["min_score"])
         except KBError as e:
             if str(e) == "Индекс не построен":
                 raise HTTPException(404, "Индекс не построен")
             raise HTTPException(400, str(e))
-        return {"results": rag["results"],
+        resp = {"results": rag["results"],
                 "recall_total": rag["recall_total"],
                 "reranked": rag["reranked"]}
+        if "filtered" in rag:  # день 23: аддитивно при min_score > 0
+            resp["filtered"] = rag["filtered"]
+            resp["dropped"] = rag["dropped"]
+        return resp
 
     @app.get("/api/kb/settings")
     def kb_settings_get():

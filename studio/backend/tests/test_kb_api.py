@@ -391,6 +391,54 @@ def test_kb_search_rerank_enabled(kb_env, client, monkeypatch):
     assert b["results"][0]["stage1_rank"] == b["recall_total"]
 
 
+def test_kb_search_min_score_from_settings(kb_env, client, monkeypatch):
+    """min_score из настроек: fake scores [0.99, 0.5, 0.1] + min_score=0.6
+    → ровно 1 результат (0.99), аддитивно filtered=True, dropped=2."""
+    import kb as kb_module
+
+    class ScoredReranker:
+        def __init__(self, base_url, api_key, client=None):
+            pass
+
+        def rerank(self, query, texts):
+            return [0.99, 0.5, 0.1][:len(texts)]
+
+    monkeypatch.setenv("GPUSTACK_KEY_RERANK", "fake-key")
+    monkeypatch.setattr(kb_module, "APIReranker", ScoredReranker)
+    agent, kb = kb_env
+    _upload_music(kb)
+    _upload_weather(kb)  # 3 чанка → scores [0.99, 0.5, 0.1]
+    client.post("/api/kb/index",
+                json={"strategy": "structural", "embedder": "hash"})
+    client.post("/api/kb/settings",
+                json={"reranker": "api", "rag_recall": 5, "min_score": 0.6})
+    r = client.get("/api/kb/search", params={"q": "что про ксилофон", "k": 3})
+    assert r.status_code == 200
+    b = r.json()
+    assert b["reranked"] is True
+    assert b["filtered"] is True
+    assert b["dropped"] == 2
+    assert len(b["results"]) == 1
+    assert b["results"][0]["rerank_score"] == 0.99
+    # старые поля не тронуты
+    assert {"results", "recall_total", "reranked"} <= set(b)
+
+
+def test_kb_search_min_score_zero_no_extra_fields(kb_env, client):
+    """min_score=0.0 (дефолт и явный) — ответ БЕЗ filtered/dropped."""
+    agent, kb = kb_env
+    _upload_music(kb)
+    client.post("/api/kb/index",
+                json={"strategy": "structural", "embedder": "hash"})
+    r = client.get("/api/kb/search", params={"q": "что про ксилофон", "k": 3})
+    assert r.status_code == 200
+    assert set(r.json()) == {"results", "recall_total", "reranked"}
+    client.post("/api/kb/settings", json={"min_score": 0.0})
+    r = client.get("/api/kb/search", params={"q": "что про ксилофон", "k": 3})
+    assert r.status_code == 200
+    assert set(r.json()) == {"results", "recall_total", "reranked"}
+
+
 # ---------- /api/kb/settings ----------
 
 def test_kb_settings_defaults(client):
@@ -398,7 +446,10 @@ def test_kb_settings_defaults(client):
     assert r.status_code == 200
     assert r.json() == {"agent_loop": True, "rag": True,
                         "reranker": "off", "rag_recall": 50, "rag_top_k": 3,
+                        "min_score": 0.0,
                         "strategy": "structural", "embedder": "hash"}
+    # дефолт min_score — именно 0.0
+    assert r.json()["min_score"] == 0.0
 
 
 def test_kb_settings_post_persists(client, kb_env):
@@ -447,6 +498,32 @@ def test_kb_settings_reranker_recall_valid(client, kb_env):
     # пережил перезапись
     got = client.get("/api/kb/settings").json()
     assert got["reranker"] == "api" and got["rag_recall"] == 120
+
+
+def test_kb_settings_min_score_valid(client, kb_env):
+    agent, kb = kb_env
+    r = client.post("/api/kb/settings", json={"min_score": 0.5})
+    assert r.status_code == 200
+    assert r.json()["min_score"] == 0.5
+    assert client.get("/api/kb/settings").json()["min_score"] == 0.5
+    # границы диапазона: 0 и 1 — валидны
+    assert client.post("/api/kb/settings",
+                       json={"min_score": 0}).status_code == 200
+    assert client.get("/api/kb/settings").json()["min_score"] == 0.0
+    assert client.post("/api/kb/settings",
+                       json={"min_score": 1}).status_code == 200
+    assert client.get("/api/kb/settings").json()["min_score"] == 1.0
+
+
+def test_kb_settings_min_score_invalid_400(client, kb_env):
+    agent, kb = kb_env
+    # bool (ловушка isinstance(True, int)), строка, вне диапазона — 400 RU
+    for bad in (True, False, "0.5", 1.5, -0.1):
+        r = client.post("/api/kb/settings", json={"min_score": bad})
+        assert r.status_code == 400, bad
+        assert "min_score" in r.json()["detail"]
+    # значение не изменилось
+    assert client.get("/api/kb/settings").json()["min_score"] == 0.0
 
 
 # ---------- /api/kb/index: валидация ----------

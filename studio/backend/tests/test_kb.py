@@ -836,13 +836,101 @@ def test_search_rag_no_index_raises(env):
         k2.search_rag("что угодно", recall=5, top_k=3, reranker_mode="off")
 
 
+# ---------- search_rag: min_score (день 23) ----------
+
+class _ScoredReranker:
+    """Фейк-реранкер с фиксированными scores (детерминированные пороги)."""
+    def __init__(self, scores):
+        self.scores = list(scores)
+        self.calls = 0
+
+    def rerank(self, query, texts):
+        self.calls += 1
+        assert len(texts) == len(self.scores)
+        return self.scores
+
+
+def test_search_rag_min_score_filters_reranked(kb):
+    """fake scores [0.99, 0.5, 0.1], min_score=0.6 → ровно 1 (0.99)."""
+    kb.build("structural", HashEmbedder())
+    fake = _ScoredReranker([0.99, 0.5, 0.1])
+    res = kb.search_rag("ксилофон", recall=5, top_k=5,
+                        reranker_mode="api", reranker=fake, min_score=0.6)
+    assert res["filtered"] is True
+    assert res["dropped"] == 2
+    assert len(res["results"]) == 1
+    assert res["results"][0]["rerank_score"] == 0.99
+
+
+def test_search_rag_min_score_drops_all(kb):
+    """min_score=0.999 → 0 результатов, dropped=3."""
+    kb.build("structural", HashEmbedder())
+    fake = _ScoredReranker([0.99, 0.5, 0.1])
+    res = kb.search_rag("ксилофон", recall=5, top_k=5,
+                        reranker_mode="api", reranker=fake, min_score=0.999)
+    assert res["filtered"] is True
+    assert res["dropped"] == 3
+    assert res["results"] == []
+
+
+def test_search_rag_min_score_zero_byte_identical(kb):
+    """min_score=0.0 — ответ идентичен вызову без фильтра."""
+    kb.build("structural", HashEmbedder())
+    base = kb.search_rag("ксилофон", recall=5, top_k=3, reranker_mode="off")
+    zero = kb.search_rag("ксилофон", recall=5, top_k=3, reranker_mode="off",
+                         min_score=0.0)
+    assert zero == base  # байт-в-байт: поля filtered/dropped не добавляются
+    assert "filtered" not in zero and "dropped" not in zero
+
+
+def test_search_rag_min_score_relative_best_always_passes(kb):
+    """реранкер off — относительный режим: лучший результат ВСЕГДА
+    проходит даже min_score=0.9999 (score/best = 1.0 >= 0.9999)."""
+    kb.build("structural", HashEmbedder())
+    base = kb.search_rag("ксилофон", recall=5, top_k=3, reranker_mode="off")
+    res = kb.search_rag("ксилофон", recall=5, top_k=3, reranker_mode="off",
+                        min_score=0.9999)
+    assert res["filtered"] is True
+    assert len(base["results"]) == 3  # в мини-корпусе 3 чанка
+    assert len(res["results"]) >= 1
+    best = max(r["score"] for r in base["results"])
+    # лучший по этапу 1 на месте: RRF-счёт самого лучшего не отфильтрован
+    assert any(r["score"] == best for r in res["results"])
+    assert res["results"][0]["score"] >= 0.9999 * best
+
+
+def test_search_rag_min_score_best_zero_guard(kb):
+    """все scores этапа 1 = 0 → пустой результат, деления нет."""
+    kb.build("structural", HashEmbedder())
+    kb.search = lambda query, k=5: [{"chunk_id": "c-0", "source": "upload",
+                                      "file": "f", "section": "s",
+                                      "score": 0.0, "text": "текст"}]
+    res = kb.search_rag("что угодно", recall=5, top_k=3,
+                        reranker_mode="off", min_score=0.5)
+    assert res["filtered"] is True
+    assert res["dropped"] == 1
+    assert res["results"] == []
+
+
+def test_search_rag_min_score_ge_semantics_edge(kb):
+    """edge: min_score=1.0, doc с rerank_score=1.0 → остаётся (>=)."""
+    kb.build("structural", HashEmbedder())
+    fake = _ScoredReranker([1.0, 0.2, 0.1])
+    res = kb.search_rag("ксилофон", recall=5, top_k=5,
+                        reranker_mode="api", reranker=fake, min_score=1.0)
+    assert res["filtered"] is True
+    assert res["dropped"] == 2
+    assert len(res["results"]) == 1
+    assert res["results"][0]["rerank_score"] == 1.0
+
+
 # ---------- KnowledgeBase: settings ----------
 
 def test_settings_defaults_no_write(env):
     s = KnowledgeBase(env["kb"], env["repo"])
     assert s.settings() == {"agent_loop": True, "rag": True,
                             "reranker": "off", "rag_recall": 50,
-                            "rag_top_k": 3,
+                            "rag_top_k": 3, "min_score": 0.0,
                             "strategy": "structural", "embedder": "hash"}
     # дефолты файлом НЕ пишутся
     assert not os.path.exists(os.path.join(env["kb"], "settings.json"))
@@ -892,6 +980,24 @@ def test_update_settings_invalid_values(kb):
         kb.update_settings({"rag_recall": "50"})
     with pytest.raises(ValueError):
         kb.update_settings({"rag_recall": True})
+    assert kb.settings() == KnowledgeBase.DEFAULT_SETTINGS  # не испорчено
+
+
+def test_update_settings_min_score_valid(kb):
+    s = kb.update_settings({"min_score": 0.5})
+    assert s["min_score"] == 0.5
+    # границы диапазона
+    assert kb.update_settings({"min_score": 0})["min_score"] == 0.0
+    assert kb.update_settings({"min_score": 1})["min_score"] == 1.0
+    # храним float (0 → 0.0, 1 → 1.0)
+    assert isinstance(kb.settings()["min_score"], float)
+
+
+def test_update_settings_min_score_invalid(kb):
+    # bool — ПЕРВЫЙ (ловушка isinstance(True, int)); потом тип, потом диапазон
+    for bad in (True, False, "0.5", 1.5, -0.1, None, [0.5]):
+        with pytest.raises(ValueError, match="min_score"):
+            kb.update_settings({"min_score": bad})
     assert kb.settings() == KnowledgeBase.DEFAULT_SETTINGS  # не испорчено
 
 

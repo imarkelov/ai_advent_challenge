@@ -741,7 +741,7 @@ class KnowledgeBase:
 
     DEFAULT_SETTINGS = {"agent_loop": True, "rag": True,
                         "reranker": "off", "rag_recall": 50,
-                        "rag_top_k": 3,
+                        "rag_top_k": 3, "min_score": 0.0,
                         "strategy": "structural", "embedder": "hash"}
 
     def __init__(self, kb_dir: str, repo_root: str | None = None):
@@ -1176,7 +1176,8 @@ class KnowledgeBase:
 
     def search_rag(self, query: str, recall: int, top_k: int,
                    reranker_mode: str = "off",
-                   reranker: "APIReranker | None" = None) -> dict:
+                   reranker: "APIReranker | None" = None,
+                   min_score: float = 0.0) -> dict:
         """Двухэтапный поиск RAG: этап 1 — гибридный top-`recall`
         (`search`), этап 2 — реранкер (reranker_mode "api", модель
         qwen3-reranker-4b) и top-`top_k`.
@@ -1186,6 +1187,15 @@ class KnowledgeBase:
         "rerank_score" (0..1), "stage1_rank" (1-based ранг гибрида) и
         "reranked": True; порядок — по rerank_score desc (stable: при
         равенстве — порядок этапа 1).
+
+        `min_score` (0..1, день 23): порог релевантности, применяется
+        ПОСЛЕ этапа 1 (+реранка, если был) и ДО top-k среза.
+        min_score <= 0 — поведение без изменений (поля не добавляются).
+        min_score > 0: при реранке — чанки с rerank_score >= min_score;
+        без реранкера — относительный нормализованный порог
+        score >= min_score * best (best = max(score); best == 0 —
+        пустой результат, деления нет). В ответ аддитивно добавляются
+        "filtered": True и "dropped": int (сколько отброшено порогом).
 
         Индекс не построен — KBError (как у `search`). Реранкер недоступен
         (нет ключа GPUSTACK_KEY_RERANK) или API-сбой — деградация на
@@ -1225,6 +1235,19 @@ class KnowledgeBase:
                         r["reranked"] = True
                     stage1.sort(key=lambda r: -r["rerank_score"])
                     out["reranked"] = True
+        if min_score > 0:
+            if out["reranked"]:
+                kept = [r for r in stage1 if r["rerank_score"] >= min_score]
+            else:
+                # RRF-шкала (0.003..0.033) не сопоставима с порогом 0..1 —
+                # относительная нормализация: порог от лучшего результата.
+                best = max(r["score"] for r in stage1)
+                kept = ([r for r in stage1
+                         if r["score"] >= min_score * best]
+                        if best > 0 else [])
+            out["filtered"] = True
+            out["dropped"] = len(stage1) - len(kept)
+            stage1 = kept
         out["results"] = stage1[:max(0, top_k)]
         return out
 
@@ -1262,6 +1285,13 @@ class KnowledgeBase:
                 if not isinstance(v, int) or isinstance(v, bool) \
                         or not (1 <= v <= 10):
                     raise ValueError("rag_top_k — целое число от 1 до 10")
+            elif k == "min_score":
+                # bool — ПЕРВЫЙ: isinstance(True, int) == True
+                if isinstance(v, bool) \
+                        or not isinstance(v, (int, float)) \
+                        or not (0.0 <= v <= 1.0):
+                    raise ValueError("min_score должен быть числом от 0 до 1")
+                v = float(v)  # храним float (0 → 0.0, 1 → 1.0)
             elif k == "strategy":
                 if v not in ("fixed", "structural"):
                     raise ValueError(
