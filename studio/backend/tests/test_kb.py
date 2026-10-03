@@ -900,3 +900,74 @@ def test_settings_broken_file_defaults(kb):
     with open(p, "w", encoding="utf-8") as f:
         f.write("{битый json")
     assert kb.settings() == KnowledgeBase.DEFAULT_SETTINGS
+
+
+# ---------- чтение файлов корпуса: авто-определение кодировки ----------
+
+def test_read_file_utf8_cyrillic_roundtrip(kb, tmp_path):
+    """Валидный utf-8 декодируется 1:1 (поведение не изменилось)."""
+    p = os.path.join(str(tmp_path), "u8.txt")
+    text = "Телефон был у бабки — проверка кириллицы.\n"
+    with open(p, "w", encoding="utf-8") as f:
+        f.write(text)
+    assert kb._read_file(p) == text
+
+
+def test_read_file_cp1251_decodes_cyrillic(kb, tmp_path):
+    """Windows-1251 (ANSI) — реальная кириллица, а не U+FFFD-каша
+    (история: cp1251-файл дал 5826 U+FFFD, поиск по кириллице пуст)."""
+    p = os.path.join(str(tmp_path), "ansi.txt")
+    with open(p, "w", encoding="cp1251") as f:
+        f.write("Как телфон был у бабки — старый текст в cp1251.\n")
+    text = kb._read_file(p)
+    assert text is not None
+    assert "\ufffd" not in text
+    assert "телфон" in text
+    assert "бабки" in text
+
+
+def test_read_file_undecodable_binary_no_raise(kb, tmp_path):
+    """Бинарный мусор (не валиден ни utf-8, ни cp1251) — без исключения,
+    строка (fallback errors="replace" — сборку не роняет)."""
+    p = os.path.join(str(tmp_path), "bin.dat")
+    with open(p, "wb") as f:
+        f.write(bytes(range(0x80, 0x100)) + b"\x00\xff\xfe")
+    text = kb._read_file(p)
+    assert isinstance(text, str)
+
+
+# ---------- _match_tf: typo-допуск (префикс) ----------
+
+def test_match_tf_typo_prefix_match():
+    """1-буквенная опечатка «телфон» не substring «телефон», но
+    typo-правило (первые 5 симв. равны ИЛИ удаление одного символа,
+    оба >= 5) — матчится."""
+    assert kb_module._match_tf("телфон", {"телефон": 2}) == 2
+
+
+def test_match_tf_typo_prefix_branch():
+    """Равные первые 5 симв. (замена 5-го) — тоже матч."""
+    assert kb_module._match_tf("телефх", {"телефон": 2}) == 2
+
+
+def test_match_tf_typo_max_semantics():
+    """Несколько typo-матчей — max tf (как в substring-ветке)."""
+    assert kb_module._match_tf(
+        "телфон", {"телефон": 2, "телфоны": 5}) == 5
+
+
+def test_match_tf_exact_unchanged():
+    assert kb_module._match_tf("телефон", {"телефон": 3}) == 3
+
+
+def test_match_tf_short_terms_no_prefix():
+    """Короткие термы (< 5 симв.) префикс-правило не трогает:
+    «теле» — префикс «телефон», но len < 5 → 0 (как и раньше)."""
+    assert kb_module._match_tf("теле", {"телефон": 2}) == 0
+
+
+def test_match_tf_substring_inflection_unchanged():
+    """Старое substring-поведение инфлексий сохранено."""
+    assert kb_module._match_tf("телефона", {"телефон": 2}) == 2
+    assert kb_module._match_tf("телефон", {"телефона": 4}) == 4
+    assert kb_module._match_tf("ксилофон", {"стол": 1}) == 0

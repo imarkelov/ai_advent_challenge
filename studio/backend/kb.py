@@ -107,6 +107,8 @@ def cosine(a: list[float], b: list[float]) -> float:
 _MIN_TOKEN = 3        # токены короче — шум
 _SUBSTR_MIN = 5       # substring-матч инфлексий: короткая сторона >= 5
                       # («телефон» ↔ «телефона»; короткие слова не трогаем)
+_PREFIX_MIN = 5       # typo-допуск: оба терма >= 5 и первые 5 симв. равны
+                      # («телфон» ↔ «телефон» — 1-буквенная опечатка)
 _BM25_K1 = 1.5
 _BM25_B = 0.75
 _RRF_K = 60
@@ -127,17 +129,35 @@ def _term_freq(text: str) -> dict:
     return tf
 
 
+def _one_del(a: str, b: str) -> bool:
+    """b получается из a удалением ровно одного символа
+    (детерминированно, O(len a))."""
+    if len(b) != len(a) - 1:
+        return False
+    i = 0
+    while i < len(b) and a[i] == b[i]:
+        i += 1
+    return a[i + 1:] == b[i:]
+
+
 def _match_tf(qterm: str, terms: dict) -> int:
     """Частота query-терма в чанке: точное совпадение; иначе
     substring-матч с любым термом чанка (короткая сторона >= 5 симв. —
-    грубый «стемминг» без морфологического анализатора). Несколько
-    матчей — max tf (порядок terms — отсортирован, детерминированно)."""
+    грубый «стемминг» без морфологического анализатора) или
+    typo-матч (оба терма >= 5 симв.): равные первые 5 симв. либо
+    один терм получается из другого удалением одного символа
+    («телфон» ↔ «телефон» — 1-буквенная опечатка). Несколько матчей —
+    max tf (порядок terms — отсортирован, детерминированно)."""
     tf = terms.get(qterm, 0)
     if tf:
         return tf
     for u, f in terms.items():
         a, b = (qterm, u) if len(qterm) <= len(u) else (u, qterm)
         if len(a) >= _SUBSTR_MIN and a in b:
+            tf = max(tf, f)
+        elif (len(qterm) >= _PREFIX_MIN and len(u) >= _PREFIX_MIN
+                and (qterm[:_PREFIX_MIN] == u[:_PREFIX_MIN]
+                     or _one_del(qterm, u) or _one_del(u, qterm))):
             tf = max(tf, f)
     return tf
 
@@ -749,11 +769,29 @@ class KnowledgeBase:
     # ---------- корпус ----------
 
     def _read_file(self, path: str) -> str | None:
+        """Чтение с авто-определением кодировки: utf-8 (строгий) →
+        cp1251 (строгий; Windows-ANSI-файлы пользователя) →
+        utf-8/errors="replace" (мусор — U+FFFD, но сборка не роняется).
+        История: cp1251-файл молча превращался в U+FFFD-кашу и стал
+        невидим для кириллических запросов. Байты читаются один раз;
+        переводы строк нормализуются в \\n (как раньше в текстовом
+        режиме) — поведение для валидного utf-8 не изменилось."""
         try:
-            with open(path, "r", encoding="utf-8", errors="replace") as f:
-                return f.read()
+            with open(path, "rb") as f:
+                raw = f.read()
         except OSError:
             return None  # недоступный файл — пропустить, сборку не ронять
+
+        def decode(enc: str) -> str:
+            return (raw.decode(enc).replace("\r\n", "\n")
+                    .replace("\r", "\n"))
+
+        for enc in ("utf-8", "cp1251"):
+            try:
+                return decode(enc)
+            except UnicodeDecodeError:
+                continue
+        return raw.decode("utf-8", errors="replace")
 
     def corpus_files(self) -> list[CorpusDoc]:
         """Корпус — ТОЛЬКО загрузки пользователя: kb_dir/uploads/*
