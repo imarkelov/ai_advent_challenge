@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261002-2146",
-  "generated_at": "2026-10-02T21:46:40Z",
+  "id": "digest-20261003-0339",
+  "generated_at": "2026-10-03T03:39:05Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 3.3,
-    "feels_like_c": 0.1,
-    "description": "Пасмурно",
-    "wind_ms": 7.7
+    "temp_c": 2.8,
+    "feels_like_c": -0.7,
+    "description": "Небольшой дождь",
+    "wind_ms": 10.2
   },
   "news": {
     "vc.ru": [
@@ -15,12 +15,12 @@
         "url": "https://vc.ru/migration/3172466-argentina-programma-grazhdanstva-za-investitsii?from=rss"
       },
       {
-        "title": "РЖД с 1 декабря 2026 года будет взимать за возврат билетов от 1% до 10% их стоимости — размер сбора будет зависеть от времени, оставшегося до отправления",
-        "url": "https://vc.ru/transport/3171705-rzhd-novyy-sbor-za-vozvrat-biletov?from=rss"
-      },
-      {
         "title": "Прыгнули в чан с расплавленным металлом, как в «Терминаторе»: Figure выпустила рекламу с Арнольдом Шварценеггером о списании предыдущего поколения роботов",
         "url": "https://vc.ru/marketing/3172043-reklama-figure-s-shvarceneggerom-o-rasplavke-robotov?from=rss"
+      },
+      {
+        "title": "РЖД с 1 декабря 2026 года будет взимать за возврат билетов от 1% до 10% их стоимости — размер сбора будет зависеть от времени, оставшегося до отправления",
+        "url": "https://vc.ru/transport/3171705-rzhd-novyy-sbor-za-vozvrat-biletov?from=rss"
       },
       {
         "title": "Отсрочки по налогам и страховым взносам: правительство утвердило меры поддержки для продавцов Ozon, пострадавших от атак беспилотников",
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261002-2146: Самара 3.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261003-0339: Самара 2.8°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
