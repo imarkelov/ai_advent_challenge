@@ -2068,6 +2068,27 @@ score: plain 6.0 / rag 9.0 / rag+filter 9.0 / rag+rewrite 8.8.
 plain — на 2 общих вопросах (Q11 рецепт борща, Q12 Python 3.13), где
 база знаний и не нужна; judge-вердикты: tie=5, rag_wins=3,
 rag_filter_wins=2, plain_wins=2.
+- **Демо-видео** (live, deepseek-v4-flash) — флоу дня 23:
+  `C:\Users\migor\OneDrive\Рабочий стол\AI Advent Challenge -
+  видео\day23_demo.mp4` (desktop, **НЕ в репозитории**), 73.36 s,
+  ~989 КБ. Сцены (per план, «10. Демо-видео»): (1) поле «Порог
+  отсечения (0 = off)» в секции «Включить» вкладки «База знаний»
+  (min_score=0.5); (2) «Поиск по базе» с чипом «фильтр ≥ 0.5» и
+  отсечёнными результатами (запросы «Какой телефон был у героя?»,
+  «Что герой знал про яйца?», «Яичница на сковороде», «eggs»);
+  (3) «Сравнение RAG» — 4 панели (plain / RAG / RAG+filter /
+  RAG+rewrite) одним `POST /api/rag/compare`; (4) rewrite-chip с
+  перефразом. Evidence-лог: `.omo/evidence/day23-demo-server.log`.
+  Отклонение: в момент записи qwen3.8-27b отдавал 403 «Api key not
+  allowed» (как в дне 22) — запись выполнена на deepseek-v4-flash.
+
+### Исправление после релиза (live-chat min_score)
+
+F2-ревью (code-quality) нашло: live-чат (`ask_stream`) не передавал
+`min_score` в `_rag_retrieve` — спека требует единый фильтр у всех 3
+потребителей `search_rag` (live-чат, `GET /api/kb/search`,
+`POST /api/rag/compare`). Фикс `29f33d8`: pass-through настройки
++ 2 spy-теста (бэкенд 579 → **581** тестов PASS).
 
 ### Статус
 

@@ -111,6 +111,14 @@ judge-вердикты: tie=5, rag_wins=3, rag_filter_wins=2, plain_wins=2.
 вопросах (Q3, Q9 — очевидная нерелевантность корпуса), plain — на 2
 общих вопросах (Q11, Q12), где база знаний и не нужна.
 
+### Исправление после релиза (live-chat min_score)
+
+F2-ревью (code-quality) нашло: live-чат (`ask_stream`) не передавал
+`min_score` в `_rag_retrieve` — спека требует единый фильтр у всех 3
+потребителей `search_rag` (live-чат, `GET /api/kb/search`,
+`POST /api/rag/compare`). Фикс `29f33d8`: pass-through настройки
++ 2 spy-теста (бэкенд 579 → **581** тестов PASS).
+
 ## Коммиты
 
 | Коммит | Сообщение |
@@ -123,6 +131,12 @@ judge-вердикты: tie=5, rag_wins=3, rag_filter_wins=2, plain_wins=2.
 | `39bd248` | feat(day23): UI — min_score поле + 4 панели сравнения |
 | `3734236` | feat(day23): compare_day23.py — 10 вопросов × 4 режима |
 | `d11e8df` | test(day23): e2e_day23.py — Part A offline + Part B :8107 |
+| `339c3f8` | docs(day23): README + RELEASE + spec/plan |
+| `25b2b2b` | docs(day23): tick tasks 7-9 in openspec tasks.md |
+| `8c393f6` | docs(day23): tick task 10 in openspec tasks.md |
+| `b9bcff2` | docs(day23): tick tasks 1-6 in openspec tasks.md |
+| `29f33d8` | fix(day23): min_score в live-чат (ask_stream) + docstring «пять вызовов» |
+| `b11a6a7` | docs(day23): бэкенд 581 тестов (fix live-chat min_score +2) |
 
 ---
 
