@@ -1,18 +1,22 @@
 {
-  "id": "digest-20261003-1539",
-  "generated_at": "2026-10-03T15:39:29Z",
+  "id": "digest-20261003-2033",
+  "generated_at": "2026-10-03T20:33:48Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.8,
-    "feels_like_c": -0.6,
+    "temp_c": 2.3,
+    "feels_like_c": -1.5,
     "description": "Пасмурно",
-    "wind_ms": 10.2
+    "wind_ms": 12.1
   },
   "news": {
     "vc.ru": [
       {
         "title": "Покупатели дорогих моделей не испугаются: что будет с ценами на автомобили после индексации утильсбора — подсчёт Autonews",
         "url": "https://vc.ru/transport/3173559-tseny-na-avtomobili-posle-indeksatsii-utilsbora?from=rss"
+      },
+      {
+        "title": "В поисках того, кто пашет и может оказаться умнее нанимающего менеджера: каких сотрудников ищет SpaceX",
+        "url": "https://vc.ru/hr/3173801-spacex-i-trebovaniya-k-sotrudnikam?from=rss"
       },
       {
         "title": "Аргентина запустила программу получения гражданства за инвестиции — можно внести $350 тысяч в казну или купить облигации на $800 тысяч",
@@ -25,10 +29,6 @@
       {
         "title": "РЖД с 1 декабря 2026 года будет взимать за возврат билетов от 1% до 10% их стоимости — размер сбора будет зависеть от времени, оставшегося до отправления",
         "url": "https://vc.ru/transport/3171705-rzhd-novyy-sbor-za-vozvrat-biletov?from=rss"
-      },
-      {
-        "title": "День 1683: с января по сентябрь 2026 года индекс Мосбиржи снизился на 18,07%",
-        "url": "https://vc.ru/money/3173101-indeks-mosbirzhi-snizilsya-kursy-valyut?from=rss"
       }
     ],
     "habr": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261003-1539: Самара 2.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261003-2033: Самара 2.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
