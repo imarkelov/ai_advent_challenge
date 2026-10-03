@@ -27,6 +27,7 @@
 | День 20 | [`day20-mcp-orchestration`](https://github.com/imarkelov/ai_advent_challenge/tree/day20-mcp-orchestration) | Orchestration MCP: 10 едицельных локальных MCP-серверов (1 сервер = 1 тул, каркас `_mcp_base.py`), always-префикс `{server}__{tool}` + каталог серверов в system-промпте, кап tool-loop 15 (`TOOL_LOOP_CAP`), реестр 12 дефолтов с миграцией старых мультитул-серверов, бейджи «server · tool», e2e_day20 — 10-шаговый кросс-серверный флоу (порт 8104) |
 | День 21 | [day21-doc-indexing](https://github.com/imarkelov/ai_advent_challenge/tree/day21-doc-indexing) | База знаний: пайплайн индексации документов (2 стратегии chunking, эмбеддинги, локальный SQLite-индекс, метаданные, сравнение стратегий), гибридный поиск (вектор+BM25, RRF) с опциональным 2-м этапом — cross-encoder-реранкером (qwen3-reranker-4b), RAG-инъект в чат + инспектор RAG-контекста в сообщениях + тумблеры RAG/реранкер/цикл-агента, вкладка «База знаний» (индексация, upload файлов, статистика, сравнение, 2-этапный поиск) |
 | День 22 | [day22-rag-query](https://github.com/imarkelov/ai_advent_challenge/tree/day22-rag-query) | Первый RAG-запрос: POST /api/rag/compare — ответ с RAG и без в одном вызове (T=0, max_tokens=1024, симметричный промпт), 10 контрольных вопросов с ожиданиями и источниками, скрипт сравнения с отчётом (факт-чек + LLM-judge) и UI-секция «Сравнение RAG» |
+| День 23 | [day23-rerank-filter](https://github.com/imarkelov/ai_advent_challenge/tree/day23-rerank-filter) | Реранкинг и фильтрация: настройка `min_score` (0..1, 0 = off) — порог релевантности в `search_rag` после реранкера (абсолютный `rerank_score ≥ min_score`) или относительно лучшего результата без него (`score ≥ min_score × best`), фильтрация до среза top-k с полями `filtered`/`dropped`, query rewrite в сравнении (LLM-перефраз вопроса при T=0 с фолбэком на исходный), 4-режимный compare (plain \| rag \| rag+filter \| rag+rewrite) + UI-секция с 4 панелями и чипом «фильтр ≥ X» |
 
 ## День 7: как работает сервис
 
@@ -1908,3 +1909,177 @@ substitution, max-tf семантика, короткие термы (< 5) не 
 + `tsc -b` clean. E2E `scripts/e2e_day22.py`: Part A 7/7 PASS, Part B
 live 12 PASS / 0 FAIL / 0 SKIP. Ветка `day22-rag-query` (от
 `day21-doc-indexing`).
+
+## День 23: Реранкинг и фильтрация
+
+### Что это
+
+Реранкинг и фильтрация поверх базы знаний дня 21 и сравнения дня 22.
+Три добавления, без пересборки пайплайна: (1) порог отсечения
+нерелевантных результатов `min_score` (0..1, дефолт 0.0 = off) в
+settings и body-override compare, (2) query rewrite (один LLM-вызов,
+только в compare, live-чат не тронут), (3) 4-режимное сравнение
+качества в одном `POST /api/rag/compare`: plain / rag / rag+filter /
+rag+rewrite (5 LLM-вызовов в одном HTTP-вызове). Контракт ответа
+аддитивный: поля дня 22 не тронуты, добавлено 8 полей (e2e_day22
+остаётся green). Корпус тот же, что в дне 22: 6 файлов, 1666 чанков
+(structural, api-эмбеддер `qwen3-vl-embedding-8b`, dim 4096).
+
+### Архитектура
+
+```
+вопрос
+  → kb.search_rag(query, recall, top_k, reranker, min_score)
+      этап 1: гибридный recall top-rag_recall (вектор + BM25, RRF)
+      [этап 2: cross-encoder, если reranker=api]
+      → отсечение по min_score (только при > 0): после оценки, до [:top_k]
+          reranked:     rerank_score >= min_score
+          без реранка:  score >= min_score * best   (относительное)
+      → срез top_k
+  → agent.rag_compare(question, min_score?)
+      5 non-stream LLM-вызовов (T=0, _task_llm_call, requests.json не пишется):
+          plain(0) → rag(1) → rag+filter(2) → rewrite(3, mt=200)
+          → rag+rewrite(4, mt=1024, отвечает на ОРИГИНАЛЬНЫЙ вопрос)
+  → ответ: 13 полей (5 дня 22 + 8 аддитивных)
+```
+
+- **Позиция отсечения** (`kb.search_rag`, одна точка): после stage1
+  (и после сортировки реранка, если он сработал) и до среза `[:top_k]`.
+  До реранка отсекать нельзя (реранкер пересматривает оценки, порог по
+  устаревшим счётам уберёт то, что cross-encoder признал бы
+  релевантным); после top_k-среза тоже нельзя: задание «топ-K до и
+  после фильтрации» требует, чтобы top_k выбирался из прошедших порог.
+- **Семантика `min_score`**:
+  - `0.0` (дефолт) = off: поведение байт-в-байт как до дня 23 (полю
+    `filtered`/`dropped` вообще не добавляются, регрессия закреплена
+    снимком-сравнением списков);
+  - `reranker=api` → `rerank_score >= min_score` (шкала cross-encoder
+    0..1, абсолютная);
+  - `reranker=off` (или реранк деградировал на stage1) →
+    `score >= min_score * best` (best = максимум RRF-счёта stage1;
+    сырой RRF = Σ 1/(60+rank) ≈ 0.003..0.033 несовместим с абсолютной
+    шкалой 0..1, поэтому относительная нормализация); guard:
+    `best == 0` → пустой список, деления нет;
+  - семантика `>=`: `min_score = 1.0` оставляет результат с
+    максимальной оценкой.
+- **Консистентность**: фильтр действует на всех 3 потребителя
+  `search_rag` (live-чат `_rag_retrieve`, `GET /api/kb/search`,
+  `rag_compare`) из одних и тех же settings.
+- **4 армы** (`agent.rag_compare`): plain (голый system-промпт) и rag
+  (промпт + блок «База знаний») НИКОГДА не фильтруют, даже при
+  заданном `min_score` (контрольные руки); rag+filter — retrieval с
+  `min_score` (body-override, иначе settings); rag+rewrite — retrieval
+  на перефразе, ANSWER-LLM отвечает на **оригинальный** вопрос
+  (kb_block рендерится с оригинальным вопросом, окно выдержки под него).
+  Порядок LLM-вызовов: plain → rag → filter → rewrite (T=0,
+  max_tokens=200) → rewrite-arm (T=0, max_tokens=1024); rewrite-вызов
+  поставлен после первой тройки рук, чтобы captured[0..1] остались
+  plain/rag (контракт захвата e2e).
+- **`rewrite_query`** (`agent.py`): один non-stream вызов, T=0,
+  max_tokens=200, RU-system-промпт «одним предложением, ключевыми
+  словами, без приветствий»; `(rewritten, True)` только при непустом и
+  не-идентичном (case-insensitive) ответе; пустой/идентичный/исключение
+  → `(question, False)` + log warning, наружу не «Ошибка:». Вызывается
+  только из rewrite-армы; из `ask_stream` никогда (guardrail-тест).
+- **Деградация**: сбой rewrite → rewrite-арма отвечает на оригинале
+  (`rewrite_applied=false`, `rewritten_query` = оригинал, рука не
+  «Ошибка:»); реранкер down при `min_score > 0` → фильтр не отключается,
+  переходит в relative-режим на stage1-счётах; всё отфильтровано (напр.
+  0.999) → 200, `chunks_rag_filter == []`, пустой kb_block, непустой
+  ответ без контекста («не знаю по базе» — честный ответ, не ошибка).
+- **Валидация** (settings и compare-body, одна логика): bool ПЕРВЫМ
+  (Python-ловушка `isinstance(True, int)`), затем `int/float` и
+  диапазон 0..1, строк-чисел нет → 400 RU «min_score должен быть
+  числом от 0 до 1».
+
+### API
+
+| Метод | Путь | Назначение |
+| --- | --- | --- |
+| GET / POST | `/api/kb/settings` | + `min_score` (0..1, float, дефолт 0.0; merge over defaults, старый settings.json backward-совместим); 400 RU — bool / строка / вне диапазона («min_score должен быть числом от 0 до 1») |
+| GET | `/api/kb/search?q=&k=5` | `min_score` из settings; при `min_score > 0` в ответе аддитивные поля `filtered: true` и `dropped: int` (сколько отброшено порогом) |
+| POST | `/api/rag/compare` | body `{question, min_score?}` → 13 полей: `{answer_plain, answer_rag, kb_block, chunks, rag_context}` (день 22) + аддитивные `answer_rag_filter`, `answer_rag_rewrite`, `chunks_rag_filter`, `chunks_rag_rewrite`, `rag_context_rag_filter`, `rag_context_rag_rewrite`, `rewritten_query`, `rewrite_applied`; 5 non-stream вызовов (руки T=0/max_tokens=1024, rewrite T=0/max_tokens=200); 400 — пустой вопрос или некорректный `min_score` (RU), 404 — индекс не построен |
+
+### UI
+
+`KbTab.tsx` (вкладка «База знаний»):
+
+- **Поле «Порог отсечения (0 = off)»** в секции «Включить»: число 0..1
+  step 0.05, коммит на blur через `POST /api/kb/settings` (паттерн
+  patchSettings); значение derived (touched-черновик, иначе GET
+  settings), без init-эффекта.
+- **Секция «Сравнение RAG»: 4 панели вместо 2** (plain / RAG /
+  RAG+filter / RAG+rewrite, flex-wrap); у filter-панели чип
+  «фильтр ≥ X» (X = min_score, виден при > 0); у rewrite-панели
+  rewrite-chip с перефразом (копирование: clipboard + execCommand-фолбэк,
+  «Скопировано» 1.5 c, показывается только при
+  `rewrite_applied === true`); пустая арма — «—».
+- **Секция «Поиск по базе»**: информационный чип «фильтр ≥ X» при
+  `min_score > 0` (ответ `/api/kb/search` несёт `filtered`/`dropped`).
+- Undefined-safe для старого бэкенда: новые compare-поля опциональные,
+  4 панели рендерятся (пустые — «—», без краха).
+
+### E2E — `scripts/e2e_day23.py`
+
+Гибрид (паттерн e2e_day22, stdlib, порт **8107**): **Part A** —
+офлайн-детерминированное ядро, **MUST PASS** (net cut `_NO_NET`,
+TestClient + fake-LLM + fake-reranker scores [0.99, 0.5, 0.1]):
+A1 settings GET/POST `min_score` + валидация 400 (1.5 / -0.1 / "0.5" /
+true); A2 абсолютный фильтр по `rerank_score` (0.6 → ровно 1 результат,
+`filtered`/`dropped` только при > 0); A3 relative-режим (reranker off):
+`score >= min_score * best`, порядок сохранён; A4 compare 4 армы: 13
+ключей ответа, filter-арма отфильтрована, rag-арма нет, 5 LLM-вызовов,
+скриптованный rewrite; A5 сбой rewrite (500 на вызове с
+max_tokens=200) → фолбэк: `chunks_rag_rewrite == chunks`,
+`rewrite_applied=false`, 200; A6 min_score=0.999 →
+`chunks_rag_filter == []`, `answer_rag_filter` непустой (LLM отвечает
+даже на пустом контексте); A7 совместимость с днём 22: 5 старых ключей
+compare + 6 полей чанка. **Part B** — live (uvicorn :8107, реальный
+GPustack LLM + api-эмбеддер + api-реранкер), best-effort: B1 пересборка
+корпуса (egg + extras, chunks=94), B2 настройки, B3 live compare с
+min_score=0.5 (13 ключей, rewrite_applied=true), B4 пасхалка IPhone
+17Promax (WARNING, не FAIL). Port-busy — ожидание до 10 мин (чужой
+сервер не убивается); cleanup всегда; exit 0 для PASS/SKIP, 1 для FAIL.
+
+### Проверка задания
+
+- **Порог отсечения нерелевантных результатов** ✓ — `min_score` (0..1)
+  в settings + body-override `/api/rag/compare`; отсечение после
+  stage1/rerank, до top_k; семантика `>=`; reranker=api →
+  `rerank_score`, reranker=off → relative `score >= min_score * best`.
+- **Топ-K до и после фильтрации** ✓ — в compare: `chunks` (top_k=3,
+  без фильтра) vs `chunks_rag_filter` (то, что прошло порог из recall
+  50); в поиске: поля `filtered`/`dropped`.
+- **Сравнение качества без фильтра/rewrite и с ними** ✓ —
+  `scripts/compare_day23.py` (live; корпус 6 файлов / 1666 чанков,
+  embedder/reranker api, recall 50, top_k 3, T=0): **12 вопросов**
+  (10 контрольных дня 22 + 2 «отвлекающих» с очевидной нерелевантностью
+  к корпусу) × **4 режима**, факт-чек + LLM-judge (оценены 12/12),
+  отчёт `.omo/evidence/day23-compare/report.md`.
+- **Query rewrite** ✓ — один LLM-вызов T=0/max_tokens=200, compare-only
+  (guardrail: не в `ask_stream`), graceful fallback; в отчёте
+  rewrite_applied=12/12.
+
+Честный итог сравнения (как в отчёте): на 1666-чанковом корпусе все 4
+режима примерно равны по факто-покрытию: win-rate plain 13/22 (59%),
+rag 13/22 (59%), rag+filter 13/22 (59%), rag+rewrite 13/22 (59%); avg
+score: plain 6.0 / rag 9.0 / rag+filter 9.0 / rag+rewrite 8.8.
+Фильтр (min_score=0.6) выиграл на 2 «отвлекающих» вопросах (Q3, Q9),
+plain — на 2 общих вопросах (Q11 рецепт борща, Q12 Python 3.13), где
+база знаний и не нужна; judge-вердикты: tie=5, rag_wins=3,
+rag_filter_wins=2, plain_wins=2.
+
+### Статус
+
+Бэкенд — **579 тестов PASS** (baseline 548 → +31). Фронтенд — **296
+тестов PASS** (Vitest, baseline 288 → +8) + `tsc -b` clean + `npm run
+build` clean. E2E `scripts/e2e_day23.py`: Part A **7/7 PASS**
+(офлайн, net cut); Part B live: **PASS=11, FAIL=0, WARNING=1** (B4
+пасхалка, best-effort). Регрессия `scripts/e2e_day22.py`: **12/12
+PASS** (Part A 7/7 + Part B live) — контракт compare аддитивен.
+Сноска: `e2e_day22.py` обновлён под 5-вызовный контракт (A2
+`len(captured)==5`, A6 — индексы арм 0/1/2/4 + rewrite(3),
+`COMPARE_TIMEOUT` 330→825); чеки старых полей не тронуты,
+документированное отклонение от запрета «не менять e2e_day22» (без него
+Part A физически не может быть 7/7: A6 ассертил ровно 2 non-stream
+вызова). Ветка `day23-rerank-filter` (от `day22-ui-rework`).

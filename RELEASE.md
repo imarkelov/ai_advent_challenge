@@ -1,3 +1,131 @@
+# Release Notes — day23-rerank-filter (день 23)
+
+Ветка: [`day23-rerank-filter`](https://github.com/imarkelov/ai_advent_challenge/tree/day23-rerank-filter)
+(от `day22-ui-rework`).
+
+## Что в релизе
+
+**Реранкинг и фильтрация.** Поверх day21-реранкера
+(`APIReranker` `qwen3-reranker-4b`, 2-этапный `search_rag`) и
+day22-сравнения (`POST /api/rag/compare`) добавлены: порог отсечения
+нерелевантных результатов `min_score` (0..1, дефолт 0.0 = off,
+байт-в-байт без изменений при 0.0), query rewrite (один non-stream
+LLM-вызов T=0/max_tokens=200, только в compare, live-чат не тронут)
+и 4-режимное сравнение качества в одном HTTP-вызове: plain | rag |
+rag+filter | rag+rewrite (5 LLM-вызовов: 4 руки T=0/max_tokens=1024 +
+rewrite T=0/max_tokens=200). Контракт compare-ответа аддитивный:
+старые 5 полей дня 22 не тронуты, добавлено 8; `e2e_day22.py`
+остаётся green (обновлён только под 5-вызовный контракт, см. ниже).
+
+- `studio/backend/kb.py` — `DEFAULT_SETTINGS` + `"min_score": 0.0`
+  (merge over defaults, старый settings.json backward-совместим);
+  `update_settings`: валидация min_score (bool ПЕРВЫМ — Python-ловушка
+  `isinstance(True, int)`, затем `int/float` и 0..1, строк-чисел нет;
+  400 RU «min_score должен быть числом от 0 до 1», сохранение как
+  float); `search_rag`: новый параметр `min_score: float = 0.0`,
+  отсечение после stage1 (+rerank, если был) и до `[:top_k]`:
+  reranked → `rerank_score >= min_score`, без реранка →
+  `score >= min_score * best` (relative-нормализация; guard
+  `best == 0` → пустой список); аддитивные поля ответа
+  `filtered: true` / `dropped: int` только при `min_score > 0`.
+  RRF/BM25/embedder/chunking/APIReranker-internals не меняются.
+- `studio/backend/agent.py` — `rewrite_query(question) -> (str, bool)`
+  (один non-stream `_task_llm_call`, T=0, max_tokens=200,
+  `REWRITE_QUERY_PROMPT`; `(rewritten, True)` только при непустом и
+  не-идентичном (case-insensitive) ответе; сбой/пустой/идентичный →
+  `(question, False)` + log warning); `rag_compare(question,
+  min_score=None)` — с 2 рук до 4 арм: plain/rag без изменений и
+  никогда не фильтруют; rag+filter — retrieval с `min_score`
+  (body-override, иначе settings); rag+rewrite — retrieval на
+  перефразе, ANSWER-LLM отвечает на оригинальный вопрос;
+  `ask_stream` не тронут (guardrail-тест: rewrite не вызывается из
+  чата).
+- `studio/backend/main.py` — `POST /api/rag/compare`: body
+  `{question, min_score?}`, валидация min_score как в
+  `update_settings` (400 RU), default = `settings["min_score"]`;
+  `GET /api/kb/search` передаёт `min_score` из settings в
+  `search_rag` (ответ + `filtered`/`dropped` при > 0);
+  `GET /api/kb/settings` отдаёт `min_score` (merge).
+- Фронтенд — `src/api.ts` (`KbSettings.min_score`, опциональные
+  4-arm-поля `RagCompareResult`, `apiRagCompare(question, minScore?)` —
+  body `min_score` только если > 0); `components/KbTab.tsx`: поле
+  «Порог отсечения (0 = off)» 0..1 step 0.05 (коммит на blur,
+  derived-значение без init-эффекта), 4 панели сравнения (flex-wrap,
+  без новых CSS-классов), чип «фильтр ≥ X» (filter-панель + секция
+  поиска) при min_score > 0, rewrite-chip с копированием (clipboard +
+  execCommand-фолбэк, «Скопировано» 1.5 c) при
+  `rewrite_applied === true`; undefined-safe для старого бэкенда.
+- `scripts/e2e_day23.py` (новый, stdlib, порт 8107) — Part A офлайн
+  MUST PASS (net cut, TestClient + fake-LLM + fake-reranker
+  [0.99, 0.5, 0.1]): A1 settings/валидация, A2 абсолютный фильтр,
+  A3 relative-режим, A4 4 армы + 5 LLM-вызовов + scripted rewrite,
+  A5 rewrite-fallback, A6 всё-отфильтровано (0.999 → [] + непустой
+  ответ), A7 day22-регрессия; Part B live best-effort
+  (B1 rebuild, B2 settings, B3 compare min_score=0.5, B4
+  easter-egg WARNING).
+- `scripts/compare_day23.py` (новый, stdlib, паттерн compare_day22) —
+  12 вопросов (10 контрольных дня 22 + 2 «отвлекающих») × 4 режима,
+  body `min_score=0.6`, факт-чек (hard) + LLM-judge (soft, 12/12),
+  отчёт `.omo/evidence/day23-compare/` (compare.json + report.md,
+  всегда, try/finally).
+- `scripts/e2e_day22.py` (обновлён, документированное отклонение от
+  запрета «не менять e2e_day22»): Part A под 5-вызовный контракт —
+  A2 `len(captured)==5`, A3 `no_calls==5`, A6 — индексы арм
+  (0/1/2/4 mt=1024 + rewrite(3) mt=200), A7 `==5`,
+  `COMPARE_TIMEOUT` 330→825 (5 live-вызовов); чеки старых полей не
+  тронуты. Без этого Part A физически не может быть 7/7 (A6
+  ассертил ровно 2 non-stream вызова).
+- `openspec/changes/day23-rerank-filter/` (proposal, design, tasks,
+  specs/rag-filter-rewrite/spec.md: 3 Requirement, 12 Scenario) +
+  `docs/superpowers/specs/2026-10-03-day23-rerank-filter-design.md` +
+  `docs/superpowers/plans/2026-10-03-day23-rerank-filter.md`.
+
+## API
+
+| Метод | Путь | Назначение |
+| --- | --- | --- |
+| GET / POST | `/api/kb/settings` | + `min_score` (0..1, float, дефолт 0.0); 400 RU — bool / строка / вне диапазона |
+| GET | `/api/kb/search?q=&k=5` | `min_score` из settings; при `min_score > 0` в ответе аддитивно `filtered: true` + `dropped: int` |
+| POST | `/api/rag/compare` | body `{question, min_score?}` → 13 полей: 5 дня 22 (`answer_plain`, `answer_rag`, `kb_block`, `chunks`, `rag_context`) + `answer_rag_filter`, `answer_rag_rewrite`, `chunks_rag_filter`, `chunks_rag_rewrite`, `rag_context_rag_filter`, `rag_context_rag_rewrite`, `rewritten_query`, `rewrite_applied`; 5 non-stream вызовов (руки T=0/max_tokens=1024, rewrite T=0/max_tokens=200); 400 — пустой вопрос / некорректный `min_score` (RU), 404 — индекс не построен; журнал `requests.json` не пишется |
+
+Новых эндпоинтов нет: изменены существующие 3 маршрута (аддитивно).
+
+## Проверка задания
+
+Бэкенд — **579 тестов PASS** (pytest, офлайн; baseline дня 23 — 548,
++31 новых). Фронтенд — **296 тестов PASS** (Vitest; baseline 288, +8)
++ `tsc -b` clean + `npm run build` clean. E2E `scripts/e2e_day23.py`:
+**Part A 7/7 PASS** (офлайн, net cut); **Part B live: PASS=11,
+FAIL=0, WARNING=1** (B4 easter-egg — best-effort WARNING). Регрессия
+`scripts/e2e_day22.py`: **12/12 PASS** (Part A 7/7 + Part B live) —
+контракт compare аддитивен. Compare-отчёт
+(`.omo/evidence/day23-compare/`, live: deepseek-v4-flash,
+embedder/reranker api, recall 50, top_k 3, T=0, корпус 6 файлов /
+1666 чанков / dim 4096, `min_score=0.6` в body): **12 вопросов × 4
+режима**, judge 12/12; win-rate: plain 13/22 (59%), rag 13/22 (59%),
+rag+filter 13/22 (59%), rag+rewrite 13/22 (59%); avg score:
+plain 6.0 / rag 9.0 / rag+filter 9.0 / rag+rewrite 8.8;
+judge-вердикты: tie=5, rag_wins=3, rag_filter_wins=2, plain_wins=2.
+Честный итог (как в отчёте): на 1666-чанковом корпусе все 4 режима
+примерно равны по факто-покрытию; фильтр выиграл на 2 «отвлекающих»
+вопросах (Q3, Q9 — очевидная нерелевантность корпуса), plain — на 2
+общих вопросах (Q11, Q12), где база знаний и не нужна.
+
+## Коммиты
+
+| Коммит | Сообщение |
+| --- | --- |
+| `5f232bb` | feat(day23): min_score — settings + валидация + фильтр в search_rag |
+| `7f5b6d8` | fix(day23): min_score guard на пустой stage1 (max default=0) |
+| `19e73af` | docs(day23): openspec change day23-rerank-filter |
+| `ca3a2f8` | feat(day23): rewrite_query + оффлайн-тесты |
+| `feb6db3` | feat(day23): /api/rag/compare 4 армы + body override min_score |
+| `39bd248` | feat(day23): UI — min_score поле + 4 панели сравнения |
+| `3734236` | feat(day23): compare_day23.py — 10 вопросов × 4 режима |
+| `d11e8df` | test(day23): e2e_day23.py — Part A offline + Part B :8107 |
+
+---
+
 # Release Notes — day22-ui-rework (день 22, UI-rework)
 
 Ветка: [`day22-ui-rework`](https://github.com/imarkelov/ai_advent_challenge/tree/day22-ui-rework)
