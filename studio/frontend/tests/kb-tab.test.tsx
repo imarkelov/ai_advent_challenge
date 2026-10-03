@@ -703,3 +703,230 @@ describe('KbTab — день 22: «Сравнение RAG»', () => {
     expect(screen.getByRole('button', { name: 'Сравнить' })).toBeDisabled()
   })
 })
+
+// ── День 23: порог отсечения min_score + 4 панели сравнения ──────────────────
+
+// Ответ POST /api/rag/compare с 4 армами (контракт дня 23): старые поля
+// (день 22) + answer_rag_filter / answer_rag_rewrite / rewritten_query /
+// rewrite_applied. answer_rag_filter пустой — пустая арма → «—».
+const RAG_COMPARE_4 = {
+  answer_plain: 'Plain: не знаю.',
+  answer_rag: 'RAG: у героя был телефон.',
+  answer_rag_filter: '',
+  answer_rag_rewrite: 'Rewrite: телефон IPhone 17Promax.',
+  kb_block: 'База знаний:',
+  chunks: [] as unknown[],
+  rag_context: { recall_total: 50, reranked: false, chunks: [] },
+  rewritten_query: 'модель телефона героя',
+  rewrite_applied: true,
+}
+
+// Своя заставка: min_score в settings (не указан — форма «старого»
+// бэкенда без поля), compare-ответ настраиваемый; calls — все POST
+function stubDay23Fetch(opts: {
+  minScore?: number
+  compare?: Record<string, unknown>
+  calls: Call[]
+}) {
+  const settings: Record<string, unknown> = {
+    agent_loop: false,
+    rag: true,
+    rag_top_k: 3,
+    strategy: 'fixed',
+    embedder: 'hash',
+    reranker: 'off',
+    rag_recall: 50,
+  }
+  if (opts.minScore !== undefined) settings.min_score = opts.minScore
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = normalizeUrl(input)
+      if (init?.method === 'POST' && url === '/api/rag/compare') {
+        const body = JSON.parse(String(init.body))
+        opts.calls.push({ url, body })
+        return jsonResponse(opts.compare ?? {})
+      }
+      if (init?.method === 'POST' && url === '/api/kb/settings') {
+        const body = JSON.parse(String(init.body))
+        opts.calls.push({ url, body })
+        return jsonResponse({ ...settings, ...body })
+      }
+      if (url.startsWith('/api/kb/stats')) return jsonResponse(kbStatsBody(['egg_book.txt'], []))
+      if (url === '/api/kb/settings') return jsonResponse(settings)
+      return jsonResponse(FIXTURES[url] ?? { ok: true })
+    }),
+  )
+}
+
+async function doCompareInUi(question = 'Какая модель телефона была у героя?') {
+  const ta = await screen.findByLabelText('Вопрос')
+  fireEvent.change(ta, { target: { value: question } })
+  fireEvent.click(screen.getByRole('button', { name: 'Сравнить' }))
+}
+
+describe('KbTab — день 23: порог отсечения + 4 панели сравнения', () => {
+  it('порог: вводишь 0.5 → blur → POST /api/kb/settings {min_score: 0.5}', async () => {
+    const calls = await renderTab({ indexed: false })
+    const input = screen.getByLabelText('Порог отсечения (0 = off)') as HTMLInputElement
+    expect(input).toHaveAttribute('step', '0.05')
+    fireEvent.change(input, { target: { value: '0.5' } })
+    // до blur POST не уходит (частичный ввод не спамит)
+    expect(calls.filter((c) => c.url === '/api/kb/settings')).toHaveLength(0)
+    fireEvent.blur(input)
+    await waitFor(() =>
+      expect(calls).toContainEqual({ url: '/api/kb/settings', body: { min_score: 0.5 } }),
+    )
+    // инпут показывает закоммиченное значение
+    await waitFor(() => expect(input.value).toBe('0.5'))
+  })
+
+  it('порог: значение из GET settings подставлено (persist после reload)', async () => {
+    const calls: Call[] = []
+    stubDay23Fetch({ minScore: 0.5, compare: RAG_COMPARE_4, calls })
+    render(
+      <StudioProvider>
+        <KbTab />
+      </StudioProvider>,
+    )
+    // дождались загрузки stats/settings
+    await screen.findByText('Документов')
+    expect((screen.getByLabelText('Порог отсечения (0 = off)') as HTMLInputElement).value).toBe('0.5')
+  })
+
+  it('compare: 4 армы → 4 панели с заголовками; пустая арма → «—»; body с min_score', async () => {
+    const calls: Call[] = []
+    stubDay23Fetch({ minScore: 0.5, compare: RAG_COMPARE_4, calls })
+    render(
+      <StudioProvider>
+        <KbTab />
+      </StudioProvider>,
+    )
+    await doCompareInUi()
+    await waitFor(() =>
+      expect(calls).toContainEqual({
+        url: '/api/rag/compare',
+        body: { question: 'Какая модель телефона была у героя?', min_score: 0.5 },
+      }),
+    )
+    // 4 заголовка панелей
+    expect(screen.getByText('Без RAG')).toBeInTheDocument()
+    expect(screen.getByText('С RAG')).toBeInTheDocument()
+    expect(screen.getByText('С RAG + фильтром')).toBeInTheDocument()
+    expect(screen.getByText('С RAG + rewrite')).toBeInTheDocument()
+    // ответы арм + пустая filter-арма → «—»
+    expect(await screen.findByText('RAG: у героя был телефон.')).toBeInTheDocument()
+    expect(screen.getByText('Plain: не знаю.')).toBeInTheDocument()
+    expect(screen.getByText('Rewrite: телефон IPhone 17Promax.')).toBeInTheDocument()
+    expect(screen.getByText('—')).toBeInTheDocument()
+  })
+
+  it('chip «фильтр ≥ 0.5» виден при min_score=0.5 (поиск + filter-панель)', async () => {
+    const calls: Call[] = []
+    stubDay23Fetch({ minScore: 0.5, compare: RAG_COMPARE_4, calls })
+    render(
+      <StudioProvider>
+        <KbTab />
+      </StudioProvider>,
+    )
+    await screen.findByText('Документов')
+    // до compare — только информационный чип в поиске
+    expect(screen.getAllByText('фильтр ≥ 0.5')).toHaveLength(1)
+    await doCompareInUi()
+    expect(await screen.findByText('RAG: у героя был телефон.')).toBeInTheDocument()
+    // + чип у filter-панели
+    expect(screen.getAllByText('фильтр ≥ 0.5')).toHaveLength(2)
+  })
+
+  it('chip «фильтр ≥ X» скрыт при min_score=0 / без поля (старый бэкенд); body без min_score', async () => {
+    const calls: Call[] = []
+    // settings без min_score (форма «старого» бэкенда)
+    stubDay23Fetch({ compare: RAG_COMPARE_4, calls })
+    render(
+      <StudioProvider>
+        <KbTab />
+      </StudioProvider>,
+    )
+    await screen.findByText('Документов')
+    expect((screen.getByLabelText('Порог отсечения (0 = off)') as HTMLInputElement).value).toBe('0')
+    expect(screen.queryByText(/фильтр ≥/)).not.toBeInTheDocument()
+    await doCompareInUi()
+    // тело byte-совместимо с днём 22: без min_score
+    await waitFor(() =>
+      expect(calls).toContainEqual({
+        url: '/api/rag/compare',
+        body: { question: 'Какая модель телефона была у героя?' },
+      }),
+    )
+    expect(screen.queryByText(/фильтр ≥/)).not.toBeInTheDocument()
+  })
+
+  it('rewrite-чип: rewritten_query виден + копирование («Скопировано»)', async () => {
+    const calls: Call[] = []
+    stubDay23Fetch({ compare: RAG_COMPARE_4, calls })
+    render(
+      <StudioProvider>
+        <KbTab />
+      </StudioProvider>,
+    )
+    await doCompareInUi()
+    expect(await screen.findByText('Rewrite: телефон IPhone 17Promax.')).toBeInTheDocument()
+    // чип с переписанным запросом + кнопка копирования
+    expect(screen.getByText('модель телефона героя')).toBeInTheDocument()
+    const copyBtn = screen.getByRole('button', { name: 'Скопировать' })
+    fireEvent.click(copyBtn)
+    expect(await screen.findByText('Скопировано')).toBeInTheDocument()
+  })
+
+  it('rewrite_applied=false → панели rag+rewrite без rewrite-чипа (ответ показан)', async () => {
+    const calls: Call[] = []
+    stubDay23Fetch({
+      compare: {
+        ...RAG_COMPARE_4,
+        rewrite_applied: false,
+        // бэкенд в fallback может вернуть исходный вопрос — UI чип не рендерит
+        rewritten_query: 'Какая модель телефона была у героя?',
+      },
+      calls,
+    })
+    render(
+      <StudioProvider>
+        <KbTab />
+      </StudioProvider>,
+    )
+    await doCompareInUi()
+    // панель на месте, ответ показан
+    expect(await screen.findByText('Rewrite: телефон IPhone 17Promax.')).toBeInTheDocument()
+    // rewrite-чипа нет ни в каком виде
+    expect(screen.queryByText('модель телефона героя')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Скопировать' })).not.toBeInTheDocument()
+  })
+
+  it('старая форма ответа (без полей дня 23) → без краха: 4 панели, пустые армы «—»', async () => {
+    const calls: Call[] = []
+    // RAG_COMPARE_OK — ответ дня 22: ни одного поля дня 23 (undefined)
+    stubDay23Fetch({ compare: RAG_COMPARE_OK, calls })
+    render(
+      <StudioProvider>
+        <KbTab />
+      </StudioProvider>,
+    )
+    await doCompareInUi()
+    await waitFor(() =>
+      expect(calls).toContainEqual({
+        url: '/api/rag/compare',
+        body: { question: 'Какая модель телефона была у героя?' },
+      }),
+    )
+    // старые армы с ответами, новые — «—» (2 шт: filter + rewrite)
+    expect(screen.getByText('Без RAG')).toBeInTheDocument()
+    expect(screen.getByText('С RAG')).toBeInTheDocument()
+    expect(screen.getByText('С RAG + фильтром')).toBeInTheDocument()
+    expect(screen.getByText('С RAG + rewrite')).toBeInTheDocument()
+    expect(screen.getByText(RAG_COMPARE_OK.answer_plain)).toBeInTheDocument()
+    expect(screen.getAllByText('—')).toHaveLength(2)
+    // чипы фильтра/rewrite не рендерятся
+    expect(screen.queryByText(/фильтр ≥/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Скопировать' })).not.toBeInTheDocument()
+  })
+})

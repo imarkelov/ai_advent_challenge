@@ -535,6 +535,9 @@ export interface KbSettings {
   reranker: KbReranker
   // Этап 1: число кандидатов (recall), по которому идёт реранк (1..200)
   rag_recall: number
+  // День 23: порог отсечения реранк-скоров (0..1; 0 — отсечка выключена).
+  // Старый бэкенд (до дня 23) поле не отдаёт — в UI читать как ?? 0
+  min_score: number
 }
 
 export interface KbBuildResult {
@@ -623,19 +626,38 @@ export function apiKbSettingsPost(patch: Partial<KbSettings>): Promise<KbSetting
 // День 22 (сравнение RAG): ответ POST /api/rag/compare — один вопрос, два
 // ответа LLM (без KB-блока / с чанками), non-stream. chunks — тот же тип,
 // что у двухэтапного поиска (KbSearchResult), rag_context — RagContext.
+// День 23 (аддитивно): +2 армы (фильтр min_score / rewrite) — все новые
+// поля OPTIONAL: старый бэкенд (до дня 23) их не отдаёт, UI — undefined-safe.
 export interface RagCompareResult {
   answer_plain: string
   answer_rag: string
   kb_block: string
   chunks: KbSearchResult[]
   rag_context: RagContext
+  // ── День 23: новые армы (отсутствуют у старого бэкенда) ──
+  // Арма «С RAG + фильтром»: RAG с отсечкой чанков ниже min_score
+  answer_rag_filter?: string
+  // Арма «С RAG + rewrite»: RAG по переписанному LLM-запросу
+  answer_rag_rewrite?: string
+  chunks_rag_filter?: KbSearchResult[]
+  chunks_rag_rewrite?: KbSearchResult[]
+  rag_context_rag_filter?: RagContext
+  rag_context_rag_rewrite?: RagContext
+  // Переписанный запрос (rewrite-арма); есть, если rewrite_applied === true
+  rewritten_query?: string
+  // true — LLM действительно переписала запрос; false — fallback на
+  // исходный вопрос (арма = обычный RAG), rewritten_query может отсутствовать
+  rewrite_applied?: boolean
 }
 
-// Сравнение RAG: POST /api/rag/compare {question} → оба ответа одним
-// запросом (non-stream, стриминга нет). 400/404/500 — ApiError с RU-detail
-// (детерминированный из тела ответа — паттерн соседних KB-хелперов).
-export function apiRagCompare(question: string): Promise<RagCompareResult> {
-  return apiPost('/rag/compare', { question })
+// Сравнение RAG: POST /api/rag/compare {question, min_score?} → ответы
+// одним запросом (non-stream, стриминга нет). min_score уйдёт в тело,
+// только если > 0 (0/undefined — тело как в день 22, byte-совместимо).
+// 400/404/500 — ApiError с RU-detail (паттерн соседних KB-хелперов).
+export function apiRagCompare(question: string, minScore?: number): Promise<RagCompareResult> {
+  const body: { question: string; min_score?: number } = { question }
+  if (minScore != null && minScore > 0) body.min_score = minScore
+  return apiPost('/rag/compare', body)
 }
 
 // EventSource не умеет POST, поэтому — fetch + ReadableStream.

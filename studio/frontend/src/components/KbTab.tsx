@@ -5,7 +5,9 @@
 // + этапы 1/2), «Индексация» (стратегия + эмбеддер + «Индексировать»),
 // «Файлы» (загрузка), «Статистика», «Сравнение стратегий» (таблица fixed vs
 // structural), «Поиск по базе», «Сравнение RAG» (день 22: один вопрос —
-// два ответа LLM рядом, «Без RAG» / «С RAG» + чанки + KB-блок).
+// два ответа LLM рядом; день 23: четыре панели «Без RAG» / «С RAG» /
+// «С RAG + фильтром» / «С RAG + rewrite», порог отсечения min_score 0..1
+// в «Включить» + чипы «фильтр ≥ X»).
 // Данные локальны в компоненте (паттерн ProfileTab): при открытии читаем
 // GET /api/kb/stats + /api/kb/settings + /api/kb/uploads (список загрузок
 // независим от индекса), после каждого действия перечитываем.
@@ -36,6 +38,9 @@ import {
 // Рисунок метрики сравнения: hit@3/precision@3/MRR — 3 знака, длины — целое
 const metric3 = (v: number) => v.toFixed(3)
 const len0 = (v: number) => String(Math.round(v))
+
+// День 23: порог отсечения в чипах «фильтр ≥ X» — без хвостовых нулей
+const fmtScore = (v: number) => String(Math.round(v * 100) / 100)
 
 // Размер файла для списка загрузок: КБ или МБ
 const humanSize = (bytes: number) =>
@@ -114,6 +119,49 @@ function KbSwitch({
   )
 }
 
+// День 23 (rewrite-арма): чип с переписанным запросом + копирование.
+// Копирование — паттерн FlowInspector.tsx (НЕ менять): clipboard API,
+// фолбэк временный textarea + execCommand, «Скопировано» ~1.5 s
+function RewriteChip({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+  const copyTimer = useRef<number | null>(null)
+  useEffect(() => () => {
+    if (copyTimer.current) window.clearTimeout(copyTimer.current)
+  }, [])
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch {
+      try {
+        const ta = document.createElement('textarea')
+        ta.value = text
+        document.body.appendChild(ta)
+        ta.select()
+        document.execCommand('copy')
+        document.body.removeChild(ta)
+      } catch {
+        // буфер обмена недоступен — молча
+      }
+    }
+    setCopied(true)
+    if (copyTimer.current) window.clearTimeout(copyTimer.current)
+    copyTimer.current = window.setTimeout(() => setCopied(false), 1500)
+  }
+  return (
+    <span className="kb-chip" title="Переписанный LLM-запрос rewrite-армы">
+      {text}
+      <button
+        type="button"
+        className="btn kb-rewrite-copy"
+        title="Скопировать переписанный запрос"
+        onClick={() => void copy()}
+      >
+        {copied ? 'Скопировано' : 'Скопировать'}
+      </button>
+    </span>
+  )
+}
+
 export default function KbTab() {
   // stats: null — ещё загружаем; {exists:false} — индекс не построен
   const [stats, setStats] = useState<KbStats | { exists: false } | null>(null)
@@ -143,6 +191,13 @@ export default function KbTab() {
   const [searching, setSearching] = useState(false)
   const [results, setResults] = useState<KbSearchResult[] | null>(null)
   const [searchError, setSearchError] = useState('')
+
+  // День 23: порог отсечения min_score (0..1) — черновик в инпуте;
+  // POST уходит на blur (валидацией владеет бэкенд: 400 RU при не-числе/
+  // вне диапазона). До первого ввода инпут показывает значение settings
+  // (persist после reload) — touched-флаг, не эффект-инициализация
+  const [minScoreDraft, setMinScoreDraft] = useState('')
+  const [minScoreTouched, setMinScoreTouched] = useState(false)
 
   // Сравнение RAG (день 22): один вопрос → два ответа LLM одним
   // non-stream запросом (стриминга нет — простой spinner)
@@ -209,6 +264,32 @@ export default function KbTab() {
         console.error('kb settings:', err)
       }
     })()
+  }
+
+  // День 23: актуальный порог отсечения (старый бэкенд без поля → 0 = off)
+  const minScore = settings?.min_score ?? 0
+  // Инпут: до первого ввода — значение settings, после — черновик
+  const minScoreValue = minScoreTouched ? minScoreDraft : fmtScore(minScore)
+
+  // День 23: коммит порога отсечения на blur: парсим черновик, клампим
+  // в 0..1, POST /api/kb/settings {min_score}. Значение не изменилось —
+  // POST не уходит (touched сбрасываем — инпут снова следит за settings);
+  // битый ввод — откат к авторитетному значению settings
+  const commitMinScore = () => {
+    if (!minScoreTouched) return
+    const raw = minScoreDraft.trim()
+    const v = raw === '' ? Number.NaN : Number(raw)
+    if (!Number.isFinite(v)) {
+      setMinScoreTouched(false)
+      return
+    }
+    const rounded = Math.round(Math.max(0, Math.min(1, v)) * 100) / 100
+    setMinScoreDraft(fmtScore(rounded))
+    if (rounded === minScore) {
+      setMinScoreTouched(false)
+      return
+    }
+    patchSettings({ min_score: rounded })
   }
 
   // Собрать индекс: POST /api/kb/index {strategy, embedder} (сервер сам
@@ -339,9 +420,12 @@ export default function KbTab() {
     })()
   }
 
-  // Сравнение RAG (день 22): POST /api/rag/compare {question} — оба ответа
-  // (без KB-блока / с чанками) одним non-stream запросом. Ошибка (400/404/
-  // 500) — RU-detail в message; результат сбрасываем, как в doSearch.
+  // Сравнение RAG (день 22/23): POST /api/rag/compare {question, min_score?}
+  // — ответы (4 армы с дня 23) одним non-stream запросом. min_score —
+  // body-override: уйдёт в тело, только если > 0 (0 — тело как день 22).
+  // Ошибка (400/404/500) — RU-detail в message; результат сбрасываем, как
+  // в doSearch.
+
   const doCompare = () => {
     const question = ragQ.trim()
     if (!question || comparing) return
@@ -349,7 +433,7 @@ export default function KbTab() {
     setRagError('')
     void (async () => {
       try {
-        setRagResult(await apiRagCompare(question))
+        setRagResult(await apiRagCompare(question, minScore > 0 ? minScore : undefined))
       } catch (err) {
         setRagResult(null)
         setRagError(err instanceof Error ? err.message : String(err))
@@ -422,6 +506,29 @@ export default function KbTab() {
             onChange={(e) => {
               const n = Math.max(1, Math.min(10, Number(e.target.value) || 1))
               patchSettings({ rag_top_k: n })
+            }}
+          />
+        </label>
+        {/* День 23: порог отсечения реранк-скоров (0 — off). Сохранение —
+            на blur (не на каждый keystroke): частичный ввод «0.» не должен
+            летать POST-ом; валидация — бэкенд (400 RU при не-числе/вне 0..1) */}
+        <label className="kb-row">
+          <span>Порог отсечения (0 = off)</span>
+          <input
+            type="number"
+            className="input kb-topk-input"
+            aria-label="Порог отсечения (0 = off)"
+            min={0}
+            max={1}
+            step={0.05}
+            value={minScoreValue}
+            onChange={(e) => {
+              setMinScoreTouched(true)
+              setMinScoreDraft(e.target.value)
+            }}
+            onBlur={commitMinScore}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
             }}
           />
         </label>
@@ -661,6 +768,14 @@ export default function KbTab() {
               </button>
             </div>
             {searchError && <p className="kb-error">{searchError}</p>}
+            {/* День 23: порог отсечения действует и на /api/kb/search —
+                информационный чип, что поиск фильтрует чанки ниже порога */}
+            {minScore > 0 && (
+              <p className="kb-hint">
+                <span className="kb-chip" title="Результаты поиска отфильтрованы порогом отсечения">фильтр ≥ {fmtScore(minScore)}</span>{' '}
+                — поиск отбрасывает чанки ниже порога
+              </p>
+            )}
             {results !== null && results.length === 0 && (
               <p className="kv-empty">Ничего не найдено</p>
             )}
@@ -726,16 +841,37 @@ export default function KbTab() {
               </div>
             </div>
             {ragError && <p className="kb-error">{ragError}</p>}
+            {/* День 23: 4 армы (plain / rag / rag+filter / rag+rewrite).
+                Старый бэкенд не отдаёт новые поля — эти две панели
+                undefined-safe: пустой/отсутствующий ответ → «—», чипы
+                фильтра/rewrite не рендерятся (graceful деградация).
+                Сбой армы бэкенд отдаёт строкой «Ошибка: …» — рендерим как
+                есть в панели этой армы. Один общий спиннер — рядом с
+                кнопкой «Сравнить» (5 LLM-вызовов: 4 ответа + rewrite) */}
             {ragResult && (
               <>
                 <div className="kb-compare-panels">
                   <div className="kb-compare-panel">
                     <span className="kb-compare-label">Без RAG</span>
-                    <pre className="kb-compare-answer">{ragResult.answer_plain}</pre>
+                    <pre className="kb-compare-answer">{ragResult.answer_plain || '—'}</pre>
                   </div>
                   <div className="kb-compare-panel">
                     <span className="kb-compare-label">С RAG</span>
-                    <pre className="kb-compare-answer">{ragResult.answer_rag}</pre>
+                    <pre className="kb-compare-answer">{ragResult.answer_rag || '—'}</pre>
+                  </div>
+                  <div className="kb-compare-panel">
+                    <span className="kb-compare-label">С RAG + фильтром</span>
+                    {minScore > 0 && (
+                      <span className="kb-chip" title="Арма ответила по чанкам, прошедшим порог отсечения">фильтр ≥ {fmtScore(minScore)}</span>
+                    )}
+                    <pre className="kb-compare-answer">{ragResult.answer_rag_filter || '—'}</pre>
+                  </div>
+                  <div className="kb-compare-panel">
+                    <span className="kb-compare-label">С RAG + rewrite</span>
+                    {ragResult.rewrite_applied === true && ragResult.rewritten_query && (
+                      <RewriteChip text={ragResult.rewritten_query} />
+                    )}
+                    <pre className="kb-compare-answer">{ragResult.answer_rag_rewrite || '—'}</pre>
                   </div>
                 </div>
                 {ragResult.chunks.length > 0 && (
