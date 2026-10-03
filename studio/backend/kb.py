@@ -1241,7 +1241,7 @@ class KnowledgeBase:
             else:
                 # RRF-шкала (0.003..0.033) не сопоставима с порогом 0..1 —
                 # относительная нормализация: порог от лучшего результата.
-                best = max(r["score"] for r in stage1)
+                best = max((r["score"] for r in stage1), default=0)
                 kept = ([r for r in stage1
                          if r["score"] >= min_score * best]
                         if best > 0 else [])

@@ -912,6 +912,20 @@ def test_search_rag_min_score_best_zero_guard(kb):
     assert res["results"] == []
 
 
+def test_search_rag_min_score_empty_stage1_no_crash(kb):
+    """stage1 пуст (векторная нога деградировала, BM25 — 0 матчей) +
+    min_score>0 + реранкер off — без исключения (защита от
+    max() по пустому списку), пустой результат."""
+    kb.build("structural", HashEmbedder())
+    kb.search = lambda query, k=5: []
+    res = kb.search_rag("что угодно", recall=5, top_k=3,
+                        reranker_mode="off", min_score=0.5)
+    assert res["results"] == []
+    assert res["recall_total"] == 0
+    # ранний возврат (пустой stage1) срабатывает ДО блока фильтра
+    assert "filtered" not in res and "dropped" not in res
+
+
 def test_search_rag_min_score_ge_semantics_edge(kb):
     """edge: min_score=1.0, doc с rerank_score=1.0 → остаётся (>=)."""
     kb.build("structural", HashEmbedder())
