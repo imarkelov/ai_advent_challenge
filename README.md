@@ -2071,7 +2071,7 @@ rag_filter_wins=2, plain_wins=2.
 
 ### Статус
 
-Бэкенд — **579 тестов PASS** (baseline 548 → +31). Фронтенд — **296
+Бэкенд — **581 тестов PASS** (baseline 548 → +33). Фронтенд — **296
 тестов PASS** (Vitest, baseline 288 → +8) + `tsc -b` clean + `npm run
 build` clean. E2E `scripts/e2e_day23.py`: Part A **7/7 PASS**
 (офлайн, net cut); Part B live: **PASS=11, FAIL=0, WARNING=1** (B4

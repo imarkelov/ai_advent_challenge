@@ -92,8 +92,8 @@ rewrite T=0/max_tokens=200). Контракт compare-ответа аддити�
 
 ## Проверка задания
 
-Бэкенд — **579 тестов PASS** (pytest, офлайн; baseline дня 23 — 548,
-+31 новых). Фронтенд — **296 тестов PASS** (Vitest; baseline 288, +8)
+Бэкенд — **581 тестов PASS** (pytest, офлайн; baseline дня 23 — 548,
++33 новых). Фронтенд — **296 тестов PASS** (Vitest; baseline 288, +8)
 + `tsc -b` clean + `npm run build` clean. E2E `scripts/e2e_day23.py`:
 **Part A 7/7 PASS** (офлайн, net cut); **Part B live: PASS=11,
 FAIL=0, WARNING=1** (B4 easter-egg — best-effort WARNING). Регрессия
