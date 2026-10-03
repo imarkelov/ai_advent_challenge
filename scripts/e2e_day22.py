@@ -83,7 +83,7 @@ BASE = f"http://{HOST}:{PORT}"
 WAIT_PORT_BUSY_MAX = 600   # 10 минут ожидания освобождения порта
 WAIT_PORT_BUSY_STEP = 10
 WAIT_SERVER_UP_MAX = 90
-COMPARE_TIMEOUT = 330      # 2 non-stream LLM-вызова (plain + rag)
+COMPARE_TIMEOUT = 825      # день 23: 5 non-stream LLM-вызовов (4 армы + rewrite)
 INDEX_TIMEOUT = 900        # live-сборка индекса (корпус до нескольких МБ)
 EGG_FIXTURE = os.path.join(REPO, "studio", "backend", "tests", "fixtures",
                            "egg_book.txt")
@@ -407,12 +407,13 @@ def part_a() -> bool:
         plain_user = ((captured[0].get("messages") or [{}])[1].get("content", "")
                       if len(captured) > 0
                       and len(captured[0].get("messages", [])) > 1 else "")
-        a2 = (len(captured) == 2
+        a2 = (len(captured) == 5  # день 23: plain, rag, filter, rewrite,
+              # rewrite-arm (контракт захвата)
               and "База знаний" not in plain_sys
               and "База знаний" in rag_sys
               and plain_user == COMPARE_QUESTION)
         record("A2: kb_block — «База знаний» в system rag-руки, НЕТ в "
-               "plain-руке (fake-LLM захват, порядок plain → rag)",
+               "plain-руке (fake-LLM захват, порядок plain → rag → …)",
                "PASS" if a2 else "FAIL",
                f"calls={len(captured)} "
                f"plain_block={'База знаний' in plain_sys} "
@@ -428,7 +429,7 @@ def part_a() -> bool:
                      and all(isinstance(r.json().get("detail"), str)
                              and r.json()["detail"]
                              for r in (r_e, r_w, r_n, r_x)))
-        no_calls = len(captured) == 2  # LLM на 400 не вызывался
+        no_calls = len(captured) == 5  # LLM на 400 не вызывался
         # 404 — отдельная tmp-БЗ: загрузка есть, индекс НЕ собран
         kb404 = _make_tmp_kb(os.path.join(tmp, "kb_noidx"), build=False)
         agent404 = StudioAgent(os.path.join(tmp, "data404"),
@@ -503,14 +504,21 @@ def part_a() -> bool:
                f"n={len(q5) if isinstance(q5, list) else '-'} "
                f"ids={ids5 if isinstance(q5, list) else '-'}")
 
-        # A6 (C6): T=0 + max_tokens=1024 в обоих payload (A1-capture)
+        # A6 (C6): T=0 + max_tokens=1024 в payload-ах 4-х рук
+        # (plain/rag/filter/rewrite-arm — позиции 0,1,2,4); rewrite-вызов
+        # (позиция 3, день 23 задача 3) — T=0, max_tokens=200
         model6 = agent.get_config()["model"]
-        a6 = (len(captured) == 2
+        arm_calls6 = [captured[i] for i in (0, 1, 2, 4)]
+        rewrite6 = captured[3]
+        a6 = (len(captured) == 5
               and all(p.get("temperature") == 0
                       and p.get("max_tokens") == 1024
-                      and p.get("model") == model6 for p in captured))
-        record("A6: оба payload — temperature == 0, max_tokens == 1024, "
-               "model == config",
+                      and p.get("model") == model6 for p in arm_calls6)
+              and rewrite6.get("temperature") == 0
+              and rewrite6.get("max_tokens") == 200
+              and rewrite6.get("model") == model6)
+        record("A6: payload-ы 4-х рук — temperature == 0, max_tokens == "
+               "1024, model == config (+ rewrite-вызов: max_tokens=200)",
                "PASS" if a6 else "FAIL",
                f"t={[p.get('temperature') for p in captured]} "
                f"mt={[p.get('max_tokens') for p in captured]} "
@@ -519,7 +527,7 @@ def part_a() -> bool:
         # A7 (C7): голый system-промпт — без маркеров чата
         markers = ("Профиль", "Память", "Инварианты")
         sysprompts = [p["messages"][0]["content"] for p in captured[:2]]
-        a7 = (len(captured) == 2
+        a7 = (len(captured) == 5  # день 23: 4 армы + rewrite-вызов
               and all(m not in s for s in sysprompts for m in markers))
         record("A7: bare system prompt — маркеров «Профиль»/«Память»/"
                "«Инварианты» нет ни на одной руке",

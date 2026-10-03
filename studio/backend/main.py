@@ -807,20 +807,39 @@ def create_app(agent: StudioAgent | None = None,
 
     @app.post("/api/rag/compare")
     def rag_compare(body: dict):
-        """День 22: ответ на вопрос двумя способами — без RAG и с RAG —
-        одним вызовом: оба LLM-вызова non-stream (T=0, max_tokens=1024,
-        голый system-промпт), retrieval из search_rag по настройкам БЗ
-        (флаг settings['rag'] не consulted — сравнение явное).
-        Журнал requests.json НЕ пишется — non-stream паттерн, как
-        `_task_llm_call`. Ответ: {answer_plain, answer_rag, kb_block,
-        chunks, rag_context}. 400 — вопрос пустой/не строка;
+        """День 22 (+ день 23): ответ на вопрос 4 способами — plain /
+        rag / rag+filter / rag+rewrite — одним вызовом: все LLM-вызовы
+        non-stream (T=0, max_tokens=1024, голый system-промпт),
+        retrieval из search_rag по настройкам БЗ (флаг settings['rag']
+        не consulted — сравнение явное). Журнал requests.json НЕ
+        пишется — non-stream паттерн, как `_task_llm_call`. Ответ:
+        {answer_plain, answer_rag, kb_block, chunks, rag_context} +
+        аддитивно (день 23) answer_rag_filter / answer_rag_rewrite /
+        chunks_rag_filter / chunks_rag_rewrite /
+        rag_context_rag_filter / rag_context_rag_rewrite /
+        rewritten_query / rewrite_applied. Body: {question, min_score?}
+        — min_score опциональный override порога для rag+filter-руки
+        (валидация как в update_settings: bool ПЕРВЫЙ, затем тип,
+        затем диапазон; default — settings["min_score"]).
+        400 — вопрос пустой/не строка; 400 RU — некорректный min_score;
         404 — индекс не построен."""
         q = body.get("question")
         if not isinstance(q, str) or not q.strip():
             raise HTTPException(400, "Вопрос не может быть пустым")
+        min_score = None
+        if "min_score" in body:
+            v = body["min_score"]
+            # bool — ПЕРВЫЙ: isinstance(True, int) == True (паттерн
+            # kb.update_settings, день 23)
+            if isinstance(v, bool) \
+                    or not isinstance(v, (int, float)) \
+                    or not (0.0 <= v <= 1.0):
+                raise HTTPException(
+                    400, "min_score должен быть числом от 0 до 1")
+            min_score = float(v)
         if kb.load_index() is None:
             raise HTTPException(404, "Индекс не построен")
-        return agent.rag_compare(q)
+        return agent.rag_compare(q, min_score=min_score)
 
     # ---------- токены ----------
 

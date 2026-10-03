@@ -511,28 +511,52 @@ class StudioAgent:
                 "reranked": bool(rag.get("reranked")),
                 "chunks": chunks}
 
-    def rag_compare(self, question: str) -> dict:
-        """День 22: сравнение «без RAG / с RAG» в одном вызове — два
-        non-stream LLM-вызова (`_task_llm_call`, в requests.json не
-        входят) на ОДИН вопрос: plain — голый config.system_prompt;
-        rag — тот же промпт + блок «База знаний» из двухэтапного поиска
+    def rag_compare(self, question: str,
+                    min_score: float | None = None) -> dict:
+        """День 22 (+ день 23): сравнение 4 режимов в одном вызове —
+        plain / rag / rag+filter / rag+rewrite; четыре non-stream
+        LLM-вызова (`_task_llm_call`, в requests.json не входят) на
+        ОДИН вопрос: plain — голый config.system_prompt; rag — тот же
+        промпт + блок «База знаний» из двухэтапного поиска
         (`search_rag`, настройки rag_recall/rag_top_k/reranker; флаг
-        settings['rag'] НЕ consulted — сравнение явное). Параметры
-        детерминированные: temperature=0, max_tokens=1024
-        (переопределение значений конфига); модель — из конфига.
-        Руки вызовы последовательные; сбой LLM на одной руке НЕ роняет
-        другую — в ответе сбойной руки человекочитаемое НЕПУСТОЕ
-        строка-ошибка «Ошибка: …» (фронтенд рендерит ответ как текст,
-        отдельного error-поля в контракте нет).
+        settings['rag'] НЕ consulted — сравнение явное).
 
-        Возврат: {answer_plain, answer_rag, kb_block, chunks
-        (results search_rag — та же форма, что GET /api/kb/search),
-        rag_context (из `_kb_context`; None, если чанков нет)}."""
+        День 23 (аддитивно):
+        - rag+filter — retrieval с порогом `min_score` (body-override,
+          иначе settings["min_score"]); plain/rag НИКОГДА не фильтруют
+          (даже если min_score задан).
+        - rag+rewrite — retrieval на `rewrite_query(question)`;
+          ANSWER-LLM отвечает на ОРИГИНАЛЬНЫЙ вопрос (kb_block из
+          поиска по перефразу). Сбой/неприменимость перефразы →
+          retrieval как у rag-руки, `rewrite_applied: False`,
+          `rewritten_query == question` (рука НЕ «Ошибка:»).
+        Параметры арм детерминированные: temperature=0,
+        max_tokens=1024 (переопределение значений конфига); модель —
+        из конфига. Руки вызовы последовательные (порядок LLM-вызовов:
+        plain → rag → rag+filter → rewrite → rag+rewrite); сбой LLM на
+        одной руке НЕ роняет другие — в ответе сбойной руки
+        человекочитаемое НЕПУСТОЕ строка-ошибка «Ошибка: …»
+        (фронтенд рендерит ответ как текст, отдельного error-поля в
+        контракте нет).
+
+        Возврат: {answer_plain, answer_rag, kb_block, chunks (results
+        search_rag — та же форма, что GET /api/kb/search), rag_context
+        (из `_kb_context`; None, если чанков нет)} + аддитивно (день 23):
+        {answer_rag_filter, answer_rag_rewrite, chunks_rag_filter,
+        chunks_rag_rewrite, rag_context_rag_filter,
+        rag_context_rag_rewrite, rewritten_query, rewrite_applied}."""
         s = self.kb.settings()
+        eff_min = float(min_score) if min_score is not None \
+            else s["min_score"]
         rag = self._rag_retrieve(question, s["rag_recall"],
-                                 s["rag_top_k"], s["reranker"])
+                                  s["rag_top_k"], s["reranker"])
         kb_block = self._render_kb_block(question, rag["results"])
         rag_context = self._kb_context(question, rag)
+        rag_f = self._rag_retrieve(question, s["rag_recall"],
+                                    s["rag_top_k"], s["reranker"],
+                                    min_score=eff_min)
+        kb_block_f = self._render_kb_block(question, rag_f["results"])
+        rag_context_f = self._kb_context(question, rag_f)
         cfg = {**self.get_config(), "temperature": 0, "max_tokens": 1024}
         base = cfg["system_prompt"]
 
@@ -543,11 +567,35 @@ class StudioAgent:
             except Exception as e:
                 return f"Ошибка: {e}"
 
-        return {"answer_plain": _arm(base),
-                "answer_rag": _arm(base + kb_block),
+        answer_plain = _arm(base)
+        answer_rag = _arm(base + kb_block)
+        answer_rag_filter = _arm(base + kb_block_f)
+        # rewrite-вызов ПЕРЕД rag+rewrite-рукой, ПОСЛЕ первой тройки —
+        # порядок non-stream payload'ов: plain, rag, filter, rewrite,
+        # rewrite-arm (контракт захвата e2e_day22 Part A)
+        rewritten, applied = self.rewrite_query(question)
+        if applied:
+            rag_r = self._rag_retrieve(rewritten, s["rag_recall"],
+                                        s["rag_top_k"], s["reranker"])
+        else:
+            rag_r = rag  # фолбэк: retrieval как у rag-руки
+        kb_block_r = self._render_kb_block(question, rag_r["results"])
+        rag_context_r = self._kb_context(question, rag_r)
+        answer_rag_rewrite = _arm(base + kb_block_r)
+
+        return {"answer_plain": answer_plain,
+                "answer_rag": answer_rag,
                 "kb_block": kb_block,
                 "chunks": rag["results"],
-                "rag_context": rag_context}
+                "rag_context": rag_context,
+                "answer_rag_filter": answer_rag_filter,
+                "answer_rag_rewrite": answer_rag_rewrite,
+                "chunks_rag_filter": rag_f["results"],
+                "chunks_rag_rewrite": rag_r["results"],
+                "rag_context_rag_filter": rag_context_f,
+                "rag_context_rag_rewrite": rag_context_r,
+                "rewritten_query": rewritten,
+                "rewrite_applied": applied}
 
     def rewrite_query(self, question: str) -> tuple:
         """День 23: перефраз вопроса для точного поиска по БЗ.
