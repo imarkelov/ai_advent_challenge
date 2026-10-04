@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261004-1144",
-  "generated_at": "2026-10-04T11:44:20Z",
+  "id": "digest-20261004-1622",
+  "generated_at": "2026-10-04T16:22:59Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 6.0,
-    "feels_like_c": 1.9,
-    "description": "Небольшой дождь",
-    "wind_ms": 15.4
+    "temp_c": 6.8,
+    "feels_like_c": 3.8,
+    "description": "Пасмурно",
+    "wind_ms": 8.5
   },
   "news": {
     "vc.ru": [
@@ -15,23 +15,27 @@
         "url": "https://vc.ru/transport/3173559-tseny-na-avtomobili-posle-indeksatsii-utilsbora?from=rss"
       },
       {
-        "title": "День 1684: десятка худших акций на Мосбирже по итогам трёх кварталов подешевела в среднем на 66,77%",
-        "url": "https://vc.ru/money/3174574-khudshie-aktsii-na-mosbirzhe-padenie-tsen?from=rss"
-      },
-      {
         "title": "В поисках того, кто пашет и может оказаться умнее нанимающего менеджера: каких сотрудников ищет SpaceX",
         "url": "https://vc.ru/hr/3173801-spacex-i-trebovaniya-k-sotrudnikam?from=rss"
       },
       {
-        "title": "Аргентина запустила программу получения гражданства за инвестиции — можно внести $350 тысяч в казну или купить облигации на $800 тысяч",
-        "url": "https://vc.ru/migration/3172466-argentina-programma-grazhdanstva-za-investitsii?from=rss"
+        "title": "День 1684: десятка худших акций на Мосбирже по итогам трёх кварталов подешевела в среднем на 66,77%",
+        "url": "https://vc.ru/money/3174574-khudshie-aktsii-na-mosbirzhe-padenie-tsen?from=rss"
       },
       {
-        "title": "Прыгнули в чан с расплавленным металлом, как в «Терминаторе»: Figure выпустила рекламу с Арнольдом Шварценеггером о списании предыдущего поколения роботов",
-        "url": "https://vc.ru/marketing/3172043-reklama-figure-s-shvarceneggerom-o-rasplavke-robotov?from=rss"
+        "title": "Офлайн-мессенджер Bitchat Джека Дорси удалили из индийского App Store по требованию регулятора",
+        "url": "https://vc.ru/services/3174742-udalenie-oflayn-messendzhera-bitchat-dzheka-dorsi-iz-indijskogo-app-store?from=rss"
+      },
+      {
+        "title": "Аргентина запустила программу получения гражданства за инвестиции — можно внести $350 тысяч в казну или купить облигации на $800 тысяч",
+        "url": "https://vc.ru/migration/3172466-argentina-programma-grazhdanstva-za-investitsii?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "Представлен открытый минималистичный браузер Northstar, написанный полностью с нуля на языке C",
+        "url": "https://habr.com/ru/news/1090182/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090182"
+      },
       {
         "title": "Nintendo закрыла мобильную игру Mario Kart Tour",
         "url": "https://habr.com/ru/news/1090142/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090142"
@@ -47,10 +51,6 @@
       {
         "title": "Из‑за сбоя сети AT&amp;T в iPhone 18 Pro Max владельцам придётся заменить смартфоны",
         "url": "https://habr.com/ru/news/1090112/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090112"
-      },
-      {
-        "title": "Обновления для Linux: NVIDIA исправляет сбои, а NTFS-3G закрывает уязвимости",
-        "url": "https://habr.com/ru/companies/selectel/news/1090074/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090074"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261004-1144: Самара 6.0°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261004-1622: Самара 6.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
