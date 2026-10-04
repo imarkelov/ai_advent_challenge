@@ -14,8 +14,9 @@ Offline Part A (обязана проходить без сети/GPUStack, MUST
      dont_know: True}; ноль LLM-вызовов
   A3 CITE_RULE в system captured LLM-payload: есть при непустом
      kb_block (A1) и нет без чанков (A6, БЗ без индекса)
-  A4 verbatim: text каждого non-dont-know чанка A1 subset сохранённого
-     текста чанка в БЗ и len <= 300
+   A4 verbatim: text каждого non-dont-know чанка A1 subset сохранённого
+      текста чанка в БЗ и len <= 1300 (полный текст чанка ≤1300 или
+      фокус-окно 300)
   A5 chunk_id: каждый chunk_id non-dont-know rag_context A1 существует
      в индексе tmp-БЗ
   A6 регрессия shape дней 21/23: rag_context non-dont-know ответа
@@ -537,23 +538,26 @@ def part_a() -> bool:
         finally:
             kb_module.KnowledgeBase._embedder_from_index = orig_embed
 
-        # ---------- A4: verbatim: non-dont-know чанки A1 ⊂ БЗ, len <= 300 ----------
+        # ---------- A4: verbatim: non-dont-know чанки A1 ⊂ БЗ,
+        # len <= 1300 (полный текст чанка ≤1300 или фокус-окно 300) ----------
         try:
             ok["a4"] = (
                 bool(non_dk_chunks)
                 and all(
                     isinstance(c.get("text"), str)
-                    and len(c["text"]) <= 300
+                    and len(c["text"]) <= 1300
                     and c["text"] in (stored.get(c.get("chunk_id")) or "")
                     for c in non_dk_chunks
                 )
             )
-            record("A4 verbatim: цитата ⊂ текста чанка из БЗ, len <= 300",
+            record("A4 verbatim: цитата ⊂ текста чанка из БЗ, "
+                   "len <= 1300 (чанк ≤1300 — полный текст)",
                    "PASS" if ok["a4"] else "FAIL",
                    f"chunks={len(non_dk_chunks)} "
                    f"max_len={max((len(c.get('text') or '') for c in non_dk_chunks), default=0)}")
         except Exception as e:
-            record("A4 verbatim: цитата ⊂ текста чанка из БЗ, len <= 300", "FAIL",
+            record("A4 verbatim: цитата ⊂ текста чанка из БЗ, "
+                   "len <= 1300 (чанк ≤1300 — полный текст)", "FAIL",
                    f"exception: {e!r}")
 
         # ---------- A5: chunk_id каждого non-dont-know чанка A1 в индексе ----------
