@@ -1,18 +1,22 @@
 {
-  "id": "digest-20261004-0408",
-  "generated_at": "2026-10-04T04:08:53Z",
+  "id": "digest-20261004-1144",
+  "generated_at": "2026-10-04T11:44:20Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 3.6,
-    "feels_like_c": -0.3,
-    "description": "Пасмурно",
-    "wind_ms": 14.0
+    "temp_c": 6.0,
+    "feels_like_c": 1.9,
+    "description": "Небольшой дождь",
+    "wind_ms": 15.4
   },
   "news": {
     "vc.ru": [
       {
         "title": "Покупатели дорогих моделей не испугаются: что будет с ценами на автомобили после индексации утильсбора — подсчёт Autonews",
         "url": "https://vc.ru/transport/3173559-tseny-na-avtomobili-posle-indeksatsii-utilsbora?from=rss"
+      },
+      {
+        "title": "День 1684: десятка худших акций на Мосбирже по итогам трёх кварталов подешевела в среднем на 66,77%",
+        "url": "https://vc.ru/money/3174574-khudshie-aktsii-na-mosbirzhe-padenie-tsen?from=rss"
       },
       {
         "title": "В поисках того, кто пашет и может оказаться умнее нанимающего менеджера: каких сотрудников ищет SpaceX",
@@ -25,32 +29,28 @@
       {
         "title": "Прыгнули в чан с расплавленным металлом, как в «Терминаторе»: Figure выпустила рекламу с Арнольдом Шварценеггером о списании предыдущего поколения роботов",
         "url": "https://vc.ru/marketing/3172043-reklama-figure-s-shvarceneggerom-o-rasplavke-robotov?from=rss"
-      },
-      {
-        "title": "РЖД с 1 декабря 2026 года будет взимать за возврат билетов от 1% до 10% их стоимости — размер сбора будет зависеть от времени, оставшегося до отправления",
-        "url": "https://vc.ru/transport/3171705-rzhd-novyy-sbor-za-vozvrat-biletov?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Представлен Kerbal Space Program (KSP) в браузере",
-        "url": "https://habr.com/ru/news/1090010/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090010"
+        "title": "Nintendo закрыла мобильную игру Mario Kart Tour",
+        "url": "https://habr.com/ru/news/1090142/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090142"
       },
       {
-        "title": "Сооснователь Anthropic опасается, что Claude будет постоянно страдать",
-        "url": "https://habr.com/ru/companies/bothub/news/1089996/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089996"
+        "title": "В Tesla стали бороться с проблемой распознавания животных Cybercab",
+        "url": "https://habr.com/ru/news/1090120/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090120"
       },
       {
-        "title": "NVIDIA представила AI-компьютер за $4999",
-        "url": "https://habr.com/ru/news/1089948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089948"
+        "title": "Sony закроет программу лояльности PlayStation Stars в ноябре 2026 года",
+        "url": "https://habr.com/ru/news/1090130/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090130"
       },
       {
-        "title": "Tesla снижает объем RAM в чипах AI5 и AI6",
-        "url": "https://habr.com/ru/companies/selectel/news/1089738/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089738"
+        "title": "Из‑за сбоя сети AT&amp;T в iPhone 18 Pro Max владельцам придётся заменить смартфоны",
+        "url": "https://habr.com/ru/news/1090112/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090112"
       },
       {
-        "title": "Выпущен порт файлового менеджера DOS Navigator на Free Pascal",
-        "url": "https://habr.com/ru/news/1089942/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089942"
+        "title": "Обновления для Linux: NVIDIA исправляет сбои, а NTFS-3G закрывает уязвимости",
+        "url": "https://habr.com/ru/companies/selectel/news/1090074/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090074"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261004-0408: Самара 3.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261004-1144: Самара 6.0°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
