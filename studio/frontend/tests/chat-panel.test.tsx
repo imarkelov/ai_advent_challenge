@@ -1530,7 +1530,7 @@ describe('ChatPanel — инспектор RAG-контекста (день 21, 
       { role: 'user', content: 'вопрос' },
       { role: 'assistant', content: 'Ответ с RAG', model: 'm', rag_context: RAG_CTX },
     ])
-    render(
+    const { container } = render(
       <StudioProvider>
         <ChatPanel />
       </StudioProvider>,
@@ -1538,9 +1538,13 @@ describe('ChatPanel — инспектор RAG-контекста (день 21, 
     await screen.findByText('Ответ с RAG')
     const toggle = screen.getByRole('button', { name: /Показать извлечённый контекст RAG \(3 чанков из 50\)/ })
     expect(toggle).toHaveAttribute('aria-expanded', 'false')
-    // свёрнут: чанки не видны
-    expect(screen.queryByText('Текст чанка 1')).toBeNull()
-    expect(screen.queryByText(/\[Чанк #1\]/)).toBeNull()
+    // свёрнут: чанки не видны ВНУТРИ инспектора (день 24: тот же текст есть
+    // и в панели «Источники и цитаты» — оба инспектора сосуществуют)
+    const inspector = container.querySelector('.msg.assistant .rag-ctx') as HTMLElement
+    expect(inspector).not.toBeNull()
+    expect(inspector.querySelector('.rag-ctx-list')).toBeNull()
+    expect(inspector.textContent).not.toContain('Текст чанка 1')
+    expect(inspector.textContent).not.toContain('[Чанк #1]')
   })
 
   it('клик по toggle — разворачивает: строка чанка #1 со score + (Reranked из #14)', async () => {
@@ -1548,7 +1552,7 @@ describe('ChatPanel — инспектор RAG-контекста (день 21, 
       { role: 'user', content: 'вопрос' },
       { role: 'assistant', content: 'Ответ с RAG', model: 'm', rag_context: RAG_CTX },
     ])
-    render(
+    const { container } = render(
       <StudioProvider>
         <ChatPanel />
       </StudioProvider>,
@@ -1557,9 +1561,13 @@ describe('ChatPanel — инспектор RAG-контекста (день 21, 
     const toggle = screen.getByRole('button', { name: /Показать извлечённый контекст RAG/ })
     fireEvent.click(toggle)
     await waitFor(() => expect(toggle).toHaveAttribute('aria-expanded', 'true'))
-    expect(await screen.findByText(/\[Чанк #1\] Score: 0\.94 \(Reranked из #14\)/)).toBeInTheDocument()
-    expect(screen.getByText('a.md · Секция')).toBeInTheDocument()
-    expect(screen.getByText('Текст чанка 1')).toBeInTheDocument()
+    // ассерты — ВНУТРИ инспектора (.rag-ctx): панель «Источники и цитаты»
+    // (день 24) рендерит тот же текст параллельно
+    const inspector = container.querySelector('.msg.assistant .rag-ctx') as HTMLElement
+    expect(inspector).not.toBeNull()
+    expect(inspector.querySelector('.rag-ctx-meta')?.textContent).toBe('[Чанк #1] Score: 0.94 (Reranked из #14)')
+    expect(inspector.querySelector('.rag-ctx-src')?.textContent).toBe('a.md · Секция')
+    expect(inspector.querySelector('.rag-ctx-text')?.textContent).toBe('Текст чанка 1')
     // toggle переключился на «▲ Скрыть контекст RAG»
     expect(screen.getByRole('button', { name: /Скрыть контекст RAG/ })).toBeInTheDocument()
   })
@@ -1569,20 +1577,23 @@ describe('ChatPanel — инспектор RAG-контекста (день 21, 
       { role: 'user', content: 'вопрос' },
       { role: 'assistant', content: 'Ответ с RAG', model: 'm', rag_context: RAG_CTX },
     ])
-    render(
+    const { container } = render(
       <StudioProvider>
         <ChatPanel />
       </StudioProvider>,
     )
     await screen.findByText('Ответ с RAG')
-    fireEvent.click(screen.getByRole('button', { name: /Показать извлечённый контекст RAG/ }))
-    await screen.findByText('Текст чанка 1')
+    const toggle = screen.getByRole('button', { name: /Показать извлечённый контекст RAG/ })
+    fireEvent.click(toggle)
+    const inspector = container.querySelector('.msg.assistant .rag-ctx') as HTMLElement
+    await waitFor(() => expect(inspector.textContent).toContain('Текст чанка 1'))
     // chunk #3 (stage1_rank 42 > 20) — сигнал; #1 (14) и #2 (3) — нет
-    expect(screen.getByTitle('Реранкер поднял с позиции этапа 1 #42')).toHaveTextContent('🚨')
-    expect(screen.queryByTitle('Реранкер поднял с позиции этапа 1 #14')).toBeNull()
-    expect(screen.queryByTitle('Реранкер поднял с позиции этапа 1 #3')).toBeNull()
-    // ровно один сигнал в развёрнутом списке
-    expect(screen.getAllByText('🚨')).toHaveLength(1)
+    // (ассерты в инспекторе: панель дня 24 имеет свои title/🚨-чипы)
+    expect(inspector.querySelector('[title="Реранкер поднял с позиции этапа 1 #42"]')?.textContent).toContain('🚨')
+    expect(inspector.querySelector('[title="Реранкер поднял с позиции этапа 1 #14"]')).toBeNull()
+    expect(inspector.querySelector('[title="Реранкер поднял с позиции этапа 1 #3"]')).toBeNull()
+    // ровно один сигнал в развёрнутом списке инспектора
+    expect(inspector.querySelectorAll('.rag-alert')).toHaveLength(1)
   })
 
   it('сообщение без rag_context — инспектора (toggle) нет', async () => {
@@ -1610,9 +1621,12 @@ describe('ChatPanel — инспектор RAG-контекста (день 21, 
       </StudioProvider>,
     )
     await screen.findByText('Ответ с RAG')
-    fireEvent.click(screen.getByRole('button', { name: /Показать извлечённый контекст RAG/ }))
-    await screen.findByText('g')
-    const dots = Array.from(container.querySelectorAll('.rag-dot')).map((d) => d.className)
+    const toggle = screen.getByRole('button', { name: /Показать извлечённый контекст RAG/ })
+    fireEvent.click(toggle)
+    const inspector = container.querySelector('.msg.assistant .rag-ctx') as HTMLElement
+    // ждём раскрытия INSPECTOR (текст 'g' теперь дублируется и в панели дня 24)
+    await waitFor(() => expect(inspector.textContent).toContain('g'))
+    const dots = Array.from(inspector.querySelectorAll('.rag-dot')).map((d) => d.className)
     expect(dots).toEqual([
       'rag-dot rag-dot-green',
       'rag-dot rag-dot-yellow',

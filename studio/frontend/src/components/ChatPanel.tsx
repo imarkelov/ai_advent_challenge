@@ -11,6 +11,7 @@ import SaveMessageModal from './SaveMessageModal'
 import ToolCallModal from './ToolCallModal'
 import TokenGauge from './TokenGauge'
 import FlowInspector from './FlowInspector'
+import SourcesPanel from './SourcesPanel'
 
 // Строка автодополнения «/» (день 16): сервер (tier-1), инструмент
 // (tier-2) или подсказка (сервер не подключён)
@@ -406,6 +407,14 @@ export default function ChatPanel() {
           )}
           {m.role === 'assistant' && m.rag_context && m.rag_context.chunks.length > 0 && (
             <RagContextInspector ctx={m.rag_context} />
+          )}
+          {/* День 24 (задача 6): панель «📖 Источники и цитаты» (мокап B) ПОД
+              ответом, рядом с RagContextInspector (оба инспектора сосуществуют;
+              RagContextInspector остаётся выше). dont_know → красная карточка
+              «🚫 Не знаю» (внутри компонента); старые сообщения (без chunk_id/
+              dont_know) — undefined-safe, без краха. */}
+          {m.role === 'assistant' && m.rag_context != null && (
+            <SourcesPanel ragContext={m.rag_context} />
           )}
           {/* Флоу обработки (ui-rework, задача 3): строка-чип «📡 Обработка…» —
               если есть request_id (журнал) или RAG-чанки в сообщении */}
