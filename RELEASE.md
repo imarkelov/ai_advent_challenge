@@ -107,6 +107,17 @@ SKIP**. SKIP-сценариев не сработало (GPustack и API-эмб�
 WARNING** (Part A 7/7, Part B live 4/4, WARNING — B4 пасхалка,
 best-effort); `e2e_day22.py` — **12 PASS / 0 FAIL / 0 SKIP**
 (контракт compare аддитивен, не тронут).
+**Демо-видео** (live, deepseek-v4-flash, реальный RAG + реальный UI):
+`C:\Users\migor\OneDrive\Рабочий стол\AI Advent Challenge - видео\day24_demo.mp4`
+(desktop, **НЕ в репозитории**), 9.92 s, ~0.28 МБ. Вопрос
+«Кто такой Скакун из сказки про трёх братьев-зайцев?» → LLM-ответ с
+маркером `[1]` («…самым быстрым: «с его скачка ни один лисий след не
+обогнать» [1]»), раскрытая панель «📖 Источники и цитаты» («3
+источника», `source · file · section`, score-чипы, verbatim-цитаты).
+Evidence-лог: `POST /api/dialogues/8901bc5e01274ce1900059808d3e6979/rag`
+200 OK + `[Final Response]` с `[1]` (`.omo/evidence/day24-demo-server.log`,
+cp1251). Отклонение: qwen3.8-27b отдавал 403 «Api key not allowed» —
+запись выполнена на deepseek-v4-flash (как дни 22/23).
 
 ## Коммиты
 
@@ -120,7 +131,11 @@ best-effort); `e2e_day22.py` — **12 PASS / 0 FAIL / 0 SKIP**
 | `d157485` | test(day24): e2e_day24.py — Part A offline (dont-know + [n] + chunk_id) + Part B live (10 вопросов, :8108) — контракт-фикс: `rag_context` на сохранённом assistant-сообщении (helper `last_asst()`) + per-field-проверки |
 | `b82a2e5` | fix(day24): F-wave — source в rag_context.chunks + Part A e2e по спеке (TestClient, A1 10 вопросов, A5, A6) |
 | `7bd4ad2` | fix(day24): F-wave — source в панели, chunk_id optional, minScore wiring |
-| (эта регрессия) | docs(day24): F-wave — финальные цифры после фиксов (vitest 307, Part A 6/6, e2e 12/0/0) + полная регрессия + evidence |
+| `6f010df` | docs(day24): F-wave — финальные цифры после фиксов (vitest 307, Part A 6/6, e2e 12/0/0) + полная регрессия + evidence |
+| `987772d` | fix(day24): фокус-окно — чанки ≤1300 символов целиком (иголка в хвосте чанка была невидима) |
+| `c3aacac` | docs(day24): фикс фокус-окна — ≤300 → ≤1300 в спеке/README/e2e |
+| `9d4cda3` | fix(day24): панель «Источники и цитаты» свёрнута по умолчанию (2 уровня) |
+| `0473999` | fix(day24): post-release — фокус-окно: FOCUS_FULL_TEXT_MAX 1300 → 2400 (целый файло-чанк до порога субчанков уходит целиком) |
 
 ---
 

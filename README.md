@@ -2301,5 +2301,16 @@ A5 — `chunk_id` в индексе, A6 — shape-регрессия дней 21
 `scripts/e2e_day23.py`: Part A 7/7 PASS, Part B live 4/4 PASS —
 итого **11 PASS / 0 FAIL / 1 WARNING** (B4 пасхалка, best-effort);
 `scripts/e2e_day22.py`: **12 PASS / 0 FAIL / 0 SKIP** — контракт
-compare аддитивен, не тронут. Ветка `day24-rag-citations` (от
+compare аддитивен, не тронут.
+**Демо-видео** (live, deepseek-v4-flash, реальный RAG + реальный UI):
+`C:\Users\migor\OneDrive\Рабочий стол\AI Advent Challenge - видео\day24_demo.mp4`
+(desktop, **НЕ в репозитории**), 9.92 s, ~0.28 МБ. Вопрос
+«Кто такой Скакун из сказки про трёх братьев-зайцев?» → LLM-ответ с
+маркером `[1]` («…самым быстрым: «с его скачка ни один лисий след не
+обогнать» [1]»), раскрытая панель «📖 Источники и цитаты» («3
+источника», `source · file · section`, score-чипы, verbatim-цитаты).
+Evidence-лог: `POST /api/dialogues/8901bc5e01274ce1900059808d3e6979/rag`
+200 OK + `[Final Response]` с `[1]`. Отклонение: qwen3.8-27b отдавал
+403 «Api key not allowed» — запись выполнена на deepseek-v4-flash (как
+дни 22/23). Ветка `day24-rag-citations` (от
 `day23-rerank-filter`).
