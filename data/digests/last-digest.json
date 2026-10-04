@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261003-2033",
-  "generated_at": "2026-10-03T20:33:48Z",
+  "id": "digest-20261004-0408",
+  "generated_at": "2026-10-04T04:08:53Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.3,
-    "feels_like_c": -1.5,
+    "temp_c": 3.6,
+    "feels_like_c": -0.3,
     "description": "Пасмурно",
-    "wind_ms": 12.1
+    "wind_ms": 14.0
   },
   "news": {
     "vc.ru": [
@@ -37,7 +37,7 @@
         "url": "https://habr.com/ru/news/1090010/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090010"
       },
       {
-        "title": "Сооснователь Anthropic опасается, что Claude постоянно страдать",
+        "title": "Сооснователь Anthropic опасается, что Claude будет постоянно страдать",
         "url": "https://habr.com/ru/companies/bothub/news/1089996/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089996"
       },
       {
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261003-2033: Самара 2.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261004-0408: Самара 3.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
