@@ -2749,15 +2749,37 @@ button {
   border-radius: var(--r-md);
   background: var(--panel);
 }
+/* Шапка панели — кнопка сворачивания (паттерн дня 19 .agent-steps-header):
+   панель свёрнута по умолчанию, клик — список карточек; hover — подсветка */
 .src-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  width: 100%;
   padding: var(--sp-2) var(--sp-3);
+  border: none;
   border-bottom: 1px solid var(--border);
   border-radius: var(--r-md) var(--r-md) 0 0;
   background: linear-gradient(90deg, var(--accent-soft), rgba(224, 123, 57, 0.04));
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease);
+}
+.src-head:hover {
+  background: linear-gradient(90deg, var(--accent-soft), rgba(224, 123, 57, 0.1));
+}
+/* Панель свёрнута: без нижней борды у шапки, скругление полное */
+.src-panel-collapsed .src-head {
+  border-bottom: none;
+  border-radius: var(--r-md);
+}
+/* Кaret сворачивания (паттерн .agent-steps-caret): ▸ свёрнуто / ▾ развёрнуто */
+.src-caret {
+  flex: none;
+  font-size: 11px;
+  color: var(--muted);
 }
 .src-head-title {
   font-family: var(--font-mono);
@@ -2776,6 +2798,7 @@ button {
   flex-direction: column;
   gap: 10px;
   padding: var(--sp-3);
+  animation: msg-in var(--t-fast) var(--ease);
 }
 .src-card {
   background: var(--panel-2);
@@ -2783,11 +2806,28 @@ button {
   border-radius: var(--r-md);
   padding: var(--sp-2) 14px;
 }
+/* Шапка карточки — кнопка сворачивания цитаты (паттерн StepRow дня 19):
+   карточка свёрнута по умолчанию, клик — verbatim-цитата под шапкой */
 .src-card-top {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   margin-bottom: var(--sp-2);
+}
+/* Карточка свёрнута (без цитаты): без нижнего отступа шапки */
+.src-card-collapsed .src-card-top {
+  margin-bottom: 0;
+}
+/* Hover-аффорданс: имя источника получает акцент */
+.src-card-top:hover .src-file {
+  color: var(--accent);
 }
 .src-num {
   font-family: var(--font-mono);
@@ -2804,6 +2844,7 @@ button {
   color: var(--text);
   flex: 1;
   word-break: break-word;
+  transition: color var(--t-fast) var(--ease);
 }
 /* Score-pill (шкала паттерн RagContextInspector/KbTab): 🟢 ≥0.8 /
    🟡 0.5–0.8 / 🔴 <0.5; «из #N» — та же форма, нейтральный вариант */
@@ -2842,7 +2883,8 @@ button {
   opacity: 0.7;
   margin-top: var(--sp-1);
 }
-/* Цитата: вербатим text, декоративные «» (display-шрифт, акцент) */
+/* Цитата: вербатим text, декоративные «» (display-шрифт, акцент);
+   видна только у развёрнутой карточки (msg-in-реveal, паттерн ленты) */
 .src-quote {
   font-size: 13px;
   font-style: italic;
@@ -2850,6 +2892,7 @@ button {
   color: var(--text);
   white-space: pre-wrap;
   word-break: break-word;
+  animation: msg-in var(--t-fast) var(--ease);
 }
 .src-quote-gq {
   font-family: var(--font-display);

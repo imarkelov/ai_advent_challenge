@@ -5,7 +5,7 @@
 // карточек; dont-know done (instant done без дельт) — спиннер не зависает,
 // панель видна сразу. Старые сообщения (без chunk_id/dont_know) — без краха.
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { StudioProvider } from '../src/state'
 import type { RagContext } from '../src/api'
 import ChatPanel from '../src/components/ChatPanel'
@@ -142,7 +142,11 @@ describe('ChatPanel — SourcesPanel под assistant-ответом (день 2
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
     expect(inspector!.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    // панель рендерит источник: chunk_id + цитата
+    // панель свёрнута по умолчанию (Bug B): только шапка, карточек нет в DOM
+    expect(container.querySelector('.msg.assistant .src-panel .src-cards')).toBeNull()
+    // раскрытие двух уровней: шапка панели → карточка, шапка карточки → chunk_id + цитата
+    fireEvent.click(screen.getByRole('button', { name: /📖 ИСТОЧНИКИ И ЦИТАТЫ/ }))
+    fireEvent.click(screen.getByRole('button', { name: /a\.md · Секция/ }))
     expect(screen.getByText('onegin-structural-0042')).toBeInTheDocument()
     expect(screen.getByText('Верба над самою рекой')).toBeInTheDocument()
   })

@@ -2,9 +2,12 @@
 // под assistant-сообщением — мокап B (B-1: карточки источников — номер,
 // file · section, score-pill, «из #N» (stage1_rank) при реранке, цитата в
 // «»; B-2: красная карточка «🚫 Не знаю» со слабым контекстом).
+// Двухуровневое сворачивание (паттерн дня 19 «🧩 Шаги агента»):
+// панель свёрнута по умолчанию (клик по шапке — карточки), каждая карточка
+// свёрнута по умолчанию (клик по шапке — цитата).
 // Чистый props-компонент — StudioProvider не нужен.
 import { describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import SourcesPanel from '../src/components/SourcesPanel'
 import type { RagContext } from '../src/api'
 
@@ -41,15 +44,33 @@ const LEGACY_CTX: RagContext = {
   ],
 }
 
+const PANEL_HEAD = { name: /📖 ИСТОЧНИКИ И ЦИТАТЫ/ }
+
 describe('SourcesPanel — панель «Источники и цитаты» (мокап B)', () => {
-  it('B-1: N карточек — номер 1..N, file · section, score-чипы, «из #N» (reranked), цитата в «»', () => {
+  it('C-0: панель свёрнута по умолчанию — шапка (title + счётчик + caret ▸) видна, карточек нет в DOM', () => {
     const { container } = render(<SourcesPanel ragContext={RAG_CTX} />)
 
-    // Хедер: заголовок + счётчик (+ «reranked»)
-    expect(screen.getByText('📖 ИСТОЧНИКИ И ЦИТАТЫ')).toBeInTheDocument()
+    // Шапка-кнопка: заголовок + счётчик (+ «reranked»), aria-expanded=false
+    const head = screen.getByRole('button', PANEL_HEAD)
+    expect(head).toHaveAttribute('aria-expanded', 'false')
     expect(screen.getByText('2 источника · reranked')).toBeInTheDocument()
+    // Caret свёрнутого состояния — ▸
+    expect(container.querySelector('.src-caret')?.textContent).toBe('▸')
 
-    // Карточки: ровно N
+    // Тело свёрнуто: ни списка, ни карточек, ни цитат в DOM
+    expect(container.querySelector('.src-cards')).toBeNull()
+    expect(container.querySelectorAll('.src-card').length).toBe(0)
+    expect(container.querySelector('.src-quote')).toBeNull()
+  })
+
+  it('C-1: клик по шапке — панель раскрывается (N карточек, caret ▾), повторный клик — сворачивается', () => {
+    const { container } = render(<SourcesPanel ragContext={RAG_CTX} />)
+    const head = screen.getByRole('button', PANEL_HEAD)
+
+    // Раскрытие
+    fireEvent.click(head)
+    expect(head).toHaveAttribute('aria-expanded', 'true')
+    expect(container.querySelector('.src-caret')?.textContent).toBe('▾')
     const cards = container.querySelectorAll('.src-card')
     expect(cards.length).toBe(2)
 
@@ -61,29 +82,53 @@ describe('SourcesPanel — панель «Источники и цитаты» (
     expect(screen.getByText('egg_book.txt · Глава 3')).toBeInTheDocument()
     expect(screen.getByText('egg_book.txt · Глава 7')).toBeInTheDocument()
 
-    // Score-чипы: 0.94 → зелёный (ok), 0.61 → жёлтый (warn)
-    const pills = Array.from(container.querySelectorAll('.src-score-pill'))
-    expect(pills[0].textContent).toBe('0.94')
-    expect(pills[0].className).toContain('ok')
-    expect(pills[1].textContent).toBe('0.61')
-    expect(pills[1].className).toContain('warn')
-
     // «из #N» (stage1_rank) — реранкено
     expect(screen.getByText('из #2')).toBeInTheDocument()
     expect(screen.getByText('из #9')).toBeInTheDocument()
     // stage1_rank ≤ 20 → без 🚨
     expect(container.textContent).not.toContain('🚨')
 
-    // Цитата — вербатим из text, в «»
-    const quotes = Array.from(container.querySelectorAll('.src-quote'))
-    expect(quotes.length).toBe(2)
+    // chunk_id — id-строка видна, даже пока цитата свёрнута
+    expect(screen.getByText('egg_book-structural-0042')).toBeInTheDocument()
+    expect(screen.getByText('egg_book-structural-0057')).toBeInTheDocument()
+
+    // Повторный клик — сворачивание: карточки снова вне DOM
+    fireEvent.click(head)
+    expect(head).toHaveAttribute('aria-expanded', 'false')
+    expect(container.querySelectorAll('.src-card').length).toBe(0)
+  })
+
+  it('C-2: цитата карточки свёрнута по умолчанию; клик по шапке карточки — цитата этой карточки; карточки независимы', () => {
+    const { container } = render(<SourcesPanel ragContext={RAG_CTX} />)
+    fireEvent.click(screen.getByRole('button', PANEL_HEAD))
+
+    // Обе карточки свёрнуты: цитат нет в DOM, caret ▸
+    expect(container.querySelectorAll('.src-quote').length).toBe(0)
+    const card1 = screen.getByRole('button', { name: /egg_book\.txt · Глава 3/ })
+    const card2 = screen.getByRole('button', { name: /egg_book\.txt · Глава 7/ })
+    expect(card1).toHaveAttribute('aria-expanded', 'false')
+    expect(card2).toHaveAttribute('aria-expanded', 'false')
+
+    // Клик по 1-й карточке — её цитата вербатим, 2-я по-прежнему свёрнута
+    fireEvent.click(card1)
+    expect(card1).toHaveAttribute('aria-expanded', 'true')
+    expect(card2).toHaveAttribute('aria-expanded', 'false')
+    let quotes = container.querySelectorAll('.src-quote')
+    expect(quotes.length).toBe(1)
     expect(quotes[0].textContent).toBe(
       '«У него был телефон IPhone 17Promax, купленный на зарплату за одну неделю.»',
     )
+
+    // Клик по 2-й — обе открыты одновременно (несколько можно раскрыть)
+    fireEvent.click(card2)
+    quotes = container.querySelectorAll('.src-quote')
+    expect(quotes.length).toBe(2)
     expect(quotes[1].textContent).toBe('«…а вечером он набирал номер на том самом IPhone и ждал ответа.»')
 
-    // chunk_id — id-строка есть
-    expect(screen.getByText('egg_book-structural-0042')).toBeInTheDocument()
+    // Повторный клик по 1-й — её цитата снова скрыта (toggle)
+    fireEvent.click(card1)
+    expect(card1).toHaveAttribute('aria-expanded', 'false')
+    expect(container.querySelectorAll('.src-quote').length).toBe(1)
   })
 
   it('Шкала score: 🟢 ≥0.8 / 🟡 0.5–0.8 / 🔴 <0.5 (паттерн RagContextInspector)', () => {
@@ -97,9 +142,14 @@ describe('SourcesPanel — панель «Источники и цитаты» (
       ],
     }
     const { container } = render(<SourcesPanel ragContext={ctx} />)
+    fireEvent.click(screen.getByRole('button', PANEL_HEAD))
     const pills = Array.from(container.querySelectorAll('.src-score-pill'))
+    expect(pills.length).toBe(3)
+    expect(pills[0].textContent).toBe('0.80')
     expect(pills[0].className).toContain('ok')
+    expect(pills[1].textContent).toBe('0.60')
     expect(pills[1].className).toContain('warn')
+    expect(pills[2].textContent).toBe('0.40')
     expect(pills[2].className).toContain('bad')
   })
 
@@ -131,16 +181,21 @@ describe('SourcesPanel — панель «Источники и цитаты» (
     expect(screen.getByText('Уточните вопрос: о каком документе вы спрашиваете?')).toBeInTheDocument()
   })
 
-  it('Старое сообщение (без dont_know, без chunk_id) — рендер без краха, id-строка отсутствует', () => {
+  it('Старое сообщение (без dont_know, без chunk_id) — рендер без краха, id-строка отсутствует, цитата по клику', () => {
     const { container } = render(<SourcesPanel ragContext={LEGACY_CTX} />)
 
-    // Панель рендерится: заголовок + 1 карточка
+    // Панель свёрнута; раскрытие
     expect(screen.getByText('📖 ИСТОЧНИКИ И ЦИТАТЫ')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', PANEL_HEAD))
     expect(container.querySelectorAll('.src-card').length).toBe(1)
-    // file · section + цитата
+
+    // file · section; цитата свёрнута по умолчанию
     expect(screen.getByText('a.md · Раздел')).toBeInTheDocument()
+    expect(container.querySelector('.src-quote')).toBeNull()
+
+    // Клик по шапке карточки — цитата; без chunk_id → id-строка не рендерится
+    fireEvent.click(screen.getByRole('button', { name: /a\.md · Раздел/ }))
     expect(container.querySelector('.src-quote')?.textContent).toBe('«Старый чанк без chunk_id.»')
-    // без chunk_id → id-строка не рендерится
     expect(container.querySelector('.src-id')).toBeNull()
   })
 
@@ -161,6 +216,7 @@ describe('SourcesPanel — панель «Источники и цитаты» (
       ],
     }
     render(<SourcesPanel ragContext={ctx} />)
+    fireEvent.click(screen.getByRole('button', PANEL_HEAD))
     // source есть → «source · file · section»; source нет → «file · section»
     expect(screen.getByText('upload · a.md · Раздел')).toBeInTheDocument()
     expect(screen.getByText('b.md · Раздел 2')).toBeInTheDocument()
