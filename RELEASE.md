@@ -1,3 +1,117 @@
+# Release Notes — day24-rag-citations (день 24)
+
+Ветка: [`day24-rag-citations`](https://github.com/imarkelov/ai_advent_challenge/tree/day24-rag-citations)
+(от `day23-rerank-filter`).
+
+## Что в релизе
+
+**Цитаты, источники и анти-галлюцинации.** Поверх базы знаний дня 21
+(гибридный поиск + реранкер), RAG-чата дня 22 и фильтрации дня 23
+(`min_score`), без изменения `kb.py` и `POST /api/rag/compare` (4 армы
+дня 23):
+
+- **Обязательные источники** в RAG-ответе: у каждого чанка
+  `rag_context` — `source`, `file`, `section`, `score` + новое поле
+  `chunk_id` (аддитивно, `agent._kb_context`).
+- **Verbatim-цитаты** — гибрид A+B (выбор пользователя): код
+  прикладывает sources/citations дословно из результата `search_rag`
+  (`chunks[].text` = focused snippet ≤300, `_focus_snippet` дня 21),
+  модель цитаты НЕ генерирует и лишь ссылается на выдержки маркерами
+  `[1]`, `[2]`, … — [n]-правило строкой `CITE_RULE` в конце непустого
+  блока «База знаний» (e2e ассертит строку правила в LLM-payload, НЕ
+  комплаенс модели).
+- **Dont-know (триггер A′)**: RAG-вкл + индекс есть + **0 чанков**
+  после поиска/фильтрации (при ЛЮБОМ `min_score`, включая 0) →
+  `ask_stream` сохраняет assistant-сообщение
+  (`content = DONT_KNOW_TEXT`, `rag_context = {recall_total, reranked,
+  chunks: [], dont_know: true}`) и отдаёт `done`
+  `{"type":"done","answer":DONT_KNOW_TEXT,"usage":None,"request_id":None}`
+  (no-LLM done-паттерн дня 11) — **0 LLM-вызовов**. Нет индекса /
+  `KBError` / RAG-off диалог — обычный чат, dont-know невозможен.
+  Точная строка:
+
+  ```python
+  DONT_KNOW_TEXT = "Не знаю. В базе знаний не нашлось релевантных материалов. Уточните, пожалуйста: о каком документе или теме вы спрашиваете?"
+  ```
+- **UI (вариант B)** — `SourcesPanel.tsx` (новый): панель «📖
+  Источники и цитаты» под assistant-ответом (карточки: номер,
+  `source · file · section`, score-чип 🟢/🟡/🔴, «из #N» при реранке,
+  verbatim-цитата в «») + красная карточка «🚫 Не знаю» (причина +
+  подсказка, чанк-карточки не рендерятся); старый
+  `RagContextInspector` сохраняется (оба инспектора сосуществуют),
+  `FlowInspector` не тронут; wiring в `ChatPanel.tsx` (undefined-safe
+  для старых сообщений без `chunk_id`/`dont_know`).
+- **`scripts/e2e_day24.py`** (новый, stdlib, порт **8108**): Part A
+  офлайн **MUST PASS** (net cut, TestClient + fake-LLM + tmp-БЗ; A1 —
+  10 контрольных вопросов дня 22, A2 — dont-know детерминизм (0
+  LLM-вызовов), A3 — `CITE_RULE` в payload, A4 — verbatim (цитата ⊂
+  чанка, ≤300), A5 — `chunk_id`, A6 — регрессия shape дней 21/22/23);
+  Part B live best-effort (B1 — wipe → корпус `fetch_books.py` →
+  индексация, B2 — 10 вопросов в одном диалоге, sources/citations
+  best-effort WARNING, B3 — dont-know live при `min_score=0.999`,
+  B4 — сброс `min_score`).
+
+- `studio/backend/agent.py` — `DONT_KNOW_TEXT`, `CITE_RULE`,
+  dont-know intercept в `ask_stream` (точка вставки — после retrieval,
+  до LLM/tool-loop, guard-порядок task-guard/profile-turn не тронут),
+  `chunk_id` в `_kb_context.chunks[]`.
+- `studio/backend/tests/test_agent.py` — +6 тестов (dont-know при
+  min_score=0.999 с fake-реранкером; триггер A′ при min_score=0 на
+  корпусе без совпадений; нет индекса → обычный LLM-вызов;
+  `rag=false` → retrieval не идёт; `CITE_RULE` в payload при непустом
+  kb_block и отсутствие при пустом; `chunk_id` в `_kb_context` +
+  `text ⊂` чанка и ≤300).
+- Фронтенд — `src/components/SourcesPanel.tsx` (новый) + `styles.css` +
+  `api.ts` (типы: `chunk_id`, `dont_know`), `ChatPanel.tsx` (панель
+  под assistant-сообщением, оба инспектора); `tests/` — +8 vitest
+  (карточки панели, dont-know-карточка, legacy-сообщения,
+  ChatPanel-wiring: оба инспектора в DOM, dont-know → карточка без
+  чанков, done без дельт → спиннер не зависает).
+- `openspec/changes/day24-rag-citations/` (proposal + tasks +
+  delta-spec).
+- `README.md` — строка таблицы дней + секция «День 24»; `RELEASE.md`
+  — данный раздел.
+
+## API
+
+Новых REST-эндпоинтов нет. Источники и цитаты едут в assistant-сообщении
+(`rag_context`, у чанков аддитивное поле `chunk_id`) и в SSE
+`done`-событии; dont-know-режим — `done.answer = DONT_KNOW_TEXT`,
+`usage: None`, `request_id: None`, в сообщении `rag_context.dont_know:
+true`. Тело `POST /api/chat`, маршруты дней 21–23 и `POST
+/api/rag/compare` (4 армы, dont-know там не применим — compare явный
+инструмент) не изменились.
+
+## Проверка задания
+
+Бэкенд — **587 тестов PASS** (baseline 581 → +6, pytest, офлайн).
+Фронтенд — **306 тестов PASS** (Vitest, baseline 296 → +10) + `tsc -b`
+clean + `npm run build` clean. E2E `scripts/e2e_day24.py`: Part A
+**5/5 PASS** (офлайн, net cut, MUST, exit 0); Part B live —
+**PASS=11, FAIL=0, SKIP=0**: модель deepseek-v4-flash, корпус
+`fetch_books.py` (1665 чанков, api-эмбеддер), 10 контрольных вопросов —
+10/10 done, sources/citations 10/10, dont-know при `min_score=0.999`
+(`answer == DONT_KNOW_TEXT`), cleanup (min_score сброшен,
+реранкер/модель восстановлены). SKIP-сценариев не сработало (GPustack
+и `GPUSTACK_KEY_RERANK` доступны).
+Пользовательская live-проверка 10 вопросов в диалоге (источники/цитаты
+видны в панели, dont-know на слабом вопросе; смысл ответа ↔ цитат
+проверяется человеком, не LLM-judge) — часть Definition of Done.
+Регрессия: `e2e_day23.py` Part A 7/7 и `e2e_day22.py` Part A 7/7
+(контракт compare не тронут).
+
+## Коммиты
+
+| Коммит | Сообщение |
+| --- | --- |
+| `154fd58` | feat(day24): dont-know + [n]-правило + chunk_id в ask_stream |
+| `91a8cab` | feat(day24): SourcesPanel — источники, цитаты, «не знаю» карточка |
+| `a34f147` | feat(day24): ChatPanel wiring — панель под ответом (оба инспектора) |
+| `cce5987` | test(day24): e2e_day24.py — Part A offline (dont-know + [n] + chunk_id) + Part B live (10 вопросов, :8108) |
+| (эти release notes) | docs(day24): финальные цифры + openspec change (задача 7) |
+
+---
+
 # Release Notes — day23-rerank-filter (день 23)
 
 Ветка: [`day23-rerank-filter`](https://github.com/imarkelov/ai_advent_challenge/tree/day23-rerank-filter)

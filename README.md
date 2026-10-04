@@ -28,6 +28,7 @@
 | День 21 | [day21-doc-indexing](https://github.com/imarkelov/ai_advent_challenge/tree/day21-doc-indexing) | База знаний: пайплайн индексации документов (2 стратегии chunking, эмбеддинги, локальный SQLite-индекс, метаданные, сравнение стратегий), гибридный поиск (вектор+BM25, RRF) с опциональным 2-м этапом — cross-encoder-реранкером (qwen3-reranker-4b), RAG-инъект в чат + инспектор RAG-контекста в сообщениях + тумблеры RAG/реранкер/цикл-агента, вкладка «База знаний» (индексация, upload файлов, статистика, сравнение, 2-этапный поиск) |
 | День 22 | [day22-rag-query](https://github.com/imarkelov/ai_advent_challenge/tree/day22-rag-query) | Первый RAG-запрос: POST /api/rag/compare — ответ с RAG и без в одном вызове (T=0, max_tokens=1024, симметричный промпт), 10 контрольных вопросов с ожиданиями и источниками, скрипт сравнения с отчётом (факт-чек + LLM-judge) и UI-секция «Сравнение RAG» |
 | День 23 | [day23-rerank-filter](https://github.com/imarkelov/ai_advent_challenge/tree/day23-rerank-filter) | Реранкинг и фильтрация: настройка `min_score` (0..1, 0 = off) — порог релевантности в `search_rag` после реранкера (абсолютный `rerank_score ≥ min_score`) или относительно лучшего результата без него (`score ≥ min_score × best`), фильтрация до среза top-k с полями `filtered`/`dropped`, query rewrite в сравнении (LLM-перефраз вопроса при T=0 с фолбэком на исходный), 4-режимный compare (plain \| rag \| rag+filter \| rag+rewrite) + UI-секция с 4 панелями и чипом «фильтр ≥ X» |
+| День 24 | [day24-rag-citations](https://github.com/imarkelov/ai_advent_challenge/tree/day24-rag-citations) | Цитаты, источники и анти-галлюцинации: обязательные источники (source + section/chunk_id) + verbatim-цитаты в RAG-ответе, [n]-маркеры, режим «не знаю» при 0 релевантных чанков (без LLM-вызова), панель «Источники и цитаты» в чате, e2e_day24 (10 вопросов) |
 
 ## День 7: как работает сервис
 
@@ -2104,3 +2105,159 @@ PASS** (Part A 7/7 + Part B live) — контракт compare аддитиве�
 документированное отклонение от запрета «не менять e2e_day22» (без него
 Part A физически не может быть 7/7: A6 ассертил ровно 2 non-stream
 вызова). Ветка `day23-rerank-filter` (от `day22-ui-rework`).
+
+## День 24: Цитаты, источники и анти-галлюцинации
+
+### Что это
+
+Цитаты, источники и анти-галлюцинации поверх базы знаний дня 21,
+RAG-чата дня 22 и фильтрации дня 23. Каждый RAG-ответ в live-чате несёт
+**обязательные источники** (у каждого чанка — `source`, `file`,
+`section`, `chunk_id`, `score`) и **verbatim-цитаты** (фрагмент ≤300
+символов из текста чанка). Гибрид A+B (выбор пользователя): код
+прикладывает sources/citations дословно из результата `search_rag`,
+модель лишь ссылается на выдержки маркерами `[1]`, `[2]`, … ([n]-правило
+в блоке «База знаний»); модель цитаты НЕ генерирует. Усиление (триггер
+A′): если после поиска/фильтрации осталось **0 релевантных чанков**
+(при ЛЮБОМ `min_score`, включая 0) — ассистент детерминированно
+отвечает «не знаю» и просит уточнить, **без LLM-вызова**. UI — панель
+«📖 Источники и цитаты» (вариант B, под ответом) + красная карточка
+«🚫 Не знаю». `kb.py` и `POST /api/rag/compare` (4 армы дня 23) не
+тронуты.
+
+### Архитектура
+
+```
+вопрос (RAG-вкл, индекс есть)
+  → kb.search_rag(...)              (пайплайн дней 21/23, kb.py не тронут)
+  → 0 чанков?  → сохранить сообщение (content = DONT_KNOW_TEXT,
+                   rag_context = {recall_total, reranked, chunks: [], dont_know: true})
+               → done (answer = DONT_KNOW_TEXT, usage: None, request_id: None),
+                 0 LLM-вызовов → return
+  → чанки непусты → [n]-правило строкой в конец непустого kb_block (CITE_RULE)
+               → LLM-ответ; в assistant-сообщении rag_context —
+                 chunks + новое поле chunk_id (аддитивно)
+```
+
+- **`agent.py`** — три добавления, без пересборки пайплайна:
+  - константа (точная строка, e2e ассертит):
+
+    ```python
+    DONT_KNOW_TEXT = "Не знаю. В базе знаний не нашлось релевантных материалов. Уточните, пожалуйста: о каком документе или теме вы спрашиваете?"
+    ```
+  - **dont-know intercept** в `ask_stream` (после retrieval, до LLM/
+    tool-loop): RAG-вкл + поиск УСПЕШЕН (нет индекса / `KBError` —
+    обычный чат, dont-know невозможен) + 0 чанков после фильтра
+    `min_score` (день 23) → сохранить assistant-сообщение с
+    `rag_context = {recall_total, reranked, chunks: [], dont_know:
+    true}` → `done` c `usage: None` и `request_id: None` (no-LLM
+    done-паттерн дня 11) → return. LLM не вызывается.
+  - **`CITE_RULE`** — строка правила в конец непустого `kb_block`:
+    «Ссылайся на выдержки в ответе маркерами [1], [2], … по номерам.
+    Опирайся только на приведённые выдержки; если выдержки не покрывают
+    факт — так и скажи.» (блок пуст — правила нет). E2E ассертит
+    наличие строки в LLM-payload, НЕ комплаенс модели (мелкие модели
+    ненадёжны).
+  - **`chunk_id`** в объектах `_kb_context.chunks[]` (аддитивно, рядом с
+    rank/file/section/score).
+- **Цитаты — без новой схемы**: `rag_context.chunks[].text` и так
+  verbatim focused snippet ≤300 символов (`_focus_snippet` дня 21,
+  центрируется на характерном токене запроса); полный текст чанка не
+  хранится.
+- **Фронтенд** — `SourcesPanel.tsx` (новый компонент, props
+  `{ragContext, minScore?}`) + стили + api-типы; wiring в
+  `ChatPanel.tsx` — панель рендерится под assistant-сообщением (под
+  ответом, вариант B) **рядом с существующим `RagContextInspector`**
+  (оба инспектора сосуществуют, старый не удалён), `FlowInspector` не
+  тронут. Маркеры [n] во фронтенде НЕ рендерятся (панель автономна от
+  текста ответа).
+
+### API
+
+Новых REST-эндпоинтов нет: источники и цитаты едут в assistant-сообщении
+(`rag_context` — у каждого чанка аддитивное поле `chunk_id`) и в SSE
+`done`-событии. В dont-know-режиме `done` отдаёт `answer =
+DONT_KNOW_TEXT`, `usage: None`, `request_id: None`, а сообщение
+несёт `rag_context.dont_know: true`. Тело `POST /api/chat` и все
+маршруты дней 21–23 не изменились; `POST /api/rag/compare` (4 армы)
+не тронут (dont-know там не применим — compare явный инструмент).
+
+### UI
+
+- **Панель «📖 Источники и цитаты»** (`SourcesPanel.tsx`, под
+  assistant-ответом, вариант B): заголовок со счётчиком; карточка на
+  чанк — номер (1..N), `source · file · section`, score-чип (🟢 ≥0.8 /
+  🟡 0.5–0.8 / 🔴 <0.5, та же шкала, что у инспектора), «из #N»
+  (`stage1_rank`) при `reranked`, verbatim-цитата из `text` в «».
+- **Красная карточка «🚫 Не знаю»** (`rag_context.dont_know ===
+  true`): причина (порог `min_score` / отсечено порогом — число
+  необязательное, undefined-safe) + подсказка «Уточните вопрос: о
+  каком документе вы спрашиваете?» (в dont-know-режиме
+  чанк-карточки не рендерятся).
+- **Старые сообщения** (без `chunk_id`/`dont_know`) — панель
+  рендерится без краха (undefined-safe).
+- `RagContextInspector` и `FlowInspector` — сохранены, не изменены.
+
+### E2E — `scripts/e2e_day24.py`
+
+Гибрид (паттерн e2e_day22/23, stdlib, порт **8108**): **Part A** —
+офлайн-детерминированное ядро, **MUST PASS** (net cut, TestClient +
+fake-LLM + tmp-БЗ): A1 — 10 контрольных вопросов дня 22
+(`control_questions.json`) × `POST /api/chat` (RAG-вкл, `min_score=0`):
+каждый → 200 done, per-question `(chunks непусто → citations
+(`chunks[].text` непусто) И sources-поля `source`/`file`/`section`/
+`chunk_id` присутствуют) OR `rag_context.dont_know == true`; A2 —
+детерминизм dont-know (вопрос без совпадений → `answer ==
+DONT_KNOW_TEXT`, `usage`/`request_id` None, fake-LLM count == 0,
+сообщение с `dont_know: true`); A3 — строка `CITE_RULE` в system-
+сообщении captured LLM-payload (при непустом kb_block); A4 — verbatim:
+цитата ⊂ сохранённого текста чанка из БЗ и len ≤ 300; A5 — `chunk_id`
+каждого чанка совпадает с `chunk_id` из БЗ; A6 — регрессия shape
+дней 21/22/23 (shape `rag_context`, `min_score` в settings).
+**Part B** — live (uvicorn :8108, реальный GPustack LLM + api-
+эмбеддер), best-effort: B1 — wipe → корпус (`fetch_books.py`: primary →
+fallback → committed seed) → индексация; B2 — 10 контрольных вопросов
+в одном диалоге: 10/10 done, sources/citations — best-effort WARNING
+(не FAIL; retrieval на большом корпусе не гарантирует 10/10, паттерн
+дня 22); B3 — dont-know live (`min_score=0.999` → `answer ==
+DONT_KNOW_TEXT` + `dont_know: true`); B4 — сброс `min_score` в 0
+(cleanup). Port-busy — ожидание до 10 мин (чужой сервер не убивается);
+cleanup всегда; exit 0 для PASS/SKIP, 1 для FAIL. **Совпадение смысла
+ответа с цитатами — ВНЕ e2e**: пользовательская live-проверка в
+диалоге (НЕ LLM-judge, НЕ эмбеддинги).
+
+### Проверка задания
+
+- **Ответ = LLM-ответ ИЛИ `DONT_KNOW_TEXT`** — точная RU-константа
+  (e2e ассертит).
+- **Источники** — у каждого чанка `source`, `file`, `section`,
+  `chunk_id`, `score` (+ `rerank_score`/`stage1_rank` при реранке).
+- **Цитаты** — verbatim фрагмент ≤300 символов ⊂ текста чанка
+  (проверяется офлайн, A4).
+- **Dont-know (триггер A′)** — 0 LLM-вызовов, `usage: None`,
+  `request_id: None`, сообщение с `rag_context.dont_know: true`;
+  нет индекса / `KBError` / RAG-off диалог — обычный чат.
+- **UI** — панель «Источники и цитаты» (карточки варианта B) +
+  красная карточка «Не знаю»; старый `RagContextInspector` остаётся.
+- **[n]-маркеры** — модель instructed ссылаться на [1..k]; правило —
+  только в `kb_block` (A3).
+- **10 вопросов** — источники, цитаты, dont-know (A1, B2/B3).
+
+### Статус
+
+Бэкенд — **587 тестов PASS** (baseline 581 → +6: dont-know / [n]-
+правило / chunk_id / verbatim). Фронтенд — **306 тестов PASS** (Vitest,
+baseline 296 → +10: SourcesPanel / dont-know-карточка /
+ChatPanel-wiring) + `tsc -b` clean + `npm run build` clean.
+E2E `scripts/e2e_day24.py`: Part A **5/5 PASS** (офлайн, net cut, MUST);
+Part B live: **PASS=11, FAIL=0, SKIP=0** (модель deepseek-v4-flash;
+корпус `fetch_books.py` — 1665 чанков, api-эмбеддер; 10 контрольных
+вопросов — 10/10 done, sources/citations 10/10; dont-know live при
+`min_score=0.999` — `answer == DONT_KNOW_TEXT`; cleanup — min_score
+сброшен, реранкер/модель восстановлены). SKIP-сценариев не сработало
+(GPustack и `GPUSTACK_KEY_RERANK` доступны). Регрессия
+`scripts/e2e_day23.py`: Part A 7/7 PASS, Part B live **PASS=11,
+FAIL=0, WARNING=1** (B4 пасхалка, best-effort);
+`scripts/e2e_day22.py`: **12 PASS / 0 FAIL / 0 SKIP** — контракт
+compare аддитивен, не тронут. Ветка `day24-rag-citations` (от
+`day23-rerank-filter`).
