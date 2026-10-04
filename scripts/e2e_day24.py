@@ -1,24 +1,30 @@
 # -*- coding: utf-8 -*-
 """E2E day 24 «Цитаты, источники и анти-галлюцинации»
 
-Offline Part A (обязана проходить без сети/GPUStack, MUST PASS):
-  A1 RAG-чат (прямой ask_stream, fake LLM): done.answer непустой,
-     rag_context.chunks[0]: chunk_id (str, непусто) / file (str) /
-     section (non-None) / score (non-None) / text (str, непустой);
-     CITE_RULE в system-промте captured payload; ровно 1 LLM-вызов
-  A2 dont-know: вопрос без совпадений (векторная нога отключена) →
-     done: answer == DONT_KNOW_TEXT (байт-в-байт), usage None,
-     request_id None; content сообщения == DONT_KNOW_TEXT;
-     rag_context == {recall_total: 0, reranked: False, chunks: [],
+Offline Part A (обязана проходить без сети/GPUStack, MUST PASS;
+  TestClient + fake LLM + tmp-БЗ только egg_book, net cut):
+  A1 10 контрольных вопросов (control_questions.json) × POST /api/chat
+     в одном диалоге (RAG-вкл, min_score=0): каждый -> 200 done;
+     (chunks непусто -> у каждого чанка source/file/section/chunk_id
+     и text непусто) OR rag_context.dont_know == true
+  A2 dont-know: вопрос без совпадений при min_score=0 (векторная нога
+     отключена) -> done: answer == DONT_KNOW_TEXT (байт-в-байт),
+     usage None, request_id None; сообщение: content == DONT_KNOW_TEXT,
+     rag_context {recall_total: 0, reranked: False, chunks: [],
      dont_know: True}; ноль LLM-вызовов
-  A3 CITE_RULE в system: есть при непустом kb_block (A1) и нет при
-     пустом блоке (A6)
-  A4 verbatim: text каждого чанка rag_context из A1 ⊂ сохранённого
+  A3 CITE_RULE в system captured LLM-payload: есть при непустом
+     kb_block (A1) и нет без чанков (A6, БЗ без индекса)
+  A4 verbatim: text каждого non-dont-know чанка A1 subset сохранённого
      текста чанка в БЗ и len <= 300
-  A6 регрессия: БЗ без индекса (search → KBError) → обычный чат:
-     answer == CANNED, 1 LLM-вызов, без dont_know, CITE_RULE нет
-Live Part B (:8108, best-effort, SKIP без GPUStack):
-  B1 wipe → fetch_books.py → индексация (api, fallback hash)
+  A5 chunk_id: каждый chunk_id non-dont-know rag_context A1 существует
+     в индексе tmp-БЗ
+  A6 регрессия shape дней 21/23: rag_context non-dont-know ответа
+     (recall_total/reranked/chunks) + POST/GET /api/kb/settings
+     min_score 0.5 -> 0 (валидация 1.5 -> 400) + БЗ без индекса
+     (KBError) -> обычный чат (CANNED, 1 вызов, без dont_know/CITE_RULE)
+Live Part B (:8108, best-effort, SKIP без GPUStack/API-эмбеддера):
+  B1 wipe → fetch_books.py → индексация (api; API-эмбеддер недоступен
+     -> SKIP всей Part B)
   B2 10 контрольных вопросов в одном диалоге: 10/10 done с непустым
      ответом (MUST); sources/citations <10/10 → WARNING
   B3 dont-know live (GPUSTACK_KEY_RERANK + min_score=0.999)
@@ -172,6 +178,28 @@ def probe_gpustack() -> tuple[bool, str]:
         return True, ""
     except Exception as e:
         return False, f"GPUStack недоступен: {e}"
+
+
+def probe_embedder_api() -> tuple[bool, str]:
+    """Доступность API-эмбеддера (qwen3-vl-embedding-8b): ключ
+    GPUSTACK_KEY_EMBED + живой POST /embeddings. Part B без него
+    SKIP целиком (деградация на hash-эмбеддер спекой не допускается)."""
+    base = os.environ.get("GPUSTACK_BASE_URL", "")
+    key = os.environ.get("GPUSTACK_KEY_EMBED", "")
+    if not base or not key:
+        return False, "нет GPUSTACK_KEY_EMBED"
+    body = json.dumps({"model": "qwen3-vl-embedding-8b",
+                       "input": ["e2e probe"]}).encode("utf-8")
+    req = urllib.request.Request(base.rstrip("/") + "/embeddings", data=body,
+                                 method="POST",
+                                 headers={"Authorization": f"Bearer {key}",
+                                          "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            resp.read()
+        return True, ""
+    except Exception as e:
+        return False, f"embeddings-зонд не удался: {e}"
 
 
 # --- живой uvicorn-сервер ---
@@ -348,26 +376,29 @@ def chat_sse(dialogue_id: str, message: str,
     return parse_sse_events(body), None
 
 
-# --- Part A: offline (прямой ask_stream, без uvicorn) ---
+# --- Part A: offline (TestClient + fake LLM, без uvicorn и сети) ---
 
 
 def part_a() -> bool:
-    log("=== Part A: офлайн (direct ask_stream + fake LLM, без сети) ===")
+    log("=== Part A: офлайн (TestClient + fake LLM + tmp-БЗ, без сети) ===")
+    import httpx
+    from fastapi.testclient import TestClient
+
     sys.path.insert(0, os.path.join(REPO, "studio", "backend"))
+    from agent import CITE_RULE, DONT_KNOW_TEXT, StudioAgent  # noqa: E402
+    from main import create_app  # noqa: E402  (lazy: читает .env при импорте)
+    import kb as kb_module  # noqa: E402
 
     saved_env = {k: os.environ.get(k) for k in _NO_NET}
     os.environ.update(_NO_NET)
     tmp = tempfile.mkdtemp(prefix="e2e_day24_")
-    ok = {"a1": False, "a2": False, "a3": False, "a4": False, "a6": False}
-    chunks1: list = []
-    sys0 = ""
-    sys6 = ""
+    ok = {"a1": False, "a2": False, "a3": False, "a4": False,
+          "a5": False, "a6": False}
+    non_dk_chunks: list = []  # non-dont-know чанки A1 (A4/A5)
+    a1_rc_first: dict = {}    # rag_context первого non-dont-know (A6 shape)
+    sys_with = ""             # system с непустым kb_block (A3)
+    sys_without = ""          # system без чанков (A3)
     try:
-        import httpx
-        from agent import CITE_RULE, DONT_KNOW_TEXT, StudioAgent
-        from kb import KBError, KnowledgeBase
-        import kb as kb_module
-
         kb = _make_tmp_kb(tmp)
         idx = kb.load_index() or {}
         stored = {c.get("chunk_id"): (c.get("text") or "")
@@ -383,6 +414,7 @@ def part_a() -> bool:
             kb=kb,
         )
         store = agent.store
+        client = TestClient(create_app(agent, kb))
 
         def setup_dialogue(st, title: str) -> str:
             d = st.new_dialogue()
@@ -392,9 +424,26 @@ def part_a() -> bool:
             st.set_dialogue_rag(did, True)
             return did
 
-        def run(agent_obj, did: str, question: str):
-            done = None
-            for ev in agent_obj.ask_stream(did, question):
+        def chat(cl, did: str, question: str) -> dict:
+            """POST /api/chat (SSE через TestClient) -> done-событие."""
+            with cl.stream("POST", "/api/chat",
+                           json={"dialogue_id": did, "message": question}) \
+                    as resp:
+                assert resp.status_code == 200, \
+                    f"POST /api/chat -> {resp.status_code}"
+                lines = list(resp.iter_lines())
+            done: dict = {}
+            for line in lines:
+                line = (line or "").strip()
+                if not line.startswith("data: "):
+                    continue
+                raw = line[len("data: "):].strip()
+                if not raw or raw == "[DONE]":
+                    continue
+                try:
+                    ev = json.loads(raw)
+                except Exception:
+                    continue
                 if isinstance(ev, dict) and ev.get("type") == "done":
                     done = ev
             return done
@@ -406,46 +455,63 @@ def part_a() -> bool:
             return next((m for m in reversed(msgs)
                          if m.get("role") == "assistant"), {})
 
-        # ---------- A1: RAG-чат: chunk_id + CITE_RULE + ровно 1 LLM-вызов ----------
+        # ---------- A1: 10 контрольных вопросов × POST /api/chat ----------
+        A1_LABEL = "A1 10 контрольных вопросов /api/chat (sources+citations OR dont_know)"
         try:
+            with open(CONTROL_Q, "r", encoding="utf-8") as f:
+                questions = sorted(json.load(f), key=lambda q: q.get("id") or 0)
+            rset = client.post("/api/kb/settings", json={"min_score": 0})
+            assert rset.status_code == 200, \
+                f"settings min_score=0 -> {rset.status_code}"
             did1 = setup_dialogue(store, "e24-a1")
-            d1 = run(agent, did1, Q_RAG)
-            rc1 = last_asst(store, did1).get("rag_context") or {}
-            chunks1 = rc1.get("chunks") or []
-            c0 = chunks1[0] if chunks1 else {}
+            a1_ok = len(questions) == 10
+            n_chunks_q = 0
+            n_dk_q = 0
+            for q in questions:
+                qid = q.get("id")
+                d = chat(client, did1, q["question"])
+                rc = last_asst(store, did1).get("rag_context") or {}
+                chunks = rc.get("chunks") or []
+                if chunks:
+                    n_chunks_q += 1
+                    good = bool(d) and all(
+                        c.get("source") is not None
+                        and isinstance(c.get("file"), str)
+                        and c.get("section") is not None
+                        and isinstance(c.get("chunk_id"), str)
+                        and c["chunk_id"] != ""
+                        and isinstance(c.get("text"), str)
+                        and c["text"] != ""
+                        for c in chunks)
+                    non_dk_chunks.extend(chunks)
+                    if not a1_rc_first:
+                        a1_rc_first = rc
+                else:
+                    n_dk_q += 1
+                    good = bool(d) and rc.get("dont_know") is True
+                if not good:
+                    a1_ok = False
+            ok["a1"] = a1_ok
             if captured:
-                sys0 = ((captured[0].get("messages") or [{}])[0].get("content") or "")
-            ok["a1"] = (
-                d1 is not None
-                and isinstance(d1.get("answer"), str)
-                and d1["answer"].strip() != ""
-                and isinstance(c0.get("chunk_id"), str) and c0["chunk_id"] != ""
-                and isinstance(c0.get("file"), str)
-                and c0.get("section") is not None
-                and c0.get("score") is not None
-                and isinstance(c0.get("text"), str) and c0["text"] != ""
-                and CITE_RULE in sys0
-                and len(captured) == 1
-            )
-            record("A1 RAG-чат: chunk_id + CITE_RULE + 1 LLM-вызов",
-                   "PASS" if ok["a1"] else "FAIL",
-                   f"chunks={len(chunks1)} chunk_id={c0.get('chunk_id')!r} "
-                   f"cite={CITE_RULE in sys0} calls={len(captured)}")
+                sys_with = ((captured[0].get("messages") or [{}])[0]
+                            .get("content") or "")
+            record(A1_LABEL, "PASS" if a1_ok else "FAIL",
+                   f"q={len(questions)} chunks_q={n_chunks_q} "
+                   f"dontknow_q={n_dk_q} calls={len(captured)}")
         except Exception as e:
-            record("A1 RAG-чат: chunk_id + CITE_RULE + 1 LLM-вызов",
-                   "FAIL", f"exception: {e!r}")
+            record(A1_LABEL, "FAIL", f"exception: {e!r}")
 
         # ---------- A2: dont-know (0 чанков, ноль LLM-вызовов) ----------
         orig_embed = kb_module.KnowledgeBase._embedder_from_index
 
         def _raise(self, idx_doc):
-            raise KBError("e2e: vector leg off")
+            raise kb_module.KBError("e2e: vector leg off")
 
         kb_module.KnowledgeBase._embedder_from_index = _raise
         try:
             did2 = setup_dialogue(store, "e24-a2")
             n0 = len(captured)
-            d2 = run(agent, did2, Q_NOMATCH)
+            d2 = chat(client, did2, Q_NOMATCH)
             m2 = last_asst(store, did2)
             rc2 = m2.get("rag_context") or {}
             ok["a2"] = (
@@ -471,29 +537,64 @@ def part_a() -> bool:
         finally:
             kb_module.KnowledgeBase._embedder_from_index = orig_embed
 
-        # ---------- A4: verbatim-цитаты ⊂ сохранённых чанков, len <= 300 ----------
+        # ---------- A4: verbatim: non-dont-know чанки A1 ⊂ БЗ, len <= 300 ----------
         try:
             ok["a4"] = (
-                bool(chunks1)
+                bool(non_dk_chunks)
                 and all(
                     isinstance(c.get("text"), str)
                     and len(c["text"]) <= 300
                     and c["text"] in (stored.get(c.get("chunk_id")) or "")
-                    for c in chunks1
+                    for c in non_dk_chunks
                 )
             )
-            record("A4 verbatim: цитата ⊂ текста чанка, len <= 300",
+            record("A4 verbatim: цитата ⊂ текста чанка из БЗ, len <= 300",
                    "PASS" if ok["a4"] else "FAIL",
-                   f"chunks={len(chunks1)} max_len={max((len(c.get('text') or '') for c in chunks1), default=0)}")
+                   f"chunks={len(non_dk_chunks)} "
+                   f"max_len={max((len(c.get('text') or '') for c in non_dk_chunks), default=0)}")
         except Exception as e:
-            record("A4 verbatim: цитата ⊂ текста чанка, len <= 300", "FAIL",
+            record("A4 verbatim: цитата ⊂ текста чанка из БЗ, len <= 300", "FAIL",
                    f"exception: {e!r}")
 
-        # ---------- A6: БЗ без индекса -> KBError -> обычный чат ----------
-        cap6: list = []
+        # ---------- A5: chunk_id каждого non-dont-know чанка A1 в индексе ----------
         try:
+            ok["a5"] = (
+                bool(non_dk_chunks)
+                and all(isinstance(c.get("chunk_id"), str)
+                        and c["chunk_id"] in stored
+                        for c in non_dk_chunks)
+            )
+            record("A5 chunk_id: все в индексе tmp-БЗ",
+                   "PASS" if ok["a5"] else "FAIL",
+                   f"chunks={len(non_dk_chunks)} "
+                   f"in_index={sum(1 for c in non_dk_chunks if c.get('chunk_id') in stored)}")
+        except Exception as e:
+            record("A5 chunk_id: все в индексе tmp-БЗ", "FAIL",
+                   f"exception: {e!r}")
+
+        # ---------- A6: shape регрессия + min_score + БЗ без индекса ----------
+        A6_LABEL = "A6 shape регрессия + min_score settings + без индекса (обычный чат)"
+        cap6: list = []
+        sys6 = ""
+        try:
+            shape_ok = {"recall_total", "reranked", "chunks"} <= set(a1_rc_first)
+
+            r1 = client.post("/api/kb/settings", json={"min_score": 0.5})
+            g1 = client.get("/api/kb/settings")
+            r2 = client.post("/api/kb/settings", json={"min_score": 0})
+            g2 = client.get("/api/kb/settings")
+            rbad = client.post("/api/kb/settings", json={"min_score": 1.5})
+            set_ok = (
+                r1.status_code == 200
+                and r1.json().get("min_score") == 0.5
+                and g1.status_code == 200 and g1.json().get("min_score") == 0.5
+                and r2.status_code == 200
+                and g2.status_code == 200 and g2.json().get("min_score") == 0.0
+                and rbad.status_code == 400
+            )
+
             os.makedirs(os.path.join(tmp, "kempty"), exist_ok=True)
-            kb_empty = KnowledgeBase(os.path.join(tmp, "kempty"), tmp)
+            kb_empty = kb_module.KnowledgeBase(os.path.join(tmp, "kempty"), tmp)
             agent6 = StudioAgent(
                 os.path.join(tmp, "data6"),
                 base_url="https://mock.local/v1",
@@ -502,30 +603,34 @@ def part_a() -> bool:
                     _llm_handler(cap6))),
                 kb=kb_empty,
             )
+            client6 = TestClient(create_app(agent6, kb_empty))
             did6 = setup_dialogue(agent6.store, "e24-a6")
-            d6 = run(agent6, did6, Q_RAG)
+            d6 = chat(client6, did6, Q_RAG)
+            m6 = last_asst(agent6.store, did6)
             if cap6:
                 sys6 = ((cap6[0].get("messages") or [{}])[0].get("content") or "")
-            ok["a6"] = (
-                d6 is not None
+                sys_without = sys6
+            no_index_ok = (
+                bool(d6)
                 and d6.get("answer") == CANNED
                 and len(cap6) == 1
-                and (d6.get("rag_context") or {}).get("dont_know") is not True
+                and (m6.get("rag_context") or {}).get("dont_know") is not True
                 and CITE_RULE not in sys6
             )
-            record("A6 БЗ без индекса: обычный чат, без CITE_RULE",
-                   "PASS" if ok["a6"] else "FAIL",
-                   f"answer_eq={d6.get('answer') == CANNED if d6 else False} "
-                   f"calls={len(cap6)} cite={CITE_RULE in sys6}")
+            ok["a6"] = shape_ok and set_ok and no_index_ok
+            record(A6_LABEL, "PASS" if ok["a6"] else "FAIL",
+                   f"shape={shape_ok} settings={set_ok} no_index={no_index_ok} "
+                   f"calls6={len(cap6)}")
         except Exception as e:
-            record("A6 БЗ без индекса: обычный чат, без CITE_RULE", "FAIL",
-                   f"exception: {e!r}")
+            record(A6_LABEL, "FAIL", f"exception: {e!r}")
 
         # ---------- A3: CITE_RULE только при непустом kb_block ----------
-        ok["a3"] = (CITE_RULE in sys0) and bool(sys6) and (CITE_RULE not in sys6)
-        record("A3 CITE_RULE: есть с блоком, нет без",
+        ok["a3"] = (bool(sys_with) and CITE_RULE in sys_with
+                    and bool(sys_without) and CITE_RULE not in sys_without)
+        record("A3 CITE_RULE: есть с непустым блоком, нет без чанков",
                "PASS" if ok["a3"] else "FAIL",
-               f"with_block={CITE_RULE in sys0} without_block_absent={CITE_RULE not in sys6}")
+               f"with_block={bool(sys_with) and CITE_RULE in sys_with} "
+               f"without_absent={bool(sys_without) and CITE_RULE not in sys_without}")
     except Exception as e:
         record("A: непредвиденное исключение", "FAIL", repr(e))
     finally:
@@ -536,7 +641,7 @@ def part_a() -> bool:
                 os.environ[k] = v
         shutil.rmtree(tmp, ignore_errors=True)
     n = sum(1 for v in ok.values() if v)
-    log(f"Part A: {n}/5 PASS")
+    log(f"Part A: {n}/6 PASS")
     return all(ok.values())
 
 
@@ -555,6 +660,13 @@ def part_b() -> int:
     ok, why = probe_gpustack()
     if not ok:
         record("B: GPustack", "SKIP", why)
+        return 0
+    ok, why = probe_embedder_api()
+    if not ok:
+        # Спека: API-эмбеддер недоступен — SKIP всей Part B (не FAIL)
+        for step in ("B1 корпус", "B2 10 контрольных вопросов",
+                     "B2 sources/citations", "B3 dont-know", "B4 cleanup"):
+            record(step, "SKIP", f"Part B: API-эмбеддер недоступен: {why}")
         return 0
     orig_model = None
     pre_settings = None
@@ -601,21 +713,15 @@ def part_b() -> int:
         code, r = http("/api/kb/index", method="POST",
                        json_body={"strategy": "structural", "embedder": "api"},
                        timeout=INDEX_TIMEOUT)
-        b1_embedder = "api"
         if code != 200:
-            code, r = http("/api/kb/index", method="POST",
-                           json_body={"strategy": "structural", "embedder": "hash"},
-                           timeout=INDEX_TIMEOUT)
-            b1_embedder = "hash"
-            if code != 200:
-                record("B1 корпус", "SKIP",
-                       f"индексация не прошла api+hash -> {code}: {r}")
-                return 0
+            record("B1 корпус", "SKIP",
+                   f"индексация с api-эмбеддером не прошла -> {code}: {r}")
+            return 0
         code, st = http("/api/kb/stats", timeout=30)
         chunks = ((st.get("stats") or {}).get("chunks")
                   if isinstance(st, dict) else None)
         record("B1 корпус", "PASS" if (chunks or 0) > 0 else "FAIL",
-               f"embedder={b1_embedder}, chunks={chunks}")
+               f"embedder=api, chunks={chunks}")
         if (chunks or 0) <= 0:
             return 1
 

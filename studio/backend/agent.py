@@ -525,6 +525,9 @@ class StudioAgent:
                 # День 24: chunk_id (аддитивно) — связь инспектора
                 # с чанком из БЗ (источник цитаты, verbatim-проверка).
                 "chunk_id": r.get("chunk_id"),
+                # День 24 (F-wave): source — откуда чанк (upload/docs/
+                # code), дословно из результата search_rag.
+                "source": r.get("source"),
                 "file": r.get("file"),
                 "section": r.get("section"),
                 "score": r.get("rerank_score", r.get("score")),

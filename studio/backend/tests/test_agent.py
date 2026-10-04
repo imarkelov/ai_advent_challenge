@@ -2675,7 +2675,8 @@ def test_kb_block_cite_rule_in_system_payload(data_dir, tmp_path):
 def test_kb_context_chunk_id_snippet_subset(data_dir, tmp_path):
     """День 24: chunks[] в _kb_context несут chunk_id (аддитивно);
     text — focused snippet ≤ 300 символов И ⊂ сохранённого текста
-    чанка из БЗ."""
+    чанка из БЗ. День 24 (F-wave): chunks[] несут source — дословно
+    из результата search_rag (upload-корпус _fact_repo → "upload")."""
     kb = _fact_repo(tmp_path, "repo_cid")
     agent = make_agent(data_dir, ok_handler)
     agent.kb = kb
@@ -2688,10 +2689,12 @@ def test_kb_context_chunk_id_snippet_subset(data_dir, tmp_path):
     asst = [m for m in msgs if m["role"] == "assistant"]
     ctx = asst[-1]["rag_context"]
     assert ctx["chunks"]
-    idx_chunks = {c["chunk_id"]: c["text"]
+    idx_chunks = {c["chunk_id"]: {"text": c["text"], "source": c["source"]}
                   for c in kb.load_index()["chunks"]}
     for c in ctx["chunks"]:
         assert "chunk_id" in c
         stored = idx_chunks[c["chunk_id"]]
-        assert c["text"] in stored, "snippet не ⊂ текста чанка из БЗ"
+        assert c["source"] == stored["source"] == "upload", \
+            "source чанка ≠ сохранённому в БЗ (egg-book upload)"
+        assert c["text"] in stored["text"], "snippet не ⊂ текста чанка из БЗ"
         assert len(c["text"]) <= 300
