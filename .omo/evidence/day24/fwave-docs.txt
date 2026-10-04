@@ -1,0 +1,30 @@
+F-WAVE DOCS - day24-rag-citations (Batch 3, commit 6)
+run: 2026-10-04 14:21 | branch: day24-rag-citations
+openspec/changes/day24-rag-citations/ - НЕ изменены: tasks.md/design.md/spec.md/proposal.md уже описывают 6 групп Part A (A1-A6) - stale '5 groups' не найдено (grep).
+
+FILES IN COMMIT 6:
+- README.md
+- RELEASE.md
+- .omo/evidence/day24/fwave-regression.txt
+- .omo/evidence/day24/fwave-docs.txt
+
+WHAT CHANGED:
+README.md 'День 24' -> 'Статус':
+- vitest 306 -> 307 (baseline 296 -> +11, F-wave source-тест)
+- Part A 5/5 -> 6/6 + описание групп: A1 10 контрольных вопросов x POST /api/chat (TestClient), A2 dont-know 0 LLM, A3 CITE_RULE, A4 verbatim <=300, A5 chunk_id в индексе, A6 shape-регрессия + min_score в settings
+- Part B: stale 'PASS=11' -> 6/6 PASS (итого 12 PASS / 0 FAIL / 0 SKIP), полный live-прогон после F-wave
+- регрессия пометка (F-wave): e2e_day23 11 PASS / 0 FAIL / 1 WARNING; e2e_day22 12 PASS / 0 FAIL / 0 SKIP
+RELEASE.md (секция дня 24):
+- 'Проверка задания': vitest 307 (+11), Part A 6/6 с группами A1-A6, Part B 6/6, итого 12/0/0, SKIP не сработало (GPustack + API-эмбеддер доступны)
+- 'Коммиты': строки 8387978 (явная), d157485 (контракт-фикс rag_context/last_asst), b82a2e5 (F-wave backend/e2e), 7bd4ad2 (F-wave frontend), строка commit 6
+evidence: fwave-regression.txt (консоли трёх e2e-прогонов + финальное состояние БЗ)
+
+NUMBERS USED (all from this run):
+- e2e_day24 FULL: Part A 6/6, Part B 6/6, итого 12 PASS / 0 FAIL / 0 SKIP (A1 q=10 chunks_q=10 dontknow_q=0 calls=10; A4/A5 chunks=20 max_len=300; B1 chunks=1665; B2 done 10/10 sources 10/10 citations 10/10; model deepseek-v4-flash)
+- e2e_day23: 11 PASS / 0 FAIL / 0 SKIP / 1 WARNING (B4)
+- e2e_day22: 12 PASS / 0 FAIL / 0 SKIP
+- final KB: 1665 chunks (structural/api/qwen3-vl-embedding-8b)
+- vitest 307 (F-wave), pytest 587 (не перебран - зафиксировано batch 1/2), tsc 0, build clean (batch 1/2)
+
+REF FIX: git branch -f day23-rerank-filter origin/day23-rerank-filter
+  local: a34f147 -> f712d04 (= origin/day23-rerank-filter)

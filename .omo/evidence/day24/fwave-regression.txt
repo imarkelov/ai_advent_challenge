@@ -1,0 +1,131 @@
+F-WAVE REGRESSION - day24-rag-citations (Batch 3)
+run: 2026-10-04 14:21 | branch: day24-rag-citations | HEAD: b82a2e5
+fixes under test: b82a2e5 (F-wave backend/e2e) + 7bd4ad2 (F-wave frontend) - both verified by orchestrator
+
+========================================================================
+1) python scripts/e2e_day24.py  (FULL, live :8108)
+   exit 0 | Part A 6/6 PASS | Part B 6/6 PASS | итого 12 PASS / 0 FAIL / 0 SKIP
+========================================================================
+[e2e-day24] E2E day 24: цитаты, источники, анти-галлюцинации
+[e2e-day24] репозиторий: E:\Project\ai_advent_challenge
+[e2e-day24] живой порт: 8108 (Part B best-effort)
+[e2e-day24] === Part A: офлайн (TestClient + fake LLM + tmp-БЗ, без сети) ===
+[Final Response] e2e-deterministic answer.
+[Final Response] e2e-deterministic answer.
+[Final Response] e2e-deterministic answer.
+[Final Response] e2e-deterministic answer.
+[Final Response] e2e-deterministic answer.
+[Final Response] e2e-deterministic answer.
+[Final Response] e2e-deterministic answer.
+[Final Response] e2e-deterministic answer.
+[Final Response] e2e-deterministic answer.
+[Final Response] e2e-deterministic answer.
+[e2e-day24] A1 10 контрольных вопросов /api/chat (sources+citations OR dont_know): PASS — q=10 chunks_q=10 dontknow_q=0 calls=10
+[KB] векторный поиск недоступен (e2e: vector leg off) — лексический (BM25) fallback
+[e2e-day24] A2 dont-know: DONT_KNOW_TEXT, 0 LLM-вызовов: PASS — answer_eq=True msg_eq=True rc={'recall_total': 0, 'reranked': False, 'chunks': [], 'dont_know': True} calls=0
+[e2e-day24] A4 verbatim: цитата ⊂ текста чанка из БЗ, len <= 300: PASS — chunks=20 max_len=300
+[e2e-day24] A5 chunk_id: все в индексе tmp-БЗ: PASS — chunks=20 in_index=20
+[KB] RAG: поиск не удался: Индекс не построен
+[Final Response] e2e-deterministic answer.
+[e2e-day24] A6 shape регрессия + min_score settings + без индекса (обычный чат): PASS — shape=True settings=True no_index=True calls6=1
+[e2e-day24] A3 CITE_RULE: есть с непустым блоком, нет без чанков: PASS — with_block=True without_absent=True
+[e2e-day24] Part A: 6/6 PASS
+[e2e-day24] === Part B: живой прогон :8108 (реальный GPustack; без него -> SKIP) ===
+[e2e-day24] запускаем uvicorn на порту 8108 (лог: E:\Project\ai_advent_challenge\e2e_day24_server.log)
+[e2e-day24] B: модель: PASS — model=deepseek-v4-flash
+[e2e-day24] B1 корпус: PASS — embedder=api, chunks=1665
+[e2e-day24] B2 10 контрольных вопросов: PASS — done=10/10
+[e2e-day24] B2 sources/citations: PASS — sources=10/10 citations=10/10
+[e2e-day24] B3 dont-know: PASS — answer == DONT_KNOW_TEXT
+[e2e-day24] B4 cleanup: PASS — min_score=0.0, reranker/model restored
+[e2e-day24] 
+[e2e-day24] === Summary ===
+[e2e-day24]      PASS  A1 10 контрольных вопросов /api/chat (sources+citations OR dont_know) — q=10 chunks_q=10 dontknow_q=0 calls=10
+[e2e-day24]      PASS  A2 dont-know: DONT_KNOW_TEXT, 0 LLM-вызовов — answer_eq=True msg_eq=True rc={'recall_total': 0, 'reranked': False, 'chunks': [], 'dont_know': True} calls=0
+[e2e-day24]      PASS  A4 verbatim: цитата ⊂ текста чанка из БЗ, len <= 300 — chunks=20 max_len=300
+[e2e-day24]      PASS  A5 chunk_id: все в индексе tmp-БЗ — chunks=20 in_index=20
+[e2e-day24]      PASS  A6 shape регрессия + min_score settings + без индекса (обычный чат) — shape=True settings=True no_index=True calls6=1
+[e2e-day24]      PASS  A3 CITE_RULE: есть с непустым блоком, нет без чанков — with_block=True without_absent=True
+[e2e-day24]      PASS  B: модель — model=deepseek-v4-flash
+[e2e-day24]      PASS  B1 корпус — embedder=api, chunks=1665
+[e2e-day24]      PASS  B2 10 контрольных вопросов — done=10/10
+[e2e-day24]      PASS  B2 sources/citations — sources=10/10 citations=10/10
+[e2e-day24]      PASS  B3 dont-know — answer == DONT_KNOW_TEXT
+[e2e-day24]      PASS  B4 cleanup — min_score=0.0, reranker/model restored
+[e2e-day24]   Итого: PASS=12 FAIL=0 SKIP=0 WARNING=0
+
+========================================================================
+2) python scripts/e2e_day23.py  (regression, live :8107)
+   exit 0 | итого 11 PASS / 0 FAIL / 0 SKIP / 1 WARNING (B4 пасхалка, best-effort) - baseline дня 23 подтверждён
+========================================================================
+[e2e-day23] E2E day 23: min_score порог релевантности + rewrite (перефраз)
+[e2e-day23] репозиторий: E:\Project\ai_advent_challenge
+[e2e-day23] живой порт: 8107 (Part B best-effort)
+[e2e-day23] === Part A: офлайн (TestClient + fake LLM + fake реранкер, без сети) ===
+[e2e-day23] A1 settings min_score + валидация 400: PASS — base=0.0 echo=0.5 bad_ok=True
+[e2e-day23] A2 search: абсолютный min_score (fake reranker): PASS — n=2 base=True 0.6->1+dropped=1:True 0.999->[]+dropped=2:True 0.0==base:True
+[e2e-day23] A3 search: относительный min_score (reranker off): PASS — n=2 base=True kept=1 dropped=1 prefix_ok=True
+[e2e-day23] A4 compare min_score=0.6: filter-плечо + скриптованный rewrite: PASS — keys_ok=True filter_chunks=1 rag_chunks=2 calls=5 rw_applied=True spy=True
+[Agent] Rewrite: LLM-вызов не удался: Модель вернула ошибку HTTP 500
+[e2e-day23] A5 compare: падение rewrite -> фолбэк на rag-плечо: PASS — applied=False rw_eq_q=True chunks_eq=True calls=5
+[e2e-day23] A6 compare min_score=0.999: пустое filter-плечо не роняет ответ: PASS — before=0 filter_chunks=0 applied=True calls=5
+[e2e-day23] A7 day22-совместимость: старые ключи compare/чанков: PASS — old_keys_ok=True chunk6_ok=True payload_ok=True
+[e2e-day23] Part A: 7/7 PASS
+[e2e-day23] === Part B: живой прогон (реальный GPUStack; без GPUStack -> SKIP) ===
+[e2e-day23] запускаем uvicorn на порту 8107 (лог: E:\Project\ai_advent_challenge\e2e_day23_server.log)
+[e2e-day23] B: модель: PASS — model=deepseek-v4-flash
+[e2e-day23] B1 корпус: PASS — egg + 2 extras, индексация api, chunks=94 running=False
+[e2e-day23] B2 настройки: PASS — embedder=api reranker=api
+[e2e-day23] B3 compare min_score=0.5: PASS — keys_ok=True filter_chunks=0 applied=True rw=The hero's phone model is specified in the document.
+[e2e-day23] B4 пасхалка: WARNING — «IPhone 17Promax» не найдена в ответе (best-effort, не провал)
+[e2e-day23] 
+[e2e-day23] === Summary ===
+[e2e-day23]      PASS  A1 settings min_score + валидация 400 — base=0.0 echo=0.5 bad_ok=True
+[e2e-day23]      PASS  A2 search: абсолютный min_score (fake reranker) — n=2 base=True 0.6->1+dropped=1:True 0.999->[]+dropped=2:True 0.0==base:True
+[e2e-day23]      PASS  A3 search: относительный min_score (reranker off) — n=2 base=True kept=1 dropped=1 prefix_ok=True
+[e2e-day23]      PASS  A4 compare min_score=0.6: filter-плечо + скриптованный rewrite — keys_ok=True filter_chunks=1 rag_chunks=2 calls=5 rw_applied=True spy=True
+[e2e-day23]      PASS  A5 compare: падение rewrite -> фолбэк на rag-плечо — applied=False rw_eq_q=True chunks_eq=True calls=5
+[e2e-day23]      PASS  A6 compare min_score=0.999: пустое filter-плечо не роняет ответ — before=0 filter_chunks=0 applied=True calls=5
+[e2e-day23]      PASS  A7 day22-совместимость: старые ключи compare/чанков — old_keys_ok=True chunk6_ok=True payload_ok=True
+[e2e-day23]      PASS  B: модель — model=deepseek-v4-flash
+[e2e-day23]      PASS  B1 корпус — egg + 2 extras, индексация api, chunks=94 running=False
+[e2e-day23]      PASS  B2 настройки — embedder=api reranker=api
+[e2e-day23]      PASS  B3 compare min_score=0.5 — keys_ok=True filter_chunks=0 applied=True rw=The hero's phone model is specified in the document.
+[e2e-day23]   WARNING  B4 пасхалка — «IPhone 17Promax» не найдена в ответе (best-effort, не провал)
+[e2e-day23]   Итого: PASS=11 FAIL=0 SKIP=0 WARNING=1
+
+========================================================================
+3) python scripts/e2e_day22.py  (regression, live :8106)
+   exit 0 | итого 12 PASS / 0 FAIL / 0 SKIP (B4 easter-egg - WARNING внутри, не FAIL) - baseline дня 22
+========================================================================
+[e2e-day22] === Part A: RAG compare (офлайн: TestClient + fake LLM + HashEmbedder, без сети) ===
+[e2e-day22] PASS  A1: shape — POST /api/rag/compare → 200, все 5 полей (answer_plain/answer_rag/kb_block/chunks/rag_context), chunks non-empty (uploads/egg_book.txt) — code=200 plain=28B rag=28B chunks=1 top=uploads/egg_book.txt
+[e2e-day22] PASS  A2: kb_block — «База знаний» в system rag-руки, НЕТ в plain-руке (fake-LLM захват, порядок plain → rag → …) — calls=5 plain_block=False rag_block=True
+[e2e-day22] PASS  A3: 400 пустой/не-строка вопрос (LLM не вызван) + 404 «Индекс не построен» без индекса — 400=400/400/400/400 404=404 calls_before=5
+[e2e-day22] PASS  A4: settings rag=false → оба ответа приходят (флаг игнорируется compare-эндпоинтом, kb_block на месте) — code=200 plain=28B rag=28B rag_block=True
+[e2e-day22] PASS  A5: control_questions.json — 10 вопросов, id 1..10, expect_facts/expected_sources non-empty (utf-8-sig) — n=10 ids=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+[e2e-day22] PASS  A6: payload-ы 4-х рук — temperature == 0, max_tokens == 1024, model == config (+ rewrite-вызов: max_tokens=200) — t=[0, 0, 0, 0, 0] mt=[1024, 1024, 1024, 200, 1024] model=qwen3.8-27b
+[e2e-day22] PASS  A7: bare system prompt — маркеров «Профиль»/«Память»/«Инварианты» нет ни на одной руке — hits=[]
+[e2e-day22] === Part B: live (uvicorn :8106, реальный LLM + RAG compare) ===
+[e2e-day22] starting uvicorn (prod mode) on port 8106
+[e2e-day22] PASS  B: uvicorn up (port 8106)
+[e2e-day22] строим live-индекс (корпус = egg+ chekhov_cherry_orchard.txt+chekhov_lady_with_dog.txt — может занять пару минут)...
+[e2e-day22] PASS  B1: corpus rebuild (wipe → upload egg + chekhov_cherry_orchard.txt+chekhov_lady_with_dog.txt → index → build-status) — wipe=True upload=['chekhov_cherry_orchard.txt:200', 'chekhov_lady_with_dog.txt:200'] embedder=api chunks=94 status={'running': False, 'phase': 'done', 'done': 1, 'total': 1}
+[e2e-day22] PASS  B2: settings (embedder/reranker api при ключах, иначе off + метка) — embedder=api reranker=api
+[e2e-day22] PASS  B3: live compare «Какой телефон был у героя?» — 200, оба ответа non-empty, chunks non-empty — plain=130B rag=227B chunks=3 top=uploads/chekhov_cherry_orchard.txt
+[e2e-day22] PASS  B4: easter-egg «IPhone 17Promax» (casefold) в answer_rag (best-effort) — WARNING: факт не найден в answer_rag (best-effort, semantics модели не гарантируем): 'В приведённых выдержках нет упоминаний о телефоне у героя. Там фигурируют только телеграммы (наприме'
+[e2e-day22] stopping uvicorn (port 8106)
+[e2e-day22] Итог: 12 PASS, 0 FAIL, 0 SKIP
+
+========================================================================
+FINAL KB STATE (data/kb/index.db after all runs + restore)
+chunks: 1665 | strategy: structural | embedder: api | model: qwen3-vl-embedding-8b
+примечание: Part B e2e_day23/day22 пересобирали индекс со своими корпусами (по 94 чанка, 3 файла) - после регрессии корпус дня 24 восстановлен повторным B1 (fetch_books + POST /api/kb/index structural/api). Корпус >= 1600 для F3 QA: OK
+
+------------------------------------------------------------------------
+4) restore B1 corpus (python, :8108) - вылог:
+server up
+DELETE /api/kb -> 200
+fetch_books exit 0
+POST /api/kb/index -> 200
+STATS: {"chunks": 1665, "files": 5, "corpus_words": 255383, "strategy": "structural", "embedder": "api"}

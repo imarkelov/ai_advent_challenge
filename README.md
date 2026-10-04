@@ -2246,18 +2246,24 @@ cleanup всегда; exit 0 для PASS/SKIP, 1 для FAIL. **Совпаден
 ### Статус
 
 Бэкенд — **587 тестов PASS** (baseline 581 → +6: dont-know / [n]-
-правило / chunk_id / verbatim). Фронтенд — **306 тестов PASS** (Vitest,
-baseline 296 → +10: SourcesPanel / dont-know-карточка /
-ChatPanel-wiring) + `tsc -b` clean + `npm run build` clean.
-E2E `scripts/e2e_day24.py`: Part A **5/5 PASS** (офлайн, net cut, MUST);
-Part B live: **PASS=11, FAIL=0, SKIP=0** (модель deepseek-v4-flash;
-корпус `fetch_books.py` — 1665 чанков, api-эмбеддер; 10 контрольных
+правило / chunk_id / verbatim). Фронтенд — **307 тестов PASS** (Vitest,
+baseline 296 → +11: SourcesPanel / dont-know-карточка / ChatPanel-
+wiring + F-wave source-тест) + `tsc -b` clean + `npm run build`
+clean. E2E `scripts/e2e_day24.py` (полный live-прогон после F-wave-
+фиксов): Part A **6/6 PASS** (офлайн, net cut, MUST; TestClient +
+fake-LLM + tmp-БЗ): A1 — 10 контрольных вопросов × `POST /api/chat`
+(sources+citations OR dont_know), A2 — dont-know (0 LLM-вызовов),
+A3 — `CITE_RULE` в LLM-payload, A4 — verbatim (цитата ⊂ текста чанка,
+≤300), A5 — `chunk_id` в индексе, A6 — shape-регрессия дней 21/22/23
++ `min_score` в settings. Part B live: **6/6 PASS** (итого
+**12 PASS / 0 FAIL / 0 SKIP**; модель deepseek-v4-flash; корпус
+`fetch_books.py` — 1665 чанков, api-эмбеддер; 10 контрольных
 вопросов — 10/10 done, sources/citations 10/10; dont-know live при
 `min_score=0.999` — `answer == DONT_KNOW_TEXT`; cleanup — min_score
 сброшен, реранкер/модель восстановлены). SKIP-сценариев не сработало
-(GPustack и `GPUSTACK_KEY_RERANK` доступны). Регрессия
-`scripts/e2e_day23.py`: Part A 7/7 PASS, Part B live **PASS=11,
-FAIL=0, WARNING=1** (B4 пасхалка, best-effort);
+(GPustack и API-эмбеддер доступны). Регрессия (F-wave):
+`scripts/e2e_day23.py`: Part A 7/7 PASS, Part B live 4/4 PASS —
+итого **11 PASS / 0 FAIL / 1 WARNING** (B4 пасхалка, best-effort);
 `scripts/e2e_day22.py`: **12 PASS / 0 FAIL / 0 SKIP** — контракт
 compare аддитивен, не тронут. Ветка `day24-rag-citations` (от
 `day23-rerank-filter`).

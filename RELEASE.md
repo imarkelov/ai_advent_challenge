@@ -85,20 +85,28 @@ true`. Тело `POST /api/chat`, маршруты дней 21–23 и `POST
 ## Проверка задания
 
 Бэкенд — **587 тестов PASS** (baseline 581 → +6, pytest, офлайн).
-Фронтенд — **306 тестов PASS** (Vitest, baseline 296 → +10) + `tsc -b`
-clean + `npm run build` clean. E2E `scripts/e2e_day24.py`: Part A
-**5/5 PASS** (офлайн, net cut, MUST, exit 0); Part B live —
-**PASS=11, FAIL=0, SKIP=0**: модель deepseek-v4-flash, корпус
-`fetch_books.py` (1665 чанков, api-эмбеддер), 10 контрольных вопросов —
-10/10 done, sources/citations 10/10, dont-know при `min_score=0.999`
+Фронтенд — **307 тестов PASS** (Vitest, baseline 296 → +11) + `tsc -b`
+clean + `npm run build` clean. E2E `scripts/e2e_day24.py` (полный
+live-прогон после F-wave-фиксов): Part A **6/6 PASS** (офлайн, net
+cut, MUST, exit 0): A1 — 10 контрольных вопросов × `POST /api/chat`
+(TestClient, sources+citations OR dont_know), A2 — dont-know
+(0 LLM-вызовов), A3 — `CITE_RULE` в LLM-payload, A4 — verbatim
+(цитата ⊂ текста чанка, ≤300), A5 — `chunk_id` в индексе, A6 —
+shape-регрессия дней 21/22/23 + `min_score` в settings; Part B live —
+**6/6 PASS**: модель deepseek-v4-flash, корпус `fetch_books.py`
+(1665 чанков, api-эмбеддер), 10 контрольных вопросов — 10/10 done,
+sources/citations 10/10, dont-know при `min_score=0.999`
 (`answer == DONT_KNOW_TEXT`), cleanup (min_score сброшен,
-реранкер/модель восстановлены). SKIP-сценариев не сработало (GPustack
-и `GPUSTACK_KEY_RERANK` доступны).
+реранкер/модель восстановлены); итого **12 PASS / 0 FAIL / 0
+SKIP**. SKIP-сценариев не сработало (GPustack и API-эмбеддер
+доступны).
 Пользовательская live-проверка 10 вопросов в диалоге (источники/цитаты
 видны в панели, dont-know на слабом вопросе; смысл ответа ↔ цитат
 проверяется человеком, не LLM-judge) — часть Definition of Done.
-Регрессия: `e2e_day23.py` Part A 7/7 и `e2e_day22.py` Part A 7/7
-(контракт compare не тронут).
+Регрессия (F-wave): `e2e_day23.py` — итого **11 PASS / 0 FAIL / 1
+WARNING** (Part A 7/7, Part B live 4/4, WARNING — B4 пасхалка,
+best-effort); `e2e_day22.py` — **12 PASS / 0 FAIL / 0 SKIP**
+(контракт compare аддитивен, не тронут).
 
 ## Коммиты
 
@@ -108,7 +116,11 @@ clean + `npm run build` clean. E2E `scripts/e2e_day24.py`: Part A
 | `91a8cab` | feat(day24): SourcesPanel — источники, цитаты, «не знаю» карточка |
 | `a34f147` | feat(day24): ChatPanel wiring — панель под ответом (оба инспектора) |
 | `cce5987` | test(day24): e2e_day24.py — Part A offline (dont-know + [n] + chunk_id) + Part B live (10 вопросов, :8108) |
-| (эти release notes) | docs(day24): финальные цифры + openspec change (задача 7) |
+| `8387978` | docs(day24): финальные цифры + openspec change (задача 7) |
+| `d157485` | test(day24): e2e_day24.py — Part A offline (dont-know + [n] + chunk_id) + Part B live (10 вопросов, :8108) — контракт-фикс: `rag_context` на сохранённом assistant-сообщении (helper `last_asst()`) + per-field-проверки |
+| `b82a2e5` | fix(day24): F-wave — source в rag_context.chunks + Part A e2e по спеке (TestClient, A1 10 вопросов, A5, A6) |
+| `7bd4ad2` | fix(day24): F-wave — source в панели, chunk_id optional, minScore wiring |
+| (эта регрессия) | docs(day24): F-wave — финальные цифры после фиксов (vitest 307, Part A 6/6, e2e 12/0/0) + полная регрессия + evidence |
 
 ---
 
