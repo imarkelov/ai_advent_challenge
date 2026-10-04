@@ -509,6 +509,9 @@ export interface KbSearchResult {
 // чанки ушли в system-промпт (видно в инспекторе под сообщением)
 export interface RagContextChunk {
   rank: number          // 1-based финальный ранг
+  // День 24: идентификатор чанка (stem-strategy-NNNN, как в метаданных
+  // индекса). Старые сообщения (до дня 24) — без поля; UI undefined-safe.
+  chunk_id: string
   file: string
   section: string
   score: number         // rerank_score при реранке, иначе гибридный score
@@ -523,6 +526,10 @@ export interface RagContext {
   recall_total: number
   reranked: boolean
   chunks: RagContextChunk[]
+  // День 24 (dont-know A′): слабая база — ни один чанк не прошёл порог
+  // (min_score) / релевантности; бэкенд помечает ответ, UI рисует красную
+  // карточку «🚫 Не знаю» (мокап B-2). Опционально — старые сообщения.
+  dont_know?: boolean
 }
 
 export interface KbSettings {

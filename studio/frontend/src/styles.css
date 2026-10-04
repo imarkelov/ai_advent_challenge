@@ -2736,3 +2736,176 @@ button {
 .kb-compare-kbblock .kb-compare-answer {
   margin-top: var(--sp-1);
 }
+
+/* ── Панель «Источники и цитаты» (день 24, мокап B) ────────────────────────── */
+/* Отдельная панель под assistant-сообщением: карточки источников (номер,
+   file · section, score-pill, «из #N», цитата в «») + красная карточка
+   «🚫 Не знаю» (B-2, слабый контекст). Мелкая моно-типографика —
+   паттерн RagContextInspector (.rag-ctx); токены — дизайн-система репо. */
+.src-panel {
+  margin-top: var(--sp-2);
+  max-width: 82%;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--panel);
+}
+.src-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--r-md) var(--r-md) 0 0;
+  background: linear-gradient(90deg, var(--accent-soft), rgba(224, 123, 57, 0.04));
+}
+.src-head-title {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+}
+.src-head-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.src-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--sp-3);
+}
+.src-card {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--sp-2) 14px;
+}
+.src-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--sp-2);
+}
+.src-num {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  width: 18px;
+  text-align: center;
+  flex: none;
+}
+.src-file {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+  flex: 1;
+  word-break: break-word;
+}
+/* Score-pill (шкала паттерн RagContextInspector/KbTab): 🟢 ≥0.8 /
+   🟡 0.5–0.8 / 🔴 <0.5; «из #N» — та же форма, нейтральный вариант */
+.src-score-pill,
+.src-from {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 0 var(--sp-2);
+  color: var(--muted);
+  background: var(--panel);
+  white-space: nowrap;
+}
+.src-score-pill.ok {
+  color: var(--ok);
+  border-color: rgba(61, 220, 132, 0.45);
+}
+.src-score-pill.warn {
+  color: var(--wm);
+  border-color: rgba(224, 160, 57, 0.45);
+}
+.src-score-pill.bad {
+  color: var(--danger);
+  border-color: rgba(224, 93, 93, 0.45);
+}
+/* Сигнал: реранкер поднял чанок с низкой позиции этапа 1 (>20), как .rag-alert */
+.src-alert {
+  cursor: help;
+}
+/* id чанка (день 24): старое сообщение без chunk_id — строка не рендерится */
+.src-id {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0.7;
+  margin-top: var(--sp-1);
+}
+/* Цитата: вербатим text, декоративные «» (display-шрифт, акцент) */
+.src-quote {
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.src-quote-gq {
+  font-family: var(--font-display);
+  font-style: normal;
+  font-size: 22px;
+  line-height: 0;
+  color: var(--accent);
+  vertical-align: -5px;
+}
+.src-quote-gq-open {
+  margin-right: 5px;
+}
+.src-quote-gq-close {
+  margin-left: 5px;
+}
+
+/* B-2: красная карточка «Не знаю» (слабый контекст — ни чанк не прошёл порог) */
+.src-dontknow {
+  margin-top: var(--sp-2);
+  max-width: 82%;
+  border: 1px solid rgba(224, 93, 93, 0.45);
+  border-left: 3px solid var(--danger);
+  border-radius: var(--r-md);
+  background: rgba(224, 93, 93, 0.06);
+  padding: var(--sp-3) 14px;
+}
+.src-dk-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: var(--sp-2);
+}
+.src-dk-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--danger);
+}
+.src-dk-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  background: var(--danger);
+  color: #141419;
+  border-radius: var(--r-pill);
+  padding: 1px var(--sp-2);
+  white-space: nowrap;
+}
+.src-dk-body {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.src-dk-sub {
+  margin-top: 6px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
