@@ -1,5 +1,5 @@
 // Панель «Источники и цитаты» (день 24, задача 3): мокап B.
-// Кадры B-1 — карточки источников (номер 1..N, file · section, score-pill,
+// Кадры B-1 — карточки источников (номер 1..N, [source ·] file · section,
 // «из #N» (stage1_rank) при реранке, цитата в «»); B-2 — красная карточка
 // «🚫 Не знаю» (слабый контекст: ни один чанк не прошёл порог).
 // Панель автономна от текста сообщения: [n]-маркеры в ответе не рендерит.
@@ -75,7 +75,7 @@ export default function SourcesPanel({
               <div className="src-card-top">
                 <span className="src-num">{i + 1}</span>
                 <span className="src-file">
-                  {c.file}
+                  {c.source ? `${c.source} · ${c.file}` : c.file}
                   {c.section ? ` · ${c.section}` : ''}
                 </span>
                 <span className={scoreClass(c.score)}>{c.score.toFixed(2)}</span>

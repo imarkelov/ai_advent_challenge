@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import SourcesPanel from '../src/components/SourcesPanel'
-import type { RagContext, RagContextChunk } from '../src/api'
+import type { RagContext } from '../src/api'
 
 // ── Фикстуры (данные мокапа B-1) ────────────────────────────────────────────
 const RAG_CTX: RagContext = {
@@ -37,7 +37,7 @@ const LEGACY_CTX: RagContext = {
     {
       rank: 1, file: 'a.md', section: 'Раздел', score: 0.7,
       stage1_rank: null, reranked: false, text: 'Старый чанк без chunk_id.',
-    } as RagContextChunk,
+    },
   ],
 }
 
@@ -142,6 +142,28 @@ describe('SourcesPanel — панель «Источники и цитаты» (
     expect(container.querySelector('.src-quote')?.textContent).toBe('«Старый чанк без chunk_id.»')
     // без chunk_id → id-строка не рендерится
     expect(container.querySelector('.src-id')).toBeNull()
+  })
+
+  it('F-wave: поле source → строка «source · file · section»; без source → «file · section»', () => {
+    const ctx: RagContext = {
+      recall_total: 20,
+      reranked: false,
+      chunks: [
+        {
+          rank: 1, chunk_id: 'a-structural-0001', source: 'upload',
+          file: 'a.md', section: 'Раздел', score: 0.7,
+          stage1_rank: null, reranked: false, text: 'Чанк с source.',
+        },
+        {
+          rank: 2, file: 'b.md', section: 'Раздел 2', score: 0.6,
+          stage1_rank: null, reranked: false, text: 'Чанк без source.',
+        },
+      ],
+    }
+    render(<SourcesPanel ragContext={ctx} />)
+    // source есть → «source · file · section»; source нет → «file · section»
+    expect(screen.getByText('upload · a.md · Раздел')).toBeInTheDocument()
+    expect(screen.getByText('b.md · Раздел 2')).toBeInTheDocument()
   })
 
   it('chunks пусто и dont_know нет → панель не рендерится (null)', () => {

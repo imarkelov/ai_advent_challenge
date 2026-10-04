@@ -511,7 +511,10 @@ export interface RagContextChunk {
   rank: number          // 1-based финальный ранг
   // День 24: идентификатор чанка (stem-strategy-NNNN, как в метаданных
   // индекса). Старые сообщения (до дня 24) — без поля; UI undefined-safe.
-  chunk_id: string
+  chunk_id?: string
+  // День 24 (F-wave): источник чанка (docs/code/upload, как в метаданных
+  // индекса). Старые сообщения — без поля; UI undefined-safe.
+  source?: string
   file: string
   section: string
   score: number         // rerank_score при реранке, иначе гибридный score
