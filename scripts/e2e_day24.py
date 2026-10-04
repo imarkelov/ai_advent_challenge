@@ -399,11 +399,18 @@ def part_a() -> bool:
                     done = ev
             return done
 
+        def last_asst(st, did: str) -> dict:
+            """Последнее assistant-сообщение диалога: rag_context живёт
+            в сохранённом сообщении (append_message), а не в done-событии."""
+            msgs = (st.get_dialogue(did) or {}).get("messages") or []
+            return next((m for m in reversed(msgs)
+                         if m.get("role") == "assistant"), {})
+
         # ---------- A1: RAG-чат: chunk_id + CITE_RULE + ровно 1 LLM-вызов ----------
         try:
             did1 = setup_dialogue(store, "e24-a1")
             d1 = run(agent, did1, Q_RAG)
-            rc1 = (d1.get("rag_context") or {}) if d1 else {}
+            rc1 = last_asst(store, did1).get("rag_context") or {}
             chunks1 = rc1.get("chunks") or []
             c0 = chunks1[0] if chunks1 else {}
             if captured:
@@ -439,23 +446,25 @@ def part_a() -> bool:
             did2 = setup_dialogue(store, "e24-a2")
             n0 = len(captured)
             d2 = run(agent, did2, Q_NOMATCH)
-            msgs = (store.get_dialogue(did2) or {}).get("messages") or []
-            last = next((m for m in reversed(msgs) if m.get("role") == "assistant"), {})
+            m2 = last_asst(store, did2)
+            rc2 = m2.get("rag_context") or {}
             ok["a2"] = (
                 d2 is not None
                 and d2.get("answer") == DONT_KNOW_TEXT
                 and d2.get("usage") is None
                 and d2.get("request_id") is None
-                and d2.get("rag_context") == {"recall_total": 0, "reranked": False,
-                                              "chunks": [], "dont_know": True}
-                and last.get("content") == DONT_KNOW_TEXT
+                and rc2.get("recall_total") == 0
+                and rc2.get("reranked") is False
+                and rc2.get("chunks") == []
+                and rc2.get("dont_know") is True
+                and m2.get("content") == DONT_KNOW_TEXT
                 and len(captured) == n0
             )
             record("A2 dont-know: DONT_KNOW_TEXT, 0 LLM-вызовов",
                    "PASS" if ok["a2"] else "FAIL",
                    f"answer_eq={d2.get('answer') == DONT_KNOW_TEXT if d2 else False} "
-                   f"msg_eq={last.get('content') == DONT_KNOW_TEXT} "
-                   f"rc={d2.get('rag_context') if d2 else None} calls={len(captured) - n0}")
+                   f"msg_eq={m2.get('content') == DONT_KNOW_TEXT} "
+                   f"rc={m2.get('rag_context')} calls={len(captured) - n0}")
         except Exception as e:
             record("A2 dont-know: DONT_KNOW_TEXT, 0 LLM-вызовов", "FAIL",
                    f"exception: {e!r}")
