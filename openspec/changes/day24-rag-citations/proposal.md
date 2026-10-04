@@ -7,8 +7,8 @@
 assistant-сообщении) и фильтрации дня 23 (`min_score` уже действует в
 `ask_stream`) добавить: (1) **обязательные источники и verbatim-цитаты**
 в каждом RAG-ответе (source + file + section + `chunk_id`, цитата =
-verbatim-выдержка из `chunks[].text`: чанк ≤1300 символов — полный
-текст, иначе 300-символьное фокус-окно; фикс дня 24 после релиза),
+verbatim-выдержка из `chunks[].text`: чанк ≤2400 символов — полный
+текст, иначе 300-символьное фокус-окно; фиксы дня 24 после релиза),
 (2) **[n]-правило
 цитирования** (модель ссыляется на выдержки маркерами [1], [2], …;
 правило живёт только в `kb_block`) и (3) **dont-know по триггеру A′** —
@@ -52,10 +52,10 @@ RAG-вкл + индекс есть + 0 чанков после поиска/фи
   рендерятся (панель автономна от текста ответа).
 - **`kb.py` НЕ меняется** (сигнатуры и логика `search_rag`
   зафиксированы): `search_rag` уже отдаёт
-   `{chunk_id, source, file, section, score, text, ±rerank_score,
-   stage1_rank}`, а `chunks[].text` — уже verbatim-выдержка ≤1300
-   (чанк ≤1300 — полный текст, иначе фокус-окно 300;
-   `_focus_snippet`). `/api/rag/compare` (4 армы дня 23) НЕ
+    `{chunk_id, source, file, section, score, text, ±rerank_score,
+    stage1_rank}`, а `chunks[].text` — уже verbatim-выдержка ≤2400
+    (чанк ≤2400 — полный текст, иначе фокус-окно 300;
+    `_focus_snippet`). `/api/rag/compare` (4 армы дня 23) НЕ
   меняется: dont-know в compare не добавляется (compare = явный
   инструмент, не чат).
 - **Контракт dont-know (зафиксирован)**: done-кадр
@@ -88,9 +88,9 @@ RAG-вкл + индекс есть + 0 чанков после поиска/фи
   совпадений → dont-know, 0 LLM-вызовов), нет индекса (KBError) →
   обычный LLM-вызов (count == 1, без dont_know), `rag=false` →
   retrieval не идёт, kb_block непустой → CITE_RULE-строка в
-  system-сообщении (пустой результат → нет), `_kb_context` chunks
+   system-сообщении (пустой результат → нет), `_kb_context` chunks
    несут `chunk_id` + `text` ⊂ сохранённого текста чанка и
-   `len(text) <= 1300` (чанк ≤1300 — полный текст; фикс после
+   `len(text) <= 2400` (чанк ≤2400 — полный текст; фиксы после
    релиза); регрессия: все существующие agent-тесты зелёные.
 - **Фронтенд**: `api.ts` — типы `RagContextChunk` + `chunk_id:
   string`, `RagContext` + `dont_know?: boolean` (опционально — старые
@@ -107,11 +107,11 @@ RAG-вкл + индекс есть + 0 чанков после поиска/фи
 - **`scripts/e2e_day24.py`** (новый, stdlib, порт **8108**, паттерн
   e2e_day23): Part A — офлайн MUST PASS (net cut `_NO_NET`,
   TestClient + fake-LLM + tmp-БЗ: 10 контрольных вопросов —
-  per-question «chunks непусто → citations/sources с chunk_id
-  присутствуют OR dont_know», dont-know-детерминизм (0 LLM-вызовов),
-   CITE_RULE в captured payload, verbatim ⊂ текста чанка и ≤1300
-   (чанк ≤1300 — полный текст),
-  chunk_id-совпадение с БЗ, регрессия shape rag_context дней
+   per-question «chunks непусто → citations/sources с chunk_id
+   присутствуют OR dont_know», dont-know-детерминизм (0 LLM-вызовов),
+   CITE_RULE в captured payload, verbatim ⊂ текста чанка и ≤2400
+   (чанк ≤2400 — полный текст),
+   chunk_id-совпадение с БЗ, регрессия shape rag_context дней
   21/22/23); Part B — live best-effort (uvicorn :8108, реальный
   GPustack, 10 вопросов в одном диалоге: sources/citations —
   WARNING не FAIL при <10/10 (retrieval-качество, паттерн дня 22);
@@ -127,8 +127,8 @@ RAG-вкл + индекс есть + 0 чанков после поиска/фи
 - `rag-chat-citations`: цитаты, источники и анти-галлюцинации (день
   24) — каждый RAG-ответ несёт источники (source + file + section +
    `chunk_id` + score, ±`rerank_score`/`stage1_rank`) и verbatim-
-   цитаты (чанк ≤1300 символов — полный текст, иначе фокус-окно 300;
-   ⊂ текста чанка, без генерации моделью; фикс после релиза);
+   цитаты (чанк ≤2400 символов — полный текст, иначе фокус-окно 300;
+   ⊂ текста чанка, без генерации моделью; фиксы после релиза);
   [n]-правило (`CITE_RULE`) — только в непустом `kb_block`; dont-know
   по триггеру A′ (RAG-вкл + индекс есть + 0 чанков при любом
   min_score → `DONT_KNOW_TEXT`, 0 LLM-вызовов, `usage: None`,

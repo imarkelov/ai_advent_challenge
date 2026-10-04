@@ -5,9 +5,9 @@ Capability «rag-chat-citations» — цитаты, источники и ант
 (`ask_stream` + `kb_block` + `rag_context`) и фильтрации дня 23
 (`min_score` уже действует в чате): каждый RAG-ответ несёт
 обязательные источники (source + file + section + `chunk_id` + score,
-±`rerank_score`/`stage1_rank`) и verbatim-цитаты (чанк ≤1300
+±`rerank_score`/`stage1_rank`) и verbatim-цитаты (чанк ≤2400
 символов — полный текст чанка, иначе 300-символьное фокус-окно;
-⊂ текста чанка; цитаты генерирует код, не модель; фикс дня 24
+⊂ текста чанка; цитаты генерирует код, не модель; фиксы дня 24
 после релиза);
 модель instructed ссылаться на выдержки маркерами [n]
 (`CITE_RULE` — только в непустом `kb_block`); при 0 релевантных
@@ -35,20 +35,20 @@ UI — панель «📖 Источники и цитаты» (вариант 
 **аддитивно** (рядом с rank/file/section/score); имена/типы
 существующих полей `rag_context` не меняются. Цитата — verbatim
 фрагмент `chunks[i].text` (`text` ⊂ сохранённого текста чанка из БЗ,
-`len(text) <= 1300`: чанк ≤1300 символов — полный текст, длиннее —
+`len(text) <= 2400`: чанк ≤2400 символов — полный текст, длиннее —
 300-символьное фокус-окно), генерируемый кодом
 (`_focus_snippet`), а НЕ моделью. Полный текст чанка длиннее
-1300 символов в сообщение не хранится.
+2400 символов в сообщение не хранится.
 
 #### Scenario: Чанки rag_context несут chunk_id
 
 - **WHEN** RAG-вкл, поиск вернул ≥1 чанка, ответ сохранён
 - **THEN** каждый объект в `rag_context.chunks[]` содержит `chunk_id`, равный `chunk_id` результата `search_rag` (из индекса БЗ), плюс `source`, `file`, `section`, `score`; при `reranked` — `rerank_score`/`stage1_rank`; остальные поля `rag_context` (`query`, `reranked`, `recall_total`) не изменены
 
-#### Scenario: Цитата — verbatim, ≤1300, ⊂ текста чанка
+#### Scenario: Цитата — verbatim, ≤2400, ⊂ текста чанка
 
 - **WHEN** RAG-ответ содержит непустые `rag_context.chunks`
-- **THEN** для каждого чанка `text` является подстрокой сохранённого текста чанка из БЗ (verbatim, без пересказа) и `len(text) <= 1300` (чанк ≤1300 символов — полный текст чанка, длиннее — 300-символьное фокус-окно); полный текст чанка длиннее 1300 символов в сообщение не записывается
+- **THEN** для каждого чанка `text` является подстрокой сохранённого текста чанка из БЗ (verbatim, без пересказа) и `len(text) <= 2400` (чанк ≤2400 символов — полный текст чанка, длиннее — 300-символьное фокус-окно); полный текст чанка длиннее 2400 символов в сообщение не записывается
 
 #### Scenario: Старое сообщение читается undefined-safe
 
@@ -161,7 +161,7 @@ rag_context.dont_know == true»; dont-know-детерминизм (вопрос 
 совпадений при min_score=0 → `done.answer == DONT_KNOW_TEXT`,
 usage `None`, request_id `None`, fake-LLM count == 0, dont_know:
 true); CITE_RULE-строка в captured LLM-payload; verbatim
-(`chunks[i].text` ⊂ текста чанка из БЗ, `len <= 1300`; чанк ≤1300 —
+(`chunks[i].text` ⊂ текста чанка из БЗ, `len <= 2400`; чанк ≤2400 —
 полный текст); chunk_id-
 совпадение с БЗ; регрессия shape `rag_context` (recall_total/
 reranked/chunks) и min_score-поля дня 23. Part B — live best-effort
@@ -174,7 +174,7 @@ sources/citations при <10/10 — WARNING, не FAIL (retrieval-
 #### Scenario: Part A — 10 вопросов MUST PASS
 
 - **WHEN** `python scripts/e2e_day24.py` (Part A, net cut, tmp-БЗ)
-- **THEN** exit 0; каждый из 10 вопросов: done 200 + (sources с chunk_id И citations) OR dont_know; dont-know-ветка — 0 LLM-вызовов; CITE_RULE в payload при непустом блоке; verbatim ⊂/≤1300; chunk_id совпадает с БЗ; shape `rag_context` дней 21/22/23 без потерь
+- **THEN** exit 0; каждый из 10 вопросов: done 200 + (sources с chunk_id И citations) OR dont_know; dont-know-ветка — 0 LLM-вызовов; CITE_RULE в payload при непустом блоке; verbatim ⊂/≤2400; chunk_id совпадает с БЗ; shape `rag_context` дней 21/22/23 без потерь
 
 #### Scenario: Part B — live best-effort
 

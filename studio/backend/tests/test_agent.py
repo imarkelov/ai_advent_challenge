@@ -7,7 +7,8 @@ import json
 import httpx
 import pytest
 
-from agent import CONTEXT_LIMITS, INVARIANTS_RULE, MEMORY_RULE, StudioAgent
+from agent import (CONTEXT_LIMITS, FOCUS_FULL_TEXT_MAX, INVARIANTS_RULE,
+                   MEMORY_RULE, StudioAgent)
 from conftest import USAGE, delta_chunk, sse_body, usage_chunk
 from kb import HashEmbedder, KnowledgeBase
 from mcp import MCPRegistry
@@ -2185,16 +2186,16 @@ def test_mcp_tools_rule_only_when_tools_connected(data_dir):
 # ---------- День 21 (hybrid RAG): фокусное окно выдержки ----------
 
 def test_focus_snippet_centers_on_query_token():
-    """Факт в середине длинного чанка (>1300 — фокус-окно дня 21
+    """Факт в середине длинного чанка (>2400 — фокус-окно дня 21
     работает): слепой text[:300] утопил бы; запрос в другой форме
     («телефона» vs «телефон» в тексте) — окно центрируется на токене
-    с обрезанной инфлексией. Исправление дня 24: чанки ≤1300 —
+    с обрезанной инфлексией. Исправление дня 24: чанки ≤2400 —
     полный текст, поэтому windowing-тест — на длинном чанке."""
     text = ("x" * 2000 + "телефон Zubravichka-9000" + "y" * 500)
     snip = StudioAgent._focus_snippet(text, "какая модель телефона была")
     assert "Zubravichka-9000" in snip
     assert len(snip) == 300
-    # день 24 (фикс): короткий чанк (600 ≤1300) — весь текст назад
+    # день 24 (фикс): короткий чанк (600 ≤2400) — весь текст назад
     # (без некратных токенов windowing не проверяется)
     snip2 = StudioAgent._focus_snippet("абв" * 200, "привет")
     assert snip2 == "абв" * 200
@@ -2223,13 +2224,39 @@ def test_focus_snippet_full_chunk_needle_at_tail():
     assert snip == text  # короткий чанк — весь текст
 
 
+def test_focus_snippet_full_chunk_1671_live_case():
+    """День 24 (второй фикс после релиза, 1300 → 2400): целый
+    файло-чанк 1671 символов (файл без markdown-заголовков → один
+    чанк «whole file») идёт в LLM целиком: live-кейс
+    data/kb/uploads/skazka_1_tri_brata_zaytsa.txt (15 строк, 1671
+    симв.) — якорь «зайца» у головы, пасхалки-имена в хвосте
+    («Первого … Иван / Второго … Сергей / Третьего … Никола»);
+    при FOCUS_FULL_TEXT_MAX=1300 модель видела только 300-символьное
+    окно у головы чанка и не видела имён → неверный RAG-ответ.
+    2400 = порог субчанков StructuredChunker: все секции/файлы
+    ≤2400 уходят целиком."""
+    head = "Сказка «Три брата-зайца»\n\n"
+    egg = ("Первого брата зайца звали Иван\n"
+           "Второго брата зайца звали Сергей\n"
+           "Третьего брата зайца звали Никола")
+    filler = "Жили-были в поле, у старой берёзовой рощи, три брата-зайца. "
+    body = (filler * (1671 // len(filler) + 1))[:
+                                                 1671 - len(head) - len(egg)]
+    text = head + body + egg
+    assert len(text) == 1671
+    assert text.index("Никола") > 1600  # иголка — в самом хвосте
+    snip = StudioAgent._focus_snippet(text, "кто третий брат зайца")
+    assert "Никола" in snip
+    assert snip == text  # 1301–2400 — полный текст чанка
+
+
 def test_focus_snippet_long_chunk_still_windowed():
-    """День 24 (фикс) — регрессия windowing: чанк >1300 символов
+    """День 24 (фикс) — регрессия windowing: чанк >2400 символов
     всё ещё режется 300-символьным фокус-окном дня 21: якорь у
     головы чанка, иголка в самом хвосте в окно не попадает."""
-    text = ("Стал он кликать золотую рыбку. " + "y" * 1500
+    text = ("Стал он кликать золотую рыбку. " + "y" * 2600
             + "иголка в самом хвосте чанка N42")
-    assert len(text) > 1300
+    assert len(text) > 2400
     snip = StudioAgent._focus_snippet(
         text, "Какой телефон был у бабки из сказки о золотой рыбке?")
     assert len(snip) <= 300
@@ -2714,9 +2741,11 @@ def test_kb_block_cite_rule_in_system_payload(data_dir, tmp_path):
 
 def test_kb_context_chunk_id_snippet_subset(data_dir, tmp_path):
     """День 24: chunks[] в _kb_context несут chunk_id (аддитивно);
-    text — focused snippet ≤ 300 символов И ⊂ сохранённого текста
-    чанка из БЗ. День 24 (F-wave): chunks[] несут source — дословно
-    из результата search_rag (upload-корпус _fact_repo → "upload")."""
+    text — verbatim-выдержка ≤ FOCUS_FULL_TEXT_MAX (2400) И ⊂
+    сохранённого текста чанка из БЗ (чанк ≤2400 — полный текст,
+    длиннее — фокус-окно 300 дня 21). День 24 (F-wave): chunks[]
+    несут source — дословно из результата search_rag
+    (upload-корпус _fact_repo → "upload")."""
     kb = _fact_repo(tmp_path, "repo_cid")
     agent = make_agent(data_dir, ok_handler)
     agent.kb = kb
@@ -2737,4 +2766,4 @@ def test_kb_context_chunk_id_snippet_subset(data_dir, tmp_path):
         assert c["source"] == stored["source"] == "upload", \
             "source чанка ≠ сохранённому в БЗ (egg-book upload)"
         assert c["text"] in stored["text"], "snippet не ⊂ текста чанка из БЗ"
-        assert len(c["text"]) <= 300
+        assert len(c["text"]) <= FOCUS_FULL_TEXT_MAX
