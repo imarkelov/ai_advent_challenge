@@ -273,6 +273,20 @@ REWRITE_QUERY_PROMPT = ("Ты перефразируешь вопрос поль
                         "ОДНИМ предложением, ключевыми словами, без "
                         "приветствий и объяснений.")
 
+# День 24: честный отказ, когда поиск УСПЕШЕН, но выдержек нет (RAG-вкл).
+# LLM не вызывается; done: {answer: DONT_KNOW_TEXT, usage: None,
+# request_id: None}; сообщение — rag_context {recall_total, reranked,
+# chunks: [], dont_know: True}.
+DONT_KNOW_TEXT = ("Не знаю. В базе знаний не нашлось релевантных "
+                  "материалов. Уточните, пожалуйста: о каком документе "
+                  "или теме вы спрашиваете?")
+
+# День 24: [n]-правило цитирования — в конец непустого RAG-блока
+# system-промпта (номера — нумерация выдержек блока).
+CITE_RULE = ("Ссылайся на выдержки в ответе маркерами [1], [2], … "
+             "по номерам. Опирайся только на приведённые выдержки; если "
+             "выдержки не покрывают факт — так и скажи.")
+
 
 def _now() -> str:
     """Текущее время в формате 'YYYY-MM-DD HH:MM:SS'."""
@@ -448,17 +462,22 @@ class StudioAgent:
         """День 21 (реранкер): двухэтапный RAG-поиск — гибридный
         top-`recall` (этап 1), при включённом реранкере — cross-encoder
         (этап 2) и top-`top_k`. Возврат:
-        {"results": [...], "recall_total": N, "reranked": bool}.
-        День 23: `min_score` — порог релевантности (pass-through из
-        настроек БЗ в search_rag). Индекс не построен / поиск не
-        удался (KBError и пр. — сбой не ломает чат, только лог) —
-        пустые results."""
+        {"results": [...], "recall_total": N, "reranked": bool, "ok":
+        bool}. День 23: `min_score` — порог релевантности
+        (pass-through из настроек БЗ в search_rag). Индекс не построен
+        / поиск не удался (KBError и пр. — сбой не ломает чат, только
+        лог) — пустые results и ok=False. День 24: ok — отличает «сбой
+        поиска» от «поиск успешен, результатов 0» (dont-know триггер
+        только на втором случае)."""
         try:
-            return self.kb.search_rag(query, recall, top_k, reranker_mode,
-                                      min_score=min_score)
+            out = self.kb.search_rag(query, recall, top_k, reranker_mode,
+                                     min_score=min_score)
+            out["ok"] = True
+            return out
         except Exception as e:
             print("[KB] RAG: поиск не удался: " + str(e), flush=True)
-            return {"results": [], "recall_total": 0, "reranked": False}
+            return {"results": [], "recall_total": 0, "reranked": False,
+                    "ok": False}
 
     def build_kb_block(self, query: str, top_k: int = 3) -> str:
         """День 21: RAG-блок базы знаний для system-промпта — top-k
@@ -485,6 +504,9 @@ class StudioAgent:
             text = self._focus_snippet(r.get("text") or "", query)
             lines.append(f"{i}. [{r.get('file')} · {r.get('section')}] — "
                          f"{text}")
+        # День 24: [n]-правило цитирования — в конец непустого блока
+        # (номера — нумерация выдержек выше).
+        lines.append(CITE_RULE)
         return "\n".join(lines)
 
     def _kb_context(self, query: str, rag: dict) -> dict | None:
@@ -500,6 +522,9 @@ class StudioAgent:
         for i, r in enumerate(results, 1):
             chunks.append({
                 "rank": i,
+                # День 24: chunk_id (аддитивно) — связь инспектора
+                # с чанком из БЗ (источник цитаты, verbatim-проверка).
+                "chunk_id": r.get("chunk_id"),
                 "file": r.get("file"),
                 "section": r.get("section"),
                 "score": r.get("rerank_score", r.get("score")),
@@ -824,6 +849,21 @@ class StudioAgent:
                                      s["min_score"])
             kb_block = self._render_kb_block(message, rag["results"])
             kb_context = self._kb_context(message, rag)
+            # День 24: dont-know intercept — поиск УСПЕШЕН (ok, не
+            # KBError-сбой) и выдержек 0 → честный отказ БЕЗ LLM
+            # (паттерн no-LLM done profile-turn). Сбой поиска ≠ «в
+            # базе пусто» — обычный чат-поток (ok=False не трогает).
+            if rag["ok"] and not rag["results"]:
+                self.store.append_message(
+                    dialogue_id, "assistant", DONT_KNOW_TEXT,
+                    rag_context={
+                        "recall_total": rag.get("recall_total", 0),
+                        "reranked": bool(rag.get("reranked")),
+                        "chunks": [], "dont_know": True,
+                    })
+                yield {"type": "done", "answer": DONT_KNOW_TEXT,
+                       "usage": None, "request_id": None}
+                return
         # День 17: tool-loop. Инструменты подключённых MCP-серверов
         # (OpenAI-формат) и карта llm_name -> (server_id, real_name);
         # вычисляем один раз — за ход состав подключённых серверов

@@ -2487,3 +2487,211 @@ def test_ask_stream_source_has_no_rewrite_query_reference():
     import inspect
     src = inspect.getsource(StudioAgent.ask_stream)
     assert "rewrite_query" not in src
+
+
+# ---------- День 24: dont-know intercept + [n]-правило + chunk_id ----------
+
+def _counting_handler(calls):
+    """Fake-LLM: считает ВЕСЬ обращения (stream и non-stream), отдаёт
+    стандартные дельты. Stream payload сохраняется в calls['payloads']."""
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        payload = json.loads(request.content)
+        if "stream" in payload:
+            calls.setdefault("payloads", []).append(payload)
+        return httpx.Response(
+            200, content=sse_body([delta_chunk("Прив"), delta_chunk("ет"),
+                                   usage_chunk(), "[DONE]"]).encode("utf-8"))
+    calls = {"n": 0}
+    return handler, calls
+
+
+def test_ask_stream_dont_know_min_score_filters_all(data_dir, tmp_path,
+                                                    monkeypatch):
+    """День 24, триггер A: RAG-вкл, tmp-БЗ (HashEmbedder), fake-LLM,
+    min_score=0.999 + fake-реранкер (scores < 0.999) — весь recall
+    отфильтрован: done.answer == DONT_KNOW_TEXT, usage None,
+    request_id None, LLM-вызовов 0, сохранённое сообщение с
+    rag_context {recall_total, reranked, chunks: [], dont_know: True}."""
+    import kb as kb_module
+    from agent import DONT_KNOW_TEXT
+
+    class FakeReranker:
+        def __init__(self, base_url, api_key, client=None):
+            pass
+
+        def rerank(self, query, texts):
+            return [round((i + 1) / 100.0, 6) for i in range(len(texts))]
+
+    monkeypatch.setenv("GPUSTACK_KEY_RERANK", "fake-key")
+    monkeypatch.setattr(kb_module, "APIReranker", FakeReranker)
+
+    kb = _fact_repo(tmp_path, "repo_dk_minscore")
+    kb.update_settings({"reranker": "api", "min_score": 0.999})
+    handler, calls = _counting_handler(None)
+    agent = make_agent(data_dir, handler)
+    agent.kb = kb
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    agent.store.rename_dialogue(d["id"], "Д24")  # без авто-заголовка
+    events = list(agent.ask_stream(d["id"],
+                                   "какая модель телефона была у героя"))
+    assert events[-1] == {"type": "done", "answer": DONT_KNOW_TEXT,
+                          "usage": None, "request_id": None}
+    assert calls["n"] == 0, "LLM при dont-know не вызывается"
+    msgs = agent.store.get_messages(d["id"])
+    asst = [m for m in msgs if m["role"] == "assistant"]
+    assert asst and asst[-1]["content"] == DONT_KNOW_TEXT
+    ctx = asst[-1]["rag_context"]
+    assert set(ctx) == {"recall_total", "reranked", "chunks", "dont_know"}
+    assert ctx["chunks"] == []
+    assert ctx["dont_know"] is True
+    assert ctx["reranked"] is True
+    assert ctx["recall_total"] >= 1
+
+
+def test_ask_stream_dont_know_no_match_min_score_zero(data_dir, tmp_path,
+                                                      monkeypatch):
+    """День 24, триггер A′ при min_score=0 (дефолт, фильтр выключен):
+    вопрос без общих термов с корпусом — поиск УСПЕШЕН, но результатов
+    0 → dont-know, 0 LLM-вызовов. Векторная нога отключена (patch),
+    чтобы результат был чисто лексическим (BM25 пуст → fused пуст →
+    []); hash-векторная нога на любом запросе ранжирует все чанки,
+    и «нет совпадений» с ней получить нельзя."""
+    from kb import KBError
+    from agent import DONT_KNOW_TEXT
+
+    def _no_vec_leg(idx):
+        raise KBError("векторная нога отключена (тест)")
+    kb = _fact_repo(tmp_path, "repo_dk_nomatch")
+    monkeypatch.setattr(kb, "_embedder_from_index", _no_vec_leg)
+
+    handler, calls = _counting_handler(None)
+    agent = make_agent(data_dir, handler)
+    agent.kb = kb
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    agent.store.rename_dialogue(d["id"], "Д24")
+    events = list(agent.ask_stream(
+        d["id"], "какой рецепт борща с говядиной и свёклой"))
+    assert events[-1] == {"type": "done", "answer": DONT_KNOW_TEXT,
+                          "usage": None, "request_id": None}
+    assert calls["n"] == 0
+    msgs = agent.store.get_messages(d["id"])
+    asst = [m for m in msgs if m["role"] == "assistant"]
+    assert asst and asst[-1]["content"] == DONT_KNOW_TEXT
+    ctx = asst[-1]["rag_context"]
+    assert ctx["chunks"] == []
+    assert ctx["dont_know"] is True
+    assert ctx["reranked"] is False
+    assert ctx["recall_total"] == 0
+
+
+def test_ask_stream_no_index_no_dont_know(data_dir):
+    """День 24 (negative): индекс не построен (KBError) — обычный
+    LLM-вызов (count == 1), dont-know НЕ срабатывает, без краха.
+    Сбой поиска ≠ «в базе пусто»."""
+    from agent import DONT_KNOW_TEXT
+
+    handler, calls = _counting_handler(None)
+    agent = make_agent(data_dir, handler)  # kb БЕЗ индекса
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    agent.store.rename_dialogue(d["id"], "Д24")
+    events = list(agent.ask_stream(d["id"], "привет"))
+    assert events[-1]["type"] == "done"
+    assert events[-1]["answer"] == "Привет"
+    assert events[-1]["answer"] != DONT_KNOW_TEXT
+    assert calls["n"] == 1
+    msgs = agent.store.get_messages(d["id"])
+    asst = [m for m in msgs if m["role"] == "assistant"]
+    assert asst
+    assert "dont_know" not in (asst[-1].get("rag_context") or {})
+
+
+def test_ask_stream_rag_false_no_retrieval_no_dont_know(data_dir, tmp_path,
+                                                        monkeypatch):
+    """День 24: per-диалог rag=false — retrieval НЕ идёт (spy на
+    search_rag), dont-know невозможен; обычный LLM-ответ."""
+    kb = _fact_repo(tmp_path, "repo_ragoff")
+
+    seen = []
+    orig = kb.search_rag
+
+    def spy(query, recall, top_k, reranker_mode="off", **kwargs):
+        seen.append(query)
+        return orig(query, recall, top_k, reranker_mode, **kwargs)
+    monkeypatch.setattr(kb, "search_rag", spy)
+
+    handler, calls = _counting_handler(None)
+    agent = make_agent(data_dir, handler)
+    agent.kb = kb
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    agent.store.set_dialogue_rag(d["id"], False)
+    agent.store.rename_dialogue(d["id"], "Д24")
+    events = list(agent.ask_stream(d["id"],
+                                   "какая модель телефона была у героя"))
+    assert events[-1]["type"] == "done"
+    assert calls["n"] == 1
+    assert seen == []  # retrieval не шёл
+    msgs = agent.store.get_messages(d["id"])
+    asst = [m for m in msgs if m["role"] == "assistant"]
+    assert asst
+    assert "dont_know" not in (asst[-1].get("rag_context") or {})
+    assert asst[-1]["content"] != "Не знаю."
+
+
+def test_kb_block_cite_rule_in_system_payload(data_dir, tmp_path):
+    """День 24: kb_block непустой → CITE_RULE (точная строка) в content
+    system-сообщения captured LLM-payload; результат пустой (нет
+    индекса) → правила в system-сообщении нет."""
+    from agent import CITE_RULE
+
+    kb = _fact_repo(tmp_path, "repo_cite")
+    handler, calls = _counting_handler(None)
+    agent = make_agent(data_dir, handler)
+    agent.kb = kb
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    agent.store.rename_dialogue(d["id"], "Д24")
+    list(agent.ask_stream(d["id"],
+                          "какая модель телефона была у героя"))
+    sys_content = calls["payloads"][0]["messages"][0]["content"]
+    assert CITE_RULE in sys_content
+
+    # пустой результат (индекс не построен): правила нет
+    data2 = tmp_path / "data2"
+    data2.mkdir()
+    handler2, calls2 = _counting_handler(None)
+    agent2 = make_agent(data2, handler2)
+    d2 = agent2.store.new_dialogue()
+    ready(agent2, d2)
+    agent2.store.rename_dialogue(d2["id"], "Д24")
+    list(agent2.ask_stream(d2["id"], "привет"))
+    assert CITE_RULE not in calls2["payloads"][0]["messages"][0]["content"]
+
+
+def test_kb_context_chunk_id_snippet_subset(data_dir, tmp_path):
+    """День 24: chunks[] в _kb_context несут chunk_id (аддитивно);
+    text — focused snippet ≤ 300 символов И ⊂ сохранённого текста
+    чанка из БЗ."""
+    kb = _fact_repo(tmp_path, "repo_cid")
+    agent = make_agent(data_dir, ok_handler)
+    agent.kb = kb
+    d = agent.store.new_dialogue()
+    ready(agent, d)
+    agent.store.rename_dialogue(d["id"], "Д24")
+    list(agent.ask_stream(d["id"],
+                          "какая модель телефона была у героя"))
+    msgs = agent.store.get_messages(d["id"])
+    asst = [m for m in msgs if m["role"] == "assistant"]
+    ctx = asst[-1]["rag_context"]
+    assert ctx["chunks"]
+    idx_chunks = {c["chunk_id"]: c["text"]
+                  for c in kb.load_index()["chunks"]}
+    for c in ctx["chunks"]:
+        assert "chunk_id" in c
+        stored = idx_chunks[c["chunk_id"]]
+        assert c["text"] in stored, "snippet не ⊂ текста чанка из БЗ"
+        assert len(c["text"]) <= 300
