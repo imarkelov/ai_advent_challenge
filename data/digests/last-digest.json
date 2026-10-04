@@ -1,34 +1,34 @@
 {
-  "id": "digest-20261004-1622",
-  "generated_at": "2026-10-04T16:22:59Z",
+  "id": "digest-20261004-2049",
+  "generated_at": "2026-10-04T20:49:56Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 6.8,
-    "feels_like_c": 3.8,
-    "description": "Пасмурно",
-    "wind_ms": 8.5
+    "temp_c": 4.9,
+    "feels_like_c": 1.9,
+    "description": "Преимущественно ясно",
+    "wind_ms": 8.2
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Покупатели дорогих моделей не испугаются: что будет с ценами на автомобили после индексации утильсбора — подсчёт Autonews",
-        "url": "https://vc.ru/transport/3173559-tseny-na-avtomobili-posle-indeksatsii-utilsbora?from=rss"
+        "title": "UX-задача для разработчиков роботакси — не дать пассажирам превратить салон в спальню",
+        "url": "https://vc.ru/transport/3175260-ux-zadacha-dlya-robotaksi-kak-ne-dopustit-seks-v-salone?from=rss"
       },
       {
-        "title": "В поисках того, кто пашет и может оказаться умнее нанимающего менеджера: каких сотрудников ищет SpaceX",
-        "url": "https://vc.ru/hr/3173801-spacex-i-trebovaniya-k-sotrudnikam?from=rss"
+        "title": "Покупатели дорогих моделей не испугаются: что будет с ценами на автомобили после индексации утильсбора — подсчёт Autonews",
+        "url": "https://vc.ru/transport/3173559-tseny-na-avtomobili-posle-indeksatsii-utilsbora?from=rss"
       },
       {
         "title": "День 1684: десятка худших акций на Мосбирже по итогам трёх кварталов подешевела в среднем на 66,77%",
         "url": "https://vc.ru/money/3174574-khudshie-aktsii-na-mosbirzhe-padenie-tsen?from=rss"
       },
       {
-        "title": "Офлайн-мессенджер Bitchat Джека Дорси удалили из индийского App Store по требованию регулятора",
-        "url": "https://vc.ru/services/3174742-udalenie-oflayn-messendzhera-bitchat-dzheka-dorsi-iz-indijskogo-app-store?from=rss"
+        "title": "VK избавилась от доли в сервисе Intickets — он продавал билеты на концерты Канье Уэста в Санкт-Петербурге, которые в итоге отменили",
+        "url": "https://vc.ru/money/3175371-vk-prodala-dolyu-v-intickets-kontserty-kanye-uesta?from=rss"
       },
       {
-        "title": "Аргентина запустила программу получения гражданства за инвестиции — можно внести $350 тысяч в казну или купить облигации на $800 тысяч",
-        "url": "https://vc.ru/migration/3172466-argentina-programma-grazhdanstva-za-investitsii?from=rss"
+        "title": "В поисках того, кто пашет и может оказаться умнее нанимающего менеджера: каких сотрудников ищет SpaceX",
+        "url": "https://vc.ru/hr/3173801-spacex-i-trebovaniya-k-sotrudnikam?from=rss"
       }
     ],
     "habr": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261004-1622: Самара 6.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261004-2049: Самара 4.9°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
