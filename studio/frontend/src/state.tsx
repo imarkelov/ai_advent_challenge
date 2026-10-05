@@ -175,7 +175,7 @@ export interface ModelInfo {
 
 // Активная вкладка правой панели «Контекст» (день 12: бейдж в шапке чата
 // открывает вкладку «Профили» извне панели)
-export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile' | 'invariants' | 'kb'
+export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile' | 'invariants' | 'kb' | 'task'
 
 export interface StudioState {
   loaded: boolean

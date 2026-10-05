@@ -191,7 +191,11 @@ def test_taboo_reminder_appended_to_payload(data_dir):
     seen = {}
 
     def handler(request):
-        seen["messages"] = json.loads(request.content)["messages"]
+        # День 25: non-stream-вызов «память задачи» (_update_task_state)
+        # идёт ПОСЛЕ главного запроса — захватываем только stream-payload
+        body = json.loads(request.content)
+        if body.get("stream"):
+            seen["messages"] = body["messages"]
         return ok_handler(request)
 
     agent = make_agent(data_dir, handler)
@@ -210,7 +214,9 @@ def test_taboo_reminder_second_token(data_dir):
     seen = {}
 
     def handler(request):
-        seen["messages"] = json.loads(request.content)["messages"]
+        body = json.loads(request.content)  # день 25: только stream-payload
+        if body.get("stream"):
+            seen["messages"] = body["messages"]
         return ok_handler(request)
 
     agent = make_agent(data_dir, handler)
@@ -272,7 +278,9 @@ def test_taboo_short_token_skipped(data_dir):
     seen = {}
 
     def handler(request):
-        seen["messages"] = json.loads(request.content)["messages"]
+        body = json.loads(request.content)  # день 25: только stream-payload
+        if body.get("stream"):
+            seen["messages"] = body["messages"]
         return ok_handler(request)
 
     agent = make_agent(data_dir, handler)
@@ -290,7 +298,9 @@ def test_taboo_coexists_with_conflict_guard(data_dir):
     seen = {}
 
     def handler(request):
-        seen["messages"] = json.loads(request.content)["messages"]
+        body = json.loads(request.content)  # день 25: только stream-payload
+        if body.get("stream"):
+            seen["messages"] = body["messages"]
         return ok_handler(request)
 
     agent = make_agent(data_dir, handler)
@@ -335,9 +345,13 @@ def test_ask_stream_success(data_dir):
     seen = {}
 
     def handler(request):
-        seen["url"] = str(request.url)
-        seen["auth"] = request.headers.get("Authorization")
-        seen["body"] = json.loads(request.content)
+        body = json.loads(request.content)
+        # День 25: только stream-payload главного запроса (non-stream
+        # «память задачи» — отдельный вызов, не проверяется здесь)
+        if body.get("stream"):
+            seen["url"] = str(request.url)
+            seen["auth"] = request.headers.get("Authorization")
+            seen["body"] = body
         return ok_handler(request)
 
     agent = make_agent(data_dir, handler)
@@ -587,7 +601,9 @@ def test_conflict_reminder_appended_to_payload(data_dir):
     seen = {}
 
     def handler(request):
-        seen["messages"] = json.loads(request.content)["messages"]
+        body = json.loads(request.content)  # день 25: только stream-payload
+        if body.get("stream"):
+            seen["messages"] = body["messages"]
         return ok_handler(request)
 
     agent = make_agent(data_dir, handler)
@@ -758,7 +774,9 @@ def test_invariant_reminder_appended_to_payload(data_dir):
     seen = {}
 
     def handler(request):
-        seen["messages"] = json.loads(request.content)["messages"]
+        body = json.loads(request.content)  # день 25: только stream-payload
+        if body.get("stream"):
+            seen["messages"] = body["messages"]
         return ok_handler(request)
 
     agent = make_agent(data_dir, handler)
@@ -793,7 +811,9 @@ def test_invariant_reminder_last_among_guards(data_dir):
     seen = {}
 
     def handler(request):
-        seen["messages"] = json.loads(request.content)["messages"]
+        body = json.loads(request.content)  # день 25: только stream-payload
+        if body.get("stream"):
+            seen["messages"] = body["messages"]
         return ok_handler(request)
 
     agent = make_agent(data_dir, handler)
@@ -862,10 +882,19 @@ def test_ask_stream_no_invariant_violation_when_clean(data_dir):
 # ---------- ask_stream: авто-заголовок и model в сообщениях ----------
 
 def _title_handler(title_response, calls):
-    """non-stream (авто-заголовок) → title_response; stream → SSE."""
+    """non-stream (авто-заголовок) → title_response; stream → SSE.
+
+    День 25: non-stream-вызов «память задачи» (_update_task_state) — НЕ
+    авто-заголовок: в счётчик calls не идёт (ответ валидный пустой JSON —
+    экстракция no-op: новое состояние == предыдущее)."""
     def handler(request):
         if request.url.path.endswith("/chat/completions"):
-            if "stream" not in json.loads(request.content):
+            payload = json.loads(request.content)
+            if "stream" not in payload:
+                sys_c = (payload.get("messages") or [{}])[0].get("content") or ""
+                if "«память задачи»" in sys_c:
+                    return httpx.Response(
+                        200, json={"choices": [{"message": {"content": "{}"}}]})
                 calls["n"] += 1
                 return title_response
             body = sse_body([delta_chunk("ok"), usage_chunk(), "[DONE]"])
@@ -2656,8 +2685,8 @@ def test_ask_stream_dont_know_no_match_min_score_zero(data_dir, tmp_path,
 
 def test_ask_stream_no_index_no_dont_know(data_dir):
     """День 24 (negative): индекс не построен (KBError) — обычный
-    LLM-вызов (count == 1), dont-know НЕ срабатывает, без краха.
-    Сбой поиска ≠ «в базе пусто»."""
+    LLM-вызов + non-stream «память задачи» дня 25 (count == 2),
+    dont-know НЕ срабатывает, без краха. Сбой поиска ≠ «в базе пусто»."""
     from agent import DONT_KNOW_TEXT
 
     handler, calls = _counting_handler(None)
@@ -2669,7 +2698,7 @@ def test_ask_stream_no_index_no_dont_know(data_dir):
     assert events[-1]["type"] == "done"
     assert events[-1]["answer"] == "Привет"
     assert events[-1]["answer"] != DONT_KNOW_TEXT
-    assert calls["n"] == 1
+    assert calls["n"] == 2  # stream + «память задачи» (день 25)
     msgs = agent.store.get_messages(d["id"])
     asst = [m for m in msgs if m["role"] == "assistant"]
     assert asst
@@ -2679,7 +2708,8 @@ def test_ask_stream_no_index_no_dont_know(data_dir):
 def test_ask_stream_rag_false_no_retrieval_no_dont_know(data_dir, tmp_path,
                                                         monkeypatch):
     """День 24: per-диалог rag=false — retrieval НЕ идёт (spy на
-    search_rag), dont-know невозможен; обычный LLM-ответ."""
+    search_rag), dont-know невозможен; обычный LLM-ответ + non-stream
+    «память задачи» дня 25 (count == 2)."""
     kb = _fact_repo(tmp_path, "repo_ragoff")
 
     seen = []
@@ -2700,7 +2730,7 @@ def test_ask_stream_rag_false_no_retrieval_no_dont_know(data_dir, tmp_path,
     events = list(agent.ask_stream(d["id"],
                                    "какая модель телефона была у героя"))
     assert events[-1]["type"] == "done"
-    assert calls["n"] == 1
+    assert calls["n"] == 2  # stream + «память задачи» (день 25)
     assert seen == []  # retrieval не шёл
     msgs = agent.store.get_messages(d["id"])
     asst = [m for m in msgs if m["role"] == "assistant"]

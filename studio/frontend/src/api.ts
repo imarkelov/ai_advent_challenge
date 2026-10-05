@@ -628,6 +628,29 @@ export function apiSetDialogueRag(id: string, rag: boolean): Promise<{ rag: bool
   return apiPost(`/dialogues/${encodeURIComponent(id)}/rag`, { rag })
 }
 
+// ── День 25: память задачи (task state) per-диалог ─────────────────────────
+// Память задачи: что пользователь уже уточнил (clarifications), какие
+// ограничения/термины зафиксированы (constraints), какова цель диалога (goal).
+// Внимание: НЕ путать с TaskState (FSM задачи дня 13, выше) — отдельная
+// сущность дня 25, поэтому имя другое (TaskMemoryState).
+export interface TaskMemoryState {
+  clarifications: string[]
+  constraints: string[]
+  goal: string
+}
+
+// GET /api/dialogues/{id}/task-state → {task_state}; 404 — диалог не найден.
+// Старые записи диалога без task_state → пустое состояние (бэкенд нормализует).
+export function apiGetTaskState(id: string): Promise<{ task_state: TaskMemoryState }> {
+  return apiGet(`/dialogues/${encodeURIComponent(id)}/task-state`)
+}
+
+// POST /api/dialogues/{id}/task-state — запись ЦЕЛОГО состояния (все 3 поля
+// обязательны; отсутствующее поле = 400). 400 — некорректные поля, 404 — диалог.
+export function apiSetTaskState(id: string, taskState: TaskMemoryState): Promise<{ task_state: TaskMemoryState }> {
+  return apiPost(`/dialogues/${encodeURIComponent(id)}/task-state`, taskState)
+}
+
 // Частичное обновление настроек: POST /api/kb/settings {…} → актуальные настройки
 export function apiKbSettingsPost(patch: Partial<KbSettings>): Promise<KbSettings> {
   return apiPost('/kb/settings', patch)

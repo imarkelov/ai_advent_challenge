@@ -6,6 +6,7 @@ import MemoryTab from './MemoryTab'
 import ProfileTab from './ProfileTab'
 import InvariantsTab from './InvariantsTab'
 import KbTab from './KbTab'
+import TaskStateTab from './TaskStateTab'
 import { useStudio } from '../state'
 
 const TABS = [
@@ -13,6 +14,7 @@ const TABS = [
   { id: 'profile', label: 'Профили' },
   { id: 'invariants', label: 'Инварианты' },
   { id: 'kb', label: 'База знаний' },
+  { id: 'task', label: 'Задача' },
 ] as const
 
 export default function ContextPanel() {
@@ -40,6 +42,7 @@ export default function ContextPanel() {
         {tab === 'profile' && <ProfileTab />}
         {tab === 'invariants' && <InvariantsTab />}
         {tab === 'kb' && <KbTab />}
+        {tab === 'task' && <TaskStateTab />}
       </div>
     </aside>
   )

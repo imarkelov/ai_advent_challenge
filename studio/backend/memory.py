@@ -118,7 +118,7 @@ def new_plan() -> list:
 
 
 def new_task() -> dict:
-    """Свежее (неактивное) состояние задачи (схема дня 13b)."""
+    """Свежее (неактивное) состояние задачи (схема дня 13b + день 25 task_state)."""
     return {"active": False, "task_id": None, "stage": None,
             "current_step": 0, "total_steps": len(TASK_FLOW),
             "expected_action": None, "plan": [], "work_steps": [],
@@ -249,7 +249,7 @@ class MemoryStore:
             data = self._read_dialogues()
             d = {"id": uuid.uuid4().hex, "title": "Новый диалог",
                  "created": _now(), "messages": [], "profile": new_profile(),
-                 "rag": None}
+                 "rag": None, "task_state": {"clarifications": [], "constraints": [], "goal": ""}}
             data["dialogues"].append(d)
             data["active_id"] = d["id"]
             self._write_dialogues(data)
@@ -268,7 +268,8 @@ class MemoryStore:
                       "used_task": _used_task_of(d),
                       "profile": self._profile_of(d),
                       "task": self._task_of(d),
-                      "rag": d.get("rag")}
+                      "rag": d.get("rag"),
+                      "task_state": self._task_state_of(d)}
                      for d in data["dialogues"]]
 
     def get_dialogue(self, dialogue_id: str) -> dict | None:
@@ -284,7 +285,8 @@ class MemoryStore:
                     "used_task": _used_task_of(d),
                     "profile": self._profile_of(d),
                     "task": self._task_of(d),
-                    "rag": d.get("rag")}
+                    "rag": d.get("rag"),
+                    "task_state": self._task_state_of(d)}
 
     def get_messages(self, dialogue_id: str) -> list:
         """Сообщения диалога [{role,content}] ([] если диалог не найден)."""
@@ -343,6 +345,59 @@ class MemoryStore:
                 raise ValueError(f"Диалог «{dialogue_id}» не найден")
             d["rag"] = rag
             self._write_dialogues(data)
+
+    # ---------- память задачи (день 25: task_state) ----------
+
+    @staticmethod
+    def _task_state_of(d: dict) -> dict:
+        """task_state записи диалога; отсутствие поля (старая схема) —
+        пустое состояние (бэкворд-совместимость)."""
+        raw = d.get("task_state")
+        ts = {"clarifications": [], "constraints": [], "goal": ""}
+        if not isinstance(raw, dict):
+            return ts
+        if isinstance(raw.get("clarifications"), list):
+            ts["clarifications"] = [s for s in raw["clarifications"]
+                                    if isinstance(s, str)]
+        if isinstance(raw.get("constraints"), list):
+            ts["constraints"] = [s for s in raw["constraints"]
+                                 if isinstance(s, str)]
+        if isinstance(raw.get("goal"), str):
+            ts["goal"] = raw["goal"]
+        return ts
+
+    def get_task_state(self, dialogue_id: str) -> dict:
+        """Память задачи диалога; ValueError, если диалог не существует."""
+        with self._lock:
+            data = self._read_dialogues()
+            d = self._find(data, dialogue_id)
+            if d is None:
+                raise ValueError(f"Диалог «{dialogue_id}» не найден")
+            return self._task_state_of(d)
+
+    def update_task_state(self, dialogue_id: str, task_state: dict) -> dict:
+        """Записать память задачи диалога (целое состояние). ValueError,
+        если диалог не существует или task_state некорректен."""
+        if not isinstance(task_state, dict):
+            raise ValueError("task_state должен быть объектом")
+        clar = task_state.get("clarifications", [])
+        cons = task_state.get("constraints", [])
+        goal = task_state.get("goal", "")
+        if not isinstance(clar, list) or not all(isinstance(s, str) for s in clar):
+            raise ValueError("clarifications должен быть списком строк")
+        if not isinstance(cons, list) or not all(isinstance(s, str) for s in cons):
+            raise ValueError("constraints должен быть списком строк")
+        if not isinstance(goal, str):
+            raise ValueError("goal должен быть строкой")
+        with self._lock:
+            data = self._read_dialogues()
+            d = self._find(data, dialogue_id)
+            if d is None:
+                raise ValueError(f"Диалог «{dialogue_id}» не найден")
+            d["task_state"] = {"clarifications": clar, "constraints": cons,
+                               "goal": goal}
+            self._write_dialogues(data)
+            return d["task_state"]
 
     def append_message(self, dialogue_id: str, role: str, content: str,
                         model: str | None = None,

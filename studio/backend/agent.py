@@ -709,6 +709,11 @@ class StudioAgent:
         # подключённые тулы (иначе шум в system-промпте).
         if self.mcp.tools():
             system += MCP_TOOLS_RULE + self._mcp_catalog_block()
+        # День 25: память задачи (цель/уточнения/ограничения) — блок
+        # в system-промпт, пока непустой; пустое состояние — без блока.
+        ts_block = self.build_task_memory_block(dialogue_id)
+        if ts_block:
+            system += ts_block
         # День 14: инварианты непусты — правило с высшим приоритетом
         # в КОНЦЕ system-промпта (самое «свежее» место в system).
         if invariants:
@@ -732,6 +737,116 @@ class StudioAgent:
             history = [{"role": "user", "content": msgs[-1]["content"]}
                        if msgs else []]
         return [{"role": "system", "content": system}] + history
+
+    # ---------- память задачи (день 25) ----------
+    # Примечание: метод дня 13 `build_task_state_block(t, stage, ...)`
+    # (блок task-машины для stage-агентов) — НЕ этот; день 25 использует
+    # имя `build_task_memory_block` (коллизию имён убрали фиксом).
+
+    def build_task_memory_block(self, dialogue_id: str) -> str:
+        """День 25: память задачи диалога как блок system-промпта;
+        пустое состояние (goal и оба списка пустые) — пустая строка."""
+        try:
+            ts = self.store.get_task_state(dialogue_id)
+        except ValueError:
+            return ""
+        lines = []
+        if ts.get("goal"):
+            lines.append("Цель диалога: " + ts["goal"])
+        if ts.get("clarifications"):
+            lines.append("Уточнения пользователя:\n" +
+                         "\n".join("- " + s for s in ts["clarifications"]))
+        if ts.get("constraints"):
+            lines.append("Зафиксированные ограничения и термины:\n" +
+                         "\n".join("- " + s for s in ts["constraints"]))
+        if not lines:
+            return ""
+        return ("\n\nПамять задачи (день 25) — что зафиксировано в этом "
+                "диалоге. Не теряй цель диалога: учитывай её и ограничения "
+                "в каждом ответе.\n" + "\n".join(lines))
+
+    def _update_task_state(self, dialogue_id: str, model: str) -> None:
+        """День 25: обновление памяти задачи после хода (best-effort:
+        любой сбой — состояние не меняется, чат не затрагивается).
+
+        Один non-stream LLM-вызов (T=0, паттерн авто-заголовка дня 11):
+        по хвосту диалога (последние 12 user/assistant-сообщений) извлекает
+        цель, уточнения и ограничения; учитывает предыдущую память задачи.
+        Вызов НЕ пишется в журнал requests.json."""
+        try:
+            msgs = self.store.get_messages(dialogue_id)
+        except ValueError:
+            return
+        tail = [m for m in msgs[-12:]
+                if m.get("role") in ("user", "assistant")
+                and isinstance(m.get("content"), str) and m["content"].strip()
+                and not m.get("task_stage") and not m.get("tool_calls")]
+        if len(tail) < 2:
+            return
+        ts = self.store.get_task_state(dialogue_id)
+        transcript = "\n".join(
+            "%s: %s" % ("ПОЛЬЗОВАТЕЛЬ" if m["role"] == "user" else "АССИСТЕНТ",
+                        m["content"][:500])
+            for m in tail)
+        prev = json.dumps(
+            {"goal": ts["goal"], "clarifications": ts["clarifications"],
+             "constraints": ts["constraints"]}, ensure_ascii=False)
+        body = {
+            "model": model,
+            "temperature": 0,
+            "max_tokens": 600,
+            "chat_template_kwargs": {"enable_thinking": False},
+            "messages": [
+                {"role": "system",
+                 "content": ("Ты ведёшь «память задачи» диалога: goal — "
+                             "чему в конечном счёте должен привести диалог "
+                             "(одна фраза); clarifications — что пользователь "
+                             "уже уточнил (короткие фразы); constraints — "
+                             "какие ограничения, условия и термины "
+                             "зафиксированы (короткие фразы). Учитывай "
+                             "предыдущую память задачи: не теряй и не "
+                             "дублируй. Верни ТОЛЬКО JSON-объект без "
+                             "пояснений и без markdown: {\"goal\": \"...\", "
+                             "\"clarifications\": [\"...\"], \"constraints\": "
+                             "[\"...\"]}. Если поле не определено — пустая "
+                             "строка/пустой список.")},
+                {"role": "user",
+                 "content": "Предыдущая память задачи: " + prev +
+                            "\n\nДиалог:\n" + transcript},
+            ],
+        }
+        try:
+            resp = self._client.post(
+                self.base_url + "/chat/completions",
+                headers={"Authorization": "Bearer " + self._key_for(model)},
+                json=body, timeout=60,
+            )
+            if resp.status_code != 200:
+                return
+            content = (((resp.json().get("choices") or [{}])[0]
+                        .get("message") or {}).get("content") or "")
+            s, e = content.find("{"), content.rfind("}")
+            if s == -1 or e <= s:
+                return
+            obj = json.loads(content[s:e + 1])
+            if not isinstance(obj, dict):
+                return
+            goal = (obj.get("goal").strip()
+                    if isinstance(obj.get("goal"), str) else "")
+            raw_c = obj.get("clarifications")
+            clar = ([x.strip() for x in raw_c if isinstance(x, str)]
+                    if isinstance(raw_c, list) else [])
+            raw_k = obj.get("constraints")
+            cons = ([x.strip() for x in raw_k if isinstance(x, str)]
+                    if isinstance(raw_k, list) else [])
+            new_ts = {"goal": goal,
+                      "clarifications": [s for s in clar if s][:10],
+                      "constraints": [s for s in cons if s][:10]}
+            if new_ts == ts:
+                return
+            self.store.update_task_state(dialogue_id, new_ts)
+        except (httpx.HTTPError, ValueError):
+            return
 
     def _mcp_catalog_block(self) -> str:
         """День 20: каталог подключённых серверов в system-промпте:
@@ -1013,10 +1128,20 @@ class StudioAgent:
                                           rag_context=kb_context,
                                           request_id=rid, usage=usage)
                 print("[Final Response] " + answer[:200], flush=True)
+                # День 25: память задачи — обновление после хода
+                # (best-effort non-stream-вызов; сбой не влияет на чат).
+                self._update_task_state(dialogue_id, cfg["model"])
                 if violation:
                     yield {"type": "invariant_violation", "patterns": hits}
-                yield {"type": "done", "answer": answer, "usage": usage,
-                       "request_id": rid}
+                done = {"type": "done", "answer": answer, "usage": usage,
+                        "request_id": rid}
+                # День 25: свежая память задачи в done (фронтенд обновляет
+                # панель без доп. запроса; аддитивно — старые клиенты игнорируют).
+                try:
+                    done["task_state"] = self.store.get_task_state(dialogue_id)
+                except ValueError:
+                    pass
+                yield done
                 return
 
             # Модель решила вызвать инструменты: логируем решение,

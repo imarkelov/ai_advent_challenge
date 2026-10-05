@@ -387,6 +387,36 @@ def create_app(agent: StudioAgent | None = None,
         agent.store.activate(dialogue_id)
         return {"active_id": agent.store.active_id()}
 
+    # ---------- память задачи (день 25) ----------
+
+    @app.get("/api/dialogues/{dialogue_id}/task-state")
+    def task_state_get(dialogue_id: str):
+        """Память задачи диалога (день 25): {clarifications, constraints,
+        goal}. 404 — диалог не найден."""
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        return {"task_state": agent.store.get_task_state(dialogue_id)}
+
+    @app.post("/api/dialogues/{dialogue_id}/task-state")
+    def task_state_update(dialogue_id: str, body: dict):
+        """Записать память задачи диалога (день 25, целое состояние):
+        body {clarifications: [str], constraints: [str], goal: str}
+        (поля опциональны — отсутствуют = не менять? нет: запись
+        целого состояния, отсутствующие поля = пустые).
+        400 — некорректные поля; 404 — диалог не найден."""
+        if agent.store.get_dialogue(dialogue_id) is None:
+            raise HTTPException(404, f"Диалог «{dialogue_id}» не найден")
+        for key, ru in (("clarifications", "clarifications должен быть списком строк"),
+                        ("constraints", "constraints должен быть списком строк"),
+                        ("goal", "goal должен быть строкой")):
+            if key not in body:
+                raise HTTPException(400, ru)
+        try:
+            ts = agent.store.update_task_state(dialogue_id, body)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        return {"task_state": ts}
+
     # ---------- память: ST ----------
 
     @app.post("/api/memory/st/clear")
