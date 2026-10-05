@@ -3514,5 +3514,85 @@
       ]
     },
     "summary": "Сводка digest-20261005-0353: Самара 3.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261005-1330",
+    "generated_at": "2026-10-05T13:30:23Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 9.0,
+      "feels_like_c": 5.2,
+      "description": "Ясно",
+      "wind_ms": 9.2
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Т-Банк» запустил оплату налогов в рассрочку с кредитной карты",
+          "url": "https://vc.ru/money/3176075-oplata-nalogov-v-rassrochku-v-t-banke?from=rss"
+        },
+        {
+          "title": "«Ъ»: Минцифры вернулось к идее введения платы за международный трафик сверх лимита — теперь речь идёт о пороге в 50 ГБ, но только для сетей 5G",
+          "url": "https://vc.ru/services/3175814-mincifry-plata-za-mezhdunarodnyy-trafik-v-setyah-5g?from=rss"
+        },
+        {
+          "title": "Минцифры начало разрабатывать правила включения сайтов и приложений в «белый список» сервисов, доступных при ограничениях интернета — РБК",
+          "url": "https://vc.ru/services/3176222-mintsifry-razrabotka-pravil-dlya-belykh-spiskov?from=rss"
+        },
+        {
+          "title": "Wildberries начал тестировать в Тверской области доставку через «передвижной ПВЗ» — машина с заказами будет приезжать в малонаселённые пункты несколько раз в неделю",
+          "url": "https://vc.ru/marketplace/3176359-wildberries-testiruet-dostavku-cherez-peredvizhnoj-pvz-v-tverskoj-oblasti?from=rss"
+        },
+        {
+          "title": "Max запустил таргетированную рекламу в каналах с аудиторией от 1000 человек",
+          "url": "https://vc.ru/services/3176386-targetirovannaya-reklama-v-max-cherez-vk-reklamu?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Жительницу Флориды арестовали за обсуждение с Claude планов «устроить стрельбу» в офисе шерифа",
+          "url": "https://habr.com/ru/news/1090574/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090574"
+        },
+        {
+          "title": "РКН начал блокировать packagist.org (?)",
+          "url": "https://habr.com/ru/news/1090568/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090568"
+        },
+        {
+          "title": "Релиз PPEM 2.10: новый механизм обнаружения проблем СУБД, внешние хранилища ASH и кастомизация дашборда",
+          "url": "https://habr.com/ru/companies/postgrespro/news/1090564/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090564"
+        },
+        {
+          "title": "Федеральный судья в США назвал систему Flock инструментом «беспорядочной массовой слежки»",
+          "url": "https://habr.com/ru/news/1090550/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090550"
+        },
+        {
+          "title": "Астрономы нашли неожиданную подсказку к загадке расширения Вселенной",
+          "url": "https://habr.com/ru/news/1090502/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090502"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Нет другого выбора, кроме как принять ИИ",
+          "url": "https://tproger.ru/articles/net-drugogo-vybora-krome-kak-prinyat-ii"
+        },
+        {
+          "title": "OpenCourant выпустил первые стабильные сборки для Linux x86-64",
+          "url": "https://tproger.ru/news/opencourant-vypustil-pervye-stabilnye-sborki-dlya-linux-x86-64"
+        },
+        {
+          "title": "Future AGI 1.46.0 добавила приоритизацию решений в аналитике симуляций",
+          "url": "https://tproger.ru/news/future-agi-1-46-0-dobavila-prioritizaciyu-rewenij-v-analitike-sim"
+        },
+        {
+          "title": "Frida 17.22.0 научилась собирать библиотеки с паттернами для публикации в npm",
+          "url": "https://tproger.ru/news/frida-17-22-0-nauchilas-sobirat-biblioteki-s-patternami-dlya-pub"
+        },
+        {
+          "title": "Cloudflare увеличила историю аналитики как минимум до 30 дней на всех тарифах",
+          "url": "https://tproger.ru/news/cloudflare-uvelichila-istoriyu-analitiki-kak-minimum-do-30-dnej-na"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261005-1330: Самара 9.0°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

@@ -1,80 +1,80 @@
 {
-  "id": "digest-20261005-0353",
-  "generated_at": "2026-10-05T03:53:23Z",
+  "id": "digest-20261005-1330",
+  "generated_at": "2026-10-05T13:30:23Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 3.0,
-    "feels_like_c": -0.7,
-    "description": "Преимущественно ясно",
-    "wind_ms": 11.9
+    "temp_c": 9.0,
+    "feels_like_c": 5.2,
+    "description": "Ясно",
+    "wind_ms": 9.2
   },
   "news": {
     "vc.ru": [
       {
-        "title": "VK избавилась от доли в сервисе Intickets — он продавал билеты на концерты Канье Уэста в Санкт-Петербурге, которые в итоге отменили",
-        "url": "https://vc.ru/money/3175371-vk-prodala-dolyu-v-intickets-kontserty-kanye-uesta?from=rss"
+        "title": "«Т-Банк» запустил оплату налогов в рассрочку с кредитной карты",
+        "url": "https://vc.ru/money/3176075-oplata-nalogov-v-rassrochku-v-t-banke?from=rss"
       },
       {
-        "title": "UX-задача для разработчиков роботакси — не дать пассажирам превратить салон в спальню",
-        "url": "https://vc.ru/transport/3175260-ux-zadacha-dlya-robotaksi-kak-ne-dopustit-seks-v-salone?from=rss"
+        "title": "«Ъ»: Минцифры вернулось к идее введения платы за международный трафик сверх лимита — теперь речь идёт о пороге в 50 ГБ, но только для сетей 5G",
+        "url": "https://vc.ru/services/3175814-mincifry-plata-za-mezhdunarodnyy-trafik-v-setyah-5g?from=rss"
       },
       {
-        "title": "День 1684: десятка худших акций на Мосбирже по итогам трёх кварталов подешевела в среднем на 66,77%",
-        "url": "https://vc.ru/money/3174574-khudshie-aktsii-na-mosbirzhe-padenie-tsen?from=rss"
+        "title": "Минцифры начало разрабатывать правила включения сайтов и приложений в «белый список» сервисов, доступных при ограничениях интернета — РБК",
+        "url": "https://vc.ru/services/3176222-mintsifry-razrabotka-pravil-dlya-belykh-spiskov?from=rss"
       },
       {
-        "title": "Покупатели дорогих моделей не испугаются: что будет с ценами на автомобили после индексации утильсбора — подсчёт Autonews",
-        "url": "https://vc.ru/transport/3173559-tseny-na-avtomobili-posle-indeksatsii-utilsbora?from=rss"
+        "title": "Wildberries начал тестировать в Тверской области доставку через «передвижной ПВЗ» — машина с заказами будет приезжать в малонаселённые пункты несколько раз в неделю",
+        "url": "https://vc.ru/marketplace/3176359-wildberries-testiruet-dostavku-cherez-peredvizhnoj-pvz-v-tverskoj-oblasti?from=rss"
       },
       {
-        "title": "В поисках того, кто пашет и может оказаться умнее нанимающего менеджера: каких сотрудников ищет SpaceX",
-        "url": "https://vc.ru/hr/3173801-spacex-i-trebovaniya-k-sotrudnikam?from=rss"
+        "title": "Max запустил таргетированную рекламу в каналах с аудиторией от 1000 человек",
+        "url": "https://vc.ru/services/3176386-targetirovannaya-reklama-v-max-cherez-vk-reklamu?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Представлено обновление открытого проекта RedNotebook 2.4.3",
-        "url": "https://habr.com/ru/news/1090108/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090108"
+        "title": "Жительницу Флориды арестовали за обсуждение с Claude планов «устроить стрельбу» в офисе шерифа",
+        "url": "https://habr.com/ru/news/1090574/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090574"
       },
       {
-        "title": "Вышел открытый проект vokoscreenNG 4.11.0 для записи экрана в Windows и Linux",
-        "url": "https://habr.com/ru/news/1090150/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090150"
+        "title": "РКН начал блокировать packagist.org (?)",
+        "url": "https://habr.com/ru/news/1090568/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090568"
       },
       {
-        "title": "Выпуск обновления HopToDesk 1.46.55 — безопасного открытого решения для удалённого рабочего стола",
-        "url": "https://habr.com/ru/news/1089862/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089862"
+        "title": "Релиз PPEM 2.10: новый механизм обнаружения проблем СУБД, внешние хранилища ASH и кастомизация дашборда",
+        "url": "https://habr.com/ru/companies/postgrespro/news/1090564/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090564"
       },
       {
-        "title": "Представлен открытый минималистичный браузер Northstar, написанный полностью с нуля на языке C",
-        "url": "https://habr.com/ru/news/1090182/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090182"
+        "title": "Федеральный судья в США назвал систему Flock инструментом «беспорядочной массовой слежки»",
+        "url": "https://habr.com/ru/news/1090550/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090550"
       },
       {
-        "title": "Nintendo закрыла мобильную игру Mario Kart Tour",
-        "url": "https://habr.com/ru/news/1090142/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090142"
+        "title": "Астрономы нашли неожиданную подсказку к загадке расширения Вселенной",
+        "url": "https://habr.com/ru/news/1090502/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090502"
       }
     ],
     "tproger": [
       {
-        "title": "Почему команда растёт, а фичи выходят медленнее",
-        "url": "https://tproger.ru/articles/pochemu-komanda-rastyot-a-fichi-vyhodyat-medlennee"
+        "title": "Нет другого выбора, кроме как принять ИИ",
+        "url": "https://tproger.ru/articles/net-drugogo-vybora-krome-kak-prinyat-ii"
       },
       {
-        "title": "5 российских облаков для запуска своих ИИ-моделей в 2026 году",
-        "url": "https://tproger.ru/digest/5-rossijskih-oblakov-dlya-zapuska-svoih-ii-modelej-v-2026-godu"
+        "title": "OpenCourant выпустил первые стабильные сборки для Linux x86-64",
+        "url": "https://tproger.ru/news/opencourant-vypustil-pervye-stabilnye-sborki-dlya-linux-x86-64"
       },
       {
-        "title": "OpenAI на DevDay выпустила GPT-6.1 Sol по цене в пять раз ниже Astra",
-        "url": "https://tproger.ru/news/openai-na-devday-vypustila-gpt-6-1-sol-po-cene-v-pyat-raz-nizhe-a"
+        "title": "Future AGI 1.46.0 добавила приоритизацию решений в аналитике симуляций",
+        "url": "https://tproger.ru/news/future-agi-1-46-0-dobavila-prioritizaciyu-rewenij-v-analitike-sim"
       },
       {
-        "title": "LLM в проде — это не модель: как спроектировать доступы, контроль качества и стоимость AI-сервиса",
-        "url": "https://tproger.ru/articles/llm-v-prode-eto-ne-model-kak-sproektirovat-dostupy-kontrol"
+        "title": "Frida 17.22.0 научилась собирать библиотеки с паттернами для публикации в npm",
+        "url": "https://tproger.ru/news/frida-17-22-0-nauchilas-sobirat-biblioteki-s-patternami-dlya-pub"
       },
       {
-        "title": "В n8n 2.42.0 агентов включили по умолчанию",
-        "url": "https://tproger.ru/news/v-n8n-2-42-0-agentov-vklyuchili-po-umolchaniyu"
+        "title": "Cloudflare увеличила историю аналитики как минимум до 30 дней на всех тарифах",
+        "url": "https://tproger.ru/news/cloudflare-uvelichila-istoriyu-analitiki-kak-minimum-do-30-dnej-na"
       }
     ]
   },
-  "summary": "Сводка digest-20261005-0353: Самара 3.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261005-1330: Самара 9.0°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
