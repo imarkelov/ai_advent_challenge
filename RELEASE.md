@@ -1,3 +1,128 @@
+# Release Notes — day25-task-memory (день 25)
+
+Ветка: [`day25-task-memory`](https://github.com/imarkelov/ai_advent_challenge/tree/day25-task-memory)
+(от `day24-rag-citations`).
+
+## Что в релизе
+
+**Мини-чат с RAG + памятью задачи (production-like).** Чат хранит
+историю диалога, при каждом новом вопросе ищет контекст в базе через
+RAG, отвечает с учётом найденной информации и **всегда выводит
+источники** (дни 21–24), плюс усиление — **память задачи
+(task state)**: что пользователь уже уточнил, какие ограничения/термины
+зафиксированы, какова цель диалога. Проверка задания — 2 длинных
+сценария по 10–15 сообщений: ассистент не теряет цель и продолжает
+выдавать ответы с источниками.
+
+- **Память задачи per-диалог** (`task_state` в записи диалога,
+  `memory.py`): `{goal: str, clarifications: [str], constraints: [str]}`
+  — цель диалога, уточнения пользователя, зафиксированные
+  ограничения/термины. `get_task_state` / `update_task_state` (весь
+  объект, валидация) + `_task_state_of` (бэкворд-совместимость: старой
+  записи без поля — пустое состояние); новое поле в `new_dialogue`,
+  отдаётся `GET /api/dialogues` и `GET /api/dialogues/{id}`.
+- **Инъекция в system-промпт** (`agent.build_task_memory_block`):
+  блок «Память задачи (день 25)» — `Цель диалога: …` + списки
+  «Уточнения пользователя» / «Зафиксированные ограничения и термины» +
+  инструкция «Не теряй цель диалога: учитывай её и ограничения в
+  каждом ответе»; пустое состояние — блок не добавляется. Не коллидирует
+  с методом дня 13 `build_task_state_block(t, stage, ...)` (task-машина
+  stage-агентов — другое имя).
+- **Авто-обновление памяти** (`agent._update_task_state`): после хода
+  один non-stream LLM-вызов (T=0, max_tokens=600,
+  `enable_thinking: false`, паттерн авто-заголовка дня 11; НЕ в журнал
+  `requests.json`) по хвосту диалога (последние 12 user/assistant
+  сообщений, без task-/tool-маркеров; < 2 сообщений — skip) извлекает
+  goal/clarifications/constraints с учётом предыдущей памяти (best-effort
+  JSON, лимит 10 пунктов на список); любой сбой — состояние не
+  меняется, чат не затрагивается. Результат возвращается клиенту в SSE
+  `done` (`done["task_state"]`).
+- **REST** (`main.py`): `GET /api/dialogues/{dialogue_id}/task-state`
+  (состояние; 404 — диалог), `POST /api/dialogues/{dialogue_id}/task-state`
+  (целое состояние `{goal, clarifications, constraints}`; 400 —
+  RU-detail на некорректной форме, 404 — диалог).
+- **UI** — `TaskStateTab.tsx` (новый): 5-я вкладка «Задача» в панели
+  «Контекст» (`ContextPanel.tsx`): цель (textarea) + два списка
+  (уточнения / ограничения, строка-пункт), сохранение
+  (`POST .../task-state`), автосинхронизация по SSE `done.task_state`;
+  `api.ts` — тип `TaskMemoryState` + хелперы; `state.tsx`, `styles.css`.
+- **`scripts/e2e_day25.py`** (новый, stdlib, порт **8109**):
+  - **Part A** — офлайн-детерминированное ядро (fake LLM, без
+    GPustack, MUST PASS), 7 шагов: shape `task_state` нового диалога,
+    GET/POST task-state (200/400/404), `build_task_memory_block`
+    (пустое — нет блока; непустое — все 3 пункта + правило),
+    `_update_task_state` (best-effort: сбой API — состояние не
+    меняется, < 2 сообщений — skip, лимит 10 пунктов), `done` несёт
+    `task_state`, инъекция блока в LLM-payload.
+  - **Part B** — live (uvicorn :8109, реальный LLM): диалог с
+    RAG-включённым режимом — ответ + `rag_context` (источники) +
+    `done.task_state` на каждом шаге.
+  - **Part C** (`--part-c-only`) — **2 длинных сценария** (требование
+    задания): S1 — 12 сообщений (питч-дек для AI-agent стартапа,
+    KB-фикстура `pitch_deck_brief.txt`), S2 — 10 сообщений (план
+    backend-ревью: query performance, без миграции БД,
+    `backend_review_guide.txt`); на каждый сценарий: 100 % сообщений
+    с источниками (`rag_context.chunks` непусто), цель непустая с
+    1-го сообщения и не теряется до конца, goal-recall (ключевые слова
+    цели в поздних ответах), изоляция памяти между диалогами.
+    Отчёт: `.omo/evidence/day25-long-scenarios/report.json`.
+
+## API
+
+Новые маршруты:
+
+| Метод | Путь | Назначение |
+| --- | --- | --- |
+| GET | `/api/dialogues/{dialogue_id}/task-state` | Память задачи диалога `{task_state: {goal, clarifications, constraints}}`; 404 — диалог |
+| POST | `/api/dialogues/{dialogue_id}/task-state` | Записать целое состояние `{goal, clarifications, constraints}`; 400 — RU-detail (goal не строка / списки не из строк), 404 — диалог |
+
+Тело `POST /api/chat` не изменилось: в SSE `done`-событии аддитивное
+поле `task_state` (текущая память задачи после авто-обновления).
+`GET /api/dialogues` / `GET /api/dialogues/{id}` — аддитивное поле
+`task_state` у каждого диалога.
+
+## Проверка задания
+
+- **История диалога** ✓ (ST, день 11).
+- **RAG-контекст при каждом вопросе** ✓ (дни 21–23: гибридный поиск
+  + реранкер + `min_score`; свитч RAG per-диалог).
+- **Ответ с учётом найденной информации** ✓ (блок «База знаний» в
+  system-промпт, CITE_RULE дня 24).
+- **Всегда источники** ✓ (`rag_context` в каждом RAG-ответе + панель
+  «📖 Источники и цитаты»; dont-know дня 24 при 0 чанков).
+- **Память задачи** ✓ (goal/clarifications/constraints per-диалог:
+  авто-обновление после хода, инъекция в system-промпт, UI-вкладка
+  «Задача», REST).
+- **2 длинных сценария по 10–15 сообщений** ✓ (Part C: S1 = 12, S2 =
+  10): цель не теряется (goal непустой на всём прогоне, goal-recall в
+  поздних ответах), источники на 100 % ответов, изоляция памяти между
+  диалогами.
+
+Бэкенд — **590 тестов PASS** (baseline 589 → +1-й регрессионный
+комплекс task-state: memory/agent/API). Фронтенд — **309 тестов PASS**
+(Vitest, baseline 307 → +2) + `tsc -b` clean + `npm run build` clean.
+E2E `scripts/e2e_day25.py`: Part A **7/7 PASS** (офлайн, MUST); Part B
+live **11 PASS / 0 FAIL / 1 WARNING** (WARNING — best-effort
+goal-recall на одной модели); Part C **9 PASS / 0 FAIL / 0
+WARNING** (модель deepseek-v4-flash; S1: done 12/12, sources 12/12;
+S2: done 10/10, sources 10/10; goal-recall PASS в обоих сценариях;
+изоляция PASS).
+**Демо-видео** (live, deepseek-v4-flash, реальный RAG + UI):
+`C:\Users\migor\OneDrive\Рабочий стол\AI Advent Challenge - видео\day25_demo.mp4`
+(desktop, **НЕ в репозитории**), 26.44 s, ~0.69 МБ — короткий срез
+(вопрос → RAG-ответ → панель источников → вкладка «Задача» с целью).
+**Видео длинных сценариев** (Part C, live):
+`...\AI Advent Challenge - видео\day25_long_scenarios.mp4`, 4:19.88,
+~13.7 МБ — оба диалога целиком (12 + 10 сообщений), источники на
+каждом ответе, чекпоинты вкладки «Задача» (после сообщений 4/8/12 и
+4/10), раскрытие панели источников, закрытие контекста в конце.
+
+## Статус
+
+Ветка `day25-task-memory` (от `day24-rag-citations`).
+
+---
+
 # Release Notes — day24-rag-citations (день 24)
 
 Ветка: [`day24-rag-citations`](https://github.com/imarkelov/ai_advent_challenge/tree/day24-rag-citations)

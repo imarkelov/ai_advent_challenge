@@ -29,6 +29,7 @@
 | День 22 | [day22-rag-query](https://github.com/imarkelov/ai_advent_challenge/tree/day22-rag-query) | Первый RAG-запрос: POST /api/rag/compare — ответ с RAG и без в одном вызове (T=0, max_tokens=1024, симметричный промпт), 10 контрольных вопросов с ожиданиями и источниками, скрипт сравнения с отчётом (факт-чек + LLM-judge) и UI-секция «Сравнение RAG» |
 | День 23 | [day23-rerank-filter](https://github.com/imarkelov/ai_advent_challenge/tree/day23-rerank-filter) | Реранкинг и фильтрация: настройка `min_score` (0..1, 0 = off) — порог релевантности в `search_rag` после реранкера (абсолютный `rerank_score ≥ min_score`) или относительно лучшего результата без него (`score ≥ min_score × best`), фильтрация до среза top-k с полями `filtered`/`dropped`, query rewrite в сравнении (LLM-перефраз вопроса при T=0 с фолбэком на исходный), 4-режимный compare (plain \| rag \| rag+filter \| rag+rewrite) + UI-секция с 4 панелями и чипом «фильтр ≥ X» |
 | День 24 | [day24-rag-citations](https://github.com/imarkelov/ai_advent_challenge/tree/day24-rag-citations) | Цитаты, источники и анти-галлюцинации: обязательные источники (source + section/chunk_id) + verbatim-цитаты в RAG-ответе, [n]-маркеры, режим «не знаю» при 0 релевантных чанков (без LLM-вызова), панель «Источники и цитаты» в чате, e2e_day24 (10 вопросов) |
+| День 25 | [`day25-task-memory`](https://github.com/imarkelov/ai_advent_challenge/tree/day25-task-memory) | Мини-чат с RAG + памятью (production-like): история диалога, RAG-контекст при каждом вопросе, ответ с учётом найденного, источники на каждом ответе + «память задачи» (task state): цель диалога, уточнения, зафиксированные ограничения/термины (авто-обновление LLM-вызовом после хода, инъекция в system-промпт, вкладка «Задача», REST per-диалог); e2e_day25: 2 длинных сценария (12 + 10 сообщений) — цель не теряется, источники 100 % ответов |
 
 ## День 7: как работает сервис
 
@@ -2314,3 +2315,115 @@ Evidence-лог: `POST /api/dialogues/8901bc5e01274ce1900059808d3e6979/rag`
 403 «Api key not allowed» — запись выполнена на deepseek-v4-flash (как
 дни 22/23). Ветка `day24-rag-citations` (от
 `day23-rerank-filter`).
+
+## День 25: Мини-чат с RAG + памятью задачи (production-like)
+
+### Что это
+
+Мини-чат (production-like) поверх Студии: чат хранит историю диалога
+(ST, день 11), при каждом новом вопросе ищет контекст в базе через
+RAG (дни 21–23: гибридный поиск + реранкер + `min_score`), отвечает с
+учётом найденной информации (блок «База знаний» + CITE_RULE, день 24)
+и **всегда выводит источники** (`rag_context` + панель «📖 Источники
+и цитаты», dont-know при 0 чанков). Усиление — **память задачи
+(task state)**: что пользователь уже уточнил, какие ограничения/термины
+зафиксированы, какова цель диалога. Проверка задания — 2 длинных
+сценария по 10–15 сообщений (e2e Part C): ассистент не теряет цель и
+продолжает выдавать ответы с источниками.
+
+### Архитектура
+
+- **Хранение** (`memory.py`) — `task_state` в записи диалога
+  (`dialogues.json`): `{goal: str, clarifications: [str],
+  constraints: [str]}`; `get_task_state` / `update_task_state`
+  (целое состояние, валидация 400-формы) + `_task_state_of`
+  (бэкворд-совместимость: старой записи без поля — пустое состояние);
+  новое поле у `new_dialogue`, отдаётся `GET /api/dialogues` и
+  `GET /api/dialogues/{id}`.
+- **Инъекция** (`agent.build_task_memory_block`) — блок «Память задачи
+  (день 25)» в system-промпт на каждый запрос: `Цель диалога: …` +
+  «Уточнения пользователя» + «Зафиксированные ограничения и термины» +
+  инструкция «Не теряй цель диалога: учитывай её и ограничения в
+  каждом ответе»; пустое состояние — блок не добавляется. (Не
+  коллидирует с методом дня 13 `build_task_state_block(t, stage, ...)`
+  — блок task-машины для stage-агентов, другое имя.)
+- **Авто-обновление** (`agent._update_task_state`) — после хода один
+  non-stream LLM-вызов (T=0, max_tokens=600,
+  `enable_thinking: false`, паттерн авто-заголовка дня 11; НЕ в журнал
+  `requests.json`): по хвосту диалога (последние 12 user/assistant,
+  без task-/tool-маркеров; < 2 сообщений — skip) извлекает
+  goal/clarifications/constraints с учётом предыдущей памяти (best-effort
+  JSON; лимит 10 пунктов на список). Любой сбой — состояние не
+  меняется, чат не затрагивается. Текущая память возвращается в SSE
+  `done` (`done["task_state"]`) — фронтенд синхронизирует вкладку без
+  перечитывания.
+- **UI** — `TaskStateTab.tsx` (новый): 5-я вкладка «Задача» в панели
+  «Контекст» (`ContextPanel.tsx`) — цель (textarea) + два списка
+  (уточнения / ограничения), ручное сохранение
+  (`POST .../task-state`) + автосинхронизация по `done.task_state`;
+  `api.ts` — тип `TaskMemoryState` + хелперы.
+- **RAG-часть** — не меняется (дни 21–24): retrieval → блок «База
+  знаний» + `CITE_RULE` → ответ → `rag_context` с источниками и
+  verbatim-цитатами; память задачи и RAG сосуществуют в system-промпте
+  (RAG — факты из документов, task state — цель/ограничения диалога).
+
+### API
+
+| Метод | Путь | Назначение |
+| --- | --- | --- |
+| GET | `/api/dialogues/{dialogue_id}/task-state` | Память задачи `{task_state: {goal, clarifications, constraints}}`; 404 — диалог |
+| POST | `/api/dialogues/{dialogue_id}/task-state` | Записать целое состояние; 400 — RU-detail (goal не строка / списки не из строк), 404 — диалог |
+
+Тело `POST /api/chat` не изменилось: в SSE `done` аддитивное поле
+`task_state`. Тело `GET /api/dialogues` / `GET /api/dialogues/{id}` —
+аддитивное поле `task_state` у каждого диалога.
+
+### E2E — `scripts/e2e_day25.py`
+
+Гибрид (паттерн e2e_day17–24, stdlib, порт **8109**): **Part A** —
+офлайн-детерминированное ядро (fake LLM, без GPustack, **MUST
+PASS**), 7 шагов: shape `task_state` нового диалога; GET/POST
+task-state (200/400/404); `build_task_memory_block` (пустое — нет
+блока; непустое — 3 пункта + правило); `_update_task_state` (сбой
+API — состояние не меняется; < 2 сообщений — skip; лимит 10 пунктов);
+`done` несёт `task_state`; блок в LLM-payload. **Part B** — live
+(uvicorn :8109, реальный LLM): диалог с RAG — ответ + `rag_context` +
+`done.task_state` на каждом шаге. **Part C** (`--part-c-only`) —
+**2 длинных сценария** (требование задания): S1 — 12 сообщений
+(питч-дек AI-agent стартапа, KB-фикстура `pitch_deck_brief.txt`), S2 —
+10 сообщений (план backend-ревью: query performance, без миграции
+БД, `backend_review_guide.txt`); ассерты: источники на 100 % ответов,
+goal непустой с 1-го сообщения до конца, goal-recall в поздних
+ответах, изоляция памяти между диалогами. Отчёт:
+`.omo/evidence/day25-long-scenarios/report.json`.
+
+### Проверка задания
+
+- **История диалога** ✓ (ST, день 11).
+- **RAG-контекст при каждом вопросе** ✓ (дни 21–23).
+- **Ответ с учётом найденной информации** ✓ (блок «База знаний» +
+  CITE_RULE, день 24).
+- **Всегда источники** ✓ (`rag_context` + панель «Источники и
+  цитаты»; dont-know при 0 чанков).
+- **Память задачи** ✓ (goal/clarifications/constraints per-диалог:
+  авто-обновление LLM-вызовом после хода, инъекция в system-промпт,
+  вкладка «Задача», REST).
+- **2 длинных сценария по 10–15 сообщений** ✓ (Part C: S1 = 12, S2 =
+  10; цель не теряется, источники 100 %, изоляция PASS).
+
+Бэкенд — **590 тестов PASS**; фронтенд — **309 тестов PASS** (Vitest)
++ `tsc -b` clean + `npm run build` clean. E2E: Part A **7/7 PASS**
+(офлайн, MUST); Part B live **11 PASS / 0 FAIL / 1 WARNING**; Part C
+**9 PASS / 0 FAIL / 0 WARNING** (deepseek-v4-flash; S1: done 12/12,
+sources 12/12; S2: done 10/10, sources 10/10; goal-recall PASS в
+обоих; изоляция PASS).
+**Демо-видео** (live, deepseek-v4-flash):
+`C:\Users\migor\OneDrive\Рабочий стол\AI Advent Challenge - видео\day25_demo.mp4`
+(desktop, **НЕ в репозитории**), 26.44 s, ~0.69 МБ — короткий срез
+(вопрос → RAG-ответ → панель источников → вкладка «Задача»).
+**Видео длинных сценариев** (Part C):
+`...\AI Advent Challenge - видео\day25_long_scenarios.mp4`, 4:19.88,
+~13.7 МБ — оба диалога целиком (12 + 10 сообщений), источники на
+каждом ответе, чекпоинты вкладки «Задача» (после сообщений 4/8/12 и
+4/10), раскрытие панели источников.
+Ветка `day25-task-memory` (от `day24-rag-citations`).
