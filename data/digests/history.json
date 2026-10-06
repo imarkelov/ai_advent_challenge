@@ -3834,5 +3834,85 @@
       ]
     },
     "summary": "Сводка digest-20261006-1241: Самара 7.7°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261006-2216",
+    "generated_at": "2026-10-06T22:16:06Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 9.2,
+      "feels_like_c": 7.9,
+      "description": "Пасмурно",
+      "wind_ms": 6.9
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "ЦБ выдал «Сберу», ВТБ и «Т-Технологиям» лицензии цифровых депозитариев для работы с криптовалютами",
+          "url": "https://vc.ru/crypto/3179432-cb-vydal-litsenzii-vtb-sberu-i-t-tekhnologiyam?from=rss"
+        },
+        {
+          "title": "«Бюро 1440» представило серийный абонентский терминал спутниковой связи — он обеспечивает передачу данных со скоростью до 700 Мбит/с",
+          "url": "https://vc.ru/tech/3178311-byuro-1440-abonentnyj-terminal-sputnikovoj-svyazi?from=rss"
+        },
+        {
+          "title": "Владельцы «умных» колонок Amazon пожаловались, что голосовой помощник Alexa начал без причины повторять «лалала» на протяжении нескольких минут",
+          "url": "https://vc.ru/tech/3178726-problemy-s-alexa-golosovoj-pomoschnik-amazon?from=rss"
+        },
+        {
+          "title": "«Яндекс» выложил в открытый доступ YTsaurus Flow — технологию для непрерывной обработки больших потоков данных",
+          "url": "https://vc.ru/dev/3178042-yandeks-predstavil-ytsaurus-flow-dlya-obrabotki-bolshikh-dannykh?from=rss"
+        },
+        {
+          "title": "Max добавил возможность проводить опросы в каналах",
+          "url": "https://vc.ru/services/3178482-max-dobavil-oprosy-v-kanalah-messendzhera?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Нобелевскую премию по физике вручили руководителю проекта нейтринного детектора",
+          "url": "https://habr.com/ru/news/1091282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091282"
+        },
+        {
+          "title": "В ЕС введут штрафы до 15 млн евро за публикацию нейрослопа без маркировки",
+          "url": "https://habr.com/ru/companies/selectel/news/1056852/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1056852"
+        },
+        {
+          "title": "Сравнили 461 тысячу AI‑ответов: упоминание бренда не коррелирует с цитированием источника",
+          "url": "https://habr.com/ru/news/1091190/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091190"
+        },
+        {
+          "title": "Что ждет российский рынок ПО в 2027 году: обсудим на GuardConf",
+          "url": "https://habr.com/ru/companies/aktiv-company/news/1091160/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091160"
+        },
+        {
+          "title": "Моушн-дизайн за копейки: Grom Motion создаёт инфографику и рилсы одной кнопкой",
+          "url": "https://habr.com/ru/companies/gptunnel/news/1091186/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091186"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Изучение нейросетей для детей: рейтинг 10 школ и курсов в 2026 году",
+          "url": "https://tproger.ru/articles/izuchenie-nejrosetej-dlya-detej-rejting-10-wkol-i-kursov-v-2026-g"
+        },
+        {
+          "title": "GitLab открыла бету Artifact Central и ранний доступ к Dependency Firewall",
+          "url": "https://tproger.ru/news/gitlab-otkryla-betu-artifact-central-i-rannij-dostup-k-dependenc"
+        },
+        {
+          "title": "Cloudflare WAF добавил защиту от выполнения кода через уязвимость в F5 BIG-IP",
+          "url": "https://tproger.ru/news/cloudflare-waf-dobavil-zashhitu-ot-vypolneniya-koda-cherez-uyazvimost"
+        },
+        {
+          "title": "5 лучших супераппов для бизнеса в 2026 году: полный обзор и сравнение",
+          "url": "https://tproger.ru/articles/5-luchwih-superappov-dlya-biznesa-v-2026-godu-polnyj-obzor-i-srav"
+        },
+        {
+          "title": "ТОП-10 low-code платформ в 2026 году",
+          "url": "https://tproger.ru/articles/top-6-low-code"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261006-2216: Самара 9.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
