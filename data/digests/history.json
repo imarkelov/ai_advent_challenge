@@ -3754,5 +3754,85 @@
       ]
     },
     "summary": "Сводка digest-20261006-0441: Самара -0.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261006-1241",
+    "generated_at": "2026-10-06T12:41:51Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 7.7,
+      "feels_like_c": 5.7,
+      "description": "Небольшой дождь",
+      "wind_ms": 6.9
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Яндекс» выложил в открытый доступ YTsaurus Flow — технологию для непрерывной обработки больших потоков данных",
+          "url": "https://vc.ru/dev/3178042-yandeks-predstavil-ytsaurus-flow-dlya-obrabotki-bolshikh-dannykh?from=rss"
+        },
+        {
+          "title": "«Бюро 1440» представило серийный абонентский терминал спутниковой связи — он обеспечивает передачу данных со скоростью до 700 Мбит/с",
+          "url": "https://vc.ru/tech/3178311-byuro-1440-abonentnyj-terminal-sputnikovoj-svyazi?from=rss"
+        },
+        {
+          "title": "Владельцы «умных» колонок Amazon пожаловались, что голосовой помощник Alexa начал без причины повторять «лалала» на протяжении нескольких минут",
+          "url": "https://vc.ru/tech/3178726-problemy-s-alexa-golosovoj-pomoschnik-amazon?from=rss"
+        },
+        {
+          "title": "День 1686: на работу систем фильтрации трафика и блокировки сайтов в 2027-2029 годах выделят почти 60 млрд рублей",
+          "url": "https://vc.ru/money/3177787-sistemy-filtratsii-trafika-i-blokirovki-saytov-v-rossii?from=rss"
+        },
+        {
+          "title": "В соцсетях завирусился ИИ-блогер «из Парижа» — капитализация его мемкоина на пике достигала $12,2 млн",
+          "url": "https://vc.ru/social/3176127-virusnyj-ii-bloger-iz-parizha-i-ego-memkoin?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "В pgvector 0.8.7 исправили уязвимость с возможностью выполнения произвольного кода",
+          "url": "https://habr.com/ru/companies/otus/news/1091074/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091074"
+        },
+        {
+          "title": "Microsoft вскоре начнёт блокировать дополнительные типы вложений в новой версии Outlook для Windows и веб‑версии",
+          "url": "https://habr.com/ru/news/1091066/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091066"
+        },
+        {
+          "title": "Сэм Альтман: Миру стоит смириться с негативными последствиями ради преимуществ ИИ",
+          "url": "https://habr.com/ru/news/1090992/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090992"
+        },
+        {
+          "title": "Покупатель дважды заказал процессор AMD Ryzen 7 9850×3D на Amazon и оба раза получил Intel Core i3-3000",
+          "url": "https://habr.com/ru/news/1091056/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091056"
+        },
+        {
+          "title": "Фиксированные операторы заявили о блокировках звонков бизнес‑абонентов со стороны крупных мобильных операторов",
+          "url": "https://habr.com/ru/news/1091050/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091050"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "ClickHouse Cloud открыл исполняемые UDF для всех пользователей",
+          "url": "https://tproger.ru/news/clickhouse-cloud-otkryl-ispolnyaemye-udf-dlya-vseh-polzovatelej"
+        },
+        {
+          "title": "В pgvector 0.8.7 исправили уязвимость, допускающую выполнение произвольного кода",
+          "url": "https://tproger.ru/news/v-pgvector-0-8-7-ispravili-uyazvimost-dopuskayushhuyu-vypolnenie-pr"
+        },
+        {
+          "title": "Cloudflare открыла BGP через IPsec и GRE для Cloudflare WAN и Magic Transit",
+          "url": "https://tproger.ru/news/cloudflare-otkryla-bgp-cherez-ipsec-i-gre-dlya-cloudflare-wan-i-ma"
+        },
+        {
+          "title": "GitHub и Microsoft открыли ReviewBench для оценки ИИ-ревью кода",
+          "url": "https://tproger.ru/news/github-i-microsoft-otkryli-reviewbench-dlya-ocenki-ii-revyu-koda"
+        },
+        {
+          "title": "Future AGI 1.47.0 добавила метрики звонков и уточнила оценку ответов ИИ-агентов",
+          "url": "https://tproger.ru/news/future-agi-1-47-0-dobavila-metriki-zvonkov-i-utochnila-ocenku-otv"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261006-1241: Самара 7.7°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
