@@ -3674,5 +3674,85 @@
       ]
     },
     "summary": "Сводка digest-20261005-2341: Самара 1.4°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261006-0441",
+    "generated_at": "2026-10-06T04:41:24Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": -0.4,
+      "feels_like_c": -3.0,
+      "description": "Пасмурно",
+      "wind_ms": 2.9
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "В соцсетях завирусился ИИ-блогер «из Парижа» — капитализация его мемкоина на пике достигала $12,2 млн",
+          "url": "https://vc.ru/social/3176127-virusnyj-ii-bloger-iz-parizha-i-ego-memkoin?from=rss"
+        },
+        {
+          "title": "«Т-Банк» запустил оплату налогов в рассрочку с кредитной карты",
+          "url": "https://vc.ru/money/3176075-oplata-nalogov-v-rassrochku-v-t-banke?from=rss"
+        },
+        {
+          "title": "В Москве с 15 октября 2026 года курьеров обяжут проходить тест на знание ПДД и стандартов работы с сервисами — без этого их не допустят к работе",
+          "url": "https://vc.ru/transport/3177273-kuryery-v-moskve-test-pdd-standarty?from=rss"
+        },
+        {
+          "title": "Путин разрешил реорганизацию «Юникредит банка» и покупку его у итальянской UniCredit",
+          "url": "https://vc.ru/legal/3177122-putin-odobril-prodazhu-yunikredit-banka?from=rss"
+        },
+        {
+          "title": "Max запустил таргетированную рекламу в каналах с аудиторией от 1000 человек",
+          "url": "https://vc.ru/services/3176386-targetirovannaya-reklama-v-max-cherez-vk-reklamu?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Apple исправила баг AirLift в iOS 27.2 beta 3, что закрыло работу CarrierSIM для активации 5G и VoWiFi в РФ на iPhone",
+          "url": "https://habr.com/ru/news/1090786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090786"
+        },
+        {
+          "title": "Вышло обновление Phiola 2.11 — открытого портативного мультиплатформенного аудиоплеера с поддержкой скриптов",
+          "url": "https://habr.com/ru/news/1090580/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090580"
+        },
+        {
+          "title": "Выпуск дистрибутива Parrot OS 7.4 для этичного хакинга с ядром Linux 7.1",
+          "url": "https://habr.com/ru/news/1090088/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090088"
+        },
+        {
+          "title": "Новости $mol и Giper Dev",
+          "url": "https://habr.com/ru/news/1090740/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090740"
+        },
+        {
+          "title": "Google урежет бесплатный Gemini до Flash-Lite",
+          "url": "https://habr.com/ru/companies/bothub/news/1090726/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090726"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Для чего дети используют нейросети: рейтинг 10 школ и курсов по ИИ для детей в 2026 году",
+          "url": "https://tproger.ru/articles/dlya-chego-deti-ispolzuyut-nejroseti-rejting-10-wkol-i-kursov-po"
+        },
+        {
+          "title": "Что такое токены и как они влияют на стоимость запросов к нейросети",
+          "url": "https://tproger.ru/articles/chto-takoe-tokeny-i-kak-oni-vliyayut-na-stoimost-zaprosov-k-nejros"
+        },
+        {
+          "title": "Нет другого выбора, кроме как принять ИИ",
+          "url": "https://tproger.ru/articles/net-drugogo-vybora-krome-kak-prinyat-ii"
+        },
+        {
+          "title": "OpenCourant выпустил первые стабильные сборки для Linux x86-64",
+          "url": "https://tproger.ru/news/opencourant-vypustil-pervye-stabilnye-sborki-dlya-linux-x86-64"
+        },
+        {
+          "title": "Future AGI 1.46.0 добавила приоритизацию решений в аналитике симуляций",
+          "url": "https://tproger.ru/news/future-agi-1-46-0-dobavila-prioritizaciyu-rewenij-v-analitike-sim"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261006-0441: Самара -0.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
