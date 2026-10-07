@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261006-2216",
-  "generated_at": "2026-10-06T22:16:06Z",
+  "id": "digest-20261007-0407",
+  "generated_at": "2026-10-07T04:07:26Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 9.2,
-    "feels_like_c": 7.9,
+    "temp_c": 10.6,
+    "feels_like_c": 8.2,
     "description": "Пасмурно",
-    "wind_ms": 6.9
+    "wind_ms": 13.8
   },
   "news": {
     "vc.ru": [
@@ -27,30 +27,30 @@
         "url": "https://vc.ru/dev/3178042-yandeks-predstavil-ytsaurus-flow-dlya-obrabotki-bolshikh-dannykh?from=rss"
       },
       {
-        "title": "Max добавил возможность проводить опросы в каналах",
-        "url": "https://vc.ru/services/3178482-max-dobavil-oprosy-v-kanalah-messendzhera?from=rss"
+        "title": "Китайский маркетплейс Poizon рассказал, что комиссии для продавцов в России не превышают 29%",
+        "url": "https://vc.ru/marketplace/3179629-marketplejs-pozion-v-rossii-komissii-do-29?from=rss"
       }
     ],
     "habr": [
       {
+        "title": "Опубликовано второе издание книги «Искусство схемотехники: сборник X‑глав»",
+        "url": "https://habr.com/ru/news/1091318/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091318"
+      },
+      {
+        "title": "Релиз открытого проекта PaintFE 1.4 — портативного редактора изображений для Windows и macOS",
+        "url": "https://habr.com/ru/news/1091242/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091242"
+      },
+      {
+        "title": "Вышел OpenSSH 10.6",
+        "url": "https://habr.com/ru/news/1091226/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091226"
+      },
+      {
+        "title": "Выпуск открытого проекта Segra 1.9.0 для записи игр на ПК с Windows",
+        "url": "https://habr.com/ru/news/1090664/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090664"
+      },
+      {
         "title": "Нобелевскую премию по физике вручили руководителю проекта нейтринного детектора",
         "url": "https://habr.com/ru/news/1091282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091282"
-      },
-      {
-        "title": "В ЕС введут штрафы до 15 млн евро за публикацию нейрослопа без маркировки",
-        "url": "https://habr.com/ru/companies/selectel/news/1056852/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1056852"
-      },
-      {
-        "title": "Сравнили 461 тысячу AI‑ответов: упоминание бренда не коррелирует с цитированием источника",
-        "url": "https://habr.com/ru/news/1091190/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091190"
-      },
-      {
-        "title": "Что ждет российский рынок ПО в 2027 году: обсудим на GuardConf",
-        "url": "https://habr.com/ru/companies/aktiv-company/news/1091160/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091160"
-      },
-      {
-        "title": "Моушн-дизайн за копейки: Grom Motion создаёт инфографику и рилсы одной кнопкой",
-        "url": "https://habr.com/ru/companies/gptunnel/news/1091186/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091186"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261006-2216: Самара 9.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261007-0407: Самара 10.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
