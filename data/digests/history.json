@@ -3994,5 +3994,85 @@
       ]
     },
     "summary": "Сводка digest-20261007-0407: Самара 10.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261007-1235",
+    "generated_at": "2026-10-07T12:35:23Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 15.8,
+      "feels_like_c": 13.3,
+      "description": "Переменная облачность",
+      "wind_ms": 14.9
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "ЦБ выдал «Сберу», ВТБ и «Т-Технологиям» лицензии цифровых депозитариев для работы с криптовалютами",
+          "url": "https://vc.ru/crypto/3179432-cb-vydal-litsenzii-vtb-sberu-i-t-tekhnologiyam?from=rss"
+        },
+        {
+          "title": "Spotify до конца 2026 года откроет доступ к аудиокнигам пользователям на более чем 180 рынках",
+          "url": "https://vc.ru/services/3180817-spotify-rasshiryaet-dostup-k-audioknigam?from=rss"
+        },
+        {
+          "title": "День 1687: российская экосистема Indie GO, объединяющая около 10 тысяч разработчиков видеоигр, запустила венчурный фонд на 5 млрд рублей",
+          "url": "https://vc.ru/money/3180085-investitsii-v-igrovuyu-industriyu-indie-go-zapuskayet-venchurnyy-fond?from=rss"
+        },
+        {
+          "title": "«Бюро 1440» представило серийный абонентский терминал спутниковой связи — он обеспечивает передачу данных со скоростью до 700 Мбит/с",
+          "url": "https://vc.ru/tech/3178311-byuro-1440-abonentnyj-terminal-sputnikovoj-svyazi?from=rss"
+        },
+        {
+          "title": "SpaceX пожаловалась, что чужие спутники пролетают вблизи её группировки Starlink, и призвала делиться данными о манёврах",
+          "url": "https://vc.ru/future/3180978-spacex-pozhalovalas-chto-chuzhie-sputniki-proletayut-vblizi-ee-gruppirovki-starlink-i-prizvala-delitsya-dannymi-o-manevrah?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Суд в США обязал Apple выплатить Masimo ещё $184 млн",
+          "url": "https://habr.com/ru/news/1091584/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091584"
+        },
+        {
+          "title": "Swordfish Security обновила фреймворк оценки AI Security",
+          "url": "https://habr.com/ru/companies/swordfish_security/news/1091578/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091578"
+        },
+        {
+          "title": "В АНО «Институт логики» объявили результаты конкурса «Код логики» среди разработчиков свободного ПО",
+          "url": "https://habr.com/ru/news/1091572/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091572"
+        },
+        {
+          "title": "Жителя Алабамы арестовали после того, как Epic Games передала ФБР записи его угроз из голосового чата Fortnite",
+          "url": "https://habr.com/ru/news/1091552/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091552"
+        },
+        {
+          "title": "В Dota 2 вышла сокровищница Trove of Terror с новыми арканами для Tidehunter и Drow Ranger",
+          "url": "https://habr.com/ru/companies/ggsel/news/1091534/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091534"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "IBM и Red Hat исправили более 400 неизвестных уязвимостей в Java-библиотеках",
+          "url": "https://tproger.ru/news/ibm-i-red-hat-ispravili-bolee-400-neizvestnyh-uyazvimostej-v-java"
+        },
+        {
+          "title": "Figma вывела ИИ-агента из беты и добавила поиск файлов в чате",
+          "url": "https://tproger.ru/news/figma-vyvela-ii-agenta-iz-bety-i-dobavila-poisk-fajlov-v-chate"
+        },
+        {
+          "title": "Google выпустила EmbeddingGemma 2 для локального поиска по тексту, коду и медиа",
+          "url": "https://tproger.ru/news/google-vypustila-embeddinggemma-2-dlya-lokalnogo-poiska-po-tekst"
+        },
+        {
+          "title": "Изучение нейросетей для детей: рейтинг 10 школ и курсов в 2026 году",
+          "url": "https://tproger.ru/articles/izuchenie-nejrosetej-dlya-detej-rejting-10-wkol-i-kursov-v-2026-g"
+        },
+        {
+          "title": "GitLab открыла бету Artifact Central и ранний доступ к Dependency Firewall",
+          "url": "https://tproger.ru/news/gitlab-otkryla-betu-artifact-central-i-rannij-dostup-k-dependenc"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261007-1235: Самара 15.8°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
