@@ -4074,5 +4074,85 @@
       ]
     },
     "summary": "Сводка digest-20261007-1235: Самара 15.8°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261007-2237",
+    "generated_at": "2026-10-07T22:37:59Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 6.8,
+      "feels_like_c": 4.8,
+      "description": "Преимущественно ясно",
+      "wind_ms": 4.9
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Нет друзей» и «плоская попа»: в соцсетях делятся тегами, которые Amazon добавляет к профилям на основе истории покупок пользователя",
+          "url": "https://vc.ru/marketplace/3181523-tegi-amazon-na-osnove-pokupok?from=rss"
+        },
+        {
+          "title": "YouTube снова тестирует дизайн страницы с плеером, в котором комментарии располагаются справа от видео",
+          "url": "https://vc.ru/services/3181824-youtube-testiruet-novyj-dizajn-stranitsy-s-kommentariyami-sprava-ot-video?from=rss"
+        },
+        {
+          "title": "SpaceX пожаловалась, что чужие спутники пролетают вблизи её группировки Starlink, и призвала делиться данными о манёврах",
+          "url": "https://vc.ru/future/3180978-spacex-prizyv-delitsya-dannymi-o-sputnikakh?from=rss"
+        },
+        {
+          "title": "Jaguar представил Type 01 — свой первый серийный электромобиль стоимостью от $172 тысяч",
+          "url": "https://vc.ru/transport/3181251-jaguar-predstavil-type-01-elektromobil?from=rss"
+        },
+        {
+          "title": "ЦБ выдал «Сберу», ВТБ и «Т-Технологиям» лицензии цифровых депозитариев для работы с криптовалютами",
+          "url": "https://vc.ru/crypto/3179432-cb-vydal-litsenzii-vtb-sberu-i-t-tekhnologiyam?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Apple обновила логотип Apple Music",
+          "url": "https://habr.com/ru/news/1091810/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091810"
+        },
+        {
+          "title": "EmbeddingGemma 2 спустя сутки: что осталось от обещаний Google",
+          "url": "https://habr.com/ru/companies/bothub/news/1091786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091786"
+        },
+        {
+          "title": "Anthropic выпустила Claude Haiku 5.5: цена вопроса — $0,10",
+          "url": "https://habr.com/ru/companies/bothub/news/1091768/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091768"
+        },
+        {
+          "title": "«Солар» представил новую версию «ЗАСТАВА 9» для организаций любого масштаба – от небольшого офиса до ЦОД",
+          "url": "https://habr.com/ru/companies/solarsecurity/news/1091770/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091770"
+        },
+        {
+          "title": "Тренды в DevRel, границы применимости ИИ, внутренние конфы и инструменты фасилитации — DevRel-секция на IT Gorky",
+          "url": "https://habr.com/ru/news/1091766/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091766"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
+          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
+        },
+        {
+          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
+          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
+        },
+        {
+          "title": "Функциональные флаги в CI/CD: что, зачем и как",
+          "url": "https://tproger.ru/articles/funkcionalnye-flagi-v-ci-cd-chto-zachem-i-kak"
+        },
+        {
+          "title": "Kilo выпустила Desktop для разработки и анализа данных с ИИ",
+          "url": "https://tproger.ru/news/kilo-vypustila-desktop-dlya-razrabotki-i-analiza-dannyh-s-ii"
+        },
+        {
+          "title": "IBM и Red Hat исправили более 400 неизвестных уязвимостей в Java-библиотеках",
+          "url": "https://tproger.ru/news/ibm-i-red-hat-ispravili-bolee-400-neizvestnyh-uyazvimostej-v-java"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261007-2237: Самара 6.8°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
