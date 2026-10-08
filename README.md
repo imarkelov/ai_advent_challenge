@@ -30,6 +30,8 @@
 | День 23 | [day23-rerank-filter](https://github.com/imarkelov/ai_advent_challenge/tree/day23-rerank-filter) | Реранкинг и фильтрация: настройка `min_score` (0..1, 0 = off) — порог релевантности в `search_rag` после реранкера (абсолютный `rerank_score ≥ min_score`) или относительно лучшего результата без него (`score ≥ min_score × best`), фильтрация до среза top-k с полями `filtered`/`dropped`, query rewrite в сравнении (LLM-перефраз вопроса при T=0 с фолбэком на исходный), 4-режимный compare (plain \| rag \| rag+filter \| rag+rewrite) + UI-секция с 4 панелями и чипом «фильтр ≥ X» |
 | День 24 | [day24-rag-citations](https://github.com/imarkelov/ai_advent_challenge/tree/day24-rag-citations) | Цитаты, источники и анти-галлюцинации: обязательные источники (source + section/chunk_id) + verbatim-цитаты в RAG-ответе, [n]-маркеры, режим «не знаю» при 0 релевантных чанков (без LLM-вызова), панель «Источники и цитаты» в чате, e2e_day24 (10 вопросов) |
 | День 25 | [`day25-task-memory`](https://github.com/imarkelov/ai_advent_challenge/tree/day25-task-memory) | Мини-чат с RAG + памятью (production-like): история диалога, RAG-контекст при каждом вопросе, ответ с учётом найденного, источники на каждом ответе + «память задачи» (task state): цель диалога, уточнения, зафиксированные ограничения/термины (авто-обновление LLM-вызовом после хода, инъекция в system-промпт, вкладка «Задача», REST per-диалог); e2e_day25: 2 длинных сценария (12 + 10 сообщений) — цель не теряется, источники 100 % ответов |
+| День 26 | [`day26-local-llm`](https://github.com/imarkelov/ai_advent_challenge/tree/day26-local-llm) | Запуск локальной LLM (Ollama) в выборе модели: второй провайдер рядом с GPustack, маршрутизация по имени модели (`_base_for`), динамическое обнаружение локальных моделей, флаг `local` в `/api/models`, `optgroup` «Локальные (Ollama)» в дропдауне, переименование вкладок с иконками |
+| День 28 | [`day28-local-rag`](https://github.com/imarkelov/ai_advent_challenge/tree/day28-local-rag) | Локальная LLM + RAG: полностью локальный пайплайн на Ollama — индекс из Недели 6, retrieval локальным эмбеддером `nomic-embed-text:v1.5` (768 dim, без ключей), генерация локальной моделью; третий эмбеддер `ollama` (модель для поиска берётся из индекса), 502 при недоступной Ollama (без тихой подмены), выбор эмбеддера и фактическая модель в UI; e2e_day28 (Part A офлайн + Part B live) |
 
 ## День 7: как работает сервис
 
@@ -2516,3 +2518,138 @@ embedding-модель, чат-зонд получает от неё HTTP 400 и
 Локальная LLM запущена, добавлена в выбор модели проекта (отдельной
 группой) и отвечает на запросы через CLI и HTTP API; функционал дней
 21–25 не затронут. Ветка `day26-local-llm` (от `day25-task-memory`).
+
+## День 28: Локальная LLM + RAG (полностью локальный пайплайн)
+
+### Что это
+
+RAG-пайплайн Студии умеет работать **целиком на машине**, без GPustack
+и без сети. Задание дня 28 — соединить три части, которые до этого
+жили в разных мирах:
+
+1. **Индекс** — из Недели 6 (`kb.py`, `index.db`: SQLite, таблицы
+   `meta` + `chunks`, вектор — BLOB float32). Формат не менялся.
+2. **Retrieval** — эмбеддинг запроса **локально**: `nomic-embed-text:v1.5`
+   (768 dim) через OpenAI-совместимый `POST {OLLAMA_BASE_URL}/embeddings`.
+3. **Генерация** — **локальная** LLM (Ollama), как в дне 26.
+
+Разрыв был ровно в эмбеддере: `hash` локален, но 256-мерный char-3-gram
+md5 не различает смысл; `api` семантичен, но требует GPustack и ключ.
+День 28 добавляет третий эмбеддер `ollama` — **не замену**, а соседа
+существующих.
+
+### Архитектура
+
+| `embedder` | Модель | Где считает | Нужен ключ |
+|---|---|---|---|
+| `hash` | — (char 3-gram md5, 256 dim) | локально, детерминированно | нет |
+| `api` | `qwen3-vl-embedding-8b` | GPustack (сеть) | `GPUSTACK_KEY_EMBED` |
+| `ollama` | `nomic-embed-text:v1.5` (768 dim) | локально (Ollama) | нет |
+
+Два решения, которые стоит отметить:
+
+- **Модель для поиска берётся ИЗ ИНДЕКСА, а не из env.**
+  `_embedder_from_index` строит эмбеддер на `idx["model"]`: векторная
+  нога считает `cosine(qv, chunk_vector)`, и если запрос посчитать
+  другой моделью, косинус бессмыслен — поиск деградирует молча.
+  `OLLAMA_EMBED_MODEL` описывает модель для **новой сборки**; поиск по
+  уже собранному индексу следует индексу.
+- **Недоступная Ollama — 502, а не тихий фолбэк на `hash`.** Подмена
+  эмбеддера дала бы индекс с несравнимыми векторами и расхождение
+  `embedder`/`dim` в meta с реальностью. Молчаливо сломанный RAG хуже
+  явной ошибки.
+
+Смена эмбеддера — другой индекс: существующее правило дня 21
+(`mode: "auto"` → инкремент только при совпадении strategy+embedder)
+пересобирает индекс полностью.
+
+### Что сделано
+
+| Место | Изменение |
+|---|---|
+| `studio/backend/kb.py` | `OllamaEmbedder` (по образцу `APIEmbedder`: батчи по 16, `dim` с первого ответа, сортировка `data[]` по `index`, `KBError` при сбое, `client` DI); константы `EMBED_MODEL_LOCAL`, `DEFAULT_OLLAMA_EMBED_URL`; фабрика `ollama_embedder_from_env(model=None)`; ветка `"ollama"` в `_embedder_from_index` (модель из индекса); `"ollama"` в валидаторе `update_settings` |
+| `studio/backend/main.py` | `POST /api/kb/index` принимает `embedder: hash\|api\|ollama` (для `ollama` ключ не требуется); `GET /api/kb/stats` аддитивно отдаёт `model` — фактическую модель эмбеддера |
+| `studio/frontend/src/api.ts` | `KbEmbedder = 'hash' \| 'api' \| 'ollama'`; `KbStats.model?: string \| null` (опционально — старый бэкенд не ломает рендер) |
+| `studio/frontend/src/components/KbTab.tsx` | Опция «Ollama nomic-embed-text:v1.5 (локально)» в селекторе эмбеддера, подпись в статистике, строка «Модель» |
+| `.env.example` | `OLLAMA_EMBED_MODEL`, `GPUSTACK_KEY_EMBED` / `GPUSTACK_KEY_RERANK`; пометка, что GPustack с дня 28 опционален |
+| `scripts/e2e_day28.py` | E2E: Part A офлайн (MUST PASS) + Part B live на Ollama (best-effort, SKIP без Ollama) |
+| `openspec/changes/day28-local-rag/` | proposal / design / tasks / specs `local-rag-ollama` |
+
+**Не менялось:** `search` / `search_rag` / `_rrf` / `_bm25_scores`,
+`hash`- и `api`-эмбеддеры и их индексы, реранкер и `min_score` дня 23,
+`CITE_RULE` / dont-know дня 24, task-пайплайн, маршрутизация локальной
+генерации дня 26, схема `POST /api/chat`, формат `index.db`
+(version 1 — миграция не нужна).
+
+### Запуск
+
+```bash
+ollama serve                          # если ещё не запущен
+ollama pull nomic-embed-text:v1.5     # локальный эмбеддер RAG (274 МБ)
+ollama pull qwen3-coder:30b           # локальная генерация (любая completion-модель)
+```
+
+Выбор эмбеддера — в UI: **База знаний → Эмбеддер → «Ollama
+nomic-embed-text:v1.5 (локально)» → Индексировать**. Через API:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/kb/index \
+  -H "Content-Type: application/json" \
+  -d '{"strategy": "structural", "embedder": "ollama"}'
+```
+
+### Проверка
+
+**Тесты:** бэкенд — **607 passed, 6 skipped** (офлайн, `-m "not live"`).
+Добавлен 21 тест: 15 в `test_kb.py` (`OllamaEmbedder` — батчи, `dim`,
+прогресс, порядок `data[]`, `KBError` на HTTP-500/ConnectError/битый
+ответ; фабрика из env; диспетчер `_embedder_from_index` — в том числе
+«модель берётся из индекса, а не из env») и 6 в `test_kb_api.py`
+(сборка `ollama` без ключей, `model` в stats, локальный поиск,
+настройки 200/400). Фронтенд — `tsc -b` clean.
+*(`npx vitest` в этом окружении не стартует — pre-existing проблема
+зависимостей `rolldown`/Node 18, воспроизводится на чистом дереве;
+к изменениям дня 28 отношения не имеет.)*
+
+**E2E (`python scripts/e2e_day28.py`) — Part A 6/6 PASS, Part B 5/5 PASS:**
+
+| Шаг | Результат |
+|---|---|
+| A1 сборка `ollama`-индекса через роут | PASS — `embedder=ollama model=nomic-embed-text:v1.5 dim=768` |
+| A2 retrieval эмбеддером ИЗ ИНДЕКСА | PASS — `embedder=ollama model=nomic-embed-text:v1.5` |
+| A3 регрессия `hash`-индекса | PASS — `embedder=hash hits=2` |
+| A4 RAG-блок в system-промпте LLM | PASS — `kb_block в system=True` |
+| A5 валидация эмбеддера | PASS — `index(nope)=400`, `settings(ollama)=200`, `settings(nope)=400` |
+| A6 недоступная Ollama | PASS — **502** (не 500, не тихий фолбэк) |
+| B0 зонд Ollama | PASS — эмбеддер + completion-модель есть |
+| B1 локальная сборка индекса | PASS — 3 файла, **33 чанка**, 768 dim |
+| B2 контрольные вопросы | PASS — иголка найдена в **5/5** |
+| B3 генерация локальной LLM | PASS — непустой ответ + непустой `rag_context.chunks` |
+| B4 метка `local=true` | PASS — модель помечена локальной в `/api/models` |
+
+**Реальный корпус (`data/kb`, 3 файла, 39 143 символа):** пересобран
+`ollama`-эмбеддером за **2.3 с** → 33 чанка, 768 dim. Retrieval
+различает файлы (`backend_review_guide.txt` против
+`chekhov_chameleon.txt`), локальная LLM отвечает по базе с цитатами:
+
+```
+Q: Какие пункты в гайде по бэкенд-ревью? Ответь по базе знаний.
+A: По гайду по тех-ревизии бэкенда зафиксированы следующие этапы:
+   1. Профилирование — замер времени ответа до изменений, поиск
+      медленных запросов, проверка индексов [1].
+   2. Архитектура — устранение N+1-запросов, кэширование горячих
+      данных, настройка пулов соединений [1].
+   3. Замеры — фиксация времени ответа до/после, перцентили p50/p95/p99 [1].
+   rag_context: recall_total=33 reranked=False chunks=3
+```
+
+**Локальность доказана перехватом `httpx.Client.send`:** за ход
+`retrieval + генерация` все запросы ушли **только** на
+`localhost:11434` (`/v1/embeddings` + `/v1/chat/completions`); при
+пустых `GPUSTACK_*` сетевого пути нет вовсе.
+
+### Статус
+
+RAG-система полностью локальна: индекс из Недели 6, retrieval
+локальным эмбеддером, генерация локальной LLM. Ветка
+`day28-local-rag` (от `day26-local-llm`).

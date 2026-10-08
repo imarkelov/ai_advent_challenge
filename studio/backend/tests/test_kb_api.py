@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 
 from agent import StudioAgent
 from conftest import delta_chunk, sse_body, usage_chunk
-from kb import HashEmbedder, KnowledgeBase
+from kb import HashEmbedder, KnowledgeBase, OllamaEmbedder
 from mcp import MCPRegistry
 from memory import MemoryStore
 from tests.test_mcp import make_fake_launcher
@@ -549,6 +549,116 @@ def test_kb_index_api_embedder_no_key_400(client, monkeypatch):
                     json={"strategy": "fixed", "embedder": "api"})
     assert r.status_code == 400
     assert "GPUSTACK_KEY_EMBED" in r.json()["detail"]
+
+
+# ---------- день 28: локальный эмбеддер ollama ----------
+
+def _fake_ollama_kb(kb_env, monkeypatch, dim=768):
+    """Подменяет OllamaEmbedder клиента на MockTransport (офлайн): роут
+    строит настоящий OllamaEmbedder, но ходит в фейковый HTTP."""
+    agent, kb = kb_env
+    monkeypatch.setattr(
+        "kb.OllamaEmbedder",
+        _mock_ollama_embedder_class(dim))
+    return agent, kb
+
+
+def _mock_ollama_embedder_class(dim):
+    """Фабрика класса-двойника: сохраняет name/model контракт, embed —
+    из детерминированного хэша текста (разные тексты → разные векторы,
+    без сети)."""
+    real = OllamaEmbedder
+
+    class _Fake(real):
+        def __init__(self, base_url, api_key="ollama", client=None,
+                     model=None):
+            super().__init__(base_url, api_key, client=client, model=model)
+
+        def embed(self, texts, on_progress=None):
+            import hashlib as _h
+            out = []
+            for t in texts:
+                h = _h.md5(t.encode("utf-8")).digest()
+                v = [0.0] * dim
+                for i, b in enumerate(h):
+                    v[i % dim] += (b - 127.5) / 127.5
+                n = sum(x * x for x in v) ** 0.5 or 1.0
+                out.append([x / n for x in v])
+            if on_progress is not None:
+                on_progress(len(texts), len(texts))
+            self.dim = dim
+            return out
+
+    return _Fake
+
+
+def test_kb_index_ollama_embedder_builds_local_index(kb_env, client, monkeypatch):
+    """embedder=ollama: индекс собирается БЕЗ ключа API; в meta —
+    embedder=ollama, model=nomic-embed-text:v1.5, dim модели."""
+    agent, kb = _fake_ollama_kb(kb_env, monkeypatch)
+    _upload_music(kb)
+    r = client.post("/api/kb/index",
+                    json={"strategy": "structural", "embedder": "ollama"})
+    assert r.status_code == 200
+    idx = kb.load_index()
+    assert idx["embedder"] == "ollama"
+    assert idx["model"] == "nomic-embed-text:v1.5"
+    assert idx["dim"] == 768
+
+
+def test_kb_index_ollama_needs_no_api_key(kb_env, client, monkeypatch):
+    """Ключи GPustack не нужны: ollama-эмбеддер строится и без них."""
+    monkeypatch.delenv("GPUSTACK_KEY_EMBED", raising=False)
+    monkeypatch.delenv("GPUSTACK_API_KEY", raising=False)
+    _fake_ollama_kb(kb_env, monkeypatch)
+    _upload_music(kb_env[1])
+    r = client.post("/api/kb/index",
+                    json={"strategy": "fixed", "embedder": "ollama"})
+    assert r.status_code == 200
+
+
+def test_kb_stats_exposes_model_for_ollama(kb_env, client, monkeypatch):
+    """GET /api/kb/stats отдаёт model (день 28) — UI показывает, чем
+    построен индекс."""
+    _fake_ollama_kb(kb_env, monkeypatch)
+    _upload_music(kb_env[1])
+    assert client.post("/api/kb/index",
+                       json={"strategy": "fixed", "embedder": "ollama"}
+                       ).status_code == 200
+    b = client.get("/api/kb/stats").json()
+    assert b["embedder"] == "ollama"
+    assert b["model"] == "nomic-embed-text:v1.5"
+    assert b["dim"] == 768
+
+
+def test_kb_search_uses_ollama_embedder_from_index(kb_env, client, monkeypatch):
+    """Retrieval локальный: поиск берёт эмбеддер ИЗ ИНДЕКСА (ollama) и
+    эмбеддит запрос той же моделью; результаты непусты."""
+    _fake_ollama_kb(kb_env, monkeypatch)
+    kb = kb_env[1]
+    _upload_music(kb)
+    _upload_weather(kb)
+    assert client.post("/api/kb/index",
+                       json={"strategy": "structural", "embedder": "ollama"}
+                       ).status_code == 200
+    r = client.get("/api/kb/search", params={"q": "ксилофон", "k": 3})
+    assert r.status_code == 200
+    res = r.json()["results"]
+    assert res, "локальный поиск должен вернуть результаты"
+    assert any("ксилофон" in (x["text"] or "").lower() for x in res)
+
+
+def test_kb_settings_accepts_ollama_embedder(client):
+    """POST /api/kb/settings {embedder: ollama} — валиден."""
+    r = client.post("/api/kb/settings", json={"embedder": "ollama"})
+    assert r.status_code == 200
+    assert r.json()["embedder"] == "ollama"
+
+
+def test_kb_settings_rejects_unknown_embedder(client):
+    r = client.post("/api/kb/settings", json={"embedder": "nope"})
+    assert r.status_code == 400
+    assert "embedder" in r.json()["detail"]
 
 
 # ---------- /api/kb/upload ----------

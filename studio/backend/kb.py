@@ -4,11 +4,15 @@ RAG-ядро Студии: корпус — только загрузки пол
 (data/kb/uploads, «+ Добавить файл»; доки репозитория и код бэкенда в
 авто-корпус не входят — исправление после релиза дня 21),
 две стратегии разбиения на чанки (фиксированная / структурная),
-эмбеддинги (детерминированный hash-эмбеддер офлайн и API-эмбеддер
-GPustack), индекс `index.db` (SQLite: таблицы meta+chunks, вектор —
+эмбеддинги (детерминированный hash-эмбеддер офлайн, API-эмбеддер
+GPustack и локальный эмбеддер Ollama — день 28: nomic-embed-text:v1.5),
+индекс `index.db` (SQLite: таблицы meta+chunks, вектор —
 BLOB float32, одна транзакция на сборку/удаление, авто-миграция из
 legacy `index.json`) и гибридный поиск: векторная нога (косинус) + лексическая (BM25 по
 термам чанка, substring-матч инфлексий) с фузией Reciprocal Rank.
+
+День 28: с эмбеддером `ollama` весь RAG-пайплайн локальный — retrieval
+(эмбеддинг запроса той же моделью) и генерация (Ollama) без сети.
 
 Детерминизм: hash-эмбеддер строится ТОЛЬКО на hashlib.md5 (встроенный
 hash() salted per-process — не годится). Тесты офлайн, без сети.
@@ -30,6 +34,9 @@ DEFAULT_OVERLAP = 200
 DEFAULT_MAX_SECTION = 2400   # structured: секция длиннее → под-чанки по FixedChunker
 HASH_DIM = 256
 EMBED_MODEL = "qwen3-vl-embedding-8b"
+# День 28: локальный эмбеддер Ollama (RAG целиком на машине).
+EMBED_MODEL_LOCAL = "nomic-embed-text:v1.5"
+DEFAULT_OLLAMA_EMBED_URL = "http://localhost:11434/v1"
 RERANK_MODEL = "qwen3-reranker-4b"
 UPLOAD_EXTS = {".txt", ".md", ".py", ".js", ".ts", ".tsx", ".jsx", ".json",
                ".csv", ".html", ".css", ".yaml", ".yml"}
@@ -643,6 +650,94 @@ class APIEmbedder:
         return out
 
 
+class OllamaEmbedder:
+    """Эмбеддер локальной Ollama (день 28) — OpenAI-совместимый
+    /v1/embeddings. POST {base_url}/embeddings {"model", "input": batch} —
+    батчи по 16 (как APIEmbedder). Модель по умолчанию
+    nomic-embed-text:v1.5 (768 dim).
+
+    Ключевое отличие от APIEmbedder: данные НЕ покидают машину — Ollama
+    слушает localhost, ключ не проверяется (уходит заглушка OLLAMA_API_KEY).
+    Это делает RAG-пайплайн полностью локальным: retrieval (эмбеддинг
+    запроса) + генерация (та же Ollama) без обращений в сеть.
+
+    dim узнаётся с первого ответа. client DI для MockTransport-тестов."""
+
+    name = "ollama"
+    model = EMBED_MODEL_LOCAL
+    dim = None
+
+    def __init__(self, base_url: str, api_key: str = "ollama",
+                 client: "httpx.Client | None" = None,
+                 model: str | None = None):
+        import httpx  # локальный импорт: модуль грузится и без httpx
+        self._httpx = httpx
+        self.base_url = (base_url or "").rstrip("/")
+        self.api_key = api_key or "ollama"
+        if model:
+            self.model = model
+        self.dim = None
+        if client is not None:
+            self._client = client
+            self._owns = False
+        else:
+            self._client = httpx.Client(timeout=120)
+            self._owns = True
+
+    def embed(self, texts: list[str],
+              on_progress=None) -> list[list[float]]:
+        """on_progress(done, total) — после каждого батча (прогресс
+        индексации в UI). Сбой/битый ответ — KBError (как APIEmbedder:
+        падение эмбеддера не должно молча давать пустые векторы)."""
+        out: list[list[float]] = []
+        for i in range(0, len(texts), _API_BATCH):
+            batch = texts[i:i + _API_BATCH]
+            try:
+                r = self._client.post(
+                    self.base_url + "/embeddings",
+                    headers={"Authorization": "Bearer " + self.api_key,
+                             "Content-Type": "application/json"},
+                    json={"model": self.model, "input": batch})
+                r.raise_for_status()
+                payload = r.json()
+            except Exception as e:  # HTTP-ошибка / сбой сети / битый ответ
+                raise KBError(
+                    f"Локальный эмбеддер Ollama недоступен "
+                    f"({self.base_url}): {e}")
+            rows = payload.get("data")
+            if not isinstance(rows, list):
+                raise KBError("Локальный эмбеддер Ollama: в ответе нет data[]")
+            rows = sorted(rows, key=lambda d: d.get("index", 0))
+            vecs = []
+            for d in rows:
+                emb = d.get("embedding")
+                if not isinstance(emb, list):
+                    raise KBError(
+                        "Локальный эмбеддер Ollama: нет поля embedding")
+                vecs.append([float(x) for x in emb])
+            if self.dim is None and vecs:
+                self.dim = len(vecs[0])
+            out.extend(vecs)
+            if on_progress is not None:
+                on_progress(len(out), len(texts))
+        return out
+
+
+def ollama_embedder_from_env(model: str | None = None) -> "OllamaEmbedder":
+    """Локальный эмбеддер Ollama из окружения (день 28) — единая точка
+    сборки для роута /api/kb/index и `_embedder_from_index`.
+
+    OLLAMA_BASE_URL (дефолт http://localhost:11434/v1), OLLAMA_API_KEY —
+    заглушка (Ollama ключ не проверяет), OLLAMA_EMBED_MODEL — модель
+    (дефолт nomic-embed-text:v1.5; в индексе хранится фактическая)."""
+    base = os.environ.get("OLLAMA_BASE_URL", DEFAULT_OLLAMA_EMBED_URL)
+    key = os.environ.get("OLLAMA_API_KEY", "ollama")
+    return OllamaEmbedder(
+        base, key,
+        model=model or os.environ.get("OLLAMA_EMBED_MODEL")
+        or EMBED_MODEL_LOCAL)
+
+
 class APIReranker:
     """Реранкер GPustack (Jina/Cohere-совместимый /rerank, cross-encoder).
     POST {base_url}/rerank {"model", "query", "documents": batch} — батчи
@@ -1114,10 +1209,18 @@ class KnowledgeBase:
     # ---------- поиск ----------
 
     def _embedder_from_index(self, idx: dict):
-        """Эмбеддер по имени из индекса: hash — офлайн, api — из env."""
+        """Эмбеддер по имени из индекса: hash — офлайн, api — GPustack из
+        env, ollama — локальная Ollama (день 28).
+
+        Для ollama модель берётся ИЗ ИНДЕКСА (`idx["model"]`): векторная
+        нога обязана считать запрос той же моделью, что и чанки, иначе
+        косинус бессмыслен. Модель в индексе не записана (старый индекс) —
+        дефолт nomic-embed-text:v1.5."""
         name = idx.get("embedder")
         if name == "hash":
             return HashEmbedder()
+        if name == "ollama":
+            return ollama_embedder_from_env(model=idx.get("model"))
         if name == "api":
             key = os.environ.get("GPUSTACK_KEY_EMBED", "")
             if not key:
@@ -1297,8 +1400,8 @@ class KnowledgeBase:
                     raise ValueError(
                         "strategy: fixed|structural")
             elif k == "embedder":
-                if v not in ("hash", "api"):
-                    raise ValueError("embedder: hash|api")
+                if v not in ("hash", "api", "ollama"):
+                    raise ValueError("embedder: hash|api|ollama")
             s[k] = v
         atomic_write_json(self._p_settings, s)
         return s

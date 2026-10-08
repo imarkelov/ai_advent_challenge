@@ -18,14 +18,14 @@ try:  # пакетный режим: uvicorn studio.backend.main:app из кор
     from .agent import (CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE,
                         PROFILE_INTERVIEW_TEXT, StudioAgent)
     from .kb import (APIEmbedder, HashEmbedder, KBError, KnowledgeBase,
-                     UPLOAD_EXTS)
+                     UPLOAD_EXTS, ollama_embedder_from_env)
     from .memory import PROFILE_ACTIONS, MemoryStore
     from .mcp import MCPError
 except ImportError:  # dev-режим: uvicorn main:app из studio/backend
     from agent import (CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE,
                        PROFILE_INTERVIEW_TEXT, StudioAgent)
     from kb import (APIEmbedder, HashEmbedder, KBError, KnowledgeBase,
-                    UPLOAD_EXTS)
+                    UPLOAD_EXTS, ollama_embedder_from_env)
     from memory import PROFILE_ACTIONS, MemoryStore, PROFILE_ACTIONS
     from mcp import MCPError
 
@@ -702,6 +702,9 @@ def create_app(agent: StudioAgent | None = None,
         pending_files = sorted(corpus - set(files))
         return {"exists": True, "strategy": idx.get("strategy"),
                 "embedder": idx.get("embedder"), "dim": idx.get("dim"),
+                # День 28: фактическая модель эмбеддера (для ollama —
+                # nomic-embed-text:v1.5) — в UI видно, чем построен индекс.
+                "model": idx.get("model"),
                 "built_at": idx.get("built_at"), "stats": idx.get("stats"),
                 "comparison": idx.get("comparison"), "files": files,
                 "uploads": uploads, "pending_files": pending_files,
@@ -747,25 +750,31 @@ def create_app(agent: StudioAgent | None = None,
     @app.post("/api/kb/index")
     def kb_index(body: dict):
         """Построить индекс: body {strategy: fixed|structural,
-        embedder: hash|api, mode?: auto|full|incremental}.
+        embedder: hash|api|ollama, mode?: auto|full|incremental}.
         mode auto (дефолт): совпадении strategy+embedder с индексом —
         инкрементальная сборка (только новые файлы), иначе полная.
         400 — некорректные значения / ключ API-эмбеддера не настроен;
         409 — сборка уже идёт; 502 — сбой эмбеддинг-API. Ответ — результат
-        сборки {stats, comparison, strategy, mode, added}."""
+        сборки {stats, comparison, strategy, mode, added}.
+
+        День 28: embedder "ollama" — локальная модель (nomic-embed-text:v1.5
+        через OLLAMA_BASE_URL); ключ не нужен, данные не покидают машину."""
         strategy = body.get("strategy")
         embedder_name = body.get("embedder")
         mode = body.get("mode", "auto")
         if strategy not in ("fixed", "structural"):
             raise HTTPException(400, "strategy: fixed|structural")
-        if embedder_name not in ("hash", "api"):
-            raise HTTPException(400, "embedder: hash|api")
+        if embedder_name not in ("hash", "api", "ollama"):
+            raise HTTPException(400, "embedder: hash|api|ollama")
         if mode not in ("auto", "full", "incremental"):
             raise HTTPException(400, "mode: auto|full|incremental")
         if kb.progress().get("running"):
             raise HTTPException(409, "Сборка индекса уже идёт")
         if embedder_name == "hash":
             embedder = HashEmbedder()
+        elif embedder_name == "ollama":
+            # Локальный эмбеддер: ключ не требуется (Ollama его не проверяет).
+            embedder = ollama_embedder_from_env()
         else:
             key = os.environ.get("GPUSTACK_KEY_EMBED", "")
             if not key:

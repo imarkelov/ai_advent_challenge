@@ -1,3 +1,159 @@
+# Release Notes — day28-local-rag (день 28)
+
+Ветка: `day28-local-rag` (от `day26-local-llm`).
+
+## Что в релизе
+
+**Локальная LLM + RAG: полностью локальный пайплайн на Ollama.**
+Три части задания дня 28 соединены в один работающий контур, не
+выходящий в сеть:
+
+- **индекс** — из Недели 6 (`kb.py`, `index.db`: SQLite, таблицы
+  `meta` + `chunks`, вектор — BLOB float32; формат version 1 не менялся);
+- **retrieval** — локально: эмбеддинг запроса моделью
+  `nomic-embed-text:v1.5` (768 dim) через OpenAI-совместимый
+  `POST {OLLAMA_BASE_URL}/embeddings`;
+- **генерация** — локальной LLM (Ollama), как в дне 26.
+
+Разрыв до дня 28 был ровно в эмбеддере: `hash` локален, но 256-мерный
+char-3-gram md5 не различает смысл; `api` семантичен, но требует
+GPustack и ключ. Добавлен **третий эмбеддер `ollama`** — не замена, а
+сосед существующих.
+
+- **`OllamaEmbedder`** (`kb.py`, новый): по образцу `APIEmbedder` —
+  батчи по 16, `dim` с первого ответа, сортировка `data[]` по `index`,
+  `KBError` при HTTP-сбое/сети/битом ответе, `client` DI для
+  `MockTransport`-тестов. `name = "ollama"`,
+  `model = EMBED_MODEL_LOCAL = "nomic-embed-text:v1.5"`, `api_key` —
+  заглушка «ollama» (Ollama ключ не проверяет).
+- **Фабрика `ollama_embedder_from_env(model=None)`**: единая точка
+  сборки — `OLLAMA_BASE_URL` (дефолт `http://localhost:11434/v1`),
+  `OLLAMA_API_KEY`, `OLLAMA_EMBED_MODEL`.
+- **Модель для retrieval берётся ИЗ ИНДЕКСА** (`_embedder_from_index`):
+  ветка `"ollama"` строит эмбеддер на `idx["model"]`. Векторная нога
+  считает `cosine(qv, chunk_vector)` — если запрос посчитать другой
+  моделью, косинус бессмыслен и поиск деградирует молча.
+  `OLLAMA_EMBED_MODEL` описывает модель для новой сборки; поиск по
+  готовому индексу следует индексу. `model: null` → дефолт.
+- **`POST /api/kb/index` принимает `embedder: hash|api|ollama`**
+  (`main.py`): для `ollama` ключ не требуется — сборка работает при
+  пустых `GPUSTACK_*`. Иное значение по-прежнему 400.
+- **Недоступная Ollama → 502**, а не тихий фолбэк на `hash`: подмена
+  эмбеддера дала бы индекс с несравнимыми векторами и расхождение
+  `embedder`/`dim` в meta с реальностью. Молчаливо сломанный RAG хуже
+  явной ошибки. Лексический (BM25) фолбэк в `search` при недоступной
+  векторной ноге **во время поиска** сохранён.
+- **`GET /api/kb/stats` отдаёт `model`** (аддитивно) — фактическую
+  модель эмбеддера: в UI видно, чем построен индекс (`hash` → `null`).
+- **`update_settings` принимает `embedder: ollama`** — настройка не
+  расходится с возможностями сборки.
+- **UI**: `KbEmbedder = 'hash' | 'api' | 'ollama'`, опция «Ollama
+  nomic-embed-text:v1.5 (локально)» в селекторе эмбеддера, строка
+  «Модель» в статистике; `KbStats.model?: string | null` —
+  опционально, старый бэкенд рендерится без строки и без краха.
+- **Смена эмбеддера — другой индекс**: существующее правило дня 21
+  (`mode: "auto"` → инкремент только при совпадении
+  strategy+embedder) пересобирает индекс полностью; векторы `api`
+  (8b) и `ollama` (768) несравнимы.
+- **`scripts/e2e_day28.py`** (новый): Part A офлайн (MUST PASS, без
+  сети и Ollama) + Part B live на Ollama (best-effort, SKIP без
+  Ollama); порт 8130.
+- **`.env.example`**: `OLLAMA_EMBED_MODEL`,
+  `GPUSTACK_KEY_EMBED`/`GPUSTACK_KEY_RERANK`, пометка «GPustack с дня
+  28 опционален».
+- **`openspec/changes/day28-local-rag/`**: proposal / design / tasks /
+  specs `local-rag-ollama`.
+- **`studio/backend/README.md`**: секция «Локальный RAG (день 28)» —
+  три части пайплайна, таблица эмбеддеров, `ollama pull`, e2e.
+
+**Не менялось:** `search` / `search_rag` / `_rrf` / `_bm25_scores`,
+`hash`- и `api`-эмбеддеры и их индексы, реранкер и `min_score` дня 23,
+`CITE_RULE` / dont-know дня 24, task-пайплайн, маршрутизация локальной
+генерации дня 26 (`LOCAL_MODELS`, `_base_for`, `list_models`), схема
+`POST /api/chat`; новых REST-эндпоинтов, pip/npm-зависимостей и
+MCP-серверов нет; `index.db` version 1 — миграция не нужна.
+
+## Как проверить
+
+```bash
+ollama serve                          # если ещё не запущен
+ollama pull nomic-embed-text:v1.5     # локальный эмбеддер RAG (274 МБ)
+ollama pull qwen3-coder:30b           # локальная генерация
+```
+
+Сборка локального индекса:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/kb/index \
+  -H "Content-Type: application/json" \
+  -d '{"strategy": "structural", "embedder": "ollama"}'
+```
+
+Или в UI: **База знаний → Эмбеддер → «Ollama nomic-embed-text:v1.5
+(локально)» → Индексировать**.
+
+Полная проверка пайплайна:
+
+```bash
+python scripts/e2e_day28.py              # Part A + Part B
+python scripts/e2e_day28.py --part-a-only  # только офлайн
+```
+
+## Статус
+
+**Тесты:** бэкенд — **607 passed, 6 skipped** (офлайн,
+`-m "not live"`). Добавлен 21 тест: 15 в `test_kb.py` (батчи, `dim`,
+прогресс, порядок `data[]`, `KBError` на HTTP-500/ConnectError/битый
+ответ, фабрика из env, диспетчер `_embedder_from_index` — включая
+«модель из индекса, а не из env») и 6 в `test_kb_api.py` (сборка
+`ollama` без ключей, `model` в stats, локальный поиск, настройки
+200/400). Фронтенд — `tsc -b` clean.
+
+> Примечание: `npx vitest` в этом окружении не стартует
+> (`rolldown`/Node 18 — `node:util.styleText` отсутствует;
+> на Node 24 — `Cannot find module './rolldown-binding.wasi.cjs'`).
+> Проблема **pre-existing**: воспроизводится на чистом дереве без
+> изменений дня 28. Typecheck (`tsc -b`) проходит и валидирует
+> изменения фронтенда.
+
+**E2E — Part A 6/6 PASS, Part B 5/5 PASS:**
+
+| Шаг | Результат |
+|---|---|
+| A1 сборка `ollama`-индекса через роут | PASS — `embedder=ollama model=nomic-embed-text:v1.5 dim=768` |
+| A2 retrieval эмбеддером ИЗ ИНДЕКСА | PASS — `embedder=ollama model=nomic-embed-text:v1.5` |
+| A3 регрессия `hash`-индекса | PASS — `embedder=hash hits=2` |
+| A4 RAG-блок в system-промпте LLM | PASS — `kb_block в system=True` |
+| A5 валидация эмбеддера | PASS — `index(nope)=400`, `settings(ollama)=200`, `settings(nope)=400` |
+| A6 недоступная Ollama | PASS — **502** |
+| B0 зонд Ollama | PASS — эмбеддер и completion-модель есть |
+| B1 локальная сборка индекса | PASS — 3 файла, **33 чанка**, 768 dim |
+| B2 контрольные вопросы | PASS — иголка найдена **5/5** |
+| B3 генерация локальной LLM | PASS — непустой ответ + непустой `rag_context.chunks` |
+| B4 метка `local=true` | PASS |
+
+**Реальный корпус `data/kb`** (3 файла, 39 143 символа) пересобран
+`ollama`-эмбеддером за **2.3 с** → 33 чанка, 768 dim. Retrieval
+различает файлы, локальная LLM отвечает по базе с цитатами:
+
+```
+Q: Какие пункты в гайде по бэкенд-ревью? Ответь по базе знаний.
+A: По гайду по тех-ревизии бэкенда зафиксированы следующие этапы:
+   1. Профилирование — замер времени ответа до изменений, поиск
+      медленных запросов, проверка индексов [1].
+   2. Архитектура — устранение N+1-запросов, кэширование горячих
+      данных, настройка пулов соединений [1].
+   3. Замеры — фиксация времени ответа до/после, перцентили p50/p95/p99 [1].
+   rag_context: recall_total=33 reranked=False chunks=3
+```
+
+**Локальность доказана перехватом `httpx.Client.send`:** за ход
+`retrieval + генерация` все запросы ушли **только** на
+`localhost:11434` (`/v1/embeddings` + `/v1/chat/completions`); при
+пустых `GPUSTACK_*` сетевого пути нет вовсе.
+
+Ветка `day28-local-rag` (от `day26-local-llm`).
+
 # Release Notes — day26-local-llm (день 26)
 
 Ветка: `day26-local-llm` (от `day25-task-memory`).

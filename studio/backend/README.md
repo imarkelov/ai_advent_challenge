@@ -27,6 +27,45 @@ OpenAI-совместимый API) со стримингом по SSE, три с
 (`LOCAL_MODELS`, `_base_for()`), поэтому удалённые модели продолжают ходить
 на GPustack. Шаблон — `.env.example`.
 
+## Локальный RAG (день 28)
+
+С дня 28 RAG-пайплайн может работать **целиком на машине** — без GPustack
+и без сети. Складывается из трёх частей, все на Ollama (`localhost:11434`):
+
+1. **Индекс** — из Недели 6 (`kb.py`, `index.db`: SQLite, таблицы
+   `meta` + `chunks`, вектор — BLOB float32). Меняется только эмбеддер:
+   добавляется `embedder: "ollama"`.
+2. **Retrieval** — эмбеддинг запроса локальной моделью
+   `nomic-embed-text:v1.5` (768 dim) через `POST {OLLAMA_BASE_URL}/embeddings`.
+   `_embedder_from_index` берёт модель **из индекса** (поле `model`), а не
+   из env: векторная нога обязана считать запрос той же моделью, что и
+   чанки, иначе косинус бессмыслен.
+3. **Генерация** — локальная LLM (`qwen3-coder:30b` / `gemma3:27b` /
+   `glm-4.7-flash:q4_K_M`) через `POST {OLLAMA_BASE_URL}/chat/completions`,
+   как в дне 26.
+
+Три эмбеддера в `kb.py`:
+
+| `embedder` | Модель | Где считает | Нужен ключ |
+|---|---|---|---|
+| `hash` | — (char 3-gram md5, 256 dim) | локально, детерминированно | нет |
+| `api` | `qwen3-vl-embedding-8b` | GPustack (сеть) | `GPUSTACK_KEY_EMBED` |
+| `ollama` | `nomic-embed-text:v1.5` (768 dim) | локально (Ollama) | нет |
+
+Смена эмбеддера — другой индекс: `POST /api/kb/index` с `mode: "auto"`
+пересобирает полностью, если `embedder` не совпал с индексом (инкремент
+возможен только при совпадении strategy+embedder).
+
+Установка локальной модели:
+
+```bash
+ollama pull nomic-embed-text:v1.5   # эмбеддер RAG
+ollama pull qwen3-coder:30b         # генерация (любая completion-модель)
+```
+
+Проверка пайплайна целиком: `python scripts/e2e_day28.py` (Part A — офлайн
+без сети, Part B — живой прогон на Ollama; см. шапку скрипта).
+
 ## Запуск (dev)
 
 ```bash

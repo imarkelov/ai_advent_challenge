@@ -81,6 +81,7 @@ const progressPct = (p: KbBuildStatus): number => {
 const EMBEDDER_LABEL: Record<KbEmbedder, string> = {
   hash: 'Локальный (быстрый, офлайн)',
   api: 'API qwen3-vl-embedding-8b',
+  ollama: 'Ollama nomic-embed-text:v1.5 (локально)',
 }
 
 const STRATEGY_LABEL: Record<KbStrategy, string> = {
@@ -557,12 +558,14 @@ export default function KbTab() {
           >
             <option value="hash">Локальный (быстрый, офлайн)</option>
             <option value="api">API qwen3-vl-embedding-8b</option>
+            {/* День 28: локальный эмбеддер Ollama — RAG целиком на машине */}
+            <option value="ollama">Ollama nomic-embed-text:v1.5 (локально)</option>
           </select>
         </label>
         <button type="button" className="btn" disabled={indexing} onClick={doIndex}>
           {indexing ? 'Индексация…' : 'Индексировать'}
         </button>
-        <p className="kb-hint">новые файлы — только они (инкремент); полная пересборка — смена стратегии/эмбеддера. API-эмбеддер — до ~3 мин</p>
+        <p className="kb-hint">новые файлы — только они (инкремент); полная пересборка — смена стратегии/эмбеддера. API-эмбеддер — до ~3 мин; Ollama-эмбеддер работает локально и без ключа</p>
         {indexing && progress && (
           <>
             <div
@@ -677,6 +680,7 @@ export default function KbTab() {
           <div className="tok-row"><span className="tok-label">Время сборки</span><span className="tok-value">{(s.stats.build_ms / 1000).toFixed(1)} c</span></div>
           <div className="tok-row"><span className="tok-label">Создан</span><span className="tok-value">{new Date(s.built_at).toLocaleString('ru-RU')}</span></div>
           <div className="tok-row"><span className="tok-label">Эмбеддер</span><span className="tok-value">{EMBEDDER_LABEL[s.embedder]}</span></div>
+          {s.model && <div className="tok-row"><span className="tok-label">Модель</span><span className="tok-value">{s.model}</span></div>}
           <div className="tok-row"><span className="tok-label">Стратегия</span><span className="tok-value">{STRATEGY_LABEL[s.strategy]}</span></div>
         </section>
       )}

@@ -10,9 +10,10 @@ import httpx
 import pytest
 
 import kb as kb_module
-from kb import (APIEmbedder, APIReranker, CorpusDoc, EMBED_MODEL,
-                FixedChunker, HashEmbedder, KBError, KnowledgeBase,
-                RERANK_MODEL, StructuredChunker, cosine)
+from kb import (APIEmbedder, APIReranker, CorpusDoc, DEFAULT_OLLAMA_EMBED_URL,
+                EMBED_MODEL, EMBED_MODEL_LOCAL, FixedChunker, HashEmbedder,
+                KBError, KnowledgeBase, OllamaEmbedder, RERANK_MODEL,
+                StructuredChunker, cosine, ollama_embedder_from_env)
 
 
 # ---------- мини-корпус (tmp repo) ----------
@@ -244,6 +245,187 @@ def test_hash_embedder_on_progress_final_call():
     vecs = emb.embed(["один", "два"], on_progress=lambda d, t: steps.append((d, t)))
     assert steps == [(2, 2)]
     assert len(vecs) == 2
+
+
+# ---------- OllamaEmbedder (день 28; MockTransport, без сети) ----------
+
+def _ollama_handler(calls, dim=768, status=200):
+    """Фейк OpenAI-совместимого /embeddings Ollama: запоминает батчи,
+    отдаёт data[] с index и вектором длины dim."""
+    def handler(request):
+        body = json.loads(request.content)
+        calls.append(body["input"])
+        if status != 200:
+            return httpx.Response(status)
+        return httpx.Response(200, json={
+            "object": "list", "model": body.get("model", EMBED_MODEL_LOCAL),
+            "data": [{"index": i, "object": "embedding",
+                      "embedding": [round(0.01 * (i + 1), 4)] * dim}
+                     for i in range(len(body["input"]))]})
+    return handler
+
+
+def test_ollama_embedder_meta_defaults():
+    """Дефолты дня 28: name=ollama, модель nomic-embed-text:v1.5, dim
+    узнаётся с первого ответа (не захардкожен)."""
+    e = OllamaEmbedder("http://localhost:11434/v1")
+    assert e.name == "ollama"
+    assert e.model == EMBED_MODEL_LOCAL == "nomic-embed-text:v1.5"
+    assert e.dim is None
+    assert e.api_key == "ollama"  # заглушка: Ollama ключ не проверяет
+
+
+def test_ollama_embedder_model_override():
+    e = OllamaEmbedder("http://localhost:11434/v1", model="other:1b")
+    assert e.model == "other:1b"
+
+
+def test_ollama_embedder_batching_30_texts_two_requests():
+    """Батчи по 16 — как APIEmbedder (30 → 16+14)."""
+    calls = []
+    client = httpx.Client(transport=httpx.MockTransport(_ollama_handler(calls)))
+    e = OllamaEmbedder("http://fake.local/v1", client=client)
+    vecs = e.embed([f"текст {i}" for i in range(30)])
+    assert len(vecs) == 30
+    assert len(calls) == 2
+    assert len(calls[0]) == 16
+    assert len(calls[1]) == 14
+
+
+def test_ollama_embedder_dim_detection_and_progress():
+    calls = []
+    client = httpx.Client(transport=httpx.MockTransport(_ollama_handler(calls, dim=768)))
+    e = OllamaEmbedder("http://fake.local/v1", client=client)
+    steps = []
+    vecs = e.embed([f"текст {i}" for i in range(35)],
+                   on_progress=lambda d, t: steps.append((d, t)))
+    assert e.dim == 768  # dim с первого ответа
+    assert len(vecs) == 35
+    assert steps == [(16, 35), (32, 35), (35, 35)]
+
+
+def test_ollama_embedder_sends_model_and_auth_header():
+    """Запрос уходит на {base}/embeddings с моделью и Bearer-заглушкой."""
+    seen = {}
+
+    def handler(request):
+        seen["url"] = str(request.url)
+        seen["auth"] = request.headers.get("authorization")
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(200, json={
+            "model": EMBED_MODEL_LOCAL,
+            "data": [{"index": 0, "embedding": [0.5] * 8}]})
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    e = OllamaEmbedder("http://fake.local/v1/", api_key="secret", client=client)
+    e.embed(["один"])
+    assert seen["url"] == "http://fake.local/v1/embeddings"
+    assert seen["auth"] == "Bearer secret"
+    assert seen["body"]["model"] == EMBED_MODEL_LOCAL
+    assert seen["body"]["input"] == ["один"]
+
+
+def test_ollama_embedder_http_500_raises_kberror():
+    client = httpx.Client(
+        transport=httpx.MockTransport(_ollama_handler([], status=500)))
+    e = OllamaEmbedder("http://fake.local/v1", client=client)
+    with pytest.raises(KBError) as ei:
+        e.embed(["один"])
+    assert "Ollama" in str(ei.value)
+
+
+def test_ollama_embedder_connection_error_raises_kberror():
+    """Ollama не запущена — KBError (сбой не молчит пустыми векторами)."""
+    def handler(request):
+        raise httpx.ConnectError("connection refused", request=request)
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    e = OllamaEmbedder("http://localhost:11434/v1", client=client)
+    with pytest.raises(KBError):
+        e.embed(["один"])
+
+
+def test_ollama_embedder_missing_data_field_raises():
+    client = httpx.Client(transport=httpx.MockTransport(
+        lambda request: httpx.Response(200, json={"model": "x"})))
+    e = OllamaEmbedder("http://fake.local/v1", client=client)
+    with pytest.raises(KBError):
+        e.embed(["один"])
+
+
+def test_ollama_embedder_results_reordered_by_index():
+    """data[] в ответе может прийти не по порядку — сортируем по index
+    (как APIEmbedder): вектор i соответствует тексту i."""
+    def handler(request):
+        body = json.loads(request.content)
+        n = len(body["input"])
+        rows = [{"index": i, "embedding": [float(i)] * 3}
+                for i in range(n)][::-1]  # перевёрнутый порядок
+        return httpx.Response(200, json={"data": rows})
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    e = OllamaEmbedder("http://fake.local/v1", client=client)
+    vecs = e.embed(["a", "b", "c"])
+    assert [v[0] for v in vecs] == [0.0, 1.0, 2.0]
+
+
+def test_ollama_embedder_from_env(monkeypatch):
+    """Фабрика читает OLLAMA_BASE_URL/OLLAMA_API_KEY/OLLAMA_EMBED_MODEL."""
+    monkeypatch.setenv("OLLAMA_BASE_URL", "http://127.0.0.1:9999/v1/")
+    monkeypatch.setenv("OLLAMA_API_KEY", "envkey")
+    monkeypatch.setenv("OLLAMA_EMBED_MODEL", "custom-embed:2b")
+    e = ollama_embedder_from_env()
+    assert e.base_url == "http://127.0.0.1:9999/v1"  # rstrip "/"
+    assert e.api_key == "envkey"
+    assert e.model == "custom-embed:2b"
+    # явная модель перебивает env (модель из индекса при поиске)
+    assert ollama_embedder_from_env(model="idx:1").model == "idx:1"
+
+
+def test_ollama_embedder_from_env_defaults(monkeypatch):
+    """Без переменных окружения — дефолты (localhost:11434/v1,
+    заглушка ключа, nomic-embed-text:v1.5)."""
+    for k in ("OLLAMA_BASE_URL", "OLLAMA_API_KEY", "OLLAMA_EMBED_MODEL"):
+        monkeypatch.delenv(k, raising=False)
+    e = ollama_embedder_from_env()
+    assert e.base_url == DEFAULT_OLLAMA_EMBED_URL == "http://localhost:11434/v1"
+    assert e.api_key == "ollama"
+    assert e.model == EMBED_MODEL_LOCAL
+
+
+# ---------- _embedder_from_index: диспетчер эмбеддеров ----------
+
+def _embedder_from_index_names(tmp_path, idx: dict):
+    """`_embedder_from_index` — метод KnowledgeBase; зовём на минимальном
+    инстансе БЗ (tmp-каталог, индекс не нужен)."""
+    return KnowledgeBase(str(tmp_path / "kb"))._embedder_from_index(idx)
+
+
+def test_embedder_from_index_hash(tmp_path):
+    assert isinstance(_embedder_from_index_names(tmp_path, {"embedder": "hash"}),
+                      HashEmbedder)
+
+
+def test_embedder_from_index_ollama_uses_model_from_index(tmp_path, monkeypatch):
+    """Ключевое: запрос эмбеддится ТОЙ ЖЕ моделью, что и чанки —
+    модель берётся из индекса, а не из env."""
+    monkeypatch.setenv("OLLAMA_EMBED_MODEL", "env-model:1")
+    e = _embedder_from_index_names(
+        tmp_path, {"embedder": "ollama", "model": "nomic-embed-text:v1.5"})
+    assert isinstance(e, OllamaEmbedder)
+    assert e.model == "nomic-embed-text:v1.5"
+
+
+def test_embedder_from_index_ollama_without_model_uses_default(tmp_path, monkeypatch):
+    monkeypatch.delenv("OLLAMA_EMBED_MODEL", raising=False)
+    e = _embedder_from_index_names(
+        tmp_path, {"embedder": "ollama", "model": None})
+    assert e.model == EMBED_MODEL_LOCAL
+
+
+def test_embedder_from_index_unknown_name_raises(tmp_path):
+    with pytest.raises(KBError):
+        _embedder_from_index_names(tmp_path, {"embedder": "nope"})
 
 
 # ---------- APIReranker (MockTransport, без сети) ----------

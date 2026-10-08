@@ -434,7 +434,7 @@ export type ChatEvent =
 // GET/POST /api/kb/settings           → KbSettings (POST — частичное обновление)
 
 export type KbStrategy = 'fixed' | 'structural'
-export type KbEmbedder = 'hash' | 'api'
+export type KbEmbedder = 'hash' | 'api' | 'ollama'
 // Реранкер этапа 2 (день 21): cross-encoder поверх гибридного поиска
 export type KbReranker = 'off' | 'api'
 
@@ -461,6 +461,9 @@ export interface KbStats {
   exists: true
   strategy: KbStrategy
   embedder: KbEmbedder
+  // День 28: фактическая модель эмбеддера (ollama — nomic-embed-text:v1.5);
+  // null у hash-эмбеддера. Старый бэкенд поля не отдаёт
+  model?: string | null
   dim: number
   built_at: string
   stats: {
