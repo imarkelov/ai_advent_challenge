@@ -1,58 +1,20 @@
 {
-  "id": "digest-20261008-0419",
-  "generated_at": "2026-10-08T04:19:51Z",
+  "id": "digest-20261008-1245",
+  "generated_at": "2026-10-08T12:45:13Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 6.3,
-    "feels_like_c": 4.1,
-    "description": "Ясно",
-    "wind_ms": 6.5
+    "temp_c": 15.3,
+    "feels_like_c": 12.5,
+    "description": "Преимущественно ясно",
+    "wind_ms": 9.7
   },
   "news": {
-    "vc.ru": [
-      {
-        "title": "«Нет друзей» и «плоская попа»: в соцсетях делятся тегами, которые Amazon добавляет к профилям на основе истории покупок пользователя",
-        "url": "https://vc.ru/marketplace/3181523-tegi-amazon-na-osnove-pokupok?from=rss"
-      },
-      {
-        "title": "YouTube снова тестирует дизайн страницы с плеером, в котором комментарии располагаются справа от видео",
-        "url": "https://vc.ru/services/3181824-youtube-testiruet-novyj-dizajn-stranitsy-s-kommentariyami-sprava-ot-video?from=rss"
-      },
-      {
-        "title": "Revolut возместит расходы на замену документов тем клиентам, чьи данные он передал хакерам",
-        "url": "https://vc.ru/money/3181695-revolut-vozmetit-raskhody-na-zamenu-dokumentov?from=rss"
-      },
-      {
-        "title": "SpaceX пожаловалась, что чужие спутники пролетают вблизи её группировки Starlink, и призвала делиться данными о манёврах",
-        "url": "https://vc.ru/future/3180978-spacex-prizyv-delitsya-dannymi-o-sputnikakh?from=rss"
-      },
-      {
-        "title": "Jaguar представил Type 01 — свой первый серийный электромобиль стоимостью от $172 тысяч",
-        "url": "https://vc.ru/transport/3181251-jaguar-predstavil-type-01-elektromobil?from=rss"
-      }
-    ],
-    "habr": [
-      {
-        "title": "Вышел Ocenaudio 3.22 — бесплатный мультиплатформенный аудио‑ и музыкальный редактор",
-        "url": "https://habr.com/ru/news/1091590/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091590"
-      },
-      {
-        "title": "Релиз открытого инструментария MediaInfo 26.10 для просмотра технических данных видеороликов и аудиофайлов",
-        "url": "https://habr.com/ru/news/1091340/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091340"
-      },
-      {
-        "title": "Выпуск 7-Zip 26.04",
-        "url": "https://habr.com/ru/news/1091326/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091326"
-      },
-      {
-        "title": "Apple обновила логотип Apple Music",
-        "url": "https://habr.com/ru/news/1091810/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091810"
-      },
-      {
-        "title": "EmbeddingGemma 2 спустя сутки: что осталось от обещаний Google",
-        "url": "https://habr.com/ru/companies/bothub/news/1091786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091786"
-      }
-    ],
+    "vc.ru": {
+      "error": "<urlopen error timed out>"
+    },
+    "habr": {
+      "error": "<urlopen error timed out>"
+    },
     "tproger": [
       {
         "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
@@ -76,5 +38,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261008-0419: Самара 6.3°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261008-1245: Самара 15.3°C, Преимущественно ясно; новостей: 5 (vc.ru error, habr error, tproger 5)."
 }
