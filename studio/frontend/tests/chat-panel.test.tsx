@@ -70,6 +70,56 @@ describe('ChatPanel — выбор модели из выпадающего сп
     expect(select.value).toBe('qwen3.8-27b')
   })
 
+  it('день 26: локальные модели — отдельной группой, удалённые — своей', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = normalizeUrl(input)
+        if (url === '/api/models') {
+          return jsonResponse({
+            models: [
+              { id: 'qwen3-coder:30b', context_limit: 262144, local: true },
+              { id: 'gemma3:27b', context_limit: 131072, local: true },
+              { id: 'qwen3.8-27b', context_limit: 32768, local: false },
+            ],
+          })
+        }
+        return jsonResponse(API_FIXTURES[url] ?? { ok: true })
+      }),
+    )
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const select = (await screen.findByRole('combobox')) as HTMLSelectElement
+    await screen.findByRole('option', { name: 'qwen3-coder:30b' })
+    // Группы в порядке: локальные, затем удалённые; все модели выбираемы.
+    const groups = Array.from(select.querySelectorAll('optgroup')).map((g) => g.label)
+    expect(groups).toEqual(['Локальные (Ollama)', 'Удалённые'])
+    expect(Array.from(select.options).map((o) => o.value)).toEqual([
+      'qwen3-coder:30b',
+      'gemma3:27b',
+      'qwen3.8-27b',
+    ])
+  })
+
+  it('день 26: без локальных моделей список плоский (старый бэкенд)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) =>
+        jsonResponse(API_FIXTURES[normalizeUrl(input)] ?? { ok: true })),
+    )
+    render(
+      <StudioProvider>
+        <ChatPanel />
+      </StudioProvider>,
+    )
+    const select = (await screen.findByRole('combobox')) as HTMLSelectElement
+    await screen.findByRole('option', { name: 'glm-5.3-flash' })
+    expect(select.querySelectorAll('optgroup')).toHaveLength(0)
+  })
+
   it('выбор модели — POST /api/config {model}, дропдаун обновляется', async () => {
     const posted: unknown[] = []
     vi.stubGlobal(
@@ -351,7 +401,7 @@ describe('ChatPanel — бейдж нарушения инварианта (де
 
 describe('ChatPanel — бейдж инициализации профиля в шапке (день 12)', () => {
   // Проба: ловит вкладку + состояние overlay настроек из состояния провайдера
-  // (клик по бейджу должен открыть overlay на вкладке «Профили»)
+  // (клик по бейджу должен открыть overlay на вкладке «Users»)
   let capturedTab = 'memory'
   let capturedSettingsOpen = false
   function TabProbe() {
@@ -381,7 +431,7 @@ describe('ChatPanel — бейдж инициализации профиля в 
     )
   }
 
-  it('pending — бейдж «Профиль не заполнен», клик → overlay настроек на вкладке «Профили»', async () => {
+  it('pending — бейдж «Профиль не заполнен», клик → overlay настроек на вкладке «Users»', async () => {
     stubProfileFetch({ status: 'pending', interview: false, name: '', role: '', tone: '', taboos: '' })
     capturedTab = 'memory'
     capturedSettingsOpen = false
@@ -392,7 +442,7 @@ describe('ChatPanel — бейдж инициализации профиля в 
       </StudioProvider>,
     )
     const badge = await screen.findByRole('button', { name: 'Профиль не заполнен' })
-    expect(badge).toHaveAttribute('title', 'Открыть настройки на вкладке «Профили»')
+    expect(badge).toHaveAttribute('title', 'Открыть настройки на вкладке «Users»')
     expect(badge.className).toContain('pending')
     fireEvent.click(badge)
     await waitFor(() => expect(capturedSettingsOpen).toBe(true))

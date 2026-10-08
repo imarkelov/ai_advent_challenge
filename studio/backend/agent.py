@@ -41,6 +41,10 @@ CONTEXT_LIMITS = {
     "qwen3.8-27b": 32768,
     "deepseek-v4-flash": 16384,
     "glm-5.3-flash": 16384,
+    # --- локальные (Ollama, день 26) ---
+    "glm-4.7-flash:q4_K_M": 202752,
+    "qwen3-coder:30b": 262144,
+    "gemma3:27b": 131072,
 }
 DEFAULT_CONTEXT_LIMIT = 32768
 
@@ -52,7 +56,20 @@ MODEL_KEY_ENV = {
     "qwen3.8-27b": "GPUSTACK_API_KEY",
     "deepseek-v4-flash": "GPUSTACK_KEY_DEEPSEEK",
     "glm-5.3-flash": "GPUSTACK_KEY_GLM",
+    # День 26: локальная Ollama не проверяет ключ — уходит заглушка
+    # OLLAMA_API_KEY ("ollama"), Ollama её игнорирует.
+    "glm-4.7-flash:q4_K_M": "OLLAMA_API_KEY",
+    "qwen3-coder:30b": "OLLAMA_API_KEY",
+    "gemma3:27b": "OLLAMA_API_KEY",
 }
+
+# День 26: модели локального провайдера (Ollama) ходят на свой base_url
+# (OLLAMA_BASE_URL, по умолчанию http://localhost:11434/v1), а не на
+# GPUSTACK_BASE_URL. LOCAL_MODELS — стартовый набор; list_models() дополняет
+# его динамически (self._local_ids), поэтому новая модель в Ollama работает
+# без правки кода.
+LOCAL_MODELS = {"glm-4.7-flash:q4_K_M", "qwen3-coder:30b", "gemma3:27b"}
+DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434/v1"
 
 DEFAULT_CONFIG = {
     "model": "qwen3.8-27b",
@@ -267,6 +284,13 @@ MAX_TASK_RETRIES = 1  # один повтор execution после fail-верд
 # GPustack отдаёт 403 «Api key not allowed», если ключу модель не доступна.
 MODEL_PROBE_TTL = 600
 
+# Таймаут зонда (сек). Локальной модели Ollama его мало: при первом обращении
+# 18-ГБ веса грузятся с диска дольше 15 с, зонд падает по таймауту и модель
+# молча выпадает из списка на MODEL_PROBE_TTL. Поэтому локальным моделям —
+# отдельный, щедрый таймаут (день 26).
+MODEL_PROBE_TIMEOUT = 15
+LOCAL_PROBE_TIMEOUT = 120
+
 # День 23: перефраз вопроса для точного поиска по базе знаний (compare-arm).
 REWRITE_QUERY_PROMPT = ("Ты перефразируешь вопрос пользователя для точного "
                         "поиска по корпоративной базе документов. Ответь "
@@ -352,6 +376,10 @@ class StudioAgent:
         self.kb = kb
         self.base_url = (base_url or os.environ.get("GPUSTACK_BASE_URL",
                         "https://gpustack.data.lmru.tech/v1")).rstrip("/")
+        # День 26: base_url локального провайдера (Ollama). Адресация per-model
+        # — через _base_for(): локальные модели идут сюда, остальные на self.base_url.
+        self.ollama_base_url = os.environ.get("OLLAMA_BASE_URL",
+                                              DEFAULT_OLLAMA_BASE_URL).rstrip("/")
         self.api_key = api_key if api_key is not None else os.environ.get("GPUSTACK_API_KEY", "")
         self._env = os.environ if env is None else env
         if verify_ssl is None:
@@ -365,6 +393,9 @@ class StudioAgent:
         self._p_requests = os.path.join(data_dir, "requests.json")
         self._models_cache = None      # кэш доступных моделей (list_models)
         self._models_cache_ts = 0.0
+        # День 26: id моделей, найденных у Ollama (динамически, помимо
+        # константы LOCAL_MODELS) — маршрутизация запросов на её base_url.
+        self._local_ids = set(LOCAL_MODELS)
 
     # ---------- конфиг ----------
 
@@ -817,8 +848,8 @@ class StudioAgent:
         }
         try:
             resp = self._client.post(
-                self.base_url + "/chat/completions",
-                headers={"Authorization": "Bearer " + self._key_for(model)},
+                self._base_for(model) + "/chat/completions",
+                headers=self._auth_header_for(model),
                 json=body, timeout=60,
             )
             if resp.status_code != 200:
@@ -1042,8 +1073,8 @@ class StudioAgent:
             error = None
             try:
                 with self._client.stream(
-                    "POST", self.base_url + "/chat/completions", json=body,
-                    headers={"Authorization": "Bearer " + self._key_for(cfg["model"])}) as resp:
+                    "POST", self._base_for(cfg["model"]) + "/chat/completions", json=body,
+                    headers=self._auth_header_for(cfg["model"])) as resp:
                     if resp.status_code != 200:
                         error = f"Модель вернула ошибку HTTP {resp.status_code}"
                     else:
@@ -1325,27 +1356,57 @@ class StudioAgent:
     # ---------- список моделей ----------
 
     def list_models(self) -> list:
-        """Доступные для ключа модели API: [{id, context_limit}].
+        """Доступные модели API: [{id, context_limit, local}].
+
+        День 26: список собирается с ДВУХ провайдеров — GPustack (self.base_url)
+        и локальной Ollama (self.ollama_base_url). Динамически найденные
+        локальные модели запоминаются в self._local_ids, чтобы _base_for()
+        отправлял их на Ollama (не только захардкоженный LOCAL_MODELS).
 
         GPustack в /models отдаёт ВСЕ модели без статуса, поэтому доступность
         определяется зондом (минимальный запрос max_tokens=1): 200 — модель в
         списке, 403/ошибка — нет. Результат кэшируется на MODEL_PROBE_TTL.
-        Неизвестной модели — DEFAULT_CONTEXT_LIMIT; при недоступном API
+        Неизвестной модели — DEFAULT_CONTEXT_LIMIT; оба провайдера недоступны —
         бросает httpx.HTTPError (роут вернёт 502).
         """
         now = time.time()
         if self._models_cache is not None and now - self._models_cache_ts < MODEL_PROBE_TTL:
             return self._models_cache
-        resp = self._client.get(self.base_url + "/models",
-                                headers={"Authorization": "Bearer " + self.api_key})
-        if resp.status_code != 200:
-            raise httpx.HTTPStatusError(
-                f"Модель вернула ошибку HTTP {resp.status_code}",
-                request=resp.request, response=resp)
-        data = resp.json().get("data") or []
-        models = [{"id": m.get("id"),
-                   "context_limit": CONTEXT_LIMITS.get(m.get("id"), DEFAULT_CONTEXT_LIMIT)}
-                  for m in data if isinstance(m, dict) and m.get("id")]
+        # День 26: список — объединение провайдеров. Локальные модели Ollama
+        # отдаёт свой /models; недоступность одного провайдера не роняет
+        # список другого (иначе падение Ollama ломало бы и чат GPustack).
+        models, errors = [], []
+        for provider_url in (self.base_url, self.ollama_base_url):
+            is_local_provider = provider_url == self.ollama_base_url
+            try:
+                resp = self._client.get(provider_url + "/models",
+                                        headers=self._auth_header_for(None))
+            except httpx.HTTPError as e:
+                errors.append(e)
+                continue
+            if resp.status_code != 200:
+                errors.append(httpx.HTTPStatusError(
+                    f"Модель вернула ошибку HTTP {resp.status_code}",
+                    request=resp.request, response=resp))
+                continue
+            data = resp.json().get("data") or []
+            for m in data:
+                if not isinstance(m, dict) or not m.get("id"):
+                    continue
+                mid = m["id"]
+                if mid in {x["id"] for x in models}:
+                    continue  # дубль между провайдерами — первый выигрывает
+                is_local = is_local_provider or mid in LOCAL_MODELS
+                if is_local:
+                    # Модель, найденная у Ollama, маршрутизируется на Ollama
+                    # даже если её нет в константе LOCAL_MODELS.
+                    self._local_ids.add(mid)
+                models.append({"id": mid,
+                               "context_limit": CONTEXT_LIMITS.get(mid, DEFAULT_CONTEXT_LIMIT),
+                               "local": is_local})
+        # Оба провайдера недоступны — прежнее поведение (роут вернёт 502).
+        if not models and errors:
+            raise errors[0]
         available = [m for m in models if self._probe_model(m["id"])]
         self._models_cache = available
         self._models_cache_ts = now
@@ -1495,8 +1556,8 @@ class StudioAgent:
                          {"role": "user", "content": user}],
         }
         resp = self._client.post(
-            self.base_url + "/chat/completions",
-            headers={"Authorization": "Bearer " + self._key_for(cfg["model"])},
+            self._base_for(cfg["model"]) + "/chat/completions",
+            headers=self._auth_header_for(cfg["model"]),
             json=body, timeout=120,
         )
         if resp.status_code != 200:
@@ -1528,8 +1589,8 @@ class StudioAgent:
                          {"role": "user", "content": user}],
         }
         with self._client.stream(
-                "POST", self.base_url + "/chat/completions", json=body,
-                headers={"Authorization": "Bearer " + self._key_for(cfg["model"])},
+                "POST", self._base_for(cfg["model"]) + "/chat/completions", json=body,
+                headers=self._auth_header_for(cfg["model"]),
                 timeout=120) as resp:
             if resp.status_code != 200:
                 raise RuntimeError(f"Модель вернула ошибку HTTP {resp.status_code}")
@@ -2034,8 +2095,8 @@ class StudioAgent:
         }
         try:
             resp = self._client.post(
-                self.base_url + "/chat/completions",
-                headers={"Authorization": "Bearer " + self._key_for(model)},
+                self._base_for(model) + "/chat/completions",
+                headers=self._auth_header_for(model),
                 json=body, timeout=60,
             )
             if resp.status_code != 200:
@@ -2079,8 +2140,8 @@ class StudioAgent:
         for body in attempts:
             try:
                 resp = self._client.post(
-                    self.base_url + "/chat/completions",
-                    headers={"Authorization": "Bearer " + self._key_for(model)},
+                    self._base_for(model) + "/chat/completions",
+                    headers=self._auth_header_for(model),
                     json=body,
                     timeout=60,
                 )
@@ -2119,15 +2180,38 @@ class StudioAgent:
         фолбэк — основной self.api_key (например, если переменная не задана)."""
         return self._env.get(MODEL_KEY_ENV.get(model, DEFAULT_KEY_ENV)) or self.api_key
 
+    def _auth_header_for(self, model: str | None) -> dict:
+        """Заголовки авторизации для модели (день 26).
+
+        Если ключ пуст (например, ключи GPustack не заданы, а ходим мы в
+        локальную Ollama) — заголовок НЕ отправляем: httpx отвергает
+        «Bearer » с пустым значением (LocalProtocolError). Ollama ключ не
+        требует. model=None — основной ключ (для /models).
+        """
+        key = self.api_key if model is None else self._key_for(model)
+        return {"Authorization": "Bearer " + key} if key else {}
+
+    def _base_for(self, model: str) -> str:
+        """Базовый URL API для модели (день 26): локальные модели Ollama —
+        self.ollama_base_url, остальные — self.base_url (GPustack)."""
+        return self.ollama_base_url if model in self._local_ids else self.base_url
+
     def _probe_model(self, model_id: str) -> bool:
-        """Минимальный зонд доступности модели: 200 — доступна для её ключа."""
+        """Минимальный зонд доступности модели: 200 — доступна для её ключа.
+
+        Локальным моделям даётся увеличенный таймаут (LOCAL_PROBE_TIMEOUT):
+        первое обращение к Ollama грузит веса с диска и легко превышает
+        обычные 15 с, из-за чего модель ложно считалась бы недоступной.
+        """
+        timeout = (LOCAL_PROBE_TIMEOUT if model_id in self._local_ids
+                   else MODEL_PROBE_TIMEOUT)
         try:
             resp = self._client.post(
-                self.base_url + "/chat/completions",
-                headers={"Authorization": "Bearer " + self._key_for(model_id)},
+                self._base_for(model_id) + "/chat/completions",
+                headers=self._auth_header_for(model_id),
                 json={"model": model_id, "max_tokens": 1,
                       "messages": [{"role": "user", "content": "."}]},
-                timeout=15,
+                timeout=timeout,
             )
             return resp.status_code == 200
         except httpx.HTTPError:

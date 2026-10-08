@@ -171,10 +171,13 @@ export interface Config {
 export interface ModelInfo {
   id: string
   context_limit: number
+  // День 26: модель развёрнута локально (Ollama), а не у удалённого
+  // провайдера. Старый бэкенд поля не отдаёт — тогда undefined/ложь.
+  local?: boolean
 }
 
 // Активная вкладка правой панели «Контекст» (день 12: бейдж в шапке чата
-// открывает вкладку «Профили» извне панели)
+// открывает вкладку «Users» извне панели)
 export type ContextTab = 'memory' | 'tokens' | 'request' | 'profile' | 'invariants' | 'kb' | 'task'
 
 export interface StudioState {

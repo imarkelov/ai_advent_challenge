@@ -1,4 +1,4 @@
-// Overlay настроек: панель «Контекст» (Память/Профили/Инварианты)
+// Overlay настроек: панель «Контекст» (Memory/Users/Invariants)
 // открывается кнопкой «⚙ Настройки» в шапке чата, закрывается кнопкой «×»
 // и кликом по фону; бейдж профиля открывает overlay сразу на «Профили».
 // Вкладка «MCP» вынесена в отдельный overlay (McpOverlay, свой тест).
@@ -71,7 +71,7 @@ describe('Settings overlay — открытие и закрытие', () => {
     expect(overlayEl()).toBeTruthy()
     expect(overlayEl()).not.toHaveClass('open')
     // закрытый overlay — вкладки панели «Контекст» в DOM нет
-    for (const label of ['Память', 'Профили', 'Инварианты']) {
+    for (const label of ['Memory', 'Users', 'Invariants']) {
       expect(screen.queryByRole('tab', { name: label })).toBeNull()
     }
     expect(screen.queryByRole('button', { name: 'Закрыть настройки' })).toBeNull()
@@ -81,42 +81,42 @@ describe('Settings overlay — открытие и закрытие', () => {
     render(<App />)
     fireEvent.click(await screen.findByRole('button', { name: 'Настройки' }))
     await waitFor(() => expect(overlayEl()).toHaveClass('open'))
-    for (const label of ['Память', 'Профили', 'Инварианты']) {
+    for (const label of ['Memory', 'Users', 'Invariants']) {
       expect(screen.getByRole('tab', { name: label })).toBeTruthy()
     }
-    // открыта вкладка по умолчанию — «Память»
-    expect(screen.getByRole('tab', { name: 'Память' })).toHaveAttribute('aria-selected', 'true')
+    // открыта вкладка по умолчанию — «Memory»
+    expect(screen.getByRole('tab', { name: 'Memory' })).toHaveAttribute('aria-selected', 'true')
     const close = screen.getByRole('button', { name: 'Закрыть настройки' })
     expect(close).toBeTruthy()
 
     fireEvent.click(close)
     await waitFor(() => expect(overlayEl()).not.toHaveClass('open'))
-    expect(screen.queryByRole('tab', { name: 'Память' })).toBeNull()
+    expect(screen.queryByRole('tab', { name: 'Memory' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Закрыть настройки' })).toBeNull()
 
     // повторный клик по «⚙» — снова открывает (toggle)
     fireEvent.click(screen.getByRole('button', { name: 'Настройки' }))
     await waitFor(() => expect(overlayEl()).toHaveClass('open'))
-    expect(screen.getByRole('tab', { name: 'Память' })).toBeTruthy()
+    expect(screen.getByRole('tab', { name: 'Memory' })).toBeTruthy()
   })
 
   it('клик по фону (backdrop) закрывает overlay', async () => {
     render(<App />)
     fireEvent.click(await screen.findByRole('button', { name: 'Настройки' }))
-    await screen.findByRole('tab', { name: 'Память' })
+    await screen.findByRole('tab', { name: 'Memory' })
     const backdrop = document.querySelector('.settings-backdrop')
     expect(backdrop).toBeTruthy()
     fireEvent.click(backdrop as HTMLElement)
     await waitFor(() => expect(overlayEl()).not.toHaveClass('open'))
-    expect(screen.queryByRole('tab', { name: 'Память' })).toBeNull()
+    expect(screen.queryByRole('tab', { name: 'Memory' })).toBeNull()
   })
 
-  it('бейдж «Профиль не заполнен» → overlay открывается на вкладке «Профили» (aria-selected)', async () => {
+  it('бейдж «Профиль не заполнен» → overlay открывается на вкладке «Users» (aria-selected)', async () => {
     render(<App />)
     const badge = await screen.findByRole('button', { name: 'Профиль не заполнен' })
     fireEvent.click(badge)
     await waitFor(() => expect(overlayEl()).toHaveClass('open'))
-    expect(screen.getByRole('tab', { name: 'Профили' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByRole('tab', { name: 'Память' })).toHaveAttribute('aria-selected', 'false')
+    expect(screen.getByRole('tab', { name: 'Users' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Memory' })).toHaveAttribute('aria-selected', 'false')
   })
 })

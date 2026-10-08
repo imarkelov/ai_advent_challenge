@@ -126,6 +126,8 @@ describe('Sidebar — без блока «Инструменты» (ui-rework, �
     expect(screen.queryByRole('tab')).toBeNull()
     // остальное сайдбара без изменений: бренд, диалоги, память
     expect(screen.getByText('Диалоги')).toBeInTheDocument()
+    // «Память» здесь — заголовок блока сайдбара, а не вкладка правой панели
+    // (вкладки дня 26 переименованы в Memory/Users/Invariants/RAG/MemTask)
     expect(screen.getByText('Память')).toBeInTheDocument()
     expect(screen.getByText('Первый')).toBeInTheDocument()
   })

@@ -21,6 +21,12 @@ OpenAI-совместимый API) со стримингом по SSE, три с
 `GPUSTACK_API_KEY` (qwen), `GPUSTACK_KEY_DEEPSEEK`, `GPUSTACK_KEY_GLM`
 (per-model ключи: маппинг `MODEL_KEY_ENV` в `agent.py`).
 
+Локальная LLM (день 26) — второй провайдер: `OLLAMA_BASE_URL`
+(по умолчанию `http://localhost:11434/v1`) и `OLLAMA_API_KEY` (заглушка
+«ollama»: Ollama ключ не проверяет). Провайдер выбирается по имени модели
+(`LOCAL_MODELS`, `_base_for()`), поэтому удалённые модели продолжают ходить
+на GPustack. Шаблон — `.env.example`.
+
 ## Запуск (dev)
 
 ```bash
@@ -40,7 +46,7 @@ python -m pytest -q
 |---|---|---|
 | POST | `/api/chat` | Чат: SSE-стрим `data: {delta\|done\|error}` |
 | GET / POST | `/api/config` | Конфиг LLM (GET — текущий, POST — частичное обновление) |
-| GET | `/api/models` | Доступные модели (зонд с per-model ключом, кэш 10 мин) с лимитами; self-heal модели конфига (502 при недоступности) |
+| GET | `/api/models` | Доступные модели (объединение GPustack и локальной Ollama; зонд с per-model ключом, кэш 10 мин) с лимитами и флагом `local`; self-heal модели конфига (502, если недоступны оба провайдера) |
 | GET / POST | `/api/dialogues` | Список диалогов / создать (201, становится активным) |
 | GET / DELETE | `/api/dialogues/{id}` | Диалог с сообщениями / удалить |
 | POST | `/api/dialogues/{id}/rename` | Переименовать диалог (`{title}`; 400 пустой, 404 не найден) |

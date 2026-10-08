@@ -228,7 +228,7 @@ beforeEach(() => {
   vi.restoreAllMocks()
 })
 
-describe('KbTab — вкладка «База знаний»', () => {
+describe('KbTab — вкладка «RAG»', () => {
   it('индекс не построен — пустое состояние с кнопкой «Индексировать»', async () => {
     const calls = await renderTab({ indexed: false })
     // stats 404 → {exists:false}: подсказка в поиске, таблицы/статистики нет

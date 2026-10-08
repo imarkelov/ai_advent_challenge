@@ -2427,3 +2427,92 @@ sources 12/12; S2: done 10/10, sources 10/10; goal-recall PASS в
 каждом ответе, чекпоинты вкладки «Задача» (после сообщений 4/8/12 и
 4/10), раскрытие панели источников.
 Ветка `day25-task-memory` (от `day24-rag-citations`).
+
+## День 26: Запуск локальной LLM (Ollama) в выборе модели
+
+### Что это
+
+Локальные модели, развёрнутые на макбуке в **Ollama**, добавлены в
+выбор модели Студии как **второй провайдер** рядом с GPustack.
+Провайдер выбирается по имени модели, а не глобальной настройкой:
+удалённые модели по-прежнему идут на `GPUSTACK_BASE_URL`, локальные —
+на `OLLAMA_BASE_URL`. В дропдауне модели в нижней строке ввода
+локальные выведены отдельной группой «Локальные (Ollama)».
+
+Весь функционал дней 21–25 (RAG, источники, память задачи) работает с
+локальной моделью без изменений — она подставляется в тот же путь
+`StudioAgent`.
+
+### Что сделано
+
+| Место | Изменение |
+|---|---|
+| `studio/backend/agent.py` | `CONTEXT_LIMITS` дополнен локальными моделями (реальные `context_length` из Ollama: qwen3-coder — 262144, glm-4.7-flash — 202752, gemma3 — 131072) |
+| `studio/backend/agent.py` | `LOCAL_MODELS`, `DEFAULT_OLLAMA_BASE_URL`; `MODEL_KEY_ENV` для локальных моделей (`OLLAMA_API_KEY` = заглушка «ollama» — Ollama ключ не проверяет) |
+| `studio/backend/agent.py` | `_base_for(model)` — маршрутизация на нужный base_url; `_local_ids` пополняется динамически из `/models` Ollama, поэтому новая модель работает без правки кода |
+| `studio/backend/agent.py` | `list_models()` собирает список с **двух** провайдеров; у каждой записи флаг `local`. Падение одного провайдера не роняет список другого (graceful degradation) |
+| `studio/backend/agent.py` | `_auth_header_for(model)` — при пустом ключе заголовок `Authorization` не отправляется вовсе (httpx падает на `Bearer ` с пустым значением) |
+| `studio/backend/agent.py` | `LOCAL_PROBE_TIMEOUT = 120` для зонда локальных моделей: первая загрузка 18-ГБ весов дольше 15 с, иначе модель ложно выпадала из списка на `MODEL_PROBE_TTL` (10 мин) |
+| `studio/frontend/src/state.tsx` | `ModelInfo.local?: boolean` (старый бэкенд поля не отдаёт — группа просто не рисуется) |
+| `studio/frontend/src/components/ChatPanel.tsx` | Дропдаун модели: `optgroup` «Локальные (Ollama)» / «Удалённые»; без локальных моделей список остаётся плоским (обратная совместимость) |
+| `studio/frontend/src/components/ContextPanel.tsx` | Вкладки правой панели переименованы: `Память→Memory`, `Профили→Users`, `Инварианты→Invariants`, `База знаний→RAG`, `Задача→MemTask`; у каждой — инлайновая SVG-иконка (`stroke=currentColor`, наследует цвет вкладки), `title` с расшифровкой и `aria-label` |
+| `studio/frontend/src/styles.css` | `.tab` — flex-строка «иконка + подпись», `.tab-icon` (opacity 0.9 → 1 у активной), `.tab-label` (`white-space: nowrap` — «Invariants»/«MemTask» не ломают строку) |
+| `.env.example` | шаблон конфигурации (`OLLAMA_BASE_URL`, `OLLAMA_API_KEY`); сам `.env` в git не коммитится |
+| `scripts/day26_local_llm_check.py` | проверка: 3 запроса разной сложности через **CLI** и **HTTP API**, с временем и токенами |
+
+### Запуск
+
+```bash
+ollama serve                       # если ещё не запущен
+ollama list                        # доступные локальные модели
+python scripts/day26_local_llm_check.py --model qwen3-coder:30b
+```
+
+Выбор модели — в дропдауне под полем ввода или через конфиг:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/config \
+  -H "Content-Type: application/json" \
+  -d '{"model": "qwen3-coder:30b"}'
+```
+
+### Проверка
+
+**Тесты:** бэкенд — **586 тестов PASS** (офлайн). Добавлены
+`test_list_models_merges_local_ollama` (слияние провайдеров,
+маршрутизация, `local: true`, устойчивость к недоступному GPustack) и
+`test_probe_timeout_longer_for_local_models`; обновлены
+`test_list_models_filters_unavailable` и `test_api.py::test_models` под
+новое поле `local`. Фронтенд — **313 тестов PASS** (Vitest; +4: группы
+локальных/удалённых моделей, плоский список при старом бэкенде, порядок
+и иконки переименованных вкладок, переключение `aria-selected`),
+`tsc -b` clean, `npm run lint` — 0 ошибок, `npm run build` clean.
+
+**CLI и HTTP API, 3 запроса разной сложности** (`qwen3-coder:30b`):
+
+| # | Сложность | Запрос | CLI | HTTP | Ответ |
+|---|---|---|---|---|---|
+| 1 | простой | столица Франции, одно слово | OK 0.3 с | OK 0.1 с (26/4 токенов) | «Париж» |
+| 2 | средний | функция `is_palindrome` | OK 1.0 с | OK 0.9 с (45/73) | корректный код (`s.lower().split()` + `[::-1]`) |
+| 3 | сложный | доступность 3 реплик по 1 %, что даст 4-я | OK 2.3 с | OK 2.3 с (74/192) | 99.9999 %, разбор 0.01³ и 0.01⁴ |
+
+**Через сам проект** (uvicorn + `POST /api/chat`, SSE, локальная
+модель, с памятью задачи дня 25):
+
+```
+data: {"type": "done", "answer": "144.",
+       "usage": {"prompt_tokens": 219, "completion_tokens": 5, "total_tokens": 224},
+       "request_id": 4, "task_state": {"goal": "...", "clarifications": [...], "constraints": [...]}}
+```
+
+`GET /api/models` на живом процессе отдаёт все три локальные модели с
+флагом `local: true`; `nomic-embed-text:v1.5` в списке нет — это
+embedding-модель, чат-зонд получает от неё HTTP 400 и корректно её
+отфильтровывает. RAG-эндпоинты дня 25 (`/api/kb/settings`,
+`/api/rag/compare`) отвечают как прежде.
+
+### Статус
+
+Локальная LLM запущена, добавлена в выбор модели проекта (отдельной
+группой) и отвечает на запросы через CLI и HTTP API; функционал дней
+21–25 не затронут. Ветка `day26-local-llm` (от `day25-task-memory`).

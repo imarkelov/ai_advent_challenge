@@ -153,7 +153,7 @@ def test_models(client):
     r = client.get("/api/models")
     assert r.status_code == 200
     assert r.json() == {"models": [
-        {"id": "qwen3.8-27b", "context_limit": 32768},
+        {"id": "qwen3.8-27b", "context_limit": 32768, "local": False},
     ]}
 
 

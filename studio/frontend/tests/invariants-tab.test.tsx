@@ -275,8 +275,8 @@ describe('InvariantsTab — удаление', () => {
   })
 })
 
-describe('ContextPanel — вкладка «Инварианты»', () => {
-  it('3-й таб «Инварианты» отображается и открывает вкладку', async () => {
+describe('ContextPanel — вкладка «Invariants»', () => {
+  it('3-й таб «Invariants» отображается и открывает вкладку', async () => {
     vi.stubGlobal('fetch', stubFetch([
       { id: 'inv-1', title: 'Язык', description: 'русский', forbidden: [], is_active: true },
     ]))
@@ -286,15 +286,58 @@ describe('ContextPanel — вкладка «Инварианты»', () => {
       </StudioProvider>,
     )
     // все 3 таба панели «Контекст» (Токены/Запрос перенесены в сайдбар)
-    for (const label of ['Память', 'Профили', 'Инварианты']) {
+    for (const label of ['Memory', 'Users', 'Invariants']) {
       expect(screen.getByRole('tab', { name: label })).toBeTruthy()
     }
-    const tab = screen.getByRole('tab', { name: 'Инварианты' })
+    const tab = screen.getByRole('tab', { name: 'Invariants' })
     expect(tab).toHaveAttribute('aria-selected', 'false')
     fireEvent.click(tab)
     // контент вкладки: пометка + список
     expect(tab).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByText('неизменяемые')).toBeTruthy()
     expect(screen.getByText('Язык')).toBeTruthy()
+  })
+})
+
+describe('ContextPanel — вкладки дня 26 (переименование + иконки)', () => {
+  it('все 5 вкладок в новом порядке и с иконками', async () => {
+    vi.stubGlobal('fetch', stubFetch([]))
+    render(
+      <StudioProvider>
+        <ContextPanel />
+      </StudioProvider>,
+    )
+    // Порядок и подписи после переименования дня 26.
+    const tabs = screen.getAllByRole('tab')
+    expect(tabs.map((t) => t.textContent)).toEqual([
+      'Memory', 'Users', 'Invariants', 'RAG', 'MemTask',
+    ])
+    // У каждой вкладки — инлайновая SVG-иконка (currentColor, aria-hidden).
+    for (const tab of tabs) {
+      const icon = tab.querySelector('svg.tab-icon')
+      expect(icon).toBeTruthy()
+      expect(icon).toHaveAttribute('aria-hidden', 'true')
+      expect(icon).toHaveAttribute('stroke', 'currentColor')
+    }
+    // Старых названий вкладок больше нет.
+    for (const old of ['Память', 'Профили', 'Инварианты', 'База знаний', 'Задача']) {
+      expect(screen.queryByRole('tab', { name: old })).toBeNull()
+    }
+  })
+
+  it('переключение вкладки: aria-selected следует за выбором', async () => {
+    vi.stubGlobal('fetch', stubFetch([]))
+    render(
+      <StudioProvider>
+        <ContextPanel />
+      </StudioProvider>,
+    )
+    const rag = screen.getByRole('tab', { name: 'RAG' })
+    expect(screen.getByRole('tab', { name: 'Memory' })).toHaveAttribute(
+      'aria-selected', 'true')
+    fireEvent.click(rag)
+    expect(rag).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Memory' })).toHaveAttribute(
+      'aria-selected', 'false')
   })
 })

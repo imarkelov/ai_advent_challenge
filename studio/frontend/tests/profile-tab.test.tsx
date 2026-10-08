@@ -135,7 +135,7 @@ beforeEach(() => {
   localStorage.clear()
 })
 
-describe('ProfileTab — вкладка «Профили»', () => {
+describe('ProfileTab — вкладка «Users»', () => {
   it('рендерит 4 поля с текущими значениями активного профиля', async () => {
     const calls = await renderTab({
       status: 'active',

@@ -1320,8 +1320,14 @@ def test_requests_clear(data_dir):
 # ---------- список моделей ----------
 
 def test_list_models_filters_unavailable(data_dir):
-    """В списке только модели, прошедшие зонд: 403 «нет доступа у ключа» — мимо."""
+    """В списке только модели, прошедшие зонд: 403 «нет доступа у ключа» — мимо.
+
+    День 26: запросы идут и к локальной Ollama — её /models в этом handler'е
+    пуст (host mock.local — GPustack, host localhost — Ollama).
+    """
     def handler(request):
+        if request.url.host != "mock.local":
+            return httpx.Response(200, json={"data": []})
         if request.url.path.endswith("/models"):
             assert request.headers.get("Authorization") == "Bearer test-key"
             return httpx.Response(200, json={"data": [
@@ -1337,10 +1343,45 @@ def test_list_models_filters_unavailable(data_dir):
     agent = make_agent(data_dir, handler)
     models = agent.list_models()
     assert models == [
-        {"id": "qwen3.8-27b", "context_limit": 32768},
-        {"id": "модель-неизвестная", "context_limit": 32768},
+        {"id": "qwen3.8-27b", "context_limit": 32768, "local": False},
+        {"id": "модель-неизвестная", "context_limit": 32768, "local": False},
     ]
     assert CONTEXT_LIMITS["glm-5.3-flash"] == 16384
+
+
+def test_list_models_merges_local_ollama(data_dir):
+    """День 26: список — объединение GPustack и локальной Ollama.
+
+    Локальные модели помечены local=True и маршрутизируются на OLLAMA_BASE_URL;
+    недоступный GPustack список не роняет (graceful degradation).
+    """
+    def handler(request):
+        if request.url.host == "mock.local":          # GPustack
+            raise httpx.ConnectError("GPustack недоступен", request=request)
+        if request.url.path.endswith("/models"):      # Ollama
+            return httpx.Response(200, json={"data": [
+                {"id": "qwen3-coder:30b"}, {"id": "gemma3:27b"}]})
+        return httpx.Response(200, json={"choices": []})   # зонд
+
+    agent = make_agent(data_dir, handler)
+    models = agent.list_models()
+    assert models == [
+        {"id": "qwen3-coder:30b", "context_limit": 262144, "local": True},
+        {"id": "gemma3:27b", "context_limit": 131072, "local": True},
+    ]
+    # Динамически найденная локальная модель уходит на Ollama.
+    assert agent._base_for("qwen3-coder:30b") == agent.ollama_base_url
+    assert agent._base_for("gemma3:27b") == agent.ollama_base_url
+
+
+def test_probe_timeout_longer_for_local_models(data_dir):
+    """День 26: локальным моделям даётся увеличенный таймаут зонда.
+
+    Первое обращение к Ollama грузит веса с диска и легко превышает 15 с —
+    иначе модель ложно считалась бы недоступной и выпадала из списка.
+    """
+    from agent import LOCAL_PROBE_TIMEOUT, MODEL_PROBE_TIMEOUT
+    assert LOCAL_PROBE_TIMEOUT > MODEL_PROBE_TIMEOUT
 
 
 def test_list_models_probe_error_excludes_model(data_dir):

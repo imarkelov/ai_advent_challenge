@@ -445,6 +445,11 @@ export default function ChatPanel() {
       ? [{ id: currentModel, context_limit: 0 }, ...state.models]
       : state.models
 
+  // День 26: локальные модели (Ollama) — отдельной группой в списке.
+  // optgroup не ломает value/onChange: выбранной остаётся та же модель.
+  const localModels = modelOptions.filter((m) => m.local)
+  const remoteModels = modelOptions.filter((m) => !m.local)
+
   useEffect(() => {
     const el = feedRef.current
     if (el) el.scrollTop = el.scrollHeight
@@ -574,7 +579,7 @@ export default function ChatPanel() {
           {active && (
             <label
               className="chat-rag-toggle"
-              title="RAG-режим этого диалога: по умолчанию — глобальная настройка базы знаний (вкладка «База знаний»)"
+              title="RAG-режим этого диалога: по умолчанию — глобальная настройка базы знаний (вкладка «RAG»)"
             >
               <span className="chat-rag-toggle-label">RAG</span>
               <input
@@ -602,7 +607,7 @@ export default function ChatPanel() {
               className={`profile-chip profile-badge ${
                 activeProfile.status === 'declined' ? 'declined' : 'pending'
               }`}
-              title="Открыть настройки на вкладке «Профили»"
+              title="Открыть настройки на вкладке «Users»"
               onClick={() => openSettings('profile')}
             >
               {activeProfile.status === 'declined' ? 'Профиль отключён' : 'Профиль не заполнен'}
@@ -744,9 +749,26 @@ export default function ChatPanel() {
           disabled={state.streaming || modelOptions.length === 0}
           onChange={(e) => void setModel(e.target.value)}
         >
-          {modelOptions.map((m) => (
-            <option key={m.id} value={m.id}>{m.id}</option>
-          ))}
+          {localModels.length > 0 ? (
+            <>
+              <optgroup label="Локальные (Ollama)">
+                {localModels.map((m) => (
+                  <option key={m.id} value={m.id}>{m.id}</option>
+                ))}
+              </optgroup>
+              {remoteModels.length > 0 && (
+                <optgroup label="Удалённые">
+                  {remoteModels.map((m) => (
+                    <option key={m.id} value={m.id}>{m.id}</option>
+                  ))}
+                </optgroup>
+              )}
+            </>
+          ) : (
+            modelOptions.map((m) => (
+              <option key={m.id} value={m.id}>{m.id}</option>
+            ))
+          )}
         </select>
       </div>
 

@@ -944,6 +944,28 @@ button {
   padding: var(--sp-3) var(--sp-2);
   transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
 }
+
+/* День 26: вкладки — иконка + подпись. Иконка наследует currentColor,
+   поэтому сама меняет цвет вместе с вкладкой (hover/active). */
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.tab-icon {
+  flex: none;
+  /* чуть выше базовой линии текста, чтобы иконка и подпись читались в строку */
+  opacity: 0.9;
+}
+.tab.active .tab-icon {
+  opacity: 1;
+}
+.tab-label {
+  /* Длинные подписи (Invariants, MemTask) не должны ломать строку */
+  white-space: nowrap;
+}
+
 .tab:hover {
   color: var(--text);
 }
