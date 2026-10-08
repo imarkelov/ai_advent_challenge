@@ -4276,5 +4276,85 @@
       ]
     },
     "summary": "Сводка digest-20261008-1245: Самара 15.3°C, Преимущественно ясно; новостей: 5 (vc.ru error, habr error, tproger 5)."
+  },
+  {
+    "id": "digest-20261008-2249",
+    "generated_at": "2026-10-08T22:49:46Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 5.9,
+      "feels_like_c": 4.4,
+      "description": "Пасмурно",
+      "wind_ms": 1.8
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Масштаб ущерба ещё оценивается»: «Яндекс» пока не подтвердил возможность восстановления дата-центра после атаки",
+          "url": "https://vc.ru/services/3183669-yandeks-pozharnyj-incident-v-data-tsentre?from=rss"
+        },
+        {
+          "title": "Данные могут перенести, а «Яндекс» извлечёт урок: что говорят эксперты об атаке беспилотников на дата-центр компании и были ли похожие случаи",
+          "url": "https://vc.ru/services/3182963-ataka-bespilotnikov-na-data-tsentr-yandeksa?from=rss"
+        },
+        {
+          "title": "«Яндекс» сообщил о пожаре в дата-центре под Рязанью из-за атаки беспилотника",
+          "url": "https://vc.ru/services/3182416-pozharnaya-ataka-bespilotnika-yandeks?from=rss"
+        },
+        {
+          "title": "«Сбер» начал тестировать операции с криптовалютой в мобильном приложении",
+          "url": "https://vc.ru/crypto/3182846-sber-testiruet-operatsii-s-kriptovalyutoy?from=rss"
+        },
+        {
+          "title": "Пользователи пожаловались на сбои в работе «Яндекс Поиска», «Почты», «Циана», «Авито», «Т-Банка», Twinby и других после атаки на дата-центр в Сасово",
+          "url": "https://vc.ru/services/3182777-sboi-v-rabote-yandeks-poiska-i-pochty-posle-ataki-na-data-tsentr?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "CrowdStrike по истории Claude Code вычислили хакера, который атаковал банки Южной Кореи",
+          "url": "https://habr.com/ru/news/1092204/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092204"
+        },
+        {
+          "title": "Google открыл новый канал быстрой передачи свежего UGC в Поиск",
+          "url": "https://habr.com/ru/news/1092202/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092202"
+        },
+        {
+          "title": "На камере Hasselblad X2D запустили Doom: для этого пришлось связать игровой движок со штатным интерфейсом",
+          "url": "https://habr.com/ru/news/1092182/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092182"
+        },
+        {
+          "title": "В Telegram для macOS тестируют интерактивные HTML‑сообщения в чатах",
+          "url": "https://habr.com/ru/news/1092168/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092168"
+        },
+        {
+          "title": "Halo: Combat Evolved с кампанией и мультиплеером запустили в браузере",
+          "url": "https://habr.com/ru/news/1092164/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092164"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
+          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
+        },
+        {
+          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
+          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
+        },
+        {
+          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
+          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
+        },
+        {
+          "title": "Функциональные флаги в CI/CD: что, зачем и как",
+          "url": "https://tproger.ru/articles/funkcionalnye-flagi-v-ci-cd-chto-zachem-i-kak"
+        },
+        {
+          "title": "Kilo выпустила Desktop для разработки и анализа данных с ИИ",
+          "url": "https://tproger.ru/news/kilo-vypustila-desktop-dlya-razrabotki-i-analiza-dannyh-s-ii"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261008-2249: Самара 5.9°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
