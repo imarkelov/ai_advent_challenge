@@ -1,59 +1,67 @@
 {
-  "id": "digest-20261009-0424",
-  "generated_at": "2026-10-09T04:24:37Z",
+  "id": "digest-20261009-1231",
+  "generated_at": "2026-10-09T12:31:09Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 5.6,
-    "feels_like_c": 4.0,
-    "description": "Переменная облачность",
-    "wind_ms": 2.9
+    "temp_c": 16.0,
+    "feels_like_c": 13.7,
+    "description": "Преимущественно ясно",
+    "wind_ms": 9.0
   },
   "news": {
     "vc.ru": [
       {
-        "title": "«Масштаб ущерба ещё оценивается»: «Яндекс» пока не подтвердил возможность восстановления дата-центра после атаки",
-        "url": "https://vc.ru/services/3183669-yandeks-pozharnyj-incident-v-data-tsentre?from=rss"
+        "title": "«Яндекс» рассказал, что после атаки беспилотников пострадала часть инфраструктуры его дата-центра в Калуге",
+        "url": "https://vc.ru/services/3184679-yandeks-data-tsentr-kaluga-ataka-bespilotnikov?from=rss"
       },
       {
-        "title": "Данные могут перенести, а «Яндекс» извлечёт урок: что говорят эксперты об атаке беспилотников на дата-центр компании и были ли похожие случаи",
-        "url": "https://vc.ru/services/3182963-ataka-bespilotnikov-na-data-tsentr-yandeksa?from=rss"
+        "title": "Минцифры запланировало ввести для провайдеров требование по минимальной скорости домашнего интернета в 1 Гбит/с — на его исполнение дадут десять лет",
+        "url": "https://vc.ru/services/3184496-mincifry-vvodit-trebovanie-po-minimalnoj-skorosti-interneta?from=rss"
       },
       {
-        "title": "«Яндекс» сообщил о пожаре в дата-центре под Рязанью из-за атаки беспилотника",
-        "url": "https://vc.ru/services/3182416-pozharnaya-ataka-bespilotnika-yandeks?from=rss"
+        "title": "Netflix показал трейлер сериала «Альтруисты» о взлёте и крахе криптобиржи FTX",
+        "url": "https://vc.ru/media/3184895-netflix-altruisty-krakh-ftx?from=rss"
       },
       {
-        "title": "«Сбер» начал тестировать операции с криптовалютой в мобильном приложении",
-        "url": "https://vc.ru/crypto/3182846-sber-testiruet-operatsii-s-kriptovalyutoy?from=rss"
+        "title": "День 1689: больше трети российских компаний отказались от выплаты годовой премии сотрудникам в 2026 году",
+        "url": "https://vc.ru/money/3184426-rossijskie-kompanii-otkazyvayutsya-ot-godovyh-premij?from=rss"
       },
       {
-        "title": "Пользователи пожаловались на сбои в работе «Яндекс Поиска», «Почты», «Циана», «Авито», «Т-Банка», Twinby и других после атаки на дата-центр в Сасово",
-        "url": "https://vc.ru/services/3182777-sboi-v-rabote-yandeks-poiska-i-pochty-posle-ataki-na-data-tsentr?from=rss"
+        "title": "VK подала иск в суд ЕС, чтобы оспорить наложенные на неё санкции",
+        "url": "https://vc.ru/legal/3185086-vk-osparivaet-sanktsii-es-v-sude?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "В Curator признали, что кратковременный сбой части сервисов Рунета 8 октября произошёл из-за ошибки при техработах",
-        "url": "https://habr.com/ru/news/1092230/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092230"
+        "title": "VK через суд потребовала отменить санкции Евросюза",
+        "url": "https://habr.com/ru/news/1092470/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092470"
       },
       {
-        "title": "Представлен открытый САПР Open CAD Studio для 2D-черчения и 3D-моделирования, созданный с помощью ИИ",
-        "url": "https://habr.com/ru/news/1091974/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091974"
+        "title": "Sony представила микрофон для смартфонов с записью объёмного звука и поддержкой Eclipsa Audio",
+        "url": "https://habr.com/ru/news/1092452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092452"
       },
       {
-        "title": "Microsoft представила первый выпуск открытого проекта Litebox — безопасной ОС в форме библиотеки (Library OS)",
-        "url": "https://habr.com/ru/news/1092016/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092016"
+        "title": "Американца приговорили к 1,5 годам тюрьмы за накрутку прослушиваний ИИ‑песням в стриминговых сервисах",
+        "url": "https://habr.com/ru/news/1092448/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092448"
       },
       {
-        "title": "Вышло обновление RapidRAW 1.6.5 — открытого редактора изображений RAW",
-        "url": "https://habr.com/ru/news/1092150/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092150"
+        "title": "Пользователи недовольны действиями Microsoft: объём общего хранилища OneDrive в тарифах M365 сокращён с 6 до 2 ТБ",
+        "url": "https://habr.com/ru/news/1092442/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092442"
       },
       {
-        "title": "CrowdStrike по истории Claude Code вычислили хакера, который атаковал банки Южной Кореи",
-        "url": "https://habr.com/ru/news/1092204/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092204"
+        "title": "«Известия»: ассортимент ноутбуков ушедших из РФ брендов начал сокращаться",
+        "url": "https://habr.com/ru/news/1092438/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092438"
       }
     ],
     "tproger": [
+      {
+        "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
+        "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
+      },
+      {
+        "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
+        "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
+      },
       {
         "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
         "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
@@ -65,16 +73,8 @@
       {
         "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
         "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
-      },
-      {
-        "title": "Функциональные флаги в CI/CD: что, зачем и как",
-        "url": "https://tproger.ru/articles/funkcionalnye-flagi-v-ci-cd-chto-zachem-i-kak"
-      },
-      {
-        "title": "Kilo выпустила Desktop для разработки и анализа данных с ИИ",
-        "url": "https://tproger.ru/news/kilo-vypustila-desktop-dlya-razrabotki-i-analiza-dannyh-s-ii"
       }
     ]
   },
-  "summary": "Сводка digest-20261009-0424: Самара 5.6°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261009-1231: Самара 16.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
