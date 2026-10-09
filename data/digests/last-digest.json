@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261008-2249",
-  "generated_at": "2026-10-08T22:49:46Z",
+  "id": "digest-20261009-0424",
+  "generated_at": "2026-10-09T04:24:37Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 5.9,
-    "feels_like_c": 4.4,
-    "description": "Пасмурно",
-    "wind_ms": 1.8
+    "temp_c": 5.6,
+    "feels_like_c": 4.0,
+    "description": "Переменная облачность",
+    "wind_ms": 2.9
   },
   "news": {
     "vc.ru": [
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
+        "title": "В Curator признали, что кратковременный сбой части сервисов Рунета 8 октября произошёл из-за ошибки при техработах",
+        "url": "https://habr.com/ru/news/1092230/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092230"
+      },
+      {
+        "title": "Представлен открытый САПР Open CAD Studio для 2D-черчения и 3D-моделирования, созданный с помощью ИИ",
+        "url": "https://habr.com/ru/news/1091974/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091974"
+      },
+      {
+        "title": "Microsoft представила первый выпуск открытого проекта Litebox — безопасной ОС в форме библиотеки (Library OS)",
+        "url": "https://habr.com/ru/news/1092016/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092016"
+      },
+      {
+        "title": "Вышло обновление RapidRAW 1.6.5 — открытого редактора изображений RAW",
+        "url": "https://habr.com/ru/news/1092150/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092150"
+      },
+      {
         "title": "CrowdStrike по истории Claude Code вычислили хакера, который атаковал банки Южной Кореи",
         "url": "https://habr.com/ru/news/1092204/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092204"
-      },
-      {
-        "title": "Google открыл новый канал быстрой передачи свежего UGC в Поиск",
-        "url": "https://habr.com/ru/news/1092202/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092202"
-      },
-      {
-        "title": "На камере Hasselblad X2D запустили Doom: для этого пришлось связать игровой движок со штатным интерфейсом",
-        "url": "https://habr.com/ru/news/1092182/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092182"
-      },
-      {
-        "title": "В Telegram для macOS тестируют интерактивные HTML‑сообщения в чатах",
-        "url": "https://habr.com/ru/news/1092168/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092168"
-      },
-      {
-        "title": "Halo: Combat Evolved с кампанией и мультиплеером запустили в браузере",
-        "url": "https://habr.com/ru/news/1092164/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092164"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261008-2249: Самара 5.9°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261009-0424: Самара 5.6°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
