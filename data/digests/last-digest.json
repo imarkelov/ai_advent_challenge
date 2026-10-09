@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261009-1231",
-  "generated_at": "2026-10-09T12:31:09Z",
+  "id": "digest-20261009-2211",
+  "generated_at": "2026-10-09T22:11:50Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 16.0,
-    "feels_like_c": 13.7,
-    "description": "Преимущественно ясно",
-    "wind_ms": 9.0
+    "temp_c": 9.0,
+    "feels_like_c": 7.4,
+    "description": "Переменная облачность",
+    "wind_ms": 3.8
   },
   "news": {
     "vc.ru": [
       {
-        "title": "«Яндекс» рассказал, что после атаки беспилотников пострадала часть инфраструктуры его дата-центра в Калуге",
-        "url": "https://vc.ru/services/3184679-yandeks-data-tsentr-kaluga-ataka-bespilotnikov?from=rss"
+        "title": "Пользователи столкнулись с проблемами при вызове такси в «Яндекс Go» на фоне повреждений дата-центров компании",
+        "url": "https://vc.ru/transport/3185887-problemy-s-taksi-v-yandeks-go?from=rss"
+      },
+      {
+        "title": "«Яндекс»: часть функций чат-бота «Алиса AI» временно недоступна, «Станции» могут отвечать с задержкой",
+        "url": "https://vc.ru/services/3185537-sboj-v-rabote-alisy-ai-i-yandeks-eda?from=rss"
       },
       {
         "title": "Минцифры запланировало ввести для провайдеров требование по минимальной скорости домашнего интернета в 1 Гбит/с — на его исполнение дадут десять лет",
         "url": "https://vc.ru/services/3184496-mincifry-vvodit-trebovanie-po-minimalnoj-skorosti-interneta?from=rss"
       },
       {
-        "title": "Netflix показал трейлер сериала «Альтруисты» о взлёте и крахе криптобиржи FTX",
-        "url": "https://vc.ru/media/3184895-netflix-altruisty-krakh-ftx?from=rss"
+        "title": "«Яндекс» рассказал, что после атаки беспилотников пострадала часть инфраструктуры его дата-центра в Калуге",
+        "url": "https://vc.ru/services/3184679-yandeks-data-tsentr-kaluga-ataka-bespilotnikov?from=rss"
       },
       {
-        "title": "День 1689: больше трети российских компаний отказались от выплаты годовой премии сотрудникам в 2026 году",
-        "url": "https://vc.ru/money/3184426-rossijskie-kompanii-otkazyvayutsya-ot-godovyh-premij?from=rss"
-      },
-      {
-        "title": "VK подала иск в суд ЕС, чтобы оспорить наложенные на неё санкции",
-        "url": "https://vc.ru/legal/3185086-vk-osparivaet-sanktsii-es-v-sude?from=rss"
+        "title": "Ozon рассказал о прекращении страховой программы от атак беспилотников для продавцов",
+        "url": "https://vc.ru/marketplace/3186201-ozon-prekratil-strahovuyu-programmu-ot-atak-bespilotnikov?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "VK через суд потребовала отменить санкции Евросюза",
-        "url": "https://habr.com/ru/news/1092470/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092470"
+        "title": "Google завершил самый долгий спам-апдейт года через 13 дней и 16 часов",
+        "url": "https://habr.com/ru/news/1092584/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092584"
       },
       {
-        "title": "Sony представила микрофон для смартфонов с записью объёмного звука и поддержкой Eclipsa Audio",
-        "url": "https://habr.com/ru/news/1092452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092452"
+        "title": "Релиз Python 3.15",
+        "url": "https://habr.com/ru/news/1092576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092576"
       },
       {
-        "title": "Американца приговорили к 1,5 годам тюрьмы за накрутку прослушиваний ИИ‑песням в стриминговых сервисах",
-        "url": "https://habr.com/ru/news/1092448/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092448"
+        "title": "Sipeed представила 32-канальный логический анализатор SLogic32U3 за 130 долларов",
+        "url": "https://habr.com/ru/news/1092530/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092530"
       },
       {
-        "title": "Пользователи недовольны действиями Microsoft: объём общего хранилища OneDrive в тарифах M365 сокращён с 6 до 2 ТБ",
-        "url": "https://habr.com/ru/news/1092442/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092442"
+        "title": "Часть функций Алисы AI временно недоступна, на «Станциях» паузы с ответами, умный дом может работать нестабильно",
+        "url": "https://habr.com/ru/news/1092528/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092528"
       },
       {
-        "title": "«Известия»: ассортимент ноутбуков ушедших из РФ брендов начал сокращаться",
-        "url": "https://habr.com/ru/news/1092438/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092438"
+        "title": "Стартап Natura представил умное кольцо Interface с возможностью отдавать команды ИИ‑агентам",
+        "url": "https://habr.com/ru/news/1092498/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092498"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261009-1231: Самара 16.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261009-2211: Самара 9.0°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
