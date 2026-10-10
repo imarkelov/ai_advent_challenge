@@ -4756,5 +4756,85 @@
       ]
     },
     "summary": "Сводка digest-20261010-1150: Самара 19.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261010-1654",
+    "generated_at": "2026-10-10T16:54:17Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 14.6,
+      "feels_like_c": 13.3,
+      "description": "Переменная облачность",
+      "wind_ms": 7.2
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Турция с 1 ноября 2026 года запретит соцсети для детей младше 15 лет",
+          "url": "https://vc.ru/social/3187153-turciya-zapretit-socseti-dlya-detej-mladshe-15-let?from=rss"
+        },
+        {
+          "title": "День 1690: индекс Мосбиржи превысил 2400 пунктов на вечерней сессии после договорённостей о поставках на мировые рынки российского дизеля",
+          "url": "https://vc.ru/money/3186740-indeks-mosbirzhi-prevysil-2400-punktov-posle-postavok-rossijskogo-dizelya?from=rss"
+        },
+        {
+          "title": "«Яндекс»: часть функций чат-бота «Алиса AI» временно недоступна, «Станции» могут отвечать с задержкой",
+          "url": "https://vc.ru/services/3185537-sboj-v-rabote-alisy-ai-i-yandeks-eda?from=rss"
+        },
+        {
+          "title": "Пользователи столкнулись с проблемами при вызове такси в «Яндекс Go» на фоне повреждений дата-центров компании",
+          "url": "https://vc.ru/transport/3185887-problemy-s-taksi-v-yandeks-go?from=rss"
+        },
+        {
+          "title": "Минцифры запланировало ввести для провайдеров требование по минимальной скорости домашнего интернета в 1 Гбит/с — на его исполнение дадут десять лет",
+          "url": "https://vc.ru/services/3184496-mincifry-vvodit-trebovanie-po-minimalnoj-skorosti-interneta?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Вышел релиз stm32-gdbtest 0.4.1",
+          "url": "https://habr.com/ru/news/1092732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092732"
+        },
+        {
+          "title": "Anthropic запретила использовать Claude для создания ложных источников поисковой выдачи и ответов ИИ",
+          "url": "https://habr.com/ru/news/1092716/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092716"
+        },
+        {
+          "title": "Qwen выпустила Image 2.1 Turbo: пользовательские тесты и впечатления",
+          "url": "https://habr.com/ru/companies/bothub/news/1092690/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092690"
+        },
+        {
+          "title": "JetBrains выпустила Mellum2.1 под лицензией Apache 2.0",
+          "url": "https://habr.com/ru/companies/selectel/news/1092682/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092682"
+        },
+        {
+          "title": "К пользователю пришла полиция после сборки камеры по образцу Flock",
+          "url": "https://habr.com/ru/news/1092660/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092660"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
+          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
+        },
+        {
+          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
+          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
+        },
+        {
+          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
+          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
+        },
+        {
+          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
+          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
+        },
+        {
+          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
+          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261010-1654: Самара 14.6°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
