@@ -1,22 +1,22 @@
 {
-  "id": "digest-20261009-2211",
-  "generated_at": "2026-10-09T22:11:50Z",
+  "id": "digest-20261010-0409",
+  "generated_at": "2026-10-10T04:09:57Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 9.0,
-    "feels_like_c": 7.4,
+    "temp_c": 9.2,
+    "feels_like_c": 7.8,
     "description": "Переменная облачность",
-    "wind_ms": 3.8
+    "wind_ms": 4.3
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Пользователи столкнулись с проблемами при вызове такси в «Яндекс Go» на фоне повреждений дата-центров компании",
-        "url": "https://vc.ru/transport/3185887-problemy-s-taksi-v-yandeks-go?from=rss"
-      },
-      {
         "title": "«Яндекс»: часть функций чат-бота «Алиса AI» временно недоступна, «Станции» могут отвечать с задержкой",
         "url": "https://vc.ru/services/3185537-sboj-v-rabote-alisy-ai-i-yandeks-eda?from=rss"
+      },
+      {
+        "title": "Пользователи столкнулись с проблемами при вызове такси в «Яндекс Go» на фоне повреждений дата-центров компании",
+        "url": "https://vc.ru/transport/3185887-problemy-s-taksi-v-yandeks-go?from=rss"
       },
       {
         "title": "Минцифры запланировало ввести для провайдеров требование по минимальной скорости домашнего интернета в 1 Гбит/с — на его исполнение дадут десять лет",
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
+        "title": "Представлен открытый нативный графический отладчик The RAD Debugger для приложений user-mode с поддержкой multi-process",
+        "url": "https://habr.com/ru/news/1092550/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092550"
+      },
+      {
+        "title": "Вышло обновление Media Player Classic — Home Cinema 2.8.3",
+        "url": "https://habr.com/ru/news/1092242/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092242"
+      },
+      {
+        "title": "В Москве прошла конференция СисАдмин 2026: Linux, мониторинг, ИИ и немного Стива Возняка",
+        "url": "https://habr.com/ru/news/1092618/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092618"
+      },
+      {
         "title": "Google завершил самый долгий спам-апдейт года через 13 дней и 16 часов",
         "url": "https://habr.com/ru/news/1092584/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092584"
       },
       {
         "title": "Релиз Python 3.15",
         "url": "https://habr.com/ru/news/1092576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092576"
-      },
-      {
-        "title": "Sipeed представила 32-канальный логический анализатор SLogic32U3 за 130 долларов",
-        "url": "https://habr.com/ru/news/1092530/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092530"
-      },
-      {
-        "title": "Часть функций Алисы AI временно недоступна, на «Станциях» паузы с ответами, умный дом может работать нестабильно",
-        "url": "https://habr.com/ru/news/1092528/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092528"
-      },
-      {
-        "title": "Стартап Natura представил умное кольцо Interface с возможностью отдавать команды ИИ‑агентам",
-        "url": "https://habr.com/ru/news/1092498/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092498"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261009-2211: Самара 9.0°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261010-0409: Самара 9.2°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

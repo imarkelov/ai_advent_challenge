@@ -4596,5 +4596,85 @@
       ]
     },
     "summary": "Сводка digest-20261009-2211: Самара 9.0°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261010-0409",
+    "generated_at": "2026-10-10T04:09:57Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 9.2,
+      "feels_like_c": 7.8,
+      "description": "Переменная облачность",
+      "wind_ms": 4.3
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Яндекс»: часть функций чат-бота «Алиса AI» временно недоступна, «Станции» могут отвечать с задержкой",
+          "url": "https://vc.ru/services/3185537-sboj-v-rabote-alisy-ai-i-yandeks-eda?from=rss"
+        },
+        {
+          "title": "Пользователи столкнулись с проблемами при вызове такси в «Яндекс Go» на фоне повреждений дата-центров компании",
+          "url": "https://vc.ru/transport/3185887-problemy-s-taksi-v-yandeks-go?from=rss"
+        },
+        {
+          "title": "Минцифры запланировало ввести для провайдеров требование по минимальной скорости домашнего интернета в 1 Гбит/с — на его исполнение дадут десять лет",
+          "url": "https://vc.ru/services/3184496-mincifry-vvodit-trebovanie-po-minimalnoj-skorosti-interneta?from=rss"
+        },
+        {
+          "title": "«Яндекс» рассказал, что после атаки беспилотников пострадала часть инфраструктуры его дата-центра в Калуге",
+          "url": "https://vc.ru/services/3184679-yandeks-data-tsentr-kaluga-ataka-bespilotnikov?from=rss"
+        },
+        {
+          "title": "Ozon рассказал о прекращении страховой программы от атак беспилотников для продавцов",
+          "url": "https://vc.ru/marketplace/3186201-ozon-prekratil-strahovuyu-programmu-ot-atak-bespilotnikov?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Представлен открытый нативный графический отладчик The RAD Debugger для приложений user-mode с поддержкой multi-process",
+          "url": "https://habr.com/ru/news/1092550/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092550"
+        },
+        {
+          "title": "Вышло обновление Media Player Classic — Home Cinema 2.8.3",
+          "url": "https://habr.com/ru/news/1092242/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092242"
+        },
+        {
+          "title": "В Москве прошла конференция СисАдмин 2026: Linux, мониторинг, ИИ и немного Стива Возняка",
+          "url": "https://habr.com/ru/news/1092618/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092618"
+        },
+        {
+          "title": "Google завершил самый долгий спам-апдейт года через 13 дней и 16 часов",
+          "url": "https://habr.com/ru/news/1092584/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092584"
+        },
+        {
+          "title": "Релиз Python 3.15",
+          "url": "https://habr.com/ru/news/1092576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092576"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
+          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
+        },
+        {
+          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
+          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
+        },
+        {
+          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
+          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
+        },
+        {
+          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
+          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
+        },
+        {
+          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
+          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261010-0409: Самара 9.2°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
