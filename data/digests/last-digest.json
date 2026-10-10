@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261010-1654",
-  "generated_at": "2026-10-10T16:54:17Z",
+  "id": "digest-20261010-2106",
+  "generated_at": "2026-10-10T21:06:08Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 14.6,
-    "feels_like_c": 13.3,
-    "description": "Переменная облачность",
-    "wind_ms": 7.2
+    "temp_c": 13.5,
+    "feels_like_c": 12.7,
+    "description": "Пасмурно",
+    "wind_ms": 5.2
   },
   "news": {
     "vc.ru": [
@@ -27,11 +27,15 @@
         "url": "https://vc.ru/transport/3185887-problemy-s-taksi-v-yandeks-go?from=rss"
       },
       {
-        "title": "Минцифры запланировало ввести для провайдеров требование по минимальной скорости домашнего интернета в 1 Гбит/с — на его исполнение дадут десять лет",
-        "url": "https://vc.ru/services/3184496-mincifry-vvodit-trebovanie-po-minimalnoj-skorosti-interneta?from=rss"
+        "title": "Ozon рассказал о прекращении страховой программы от атак беспилотников для продавцов",
+        "url": "https://vc.ru/marketplace/3186201-ozon-prekratil-strahovuyu-programmu-ot-atak-bespilotnikov?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "TDK работает над прототипом дисплея для умных очков, который проецирует изображение прямо на сетчатку",
+        "url": "https://habr.com/ru/news/1091818/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091818"
+      },
       {
         "title": "Вышел релиз stm32-gdbtest 0.4.1",
         "url": "https://habr.com/ru/news/1092732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092732"
@@ -47,10 +51,6 @@
       {
         "title": "JetBrains выпустила Mellum2.1 под лицензией Apache 2.0",
         "url": "https://habr.com/ru/companies/selectel/news/1092682/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092682"
-      },
-      {
-        "title": "К пользователю пришла полиция после сборки камеры по образцу Flock",
-        "url": "https://habr.com/ru/news/1092660/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092660"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261010-1654: Самара 14.6°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261010-2106: Самара 13.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
