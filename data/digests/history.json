@@ -4676,5 +4676,85 @@
       ]
     },
     "summary": "Сводка digest-20261010-0409: Самара 9.2°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261010-1150",
+    "generated_at": "2026-10-10T11:50:48Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 19.4,
+      "feels_like_c": 16.6,
+      "description": "Пасмурно",
+      "wind_ms": 16.5
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Яндекс»: часть функций чат-бота «Алиса AI» временно недоступна, «Станции» могут отвечать с задержкой",
+          "url": "https://vc.ru/services/3185537-sboj-v-rabote-alisy-ai-i-yandeks-eda?from=rss"
+        },
+        {
+          "title": "Пользователи столкнулись с проблемами при вызове такси в «Яндекс Go» на фоне повреждений дата-центров компании",
+          "url": "https://vc.ru/transport/3185887-problemy-s-taksi-v-yandeks-go?from=rss"
+        },
+        {
+          "title": "Минцифры запланировало ввести для провайдеров требование по минимальной скорости домашнего интернета в 1 Гбит/с — на его исполнение дадут десять лет",
+          "url": "https://vc.ru/services/3184496-mincifry-vvodit-trebovanie-po-minimalnoj-skorosti-interneta?from=rss"
+        },
+        {
+          "title": "День 1690: индекс Мосбиржи превысил 2400 пунктов на вечерней сессии после договорённостей о поставках на мировые рынки российского дизеля",
+          "url": "https://vc.ru/money/3186740-indeks-mosbirzhi-prevysil-2400-punktov-posle-postavok-rossijskogo-dizelya?from=rss"
+        },
+        {
+          "title": "«Яндекс» рассказал, что после атаки беспилотников пострадала часть инфраструктуры его дата-центра в Калуге",
+          "url": "https://vc.ru/services/3184679-yandeks-data-tsentr-kaluga-ataka-bespilotnikov?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "JetBrains выпустила Mellum2.1 под лицензией Apache 2.0",
+          "url": "https://habr.com/ru/companies/selectel/news/1092682/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092682"
+        },
+        {
+          "title": "К пользователю пришла полиция после сборки камеры по образцу Flock",
+          "url": "https://habr.com/ru/news/1092660/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092660"
+        },
+        {
+          "title": "ИИ‑модель Anthropic отправила в полицию Филадельфии ложное сообщение об убийстве",
+          "url": "https://habr.com/ru/news/1092650/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092650"
+        },
+        {
+          "title": "Новый будильник от IKEA заряжает смартфон и показывает температуру",
+          "url": "https://habr.com/ru/news/1092648/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092648"
+        },
+        {
+          "title": "Tesla переименовала систему Full Self‑Driving в Tesla Assisted Driving в Европе",
+          "url": "https://habr.com/ru/news/1092644/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092644"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
+          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
+        },
+        {
+          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
+          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
+        },
+        {
+          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
+          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
+        },
+        {
+          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
+          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
+        },
+        {
+          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
+          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261010-1150: Самара 19.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

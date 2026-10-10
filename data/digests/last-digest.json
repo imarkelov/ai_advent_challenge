@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261010-0409",
-  "generated_at": "2026-10-10T04:09:57Z",
+  "id": "digest-20261010-1150",
+  "generated_at": "2026-10-10T11:50:48Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 9.2,
-    "feels_like_c": 7.8,
-    "description": "Переменная облачность",
-    "wind_ms": 4.3
+    "temp_c": 19.4,
+    "feels_like_c": 16.6,
+    "description": "Пасмурно",
+    "wind_ms": 16.5
   },
   "news": {
     "vc.ru": [
@@ -23,34 +23,34 @@
         "url": "https://vc.ru/services/3184496-mincifry-vvodit-trebovanie-po-minimalnoj-skorosti-interneta?from=rss"
       },
       {
-        "title": "«Яндекс» рассказал, что после атаки беспилотников пострадала часть инфраструктуры его дата-центра в Калуге",
-        "url": "https://vc.ru/services/3184679-yandeks-data-tsentr-kaluga-ataka-bespilotnikov?from=rss"
+        "title": "День 1690: индекс Мосбиржи превысил 2400 пунктов на вечерней сессии после договорённостей о поставках на мировые рынки российского дизеля",
+        "url": "https://vc.ru/money/3186740-indeks-mosbirzhi-prevysil-2400-punktov-posle-postavok-rossijskogo-dizelya?from=rss"
       },
       {
-        "title": "Ozon рассказал о прекращении страховой программы от атак беспилотников для продавцов",
-        "url": "https://vc.ru/marketplace/3186201-ozon-prekratil-strahovuyu-programmu-ot-atak-bespilotnikov?from=rss"
+        "title": "«Яндекс» рассказал, что после атаки беспилотников пострадала часть инфраструктуры его дата-центра в Калуге",
+        "url": "https://vc.ru/services/3184679-yandeks-data-tsentr-kaluga-ataka-bespilotnikov?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Представлен открытый нативный графический отладчик The RAD Debugger для приложений user-mode с поддержкой multi-process",
-        "url": "https://habr.com/ru/news/1092550/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092550"
+        "title": "JetBrains выпустила Mellum2.1 под лицензией Apache 2.0",
+        "url": "https://habr.com/ru/companies/selectel/news/1092682/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092682"
       },
       {
-        "title": "Вышло обновление Media Player Classic — Home Cinema 2.8.3",
-        "url": "https://habr.com/ru/news/1092242/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092242"
+        "title": "К пользователю пришла полиция после сборки камеры по образцу Flock",
+        "url": "https://habr.com/ru/news/1092660/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092660"
       },
       {
-        "title": "В Москве прошла конференция СисАдмин 2026: Linux, мониторинг, ИИ и немного Стива Возняка",
-        "url": "https://habr.com/ru/news/1092618/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092618"
+        "title": "ИИ‑модель Anthropic отправила в полицию Филадельфии ложное сообщение об убийстве",
+        "url": "https://habr.com/ru/news/1092650/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092650"
       },
       {
-        "title": "Google завершил самый долгий спам-апдейт года через 13 дней и 16 часов",
-        "url": "https://habr.com/ru/news/1092584/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092584"
+        "title": "Новый будильник от IKEA заряжает смартфон и показывает температуру",
+        "url": "https://habr.com/ru/news/1092648/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092648"
       },
       {
-        "title": "Релиз Python 3.15",
-        "url": "https://habr.com/ru/news/1092576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092576"
+        "title": "Tesla переименовала систему Full Self‑Driving в Tesla Assisted Driving в Европе",
+        "url": "https://habr.com/ru/news/1092644/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092644"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261010-0409: Самара 9.2°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261010-1150: Самара 19.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
