@@ -1,11 +1,11 @@
 {
-  "id": "digest-20261010-2106",
-  "generated_at": "2026-10-10T21:06:08Z",
+  "id": "digest-20261011-0347",
+  "generated_at": "2026-10-11T03:47:10Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 13.5,
-    "feels_like_c": 12.7,
-    "description": "Пасмурно",
+    "temp_c": 9.1,
+    "feels_like_c": 7.9,
+    "description": "Преимущественно ясно",
     "wind_ms": 5.2
   },
   "news": {
@@ -33,6 +33,14 @@
     ],
     "habr": [
       {
+        "title": "ЦОД «Яндекса» во Владимире остановлен",
+        "url": "https://habr.com/ru/news/1092820/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092820"
+      },
+      {
+        "title": "[Перевод]: что случилось с liliputing.com",
+        "url": "https://habr.com/ru/news/1092808/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092808"
+      },
+      {
         "title": "TDK работает над прототипом дисплея для умных очков, который проецирует изображение прямо на сетчатку",
         "url": "https://habr.com/ru/news/1091818/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091818"
       },
@@ -43,14 +51,6 @@
       {
         "title": "Anthropic запретила использовать Claude для создания ложных источников поисковой выдачи и ответов ИИ",
         "url": "https://habr.com/ru/news/1092716/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092716"
-      },
-      {
-        "title": "Qwen выпустила Image 2.1 Turbo: пользовательские тесты и впечатления",
-        "url": "https://habr.com/ru/companies/bothub/news/1092690/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092690"
-      },
-      {
-        "title": "JetBrains выпустила Mellum2.1 под лицензией Apache 2.0",
-        "url": "https://habr.com/ru/companies/selectel/news/1092682/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092682"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261010-2106: Самара 13.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261011-0347: Самара 9.1°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
