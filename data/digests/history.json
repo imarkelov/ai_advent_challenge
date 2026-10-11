@@ -5076,5 +5076,85 @@
       ]
     },
     "summary": "Сводка digest-20261011-1202: Самара 15.9°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261011-2126",
+    "generated_at": "2026-10-11T21:26:05Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 7.6,
+      "feels_like_c": 6.1,
+      "description": "Ясно",
+      "wind_ms": 2.2
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Дата-центр «Яндекса» во Владимире остановил работу после атаки беспилотников",
+          "url": "https://vc.ru/services/3188072-ataka-bespilotnikov-na-data-tsentr-yandeksa?from=rss"
+        },
+        {
+          "title": "«Яндекс» ограничил часть функций «Диска» для снижения нагрузки — в том числе скачивание папок",
+          "url": "https://vc.ru/services/3188990-yandeks-ogranichil-funktsii-diska?from=rss"
+        },
+        {
+          "title": "10 млн активных пользователей и стремительный рост популярности в Азии: это соцсеть Setlog, в которой можно снимать двухсекундные ролики без фильтров для создания «закрытых» видеоблогов с друзьями",
+          "url": "https://vc.ru/social/3188416-sotsset-setlog-rost-populyarnosti-v-azii?from=rss"
+        },
+        {
+          "title": "«Яндекс» сообщил о постепенном восстановлении доступа к «Алисе», «Поиску», «Картам» и другим своим сервисам",
+          "url": "https://vc.ru/services/3188673-yandeks-vosstanavlivaet-dostup-k-alise-poisku-i-drugim-servisam?from=rss"
+        },
+        {
+          "title": "FT рассказала об обсуждении в Starbucks покупки сети ресторанов мексиканской кухни Chipotle: что компании могли бы получить от возможной сделки, кроме ошибок",
+          "url": "https://vc.ru/food/3188796-starbucks-rassmatrivaet-pokupku-chipotle?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Яндекс Пэй продолжает восстанавливать работу после повреждения дата-центра",
+          "url": "https://habr.com/ru/news/1093020/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093020"
+        },
+        {
+          "title": "«Тантор Лабс» предложила альтернативу публичным облакам: собственный DBaaS на Tantor XData с развёртыванием от трёх дней",
+          "url": "https://habr.com/ru/companies/tantor/news/1093006/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093006"
+        },
+        {
+          "title": "В «Яндексе» ограничили часть функций «Яндекс 360», в том числе «Диска» для сохранения работоспособности сервисов",
+          "url": "https://habr.com/ru/news/1092992/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092992"
+        },
+        {
+          "title": "Good Bear 1.0.1 (Firefox 157): обособленное хранилище паролей для российского контейнера",
+          "url": "https://habr.com/ru/news/1092970/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092970"
+        },
+        {
+          "title": "С помощью ИИ были созданы клоны всех программ Adobe, Microsoft Office и AutoCAD",
+          "url": "https://habr.com/ru/news/1092950/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092950"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
+          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
+        },
+        {
+          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
+          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
+        },
+        {
+          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
+          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
+        },
+        {
+          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
+          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
+        },
+        {
+          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
+          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261011-2126: Самара 7.6°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
