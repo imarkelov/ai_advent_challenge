@@ -1,15 +1,23 @@
 {
-  "id": "digest-20261011-0347",
-  "generated_at": "2026-10-11T03:47:10Z",
+  "id": "digest-20261011-1202",
+  "generated_at": "2026-10-11T12:02:44Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 9.1,
-    "feels_like_c": 7.9,
-    "description": "Преимущественно ясно",
-    "wind_ms": 5.2
+    "temp_c": 15.9,
+    "feels_like_c": 12.8,
+    "description": "Пасмурно",
+    "wind_ms": 11.6
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Дата-центр «Яндекса» во Владимире остановил работу после атаки беспилотников",
+        "url": "https://vc.ru/services/3188072-ataka-bespilotnikov-na-data-tsentr-yandeksa?from=rss"
+      },
+      {
+        "title": "«Яндекс Маркет» призвал продавцов временно не привозить товары в ПВЗ и отключил «плату за опоздания» на фоне атаки на дата-центр «Яндекса» во Владимире",
+        "url": "https://vc.ru/marketplace/3188377-yandeks-market-vremenno-priostanovil-otgruzki-tovarov-v-pvz?from=rss"
+      },
       {
         "title": "Турция с 1 ноября 2026 года запретит соцсети для детей младше 15 лет",
         "url": "https://vc.ru/social/3187153-turciya-zapretit-socseti-dlya-detej-mladshe-15-let?from=rss"
@@ -19,38 +27,30 @@
         "url": "https://vc.ru/money/3186740-indeks-mosbirzhi-prevysil-2400-punktov-posle-postavok-rossijskogo-dizelya?from=rss"
       },
       {
-        "title": "«Яндекс»: часть функций чат-бота «Алиса AI» временно недоступна, «Станции» могут отвечать с задержкой",
-        "url": "https://vc.ru/services/3185537-sboj-v-rabote-alisy-ai-i-yandeks-eda?from=rss"
-      },
-      {
         "title": "Пользователи столкнулись с проблемами при вызове такси в «Яндекс Go» на фоне повреждений дата-центров компании",
         "url": "https://vc.ru/transport/3185887-problemy-s-taksi-v-yandeks-go?from=rss"
-      },
-      {
-        "title": "Ozon рассказал о прекращении страховой программы от атак беспилотников для продавцов",
-        "url": "https://vc.ru/marketplace/3186201-ozon-prekratil-strahovuyu-programmu-ot-atak-bespilotnikov?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "ЦОД «Яндекса» во Владимире остановлен",
-        "url": "https://habr.com/ru/news/1092820/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092820"
+        "title": "Российские учёные протестировали новый подсластитель, который в 2000 раз слаще сахара",
+        "url": "https://habr.com/ru/news/1092876/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092876"
       },
       {
-        "title": "[Перевод]: что случилось с liliputing.com",
-        "url": "https://habr.com/ru/news/1092808/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092808"
+        "title": "Odyssey открыла доступ к модели, которая генерирует интерактивные миры в реальном времени",
+        "url": "https://habr.com/ru/companies/koda/news/1092870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092870"
       },
       {
-        "title": "TDK работает над прототипом дисплея для умных очков, который проецирует изображение прямо на сетчатку",
-        "url": "https://habr.com/ru/news/1091818/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091818"
+        "title": "Масштабный сбой в сервисах «Яндекса» затронул работу маркетплейсов, служб доставки и ретейлеров",
+        "url": "https://habr.com/ru/news/1092856/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092856"
       },
       {
-        "title": "Вышел релиз stm32-gdbtest 0.4.1",
-        "url": "https://habr.com/ru/news/1092732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092732"
+        "title": "Выпуск открытой платформы для самостоятельного хранения и управления фото и видео Immich 3.3",
+        "url": "https://habr.com/ru/news/1092668/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092668"
       },
       {
-        "title": "Anthropic запретила использовать Claude для создания ложных источников поисковой выдачи и ответов ИИ",
-        "url": "https://habr.com/ru/news/1092716/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092716"
+        "title": "«Яндекс» включил атаки БПЛА в список форс-мажорных обстоятельств, освобождающих компанию от ответственности",
+        "url": "https://habr.com/ru/news/1092852/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092852"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261011-0347: Самара 9.1°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261011-1202: Самара 15.9°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

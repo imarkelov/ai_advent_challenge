@@ -4996,5 +4996,85 @@
       ]
     },
     "summary": "Сводка digest-20261011-0347: Самара 9.1°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261011-1202",
+    "generated_at": "2026-10-11T12:02:44Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 15.9,
+      "feels_like_c": 12.8,
+      "description": "Пасмурно",
+      "wind_ms": 11.6
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Дата-центр «Яндекса» во Владимире остановил работу после атаки беспилотников",
+          "url": "https://vc.ru/services/3188072-ataka-bespilotnikov-na-data-tsentr-yandeksa?from=rss"
+        },
+        {
+          "title": "«Яндекс Маркет» призвал продавцов временно не привозить товары в ПВЗ и отключил «плату за опоздания» на фоне атаки на дата-центр «Яндекса» во Владимире",
+          "url": "https://vc.ru/marketplace/3188377-yandeks-market-vremenno-priostanovil-otgruzki-tovarov-v-pvz?from=rss"
+        },
+        {
+          "title": "Турция с 1 ноября 2026 года запретит соцсети для детей младше 15 лет",
+          "url": "https://vc.ru/social/3187153-turciya-zapretit-socseti-dlya-detej-mladshe-15-let?from=rss"
+        },
+        {
+          "title": "День 1690: индекс Мосбиржи превысил 2400 пунктов на вечерней сессии после договорённостей о поставках на мировые рынки российского дизеля",
+          "url": "https://vc.ru/money/3186740-indeks-mosbirzhi-prevysil-2400-punktov-posle-postavok-rossijskogo-dizelya?from=rss"
+        },
+        {
+          "title": "Пользователи столкнулись с проблемами при вызове такси в «Яндекс Go» на фоне повреждений дата-центров компании",
+          "url": "https://vc.ru/transport/3185887-problemy-s-taksi-v-yandeks-go?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Российские учёные протестировали новый подсластитель, который в 2000 раз слаще сахара",
+          "url": "https://habr.com/ru/news/1092876/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092876"
+        },
+        {
+          "title": "Odyssey открыла доступ к модели, которая генерирует интерактивные миры в реальном времени",
+          "url": "https://habr.com/ru/companies/koda/news/1092870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092870"
+        },
+        {
+          "title": "Масштабный сбой в сервисах «Яндекса» затронул работу маркетплейсов, служб доставки и ретейлеров",
+          "url": "https://habr.com/ru/news/1092856/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092856"
+        },
+        {
+          "title": "Выпуск открытой платформы для самостоятельного хранения и управления фото и видео Immich 3.3",
+          "url": "https://habr.com/ru/news/1092668/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092668"
+        },
+        {
+          "title": "«Яндекс» включил атаки БПЛА в список форс-мажорных обстоятельств, освобождающих компанию от ответственности",
+          "url": "https://habr.com/ru/news/1092852/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092852"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
+          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
+        },
+        {
+          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
+          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
+        },
+        {
+          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
+          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
+        },
+        {
+          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
+          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
+        },
+        {
+          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
+          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261011-1202: Самара 15.9°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
