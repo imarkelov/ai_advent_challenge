@@ -99,6 +99,26 @@ python scripts/e2e_day28.py              # Part A + Part B
 python scripts/e2e_day28.py --part-a-only  # только офлайн
 ```
 
+## Ключи
+
+Локальный режим не требует **ни одного** ключа:
+
+| Переменная | Роль | Нужна локально |
+|---|---|---|
+| `OLLAMA_BASE_URL` | адрес Ollama (генерация + эмбеддинги) | ✅ |
+| `OLLAMA_API_KEY` | заглушка (Ollama ключ не проверяет) | для заголовка `Authorization` |
+| `OLLAMA_EMBED_MODEL` | модель эмбеддера (дефолт `nomic-embed-text:v1.5`) | не обязательно |
+| `GPUSTACK_*` | удалённый провайдер дней 5–26 | ❌ |
+| `GPUSTACK_KEY_EMBED` | только `embedder=api` | ❌ |
+| `GPUSTACK_KEY_RERANK` | только реранкер этапа 2 | ❌ |
+
+Деградация при пустых переменных безопасна и проверена: без
+`OLLAMA_EMBED_MODEL` берётся дефолт; без `GPUSTACK_KEY_EMBED` поиск по
+`ollama`-индексу работает (модель из индекса), а по `api`-индексу даёт
+явную `KBError`; без `GPUSTACK_KEY_RERANK` реранкер тихо уступает
+гибридному поиску (лог `[KB]`), не ломая запрос. `.env` в git не
+коммитится — в репозитории только `.env.example`.
+
 ## Статус
 
 **Тесты:** бэкенд — **607 passed, 6 skipped** (офлайн,
@@ -152,7 +172,22 @@ A: По гайду по тех-ревизии бэкенда зафиксиро�
 `localhost:11434` (`/v1/embeddings` + `/v1/chat/completions`); при
 пустых `GPUSTACK_*` сетевого пути нет вовсе.
 
-Ветка `day28-local-rag` (от `day26-local-llm`).
+**Проверено на живом сервере** (`uvicorn ... --port 8055`, актуальный
+код + пересобранный фронтенд): `GET /api/kb/stats` →
+`embedder=ollama, model=nomic-embed-text:v1.5, dim=768, chunks=33`
+(3 файла); `POST /api/chat` с RAG → ответ локальной LLM за 6.8 с с
+цитатой `[1]` и `rag_context.chunks=3`, первым — верный
+`backend_review_guide.txt`. Во фронтенде селектор эмбеддера содержит
+три варианта, включая «Ollama nomic-embed-text:v1.5 (локально)», а в
+статистике видна строка «Модель».
+
+> Замечание по сборке фронтенда: штатный Node 18 в этом окружении
+> `npm run build` не тянет (pre-existing `rolldown`: `node:util.styleText`
+> отсутствует; на bundled Node 24 — расхождение код-подписей
+> нативного binding'а). Сборка выполнена нативный arm64-Node 26
+> (`/opt/homebrew/bin/node`); `package.json` и зависимости не менялись.
+
+Ветка `day28-local-rag` (от `day26-local-llm`), запушена в origin.
 
 # Release Notes — day26-local-llm (день 26)
 
