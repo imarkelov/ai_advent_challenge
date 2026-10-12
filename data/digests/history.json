@@ -5236,5 +5236,85 @@
       ]
     },
     "summary": "Сводка digest-20261012-0409: Самара 4.4°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261012-1419",
+    "generated_at": "2026-10-12T14:19:57Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 16.5,
+      "feels_like_c": 16.5,
+      "description": "Преимущественно ясно",
+      "wind_ms": 4.2
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Правительственная рабочая группа предложила разрешить использование зарубежных чипов и ИИ-решений на критически важных объектах — Forbes",
+          "url": "https://vc.ru/tech/3189847-razreshenie-na-ispolzovanie-zarubezhnyh-chipov-i-ii-v-rossii?from=rss"
+        },
+        {
+          "title": "Минцифры разрабатывает новые требования для виртуальных мобильных операторов из-за «занижения» стоимости услуг связи",
+          "url": "https://vc.ru/money/3189599-mincifry-novye-trebovaniya-dlya-virtualnyh-mobilnyh-operatorov?from=rss"
+        },
+        {
+          "title": "Астрология, ИИ и никакого 996: как на развалинах древней цивилизации живёт китайская деревня вайбкодеров и стартаперов",
+          "url": "https://vc.ru/story/3185525-lyanchzhu-kitajskaya-derevnya-startaperov-i-astrologov?from=rss"
+        },
+        {
+          "title": "Основатель inDrive Арсен Томский рассказал о «десятках тысяч» заявок от новых водителей — после наплыва пользователей и заказов",
+          "url": "https://vc.ru/transport/3190353-arsen-tomskiy-o-roste-zakazov-v-indrive?from=rss"
+        },
+        {
+          "title": "ЕС ввёл санкции против застройщика «Самолёт» и его гендиректора Анны Акиньшиной — из-за якобы «использования рабочих из КНДР»",
+          "url": "https://vc.ru/legal/3190184-es-vvjel-sankcii-protiv-zastrojshchika-samolet?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Sony получила патент на систему, позволяющую зрителям влиять на игровой процесс стримеров",
+          "url": "https://habr.com/ru/news/1093446/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093446"
+        },
+        {
+          "title": "Как Национальный центр ураганов США сделал ставку на ИИ-прогноз Isaias",
+          "url": "https://habr.com/ru/companies/selectel/news/1093380/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093380"
+        },
+        {
+          "title": "Super Mario 64 запустили на Microsoft Zune HD 2009 года",
+          "url": "https://habr.com/ru/companies/selectel/news/1093226/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093226"
+        },
+        {
+          "title": "Центр экспертизы по комплексному сервису К2Тех возглавил первый рейтинг комплексных сервис-провайдеров России",
+          "url": "https://habr.com/ru/companies/k2tech/news/1093300/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093300"
+        },
+        {
+          "title": "«Диасофт» открыл бесплатный доступ к платформе Digital Q.MessageBroker",
+          "url": "https://habr.com/ru/companies/diasoft_company/news/1093442/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093442"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
+          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
+        },
+        {
+          "title": "Чем заменить Oracle и Microsoft SQL Server в 2026 году: 4 российских СУБД",
+          "url": "https://tproger.ru/articles/chem-zamenit-oracle-i-microsoft-sql-server-v-2026-godu-4-rossij"
+        },
+        {
+          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
+          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
+        },
+        {
+          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
+          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
+        },
+        {
+          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
+          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261012-1419: Самара 16.5°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
