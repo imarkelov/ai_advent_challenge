@@ -21,6 +21,10 @@ try:  # пакетный режим: uvicorn studio.backend.main:app из кор
                      UPLOAD_EXTS, ollama_embedder_from_env)
     from .memory import PROFILE_ACTIONS, MemoryStore
     from .mcp import MCPError
+    # День 29: оптимизация локальной LLM (поиск сериалов).
+    from .series import (TOP_K, SeriesError, SeriesFinder, catalog_stats,
+                         load_report)
+    from .tuning import PROFILES
 except ImportError:  # dev-режим: uvicorn main:app из studio/backend
     from agent import (CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE,
                        PROFILE_INTERVIEW_TEXT, StudioAgent)
@@ -28,6 +32,9 @@ except ImportError:  # dev-режим: uvicorn main:app из studio/backend
                     UPLOAD_EXTS, ollama_embedder_from_env)
     from memory import PROFILE_ACTIONS, MemoryStore, PROFILE_ACTIONS
     from mcp import MCPError
+    from series import (TOP_K, SeriesError, SeriesFinder, catalog_stats,
+                        load_report)
+    from tuning import PROFILES
 
 # Секреты/настройки — из .env в корне репозитория.
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
@@ -71,11 +78,18 @@ def _list_kb_uploads(kb_dir: str) -> list:
 
 
 def create_app(agent: StudioAgent | None = None,
-               kb: "KnowledgeBase | None" = None) -> FastAPI:
-    """Создаёт FastAPI-приложение. agent и kb inject-ятся для тестов;
-    по умолчанию — StudioAgent(DATA_DIR) и KnowledgeBase(KB_DIR) (день 21)."""
+               kb: "KnowledgeBase | None" = None,
+               series: "SeriesFinder | None" = None) -> FastAPI:
+    """Создаёт FastAPI-приложение. agent, kb и series inject-ятся для
+    тестов; по умолчанию — StudioAgent(DATA_DIR), KnowledgeBase(KB_DIR)
+    (день 21) и SeriesFinder() (день 29 — каталог из data/series)."""
     agent = agent or StudioAgent(DATA_DIR)
     kb = kb or KnowledgeBase(KB_DIR)
+    # Профиль `studio` не задаёт модель (она берётся из общего конфига) —
+    # передаём сервису текущую модель приложения, иначе запрос уйдёт без
+    # модели и Ollama ответит 400.
+    series_finder = series or SeriesFinder(
+        default_model=agent.get_config().get("model"))
     app = FastAPI(title="Студия")
 
     @app.on_event("shutdown")
@@ -936,6 +950,97 @@ def create_app(agent: StudioAgent | None = None,
         """Очистить журнал запросов."""
         agent.requests_clear()
         return {"ok": True}
+
+    # ---------- день 29: оптимизация локальной LLM (поиск сериалов) ----------
+
+    @app.get("/api/tuning/profiles")
+    def tuning_profiles():
+        """Профили оптимизации: список + активный.
+
+        Профиль — именованный набор параметров инференса (temperature,
+        max_tokens, num_ctx, seed) и промпт-шаблона под задачу. День 29:
+        `studio` (дефолт, поведение до дня 29), `series` (поиск
+        сериалов), `series_q8` (тот же кейс на Q8_0 — замер
+        квантования), `series_json` (строгий JSON-режим)."""
+        return {
+            "active": agent.get_tuning_profile(),
+            "profiles": [p.to_dict() for p in PROFILES.values()],
+        }
+
+    @app.post("/api/tuning/profile")
+    def tuning_profile_set(body: dict):
+        """Выбрать активный профиль. 400 — неизвестное имя."""
+        name = body.get("profile")
+        if not isinstance(name, str) or not name.strip():
+            raise HTTPException(400, "Поле profile должно быть непустой строкой")
+        try:
+            return {"active": agent.set_tuning_profile(name.strip())}
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+
+    @app.get("/api/tuning/report")
+    def tuning_report():
+        """Последний отчёт оптимизации (профили + кванты).
+
+        Отчёт пишет `scripts/series_eval.py`; пустой объект, если замер
+        ещё не прогонялся."""
+        return load_report()
+
+    @app.get("/api/series/catalog")
+    def series_catalog():
+        """Статистика каталога сериалов (реальные данные Wikidata).
+
+        Пустой каталог — не ошибка: UI показывает подсказку собрать
+        каталог скриптом."""
+        cat = series_finder.catalog
+        return {"stats": catalog_stats(cat),
+                "sample": cat[:20],
+                "ready": bool(cat)}
+
+    @app.post("/api/series/search")
+    def series_search(body: dict):
+        """Поиск сериалов активным профилем оптимизации.
+
+        Body: {query, profile?, limit?}. 400 — пустой запрос/битый
+        limit/неизвестный профиль; 502 — каталог пуст или Ollama
+        недоступна (RU detail)."""
+        query = body.get("query")
+        if not isinstance(query, str) or not query.strip():
+            raise HTTPException(400, "Запрос не может быть пустым")
+        profile_name = body.get("profile") or agent.get_tuning_profile()
+        if not isinstance(profile_name, str):
+            raise HTTPException(400, "Поле profile должно быть строкой")
+        if profile_name not in PROFILES:
+            raise HTTPException(400, f"Неизвестный профиль: {profile_name}")
+        limit = body.get("limit", TOP_K)
+        if isinstance(limit, bool) or not isinstance(limit, int) \
+                or not (1 <= limit <= 10):
+            raise HTTPException(400,
+                                "Поле limit должно быть целым числом от 1 до 10")
+        try:
+            return series_finder.recommend(query, profile_name=profile_name,
+                                           limit=limit)
+        except SeriesError as e:
+            raise HTTPException(502, str(e))
+
+    @app.post("/api/series/compare")
+    def series_compare(body: dict):
+        """Сравнить профили на одном наборе запросов.
+
+        Body: {queries: [str], profiles?: [str]}. 400 — пустой список
+        запросов/неизвестный профиль."""
+        queries = body.get("queries")
+        if not isinstance(queries, list) or not queries:
+            raise HTTPException(400, "Поле queries должно быть непустым списком")
+        if not all(isinstance(q, str) and q.strip() for q in queries):
+            raise HTTPException(400, "Каждый запрос должен быть непустой строкой")
+        profiles = body.get("profiles") or ["series", "series_json"]
+        if not isinstance(profiles, list) or not profiles:
+            raise HTTPException(400, "Поле profiles должно быть непустым списком")
+        bad = [p for p in profiles if p not in PROFILES]
+        if bad:
+            raise HTTPException(400, f"Неизвестный профиль: {bad[0]}")
+        return series_finder.compare(queries, profiles)
 
     return app
 

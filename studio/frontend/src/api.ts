@@ -736,3 +736,152 @@ export async function chatStream(
     }
   }
 }
+
+// ── День 29: оптимизация локальной LLM (поиск сериалов) ─────────────────────
+// Профиль — именованный набор параметров инференса (temperature,
+// max_tokens, num_ctx, seed) и промпт-шаблона под задачу. Активный
+// профиль хранится на бэкенде (studio/data/tuning.json).
+
+export interface TuningProfile {
+  name: string
+  title: string
+  description: string
+  model: string | null
+  temperature: number
+  top_p: number
+  num_predict: number
+  num_ctx: number | null
+  seed: number | null
+  system_prompt: string
+  stop: string[]
+  format_json: boolean
+  // Отключение «размышления» reasoning-моделей (день 29): обязательно
+  // для glm-4.7-flash, иначе content пуст.
+  think: boolean | null
+  notes: string
+}
+
+export interface TuningProfiles {
+  active: string
+  profiles: TuningProfile[]
+}
+
+export interface SeriesStats {
+  total: number
+  years: [number, number] | null
+  genres: Record<string, number>
+  countries: Record<string, number>
+}
+
+export interface SeriesCatalog {
+  stats: SeriesStats
+  sample: SeriesItem[]
+  ready: boolean
+}
+
+export interface SeriesItem {
+  id?: string
+  imdb?: string
+  title: string
+  year: number | null
+  genres: string[]
+  country: string | null
+  why?: string
+  satisfies?: boolean
+}
+
+export interface SeriesConstraints {
+  genres: string[]
+  country: string | null
+  min_year: number | null
+  max_year: number | null
+}
+
+export interface SeriesMetrics {
+  latency_sec: number
+  prompt_tokens: number
+  completion_tokens: number
+  tokens_per_sec: number | null
+  num_ctx: number | null
+  parsed: boolean
+  hallucination_rate: number
+  constraint_satisfaction: number
+}
+
+export interface SeriesResult {
+  query: string
+  profile: string
+  model: string | null
+  constraints: SeriesConstraints
+  recommendations: SeriesItem[]
+  hallucinated: { id: string; title: string; why: string }[]
+  note: string
+  parsed: boolean
+  metrics: SeriesMetrics
+  candidates: SeriesItem[]
+  request_body: Record<string, unknown>
+}
+
+export interface SeriesCompareRow {
+  query: string
+  profile: string
+  ok: boolean
+  error?: string
+  latency_sec?: number
+  tokens_per_sec?: number | null
+  num_ctx?: number | null
+  parsed?: boolean
+  hallucination_rate?: number
+  constraint_satisfaction?: number
+}
+
+export interface SeriesCompareResult {
+  profiles: Record<
+    string,
+    {
+      ok_cases: number
+      format_validity?: number
+      hallucination_rate?: number
+      constraint_satisfaction?: number
+      latency_p50?: number
+      tokens_per_sec?: number | null
+      num_ctx?: number | null
+    }
+  >
+  rows: SeriesCompareRow[]
+}
+
+// GET /api/tuning/profiles → список профилей + активный
+export function apiTuningProfiles(): Promise<TuningProfiles> {
+  return apiGet('/tuning/profiles')
+}
+
+// POST /api/tuning/profile {profile} → {active}
+export function apiSetTuningProfile(profile: string): Promise<{ active: string }> {
+  return apiPost('/tuning/profile', { profile })
+}
+
+// GET /api/series/catalog → статистика каталога + образец записей
+export function apiSeriesCatalog(): Promise<SeriesCatalog> {
+  return apiGet('/series/catalog')
+}
+
+// POST /api/series/search {query, profile?, limit?} → рекомендации + метрики
+export function apiSeriesSearch(
+  query: string,
+  profile?: string,
+  limit?: number,
+): Promise<SeriesResult> {
+  const body: { query: string; profile?: string; limit?: number } = { query }
+  if (profile) body.profile = profile
+  if (limit) body.limit = limit
+  return apiPost('/series/search', body)
+}
+
+// POST /api/series/compare {queries, profiles?} → сравнение профилей
+export function apiSeriesCompare(
+  queries: string[],
+  profiles?: string[],
+): Promise<SeriesCompareResult> {
+  return apiPost('/series/compare', { queries, profiles })
+}

@@ -31,10 +31,13 @@ try:  # пакетный режим: studio.backend.agent
     from .kb import KnowledgeBase, _STOPWORDS, _tokenize
     from .memory import MemoryStore, atomic_write_json, read_json
     from .mcp import MCPRegistry, MCPError
+    # День 29: профили оптимизации (поиск сериалов).
+    from .tuning import DEFAULT_PROFILE, PROFILES
 except ImportError:  # dev-режим: импорт из studio/backend
     from kb import KnowledgeBase, _STOPWORDS, _tokenize
     from memory import MemoryStore, atomic_write_json, read_json
     from mcp import MCPRegistry, MCPError
+    from tuning import DEFAULT_PROFILE, PROFILES
 
 # Ограничения контекста известных моделей; неизвестной — 32768.
 CONTEXT_LIMITS = {
@@ -390,6 +393,9 @@ class StudioAgent:
         self._session = {"prompt": 0, "completion": 0, "total": 0}  # in-memory
         self._last_usage = None
         self._p_config = os.path.join(data_dir, "config.json")
+        # День 29: активный профиль оптимизации — отдельный файл (см.
+        # get_tuning_profile: config.json не расширяем).
+        self._p_tuning = os.path.join(data_dir, "tuning.json")
         self._p_requests = os.path.join(data_dir, "requests.json")
         self._models_cache = None      # кэш доступных моделей (list_models)
         self._models_cache_ts = 0.0
@@ -398,6 +404,26 @@ class StudioAgent:
         self._local_ids = set(LOCAL_MODELS)
 
     # ---------- конфиг ----------
+
+    def get_tuning_profile(self) -> str:
+        """Имя активного профиля оптимизации (день 29).
+
+        Хранится отдельным файлом `tuning.json`, а НЕ в config.json:
+        `get_config` отдаёт только ключи из DEFAULT_CONFIG, и добавление
+        туда нового поля изменило бы контракт `POST /api/config`
+        (регрессия дней 11–28). Неизвестное/битое значение → дефолт
+        `studio` (поведение до дня 29).
+        """
+        d = read_json(self._p_tuning, None)
+        name = d.get("profile") if isinstance(d, dict) else None
+        return name if isinstance(name, str) and name in PROFILES else DEFAULT_PROFILE
+
+    def set_tuning_profile(self, name: str) -> str:
+        """Выбрать активный профиль; ValueError на неизвестное имя."""
+        if name not in PROFILES:
+            raise ValueError(f"Неизвестный профиль: {name}")
+        atomic_write_json(self._p_tuning, {"profile": name})
+        return name
 
     def get_config(self) -> dict:
         """Текущий конфиг (дефолты + сохранённое; битый файл -> дефолты)."""

@@ -210,6 +210,8 @@ export interface StudioState {
   settingsOpen: boolean
   // Overlay MCP (день 16): отдельная панель MCP-серверов по своей кнопке в шапке чата
   mcpOpen: boolean
+  // Overlay «Сериалы» (день 29): панель поиска сериалов по своей кнопке
+  seriesOpen: boolean
   // Инварианты (день 14): жёсткие правила (ассистент не меняет, пользователь — вкл/выкл)
   invariants: Invariant[]
   // Нарушение активного инварианта (SSE invariant_violation, день 14):
@@ -268,6 +270,7 @@ export function initialState(): StudioState {
     contextTab: 'memory',
     settingsOpen: false,
     mcpOpen: false,
+    seriesOpen: false,
     invariants: [],
     invariantViolation: null,
     mcpServers: [],
@@ -375,6 +378,9 @@ export type StudioAction =
    // Overlay MCP: открыть / закрыть (отдельная кнопка в шапке чата)
    | { type: 'open-mcp' }
    | { type: 'close-mcp' }
+   // День 29: overlay «Сериалы» (поиск сериалов) — открыть / закрыть
+   | { type: 'open-series' }
+   | { type: 'close-series' }
   | { type: 'invariants'; invariants: Invariant[] }
   | { type: 'invariant-violation'; patterns: string[] }
   | { type: 'mcp'; mcpServers: McpServer[]; mcpTools: McpTool[] }
@@ -544,6 +550,10 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
       return { ...state, mcpOpen: true }
     case 'close-mcp':
       return { ...state, mcpOpen: false }
+    case 'open-series':
+      return { ...state, seriesOpen: true }
+    case 'close-series':
+      return { ...state, seriesOpen: false }
     case 'invariants':
       return { ...state, invariants: action.invariants }
     case 'mcp':
@@ -597,6 +607,10 @@ export interface StudioApi {
   mcpOpen: boolean
   openMcp: () => void
   closeMcp: () => void
+  // Overlay «Сериалы» (день 29): панель поиска сериалов — открыть/закрыть
+  seriesOpen: boolean
+  openSeries: () => void
+  closeSeries: () => void
   refreshMemory: () => Promise<void>
   setMemoryToggle: (layer: 'st' | 'wm' | 'lt', on: boolean) => Promise<void>
   // Инварианты (день 14): перечитать/добавить/переключить/удалить — все
@@ -1075,6 +1089,16 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'close-mcp' })
   }, [])
 
+  // Открыть overlay «Сериалы» (день 29)
+  const openSeries = useCallback(() => {
+    dispatch({ type: 'open-series' })
+  }, [])
+
+  // Закрыть overlay «Сериалы» (кнопка «×» / клик по фону)
+  const closeSeries = useCallback(() => {
+    dispatch({ type: 'close-series' })
+  }, [])
+
   // Перечитать память (после изменений в MemoryTab)
   const refreshMemory = useCallback(async () => {
     dispatch({ type: 'memory', memory: await apiGet<MemoryState>('/memory') })
@@ -1260,6 +1284,9 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     mcpOpen: state.mcpOpen,
     openMcp,
     closeMcp,
+    seriesOpen: state.seriesOpen,
+    openSeries,
+    closeSeries,
     refreshMemory,
     setMemoryToggle,
     refreshInvariants,

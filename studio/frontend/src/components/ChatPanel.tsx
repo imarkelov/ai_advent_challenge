@@ -281,6 +281,7 @@ export default function ChatPanel() {
   const {
     state, activeProfile, sendMessage, setModel,
     openSettings, closeSettings, openMcp, closeMcp,
+    openSeries, closeSeries,
     activeTask, chatMode, setChatMode, sendTaskMessage,
     callMcpTool, setDialogueRag,
   } = useStudio()
@@ -621,6 +622,15 @@ export default function ChatPanel() {
             onClick={() => (state.mcpOpen ? closeMcp() : openMcp())}
           >
             🧩
+          </button>
+          <button
+            type="button"
+            className="btn-icon series-toggle"
+            aria-label="Поиск сериалов"
+            title="Поиск сериалов (оптимизированная локальная LLM)"
+            onClick={() => (state.seriesOpen ? closeSeries() : openSeries())}
+          >
+            🎬
           </button>
           <button
             type="button"

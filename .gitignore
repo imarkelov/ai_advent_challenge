@@ -46,3 +46,9 @@ data/tasks.json
 
 # День 21: база знаний (индекс эмбеддингов + загрузки) — runtime, не в git
 data/kb/
+
+# День 29: каталог сериалов. catalog.json / catalog.txt /
+# optimization_report.json — воспроизводимые артефакты замера, в git
+# (нужны для отчёта и тестов). Сырой ответ Wikidata (4000 строк, 3 МБ)
+# регенерируется scripts/fetch_series.py — не в git.
+data/series/catalog_raw.json

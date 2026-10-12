@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar'
 import ChatPanel from './components/ChatPanel'
 import SettingsOverlay from './components/SettingsOverlay'
 import McpOverlay from './components/McpOverlay'
+import SeriesOverlay from './components/SeriesOverlay'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
       </div>
       <SettingsOverlay />
       <McpOverlay />
+      <SeriesOverlay />
     </StudioProvider>
   )
 }
