@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261013-1329",
-  "generated_at": "2026-10-13T13:29:16Z",
+  "id": "digest-20261013-2215",
+  "generated_at": "2026-10-13T22:15:31Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 20.3,
-    "feels_like_c": 19.3,
-    "description": "Пасмурно",
-    "wind_ms": 4.8
+    "temp_c": 11.3,
+    "feels_like_c": 9.8,
+    "description": "Преимущественно ясно",
+    "wind_ms": 4.7
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "«Яндекс Реклама» восстановила доступ к партнёрскому кабинету РСЯ, Adfox и кабинету для рекламных агентств, доступ к кабинету «Директа» и «Бизнеса» пока ограничен",
+        "url": "https://vc.ru/marketing/3193186-yandeks-reklama-vosstanovila-dostup-k-partnerskim-kabinetam?from=rss"
+      },
       {
         "title": "«Ред Софт» и китайская Passion Tech запустили мессенджер «Молния» — он доступен в RuStore за 750 рублей",
         "url": "https://vc.ru/services/3191715-messendzher-molniya-ot-red-soft-i-passion-tech?from=rss"
       },
       {
-        "title": "«Яндекс» до конца октября 2026 года отменит плату за Yandex Cloud и «Яндекс 360» для всех пользователей",
-        "url": "https://vc.ru/services/3192036-yandeks-otmenyaet-platu-za-yandex-cloud-i-yandex-360?from=rss"
+        "title": "Мягкая (и пушистая) сила: магазины «нанимают» котов, чтобы те помогали бизнесу",
+        "url": "https://vc.ru/marketing/3192538-koty-v-magazinakh-pomogayut-biznesu?from=rss"
       },
       {
-        "title": "Alibaba представила второе поколение «умных» очков на базе Qwen по цене от $450",
-        "url": "https://vc.ru/tech/3192391-alibaba-novye-umnye-ochki-ii?from=rss"
+        "title": "«Яндекс» частично восстановил работу «умного» дома: в соцсетях жаловались на сбои подключения водонагревателей, радионянь, котлов и розеток",
+        "url": "https://vc.ru/services/3192431-yandeks-vosstanovil-rabotu-umnogo-doma?from=rss"
       },
       {
-        "title": "«АвтоВАЗ» добавил в подписку на машины Lada вторую модель — фургон Lada Largus",
-        "url": "https://vc.ru/transport/3192317-podpiska-na-avtomobili-lada-largus?from=rss"
-      },
-      {
-        "title": "SpaceXAI запустила единую подписку для Grok, Cursor и X по цене от $8 в месяц",
-        "url": "https://vc.ru/services/3191827-spacexai-podpiska-grok-cursor-x?from=rss"
+        "title": "По стопам изобретателя банки Pringles: бренд разыграет «пожизненный» запас чипсов среди тех, кто согласится на похороны в «культовой банке»",
+        "url": "https://vc.ru/marketing/3192932-priz-ot-pringles-pozhiznennyy-zapas-chipsov?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Эксперты The Lancet назвали две угрозы, способные привести к вымиранию человечества",
-        "url": "https://habr.com/ru/news/1093876/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093876"
+        "title": "Gemini 4 Argon появилась в BotHub: для каких задач стоит выбирать модель",
+        "url": "https://habr.com/ru/companies/bothub/news/1094058/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094058"
       },
       {
-        "title": "«СёрчИнформ КИБ» и InfoDiode подтвердили совместимость",
-        "url": "https://habr.com/ru/companies/searchinform/news/1093898/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093898"
+        "title": "Gemini 4 Argon вышла из закрытого теста: пишет в 15 раз больше, чем Gemini 3",
+        "url": "https://habr.com/ru/companies/gptunnel/news/1094038/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094038"
       },
       {
-        "title": "Мировые поставки ПК рухнули на 20% за год",
-        "url": "https://habr.com/ru/companies/selectel/news/1093440/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093440"
+        "title": "Valve опубликовала CAD‑модели Steam Frame для создания аксессуаров",
+        "url": "https://habr.com/ru/news/1094028/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094028"
       },
       {
-        "title": "Basis SDN 1.3: улучшенная модель безопасности и миграция виртуальных машин без разрыва сетевых соединений",
-        "url": "https://habr.com/ru/companies/basis/news/1093888/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093888"
+        "title": "Apple и LG представили линейку устройств для умного дома: камеры, домофон, замок и датчики",
+        "url": "https://habr.com/ru/news/1093986/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093986"
       },
       {
-        "title": "Google представила Fitbit Edge — фитнес‑браслет с экраном в стиле Xiaomi Mi Band",
-        "url": "https://habr.com/ru/news/1093882/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093882"
+        "title": "CodeScoring и ИСП РАН с соавторами завершают работу над стандартом композиционного анализа",
+        "url": "https://habr.com/ru/companies/codescoring/news/1093974/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093974"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261013-1329: Самара 20.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261013-2215: Самара 11.3°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
