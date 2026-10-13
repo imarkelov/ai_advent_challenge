@@ -5396,5 +5396,85 @@
       ]
     },
     "summary": "Сводка digest-20261013-0005: Самара 10.4°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261013-1329",
+    "generated_at": "2026-10-13T13:29:16Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 20.3,
+      "feels_like_c": 19.3,
+      "description": "Пасмурно",
+      "wind_ms": 4.8
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Ред Софт» и китайская Passion Tech запустили мессенджер «Молния» — он доступен в RuStore за 750 рублей",
+          "url": "https://vc.ru/services/3191715-messendzher-molniya-ot-red-soft-i-passion-tech?from=rss"
+        },
+        {
+          "title": "«Яндекс» до конца октября 2026 года отменит плату за Yandex Cloud и «Яндекс 360» для всех пользователей",
+          "url": "https://vc.ru/services/3192036-yandeks-otmenyaet-platu-za-yandex-cloud-i-yandex-360?from=rss"
+        },
+        {
+          "title": "Alibaba представила второе поколение «умных» очков на базе Qwen по цене от $450",
+          "url": "https://vc.ru/tech/3192391-alibaba-novye-umnye-ochki-ii?from=rss"
+        },
+        {
+          "title": "«АвтоВАЗ» добавил в подписку на машины Lada вторую модель — фургон Lada Largus",
+          "url": "https://vc.ru/transport/3192317-podpiska-na-avtomobili-lada-largus?from=rss"
+        },
+        {
+          "title": "SpaceXAI запустила единую подписку для Grok, Cursor и X по цене от $8 в месяц",
+          "url": "https://vc.ru/services/3191827-spacexai-podpiska-grok-cursor-x?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Эксперты The Lancet назвали две угрозы, способные привести к вымиранию человечества",
+          "url": "https://habr.com/ru/news/1093876/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093876"
+        },
+        {
+          "title": "«СёрчИнформ КИБ» и InfoDiode подтвердили совместимость",
+          "url": "https://habr.com/ru/companies/searchinform/news/1093898/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093898"
+        },
+        {
+          "title": "Мировые поставки ПК рухнули на 20% за год",
+          "url": "https://habr.com/ru/companies/selectel/news/1093440/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093440"
+        },
+        {
+          "title": "Basis SDN 1.3: улучшенная модель безопасности и миграция виртуальных машин без разрыва сетевых соединений",
+          "url": "https://habr.com/ru/companies/basis/news/1093888/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093888"
+        },
+        {
+          "title": "Google представила Fitbit Edge — фитнес‑браслет с экраном в стиле Xiaomi Mi Band",
+          "url": "https://habr.com/ru/news/1093882/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093882"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
+          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
+        },
+        {
+          "title": "Чем заменить Oracle и Microsoft SQL Server в 2026 году: 4 российских СУБД",
+          "url": "https://tproger.ru/articles/chem-zamenit-oracle-i-microsoft-sql-server-v-2026-godu-4-rossij"
+        },
+        {
+          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
+          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
+        },
+        {
+          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
+          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
+        },
+        {
+          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
+          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261013-1329: Самара 20.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261013-0005",
-  "generated_at": "2026-10-13T00:05:49Z",
+  "id": "digest-20261013-1329",
+  "generated_at": "2026-10-13T13:29:16Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 10.4,
-    "feels_like_c": 9.2,
-    "description": "Ясно",
-    "wind_ms": 2.5
+    "temp_c": 20.3,
+    "feels_like_c": 19.3,
+    "description": "Пасмурно",
+    "wind_ms": 4.8
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Правительственная рабочая группа предложила разрешить использование зарубежных чипов и ИИ-решений на критически важных объектах — Forbes",
-        "url": "https://vc.ru/tech/3189847-razreshenie-na-ispolzovanie-zarubezhnyh-chipov-i-ii-v-rossii?from=rss"
+        "title": "«Ред Софт» и китайская Passion Tech запустили мессенджер «Молния» — он доступен в RuStore за 750 рублей",
+        "url": "https://vc.ru/services/3191715-messendzher-molniya-ot-red-soft-i-passion-tech?from=rss"
       },
       {
-        "title": "Астрология, ИИ и никакого 996: как на развалинах древней цивилизации живёт китайская деревня вайбкодеров и стартаперов",
-        "url": "https://vc.ru/story/3185525-lyanchzhu-kitajskaya-derevnya-startaperov-i-astrologov?from=rss"
+        "title": "«Яндекс» до конца октября 2026 года отменит плату за Yandex Cloud и «Яндекс 360» для всех пользователей",
+        "url": "https://vc.ru/services/3192036-yandeks-otmenyaet-platu-za-yandex-cloud-i-yandex-360?from=rss"
       },
       {
-        "title": "Минцифры разрабатывает новые требования для виртуальных мобильных операторов из-за «занижения» стоимости услуг связи",
-        "url": "https://vc.ru/money/3189599-mincifry-novye-trebovaniya-dlya-virtualnyh-mobilnyh-operatorov?from=rss"
+        "title": "Alibaba представила второе поколение «умных» очков на базе Qwen по цене от $450",
+        "url": "https://vc.ru/tech/3192391-alibaba-novye-umnye-ochki-ii?from=rss"
       },
       {
-        "title": "ЕС ввёл санкции против застройщика «Самолёт» и его гендиректора Анны Акиньшиной — из-за якобы «использования рабочих из КНДР»",
-        "url": "https://vc.ru/legal/3190184-es-vvjel-sankcii-protiv-zastrojshchika-samolet?from=rss"
+        "title": "«АвтоВАЗ» добавил в подписку на машины Lada вторую модель — фургон Lada Largus",
+        "url": "https://vc.ru/transport/3192317-podpiska-na-avtomobili-lada-largus?from=rss"
       },
       {
-        "title": "CMF, суббренд Nothing по выпуску «бюджетных» устройств, представил свои первые колонки",
-        "url": "https://vc.ru/tech/3190594-cmf-nothing-novye-kolonki-s-unikalnym-dizainom?from=rss"
+        "title": "SpaceXAI запустила единую подписку для Grok, Cursor и X по цене от $8 в месяц",
+        "url": "https://vc.ru/services/3191827-spacexai-podpiska-grok-cursor-x?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "CMF представила линейку портативных колонок в дизайне коробки из‑под молока",
-        "url": "https://habr.com/ru/news/1093536/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093536"
+        "title": "Эксперты The Lancet назвали две угрозы, способные привести к вымиранию человечества",
+        "url": "https://habr.com/ru/news/1093876/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093876"
       },
       {
-        "title": "Исследователи представили проект двуногого робота с Android‑смартфоном в качестве вычислительного модуля",
-        "url": "https://habr.com/ru/news/1093530/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093530"
+        "title": "«СёрчИнформ КИБ» и InfoDiode подтвердили совместимость",
+        "url": "https://habr.com/ru/companies/searchinform/news/1093898/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093898"
       },
       {
-        "title": "Проект мессенджера «Молния» от китайской компании Passion и «Ред Софт» вышел в RuStore и оказался платным продуктом",
-        "url": "https://habr.com/ru/news/1093522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093522"
+        "title": "Мировые поставки ПК рухнули на 20% за год",
+        "url": "https://habr.com/ru/companies/selectel/news/1093440/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093440"
       },
       {
-        "title": "Владельцам сайтов недоступны ключевые кабинеты Яндекса: Вебмастер, Метрика, Бизнес и рекламные сервисы",
-        "url": "https://habr.com/ru/news/1093506/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093506"
+        "title": "Basis SDN 1.3: улучшенная модель безопасности и миграция виртуальных машин без разрыва сетевых соединений",
+        "url": "https://habr.com/ru/companies/basis/news/1093888/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093888"
       },
       {
-        "title": "В Горном Алтае пройдёт фестиваль «Просто космос!»: марсоходы, стихи с МКС и телескопы",
-        "url": "https://habr.com/ru/news/1093492/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093492"
+        "title": "Google представила Fitbit Edge — фитнес‑браслет с экраном в стиле Xiaomi Mi Band",
+        "url": "https://habr.com/ru/news/1093882/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093882"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261013-0005: Самара 10.4°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261013-1329: Самара 20.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
