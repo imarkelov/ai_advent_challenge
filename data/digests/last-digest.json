@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261012-1419",
-  "generated_at": "2026-10-12T14:19:57Z",
+  "id": "digest-20261013-0005",
+  "generated_at": "2026-10-13T00:05:49Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 16.5,
-    "feels_like_c": 16.5,
-    "description": "Преимущественно ясно",
-    "wind_ms": 4.2
+    "temp_c": 10.4,
+    "feels_like_c": 9.2,
+    "description": "Ясно",
+    "wind_ms": 2.5
   },
   "news": {
     "vc.ru": [
@@ -15,42 +15,42 @@
         "url": "https://vc.ru/tech/3189847-razreshenie-na-ispolzovanie-zarubezhnyh-chipov-i-ii-v-rossii?from=rss"
       },
       {
-        "title": "Минцифры разрабатывает новые требования для виртуальных мобильных операторов из-за «занижения» стоимости услуг связи",
-        "url": "https://vc.ru/money/3189599-mincifry-novye-trebovaniya-dlya-virtualnyh-mobilnyh-operatorov?from=rss"
-      },
-      {
         "title": "Астрология, ИИ и никакого 996: как на развалинах древней цивилизации живёт китайская деревня вайбкодеров и стартаперов",
         "url": "https://vc.ru/story/3185525-lyanchzhu-kitajskaya-derevnya-startaperov-i-astrologov?from=rss"
       },
       {
-        "title": "Основатель inDrive Арсен Томский рассказал о «десятках тысяч» заявок от новых водителей — после наплыва пользователей и заказов",
-        "url": "https://vc.ru/transport/3190353-arsen-tomskiy-o-roste-zakazov-v-indrive?from=rss"
+        "title": "Минцифры разрабатывает новые требования для виртуальных мобильных операторов из-за «занижения» стоимости услуг связи",
+        "url": "https://vc.ru/money/3189599-mincifry-novye-trebovaniya-dlya-virtualnyh-mobilnyh-operatorov?from=rss"
       },
       {
         "title": "ЕС ввёл санкции против застройщика «Самолёт» и его гендиректора Анны Акиньшиной — из-за якобы «использования рабочих из КНДР»",
         "url": "https://vc.ru/legal/3190184-es-vvjel-sankcii-protiv-zastrojshchika-samolet?from=rss"
+      },
+      {
+        "title": "CMF, суббренд Nothing по выпуску «бюджетных» устройств, представил свои первые колонки",
+        "url": "https://vc.ru/tech/3190594-cmf-nothing-novye-kolonki-s-unikalnym-dizainom?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Sony получила патент на систему, позволяющую зрителям влиять на игровой процесс стримеров",
-        "url": "https://habr.com/ru/news/1093446/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093446"
+        "title": "CMF представила линейку портативных колонок в дизайне коробки из‑под молока",
+        "url": "https://habr.com/ru/news/1093536/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093536"
       },
       {
-        "title": "Как Национальный центр ураганов США сделал ставку на ИИ-прогноз Isaias",
-        "url": "https://habr.com/ru/companies/selectel/news/1093380/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093380"
+        "title": "Исследователи представили проект двуногого робота с Android‑смартфоном в качестве вычислительного модуля",
+        "url": "https://habr.com/ru/news/1093530/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093530"
       },
       {
-        "title": "Super Mario 64 запустили на Microsoft Zune HD 2009 года",
-        "url": "https://habr.com/ru/companies/selectel/news/1093226/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093226"
+        "title": "Проект мессенджера «Молния» от китайской компании Passion и «Ред Софт» вышел в RuStore и оказался платным продуктом",
+        "url": "https://habr.com/ru/news/1093522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093522"
       },
       {
-        "title": "Центр экспертизы по комплексному сервису К2Тех возглавил первый рейтинг комплексных сервис-провайдеров России",
-        "url": "https://habr.com/ru/companies/k2tech/news/1093300/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093300"
+        "title": "Владельцам сайтов недоступны ключевые кабинеты Яндекса: Вебмастер, Метрика, Бизнес и рекламные сервисы",
+        "url": "https://habr.com/ru/news/1093506/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093506"
       },
       {
-        "title": "«Диасофт» открыл бесплатный доступ к платформе Digital Q.MessageBroker",
-        "url": "https://habr.com/ru/companies/diasoft_company/news/1093442/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093442"
+        "title": "В Горном Алтае пройдёт фестиваль «Просто космос!»: марсоходы, стихи с МКС и телескопы",
+        "url": "https://habr.com/ru/news/1093492/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093492"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261012-1419: Самара 16.5°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261013-0005: Самара 10.4°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
