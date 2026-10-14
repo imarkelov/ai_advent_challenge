@@ -5636,5 +5636,85 @@
       ]
     },
     "summary": "Сводка digest-20261014-0323: Самара 9.8°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261014-1106",
+    "generated_at": "2026-10-14T11:06:36Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 22.0,
+      "feels_like_c": 19.2,
+      "description": "Пасмурно",
+      "wind_ms": 13.9
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "OpenAI нашла прослушку в переговорной для руководства — в установке «жучка» обвинили одного из инженеров",
+          "url": "https://vc.ru/legal/3193875-openai-obnaruzhila-proslushku-v-peregovornoy?from=rss"
+        },
+        {
+          "title": "«Сбер» сообщил об атаке беспилотников на дата-центр в Саратовской области",
+          "url": "https://vc.ru/money/3193997-sber-ataka-bespilotnikov-data-tsentr-saratovskaya-oblast?from=rss"
+        },
+        {
+          "title": "Мягкая (и пушистая) сила: магазины «нанимают» котов, чтобы те помогали бизнесу",
+          "url": "https://vc.ru/marketing/3192538-koty-v-magazinakh-pomogayut-biznesu?from=rss"
+        },
+        {
+          "title": "«Яндекс Реклама» восстановила доступ к партнёрскому кабинету РСЯ, Adfox и кабинету для рекламных агентств, доступ к кабинету «Директа» и «Бизнеса» пока ограничен",
+          "url": "https://vc.ru/marketing/3193186-yandeks-reklama-vosstanovila-dostup-k-partnerskim-kabinetam?from=rss"
+        },
+        {
+          "title": "«Яндекс» частично восстановил работу «умного» дома: в соцсетях жаловались на сбои подключения водонагревателей, радионянь, котлов и розеток",
+          "url": "https://vc.ru/services/3192431-yandeks-vosstanovil-rabotu-umnogo-doma?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Релиз KDE Plasma 6.8 в день тридцатилетия проекта",
+          "url": "https://habr.com/ru/news/1094290/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094290"
+        },
+        {
+          "title": "Positive Technologies: российские компании теряют до 1,5 млрд рублей из-за программ-вымогателей",
+          "url": "https://habr.com/ru/companies/pt/news/1094282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094282"
+        },
+        {
+          "title": "Google открыла разработчикам доступ к Gemini 4 Argon через API и инструменты разработки",
+          "url": "https://habr.com/ru/companies/otus/news/1094276/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094276"
+        },
+        {
+          "title": "Банкам попросили дать дополнительное время для заключения договоров о маркировке звонков",
+          "url": "https://habr.com/ru/news/1094272/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094272"
+        },
+        {
+          "title": "Valve прекратила производство VR‑шлема Index",
+          "url": "https://habr.com/ru/news/1094270/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094270"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
+          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
+        },
+        {
+          "title": "Чем заменить Oracle и Microsoft SQL Server в 2026 году: 4 российских СУБД",
+          "url": "https://tproger.ru/articles/chem-zamenit-oracle-i-microsoft-sql-server-v-2026-godu-4-rossij"
+        },
+        {
+          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
+          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
+        },
+        {
+          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
+          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
+        },
+        {
+          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
+          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261014-1106: Самара 22.0°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
