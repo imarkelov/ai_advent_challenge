@@ -1,59 +1,63 @@
 {
-  "id": "digest-20261014-1106",
-  "generated_at": "2026-10-14T11:06:36Z",
+  "id": "digest-20261014-1626",
+  "generated_at": "2026-10-14T16:26:51Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 22.0,
-    "feels_like_c": 19.2,
+    "temp_c": 16.2,
+    "feels_like_c": 14.9,
     "description": "Пасмурно",
-    "wind_ms": 13.9
+    "wind_ms": 6.4
   },
   "news": {
     "vc.ru": [
-      {
-        "title": "OpenAI нашла прослушку в переговорной для руководства — в установке «жучка» обвинили одного из инженеров",
-        "url": "https://vc.ru/legal/3193875-openai-obnaruzhila-proslushku-v-peregovornoy?from=rss"
-      },
       {
         "title": "«Сбер» сообщил об атаке беспилотников на дата-центр в Саратовской области",
         "url": "https://vc.ru/money/3193997-sber-ataka-bespilotnikov-data-tsentr-saratovskaya-oblast?from=rss"
       },
       {
+        "title": "OpenAI нашла прослушку в переговорной для руководства — в установке «жучка» обвинили одного из инженеров",
+        "url": "https://vc.ru/legal/3193875-openai-obnaruzhila-proslushku-v-peregovornoy?from=rss"
+      },
+      {
+        "title": "Хакер получил доступ к данным 8,8 млн человек из государственного реестра Дании — он утверждает, что использовал пароль «123456»",
+        "url": "https://vc.ru/services/3194953-vzlom-gosudarstvennogo-reestra-danii?from=rss"
+      },
+      {
+        "title": "Минцифры попросило операторов связи до начала ноября 2026 года не блокировать звонки от банков, которые не заключили с ними соглашения о маркировке вызовов",
+        "url": "https://vc.ru/services/3194403-mintsifry-prizvalo-operatorov-ne-blokirovat-bankovskie-zvonki?from=rss"
+      },
+      {
         "title": "Мягкая (и пушистая) сила: магазины «нанимают» котов, чтобы те помогали бизнесу",
         "url": "https://vc.ru/marketing/3192538-koty-v-magazinakh-pomogayut-biznesu?from=rss"
-      },
-      {
-        "title": "«Яндекс Реклама» восстановила доступ к партнёрскому кабинету РСЯ, Adfox и кабинету для рекламных агентств, доступ к кабинету «Директа» и «Бизнеса» пока ограничен",
-        "url": "https://vc.ru/marketing/3193186-yandeks-reklama-vosstanovila-dostup-k-partnerskim-kabinetam?from=rss"
-      },
-      {
-        "title": "«Яндекс» частично восстановил работу «умного» дома: в соцсетях жаловались на сбои подключения водонагревателей, радионянь, котлов и розеток",
-        "url": "https://vc.ru/services/3192431-yandeks-vosstanovil-rabotu-umnogo-doma?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Релиз KDE Plasma 6.8 в день тридцатилетия проекта",
-        "url": "https://habr.com/ru/news/1094290/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094290"
+        "title": "166 страниц доказательства и месяц споров: как OpenAI запутала математиков решением Навье–Стокса",
+        "url": "https://habr.com/ru/news/1094452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094452"
       },
       {
-        "title": "Positive Technologies: российские компании теряют до 1,5 млрд рублей из-за программ-вымогателей",
-        "url": "https://habr.com/ru/companies/pt/news/1094282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094282"
+        "title": "«Яндекс»: большая часть функций умных устройств и чата с «Алисой AI» снова доступна",
+        "url": "https://habr.com/ru/news/1094460/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094460"
       },
       {
-        "title": "Google открыла разработчикам доступ к Gemini 4 Argon через API и инструменты разработки",
-        "url": "https://habr.com/ru/companies/otus/news/1094276/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094276"
+        "title": "Минцифры: «Яндекс» после атак на ЦОДы оперативно перевёл ключевые системы на заранее подготовленные резервные площадки",
+        "url": "https://habr.com/ru/news/1094422/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094422"
       },
       {
-        "title": "Банкам попросили дать дополнительное время для заключения договоров о маркировке звонков",
-        "url": "https://habr.com/ru/news/1094272/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094272"
+        "title": "Дайджест: 8 свежих CVE, которые уже активно используют злоумышленники",
+        "url": "https://habr.com/ru/companies/garda/news/1094384/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094384"
       },
       {
-        "title": "Valve прекратила производство VR‑шлема Index",
-        "url": "https://habr.com/ru/news/1094270/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094270"
+        "title": "Установлен новый мировой рекорд по дальности поездки на электромотоцикле — 436,5 км вместо предыдущего в 310,7 км",
+        "url": "https://habr.com/ru/news/1094410/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094410"
       }
     ],
     "tproger": [
+      {
+        "title": "Если вы ищете работу, но не можете найти",
+        "url": "https://tproger.ru/articles/esli-vy-ishhete-rabotu-no-ne-mozhete-najti"
+      },
       {
         "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
         "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
@@ -69,12 +73,8 @@
       {
         "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
         "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
-      },
-      {
-        "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
-        "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
       }
     ]
   },
-  "summary": "Сводка digest-20261014-1106: Самара 22.0°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261014-1626: Самара 16.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

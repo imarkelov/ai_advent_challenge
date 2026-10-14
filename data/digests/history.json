@@ -5716,5 +5716,85 @@
       ]
     },
     "summary": "Сводка digest-20261014-1106: Самара 22.0°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261014-1626",
+    "generated_at": "2026-10-14T16:26:51Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 16.2,
+      "feels_like_c": 14.9,
+      "description": "Пасмурно",
+      "wind_ms": 6.4
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Сбер» сообщил об атаке беспилотников на дата-центр в Саратовской области",
+          "url": "https://vc.ru/money/3193997-sber-ataka-bespilotnikov-data-tsentr-saratovskaya-oblast?from=rss"
+        },
+        {
+          "title": "OpenAI нашла прослушку в переговорной для руководства — в установке «жучка» обвинили одного из инженеров",
+          "url": "https://vc.ru/legal/3193875-openai-obnaruzhila-proslushku-v-peregovornoy?from=rss"
+        },
+        {
+          "title": "Хакер получил доступ к данным 8,8 млн человек из государственного реестра Дании — он утверждает, что использовал пароль «123456»",
+          "url": "https://vc.ru/services/3194953-vzlom-gosudarstvennogo-reestra-danii?from=rss"
+        },
+        {
+          "title": "Минцифры попросило операторов связи до начала ноября 2026 года не блокировать звонки от банков, которые не заключили с ними соглашения о маркировке вызовов",
+          "url": "https://vc.ru/services/3194403-mintsifry-prizvalo-operatorov-ne-blokirovat-bankovskie-zvonki?from=rss"
+        },
+        {
+          "title": "Мягкая (и пушистая) сила: магазины «нанимают» котов, чтобы те помогали бизнесу",
+          "url": "https://vc.ru/marketing/3192538-koty-v-magazinakh-pomogayut-biznesu?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "166 страниц доказательства и месяц споров: как OpenAI запутала математиков решением Навье–Стокса",
+          "url": "https://habr.com/ru/news/1094452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094452"
+        },
+        {
+          "title": "«Яндекс»: большая часть функций умных устройств и чата с «Алисой AI» снова доступна",
+          "url": "https://habr.com/ru/news/1094460/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094460"
+        },
+        {
+          "title": "Минцифры: «Яндекс» после атак на ЦОДы оперативно перевёл ключевые системы на заранее подготовленные резервные площадки",
+          "url": "https://habr.com/ru/news/1094422/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094422"
+        },
+        {
+          "title": "Дайджест: 8 свежих CVE, которые уже активно используют злоумышленники",
+          "url": "https://habr.com/ru/companies/garda/news/1094384/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094384"
+        },
+        {
+          "title": "Установлен новый мировой рекорд по дальности поездки на электромотоцикле — 436,5 км вместо предыдущего в 310,7 км",
+          "url": "https://habr.com/ru/news/1094410/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094410"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Если вы ищете работу, но не можете найти",
+          "url": "https://tproger.ru/articles/esli-vy-ishhete-rabotu-no-ne-mozhete-najti"
+        },
+        {
+          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
+          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
+        },
+        {
+          "title": "Чем заменить Oracle и Microsoft SQL Server в 2026 году: 4 российских СУБД",
+          "url": "https://tproger.ru/articles/chem-zamenit-oracle-i-microsoft-sql-server-v-2026-godu-4-rossij"
+        },
+        {
+          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
+          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
+        },
+        {
+          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
+          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261014-1626: Самара 16.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
