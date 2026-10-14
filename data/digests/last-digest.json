@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261013-2215",
-  "generated_at": "2026-10-13T22:15:31Z",
+  "id": "digest-20261014-0323",
+  "generated_at": "2026-10-14T03:23:45Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 11.3,
-    "feels_like_c": 9.8,
-    "description": "Преимущественно ясно",
-    "wind_ms": 4.7
+    "temp_c": 9.8,
+    "feels_like_c": 8.3,
+    "description": "Переменная облачность",
+    "wind_ms": 5.4
   },
   "news": {
     "vc.ru": [
@@ -15,12 +15,12 @@
         "url": "https://vc.ru/marketing/3193186-yandeks-reklama-vosstanovila-dostup-k-partnerskim-kabinetam?from=rss"
       },
       {
-        "title": "«Ред Софт» и китайская Passion Tech запустили мессенджер «Молния» — он доступен в RuStore за 750 рублей",
-        "url": "https://vc.ru/services/3191715-messendzher-molniya-ot-red-soft-i-passion-tech?from=rss"
-      },
-      {
         "title": "Мягкая (и пушистая) сила: магазины «нанимают» котов, чтобы те помогали бизнесу",
         "url": "https://vc.ru/marketing/3192538-koty-v-magazinakh-pomogayut-biznesu?from=rss"
+      },
+      {
+        "title": "«Ред Софт» и китайская Passion Tech запустили мессенджер «Молния» — он доступен в RuStore за 750 рублей",
+        "url": "https://vc.ru/services/3191715-messendzher-molniya-ot-red-soft-i-passion-tech?from=rss"
       },
       {
         "title": "«Яндекс» частично восстановил работу «умного» дома: в соцсетях жаловались на сбои подключения водонагревателей, радионянь, котлов и розеток",
@@ -33,6 +33,14 @@
     ],
     "habr": [
       {
+        "title": "Выпуск открытого модульного шрифтового движка FreeType 2.15",
+        "url": "https://habr.com/ru/news/1093706/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093706"
+      },
+      {
+        "title": "Релиз Mozilla Thunderbird 158.0",
+        "url": "https://habr.com/ru/news/1093520/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093520"
+      },
+      {
         "title": "Gemini 4 Argon появилась в BotHub: для каких задач стоит выбирать модель",
         "url": "https://habr.com/ru/companies/bothub/news/1094058/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094058"
       },
@@ -43,14 +51,6 @@
       {
         "title": "Valve опубликовала CAD‑модели Steam Frame для создания аксессуаров",
         "url": "https://habr.com/ru/news/1094028/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094028"
-      },
-      {
-        "title": "Apple и LG представили линейку устройств для умного дома: камеры, домофон, замок и датчики",
-        "url": "https://habr.com/ru/news/1093986/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093986"
-      },
-      {
-        "title": "CodeScoring и ИСП РАН с соавторами завершают работу над стандартом композиционного анализа",
-        "url": "https://habr.com/ru/companies/codescoring/news/1093974/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093974"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261013-2215: Самара 11.3°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261014-0323: Самара 9.8°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

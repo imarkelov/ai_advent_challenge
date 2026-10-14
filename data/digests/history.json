@@ -5556,5 +5556,85 @@
       ]
     },
     "summary": "Сводка digest-20261013-2215: Самара 11.3°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261014-0323",
+    "generated_at": "2026-10-14T03:23:45Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 9.8,
+      "feels_like_c": 8.3,
+      "description": "Переменная облачность",
+      "wind_ms": 5.4
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Яндекс Реклама» восстановила доступ к партнёрскому кабинету РСЯ, Adfox и кабинету для рекламных агентств, доступ к кабинету «Директа» и «Бизнеса» пока ограничен",
+          "url": "https://vc.ru/marketing/3193186-yandeks-reklama-vosstanovila-dostup-k-partnerskim-kabinetam?from=rss"
+        },
+        {
+          "title": "Мягкая (и пушистая) сила: магазины «нанимают» котов, чтобы те помогали бизнесу",
+          "url": "https://vc.ru/marketing/3192538-koty-v-magazinakh-pomogayut-biznesu?from=rss"
+        },
+        {
+          "title": "«Ред Софт» и китайская Passion Tech запустили мессенджер «Молния» — он доступен в RuStore за 750 рублей",
+          "url": "https://vc.ru/services/3191715-messendzher-molniya-ot-red-soft-i-passion-tech?from=rss"
+        },
+        {
+          "title": "«Яндекс» частично восстановил работу «умного» дома: в соцсетях жаловались на сбои подключения водонагревателей, радионянь, котлов и розеток",
+          "url": "https://vc.ru/services/3192431-yandeks-vosstanovil-rabotu-umnogo-doma?from=rss"
+        },
+        {
+          "title": "По стопам изобретателя банки Pringles: бренд разыграет «пожизненный» запас чипсов среди тех, кто согласится на похороны в «культовой банке»",
+          "url": "https://vc.ru/marketing/3192932-priz-ot-pringles-pozhiznennyy-zapas-chipsov?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Выпуск открытого модульного шрифтового движка FreeType 2.15",
+          "url": "https://habr.com/ru/news/1093706/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093706"
+        },
+        {
+          "title": "Релиз Mozilla Thunderbird 158.0",
+          "url": "https://habr.com/ru/news/1093520/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093520"
+        },
+        {
+          "title": "Gemini 4 Argon появилась в BotHub: для каких задач стоит выбирать модель",
+          "url": "https://habr.com/ru/companies/bothub/news/1094058/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094058"
+        },
+        {
+          "title": "Gemini 4 Argon вышла из закрытого теста: пишет в 15 раз больше, чем Gemini 3",
+          "url": "https://habr.com/ru/companies/gptunnel/news/1094038/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094038"
+        },
+        {
+          "title": "Valve опубликовала CAD‑модели Steam Frame для создания аксессуаров",
+          "url": "https://habr.com/ru/news/1094028/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094028"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
+          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
+        },
+        {
+          "title": "Чем заменить Oracle и Microsoft SQL Server в 2026 году: 4 российских СУБД",
+          "url": "https://tproger.ru/articles/chem-zamenit-oracle-i-microsoft-sql-server-v-2026-godu-4-rossij"
+        },
+        {
+          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
+          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
+        },
+        {
+          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
+          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
+        },
+        {
+          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
+          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261014-0323: Самара 9.8°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
