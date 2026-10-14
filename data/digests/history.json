@@ -5796,5 +5796,85 @@
       ]
     },
     "summary": "Сводка digest-20261014-1626: Самара 16.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261014-2115",
+    "generated_at": "2026-10-14T21:15:30Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 14.1,
+      "feels_like_c": 12.9,
+      "description": "Пасмурно",
+      "wind_ms": 5.1
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Сбер» сообщил об атаке беспилотников на дата-центр в Саратовской области",
+          "url": "https://vc.ru/money/3193997-sber-ataka-bespilotnikov-data-tsentr-saratovskaya-oblast?from=rss"
+        },
+        {
+          "title": "OpenAI нашла прослушку в переговорной для руководства — в установке «жучка» обвинили одного из инженеров",
+          "url": "https://vc.ru/legal/3193875-openai-obnaruzhila-proslushku-v-peregovornoy?from=rss"
+        },
+        {
+          "title": "Хакер получил доступ к данным 8,8 млн человек из государственного реестра Дании — он утверждает, что использовал пароль «123456»",
+          "url": "https://vc.ru/services/3194953-vzlom-gosudarstvennogo-reestra-danii?from=rss"
+        },
+        {
+          "title": "Минцифры попросило операторов связи до начала ноября 2026 года не блокировать звонки от банков, которые не заключили с ними соглашения о маркировке вызовов",
+          "url": "https://vc.ru/services/3194403-mintsifry-prizvalo-operatorov-ne-blokirovat-bankovskie-zvonki?from=rss"
+        },
+        {
+          "title": "Суд отправил под домашний арест фигуранта дела о кибератаке на «Додо Пиццу»",
+          "url": "https://vc.ru/legal/3195175-domashnij-arest-figurant-dela-o-kiberatake-na-dodo-piccu?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Сделал CEO AI: помощника для обсуждения задач и работы с ИИ-агентами",
+          "url": "https://habr.com/ru/news/1094526/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094526"
+        },
+        {
+          "title": "Игры для PS5 теперь можно запускать на Xbox: разработчик портировал эмулятор KytyPS5",
+          "url": "https://habr.com/ru/news/1094522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094522"
+        },
+        {
+          "title": "RoboParty опубликовала исходники открытого человекоподобного робота RP1",
+          "url": "https://habr.com/ru/news/1094508/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094508"
+        },
+        {
+          "title": "На взломанной PlayStation 5 запустили Qwen с 27 млрд параметров и 2-битным квантованием",
+          "url": "https://habr.com/ru/news/1094494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094494"
+        },
+        {
+          "title": "Онлайн сервисы стали подвергать цензуре песни",
+          "url": "https://habr.com/ru/news/1094490/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094490"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
+          "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
+        },
+        {
+          "title": "Если вы ищете работу, но не можете найти",
+          "url": "https://tproger.ru/articles/esli-vy-ishhete-rabotu-no-ne-mozhete-najti"
+        },
+        {
+          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
+          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
+        },
+        {
+          "title": "Чем заменить Oracle и Microsoft SQL Server в 2026 году: 4 российских СУБД",
+          "url": "https://tproger.ru/articles/chem-zamenit-oracle-i-microsoft-sql-server-v-2026-godu-4-rossij"
+        },
+        {
+          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
+          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261014-2115: Самара 14.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

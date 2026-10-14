@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261014-1626",
-  "generated_at": "2026-10-14T16:26:51Z",
+  "id": "digest-20261014-2115",
+  "generated_at": "2026-10-14T21:15:30Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 16.2,
-    "feels_like_c": 14.9,
+    "temp_c": 14.1,
+    "feels_like_c": 12.9,
     "description": "Пасмурно",
-    "wind_ms": 6.4
+    "wind_ms": 5.1
   },
   "news": {
     "vc.ru": [
@@ -27,33 +27,37 @@
         "url": "https://vc.ru/services/3194403-mintsifry-prizvalo-operatorov-ne-blokirovat-bankovskie-zvonki?from=rss"
       },
       {
-        "title": "Мягкая (и пушистая) сила: магазины «нанимают» котов, чтобы те помогали бизнесу",
-        "url": "https://vc.ru/marketing/3192538-koty-v-magazinakh-pomogayut-biznesu?from=rss"
+        "title": "Суд отправил под домашний арест фигуранта дела о кибератаке на «Додо Пиццу»",
+        "url": "https://vc.ru/legal/3195175-domashnij-arest-figurant-dela-o-kiberatake-na-dodo-piccu?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "166 страниц доказательства и месяц споров: как OpenAI запутала математиков решением Навье–Стокса",
-        "url": "https://habr.com/ru/news/1094452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094452"
+        "title": "Сделал CEO AI: помощника для обсуждения задач и работы с ИИ-агентами",
+        "url": "https://habr.com/ru/news/1094526/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094526"
       },
       {
-        "title": "«Яндекс»: большая часть функций умных устройств и чата с «Алисой AI» снова доступна",
-        "url": "https://habr.com/ru/news/1094460/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094460"
+        "title": "Игры для PS5 теперь можно запускать на Xbox: разработчик портировал эмулятор KytyPS5",
+        "url": "https://habr.com/ru/news/1094522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094522"
       },
       {
-        "title": "Минцифры: «Яндекс» после атак на ЦОДы оперативно перевёл ключевые системы на заранее подготовленные резервные площадки",
-        "url": "https://habr.com/ru/news/1094422/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094422"
+        "title": "RoboParty опубликовала исходники открытого человекоподобного робота RP1",
+        "url": "https://habr.com/ru/news/1094508/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094508"
       },
       {
-        "title": "Дайджест: 8 свежих CVE, которые уже активно используют злоумышленники",
-        "url": "https://habr.com/ru/companies/garda/news/1094384/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094384"
+        "title": "На взломанной PlayStation 5 запустили Qwen с 27 млрд параметров и 2-битным квантованием",
+        "url": "https://habr.com/ru/news/1094494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094494"
       },
       {
-        "title": "Установлен новый мировой рекорд по дальности поездки на электромотоцикле — 436,5 км вместо предыдущего в 310,7 км",
-        "url": "https://habr.com/ru/news/1094410/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094410"
+        "title": "Онлайн сервисы стали подвергать цензуре песни",
+        "url": "https://habr.com/ru/news/1094490/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094490"
       }
     ],
     "tproger": [
+      {
+        "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
+        "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
+      },
       {
         "title": "Если вы ищете работу, но не можете найти",
         "url": "https://tproger.ru/articles/esli-vy-ishhete-rabotu-no-ne-mozhete-najti"
@@ -69,12 +73,8 @@
       {
         "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
         "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
-      },
-      {
-        "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
-        "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
       }
     ]
   },
-  "summary": "Сводка digest-20261014-1626: Самара 16.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261014-2115: Самара 14.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
