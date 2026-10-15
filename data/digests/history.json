@@ -6116,5 +6116,85 @@
       ]
     },
     "summary": "Сводка digest-20261015-1614: Самара 15.0°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261015-2053",
+    "generated_at": "2026-10-15T20:53:54Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 12.7,
+      "feels_like_c": 11.2,
+      "description": "Переменная облачность",
+      "wind_ms": 5.9
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Американский сервис для совместной работы Miro с основателями из Перми заблокировал доступ по IP для россиян",
+          "url": "https://vc.ru/services/3197185-miro-zablokiroval-dostup-dlya-rossiyan?from=rss"
+        },
+        {
+          "title": "«Яндекс» восстановил доступ к «Директу» — можно пополнить баланс, запустить созданные ранее кампании или остановить активные",
+          "url": "https://vc.ru/marketing/3197091-yandeks-vosstanovil-dostup-k-direktu?from=rss"
+        },
+        {
+          "title": "Ledger приостановил продажи в семи странах и запретил авторизованным продавцам размещать товары на витринах после атаки — хакеры устанавливали в аппаратные криптокошельки жучки для кражи seed-фраз",
+          "url": "https://vc.ru/crypto/3196605-ledger-priostanovil-prodazhi-v-semi-stranakh-posle-ataki-hakerov?from=rss"
+        },
+        {
+          "title": "ЦБ: проводить p2p-сделки с криптовалютой можно будет до 1 июля 2027 года",
+          "url": "https://vc.ru/crypto/3195921-cb-razreshayet-p2p-sdelki-s-kriptovalyutoy?from=rss"
+        },
+        {
+          "title": "Федеральный суд США обязал возобновить программу розыгрыша грин-карт — о её приостановке рассказали в 2025 году",
+          "url": "https://vc.ru/migration/3196287-federalnyj-sud-ssha-vosstanovil-programmu-loterei-grin-kart?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Разработчик напечатал защиту для носа своей собаки — теперь её носит более 500 питомцев",
+          "url": "https://habr.com/ru/news/1094990/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094990"
+        },
+        {
+          "title": "Учебный проект MIT превратился в одобренное устройство для уменьшения тремора",
+          "url": "https://habr.com/ru/news/1094988/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094988"
+        },
+        {
+          "title": "Браузерный игровой движок LittleJS получил поддержку 3D‑рендера и редактор уровней",
+          "url": "https://habr.com/ru/news/1094972/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094972"
+        },
+        {
+          "title": "Meta* выпустила Muse Spark Open: запуск на 2 Mac Studio и не только",
+          "url": "https://habr.com/ru/companies/bothub/news/1094968/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094968"
+        },
+        {
+          "title": "Miro блокирует доступ из России и Беларуси — и, кажется, всем всё равно",
+          "url": "https://habr.com/ru/news/1094948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094948"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
+          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
+        },
+        {
+          "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
+          "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
+        },
+        {
+          "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
+          "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
+        },
+        {
+          "title": "Если вы ищете работу, но не можете найти",
+          "url": "https://tproger.ru/articles/esli-vy-ishhete-rabotu-no-ne-mozhete-najti"
+        },
+        {
+          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
+          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261015-2053: Самара 12.7°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
