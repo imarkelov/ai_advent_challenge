@@ -1,59 +1,67 @@
 {
-  "id": "digest-20261015-0302",
-  "generated_at": "2026-10-15T03:02:00Z",
+  "id": "digest-20261015-1048",
+  "generated_at": "2026-10-15T10:48:32Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 12.3,
-    "feels_like_c": 10.9,
-    "description": "Пасмурно",
-    "wind_ms": 6.6
+    "temp_c": 21.2,
+    "feels_like_c": 18.5,
+    "description": "Преимущественно ясно",
+    "wind_ms": 11.9
   },
   "news": {
     "vc.ru": [
       {
-        "title": "«Сбер» сообщил об атаке беспилотников на дата-центр в Саратовской области",
-        "url": "https://vc.ru/money/3193997-sber-ataka-bespilotnikov-data-tsentr-saratovskaya-oblast?from=rss"
+        "title": "ЦБ: проводить p2p-сделки с криптовалютой можно будет до 1 июля 2027 года",
+        "url": "https://vc.ru/crypto/3195921-cb-razreshayet-p2p-sdelki-s-kriptovalyutoy?from=rss"
+      },
+      {
+        "title": "Федеральный суд США обязал возобновить программу розыгрыша грин-карт — о её приостановке рассказали в 2025 году",
+        "url": "https://vc.ru/migration/3196287-federalnyj-sud-ssha-vosstanovil-programmu-loterei-grin-kart?from=rss"
+      },
+      {
+        "title": "«Т-Банк» отменил комиссии за переводы в Таиланд по номеру счёта через SWIFT",
+        "url": "https://vc.ru/money/3196097-t-bank-otmenil-komissii-za-perevody-v-tailand?from=rss"
+      },
+      {
+        "title": "Россияне начали получать звонки от банков с маркировкой сторонних компаний — до этого операторы обещали блокировать вызовы банков, которые не заключили договоры на маркировку",
+        "url": "https://vc.ru/services/3195826-zvonki-ot-bankov-s-markirovkoy-storonnikh-kompaniy?from=rss"
       },
       {
         "title": "Хакер получил доступ к данным 8,8 млн человек из государственного реестра Дании — он утверждает, что использовал пароль «123456»",
         "url": "https://vc.ru/services/3194953-vzlom-gosudarstvennogo-reestra-danii?from=rss"
-      },
-      {
-        "title": "OpenAI нашла прослушку в переговорной для руководства — в установке «жучка» обвинили одного из инженеров",
-        "url": "https://vc.ru/legal/3193875-openai-obnaruzhila-proslushku-v-peregovornoy?from=rss"
-      },
-      {
-        "title": "Минцифры попросило операторов связи до начала ноября 2026 года не блокировать звонки от банков, которые не заключили с ними соглашения о маркировке вызовов",
-        "url": "https://vc.ru/services/3194403-mintsifry-prizvalo-operatorov-ne-blokirovat-bankovskie-zvonki?from=rss"
-      },
-      {
-        "title": "Суд отправил под домашний арест фигуранта дела о кибератаке на «Додо Пиццу»",
-        "url": "https://vc.ru/legal/3195175-domashnij-arest-figurant-dela-o-kiberatake-na-dodo-piccu?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Представлен открытый проект NetWatch для диагностики сетевой активности",
-        "url": "https://habr.com/ru/news/1094358/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094358"
+        "title": "Недавние обновления Windows могут вызвать сбои в работе службы «Удалённый рабочий стол»",
+        "url": "https://habr.com/ru/news/1094708/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094708"
       },
       {
-        "title": "Выпуск BATorrent 4.9 — BitTorrent-клиента, созданного на C++, Qt 6 и libtorrent-rasterbar",
-        "url": "https://habr.com/ru/news/1094242/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094242"
+        "title": "В России запретят P2P‑сделки с криптовалютой c июля 2027 года",
+        "url": "https://habr.com/ru/news/1094724/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094724"
       },
       {
-        "title": "Агенты Claude Code превратили список научных статей в настоящую лабораторию, которую можно запустить прямо в браузере",
-        "url": "https://habr.com/ru/news/1094538/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094538"
+        "title": "Microsoft представила Xbox Nano Controller",
+        "url": "https://habr.com/ru/news/1094710/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094710"
       },
       {
-        "title": "Сделал CEO AI: помощника для обсуждения задач и работы с ИИ-агентами",
-        "url": "https://habr.com/ru/news/1094526/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094526"
+        "title": "В Москве протестируют новую дорожную разметку в виде цветных стрелок",
+        "url": "https://habr.com/ru/news/1094706/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094706"
       },
       {
-        "title": "Игры для PS5 теперь можно запускать на Xbox: разработчик портировал эмулятор KytyPS5",
-        "url": "https://habr.com/ru/news/1094522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094522"
+        "title": "Google без уведомления привязывает номер телефона ко всем аккаунтам",
+        "url": "https://habr.com/ru/news/1094694/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094694"
       }
     ],
     "tproger": [
+      {
+        "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
+        "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
+      },
+      {
+        "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
+        "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
+      },
       {
         "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
         "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
@@ -65,16 +73,8 @@
       {
         "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
         "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
-      },
-      {
-        "title": "Чем заменить Oracle и Microsoft SQL Server в 2026 году: 4 российских СУБД",
-        "url": "https://tproger.ru/articles/chem-zamenit-oracle-i-microsoft-sql-server-v-2026-godu-4-rossij"
-      },
-      {
-        "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
-        "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
       }
     ]
   },
-  "summary": "Сводка digest-20261015-0302: Самара 12.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261015-1048: Самара 21.2°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

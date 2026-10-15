@@ -5956,5 +5956,85 @@
       ]
     },
     "summary": "Сводка digest-20261015-0302: Самара 12.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261015-1048",
+    "generated_at": "2026-10-15T10:48:32Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 21.2,
+      "feels_like_c": 18.5,
+      "description": "Преимущественно ясно",
+      "wind_ms": 11.9
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "ЦБ: проводить p2p-сделки с криптовалютой можно будет до 1 июля 2027 года",
+          "url": "https://vc.ru/crypto/3195921-cb-razreshayet-p2p-sdelki-s-kriptovalyutoy?from=rss"
+        },
+        {
+          "title": "Федеральный суд США обязал возобновить программу розыгрыша грин-карт — о её приостановке рассказали в 2025 году",
+          "url": "https://vc.ru/migration/3196287-federalnyj-sud-ssha-vosstanovil-programmu-loterei-grin-kart?from=rss"
+        },
+        {
+          "title": "«Т-Банк» отменил комиссии за переводы в Таиланд по номеру счёта через SWIFT",
+          "url": "https://vc.ru/money/3196097-t-bank-otmenil-komissii-za-perevody-v-tailand?from=rss"
+        },
+        {
+          "title": "Россияне начали получать звонки от банков с маркировкой сторонних компаний — до этого операторы обещали блокировать вызовы банков, которые не заключили договоры на маркировку",
+          "url": "https://vc.ru/services/3195826-zvonki-ot-bankov-s-markirovkoy-storonnikh-kompaniy?from=rss"
+        },
+        {
+          "title": "Хакер получил доступ к данным 8,8 млн человек из государственного реестра Дании — он утверждает, что использовал пароль «123456»",
+          "url": "https://vc.ru/services/3194953-vzlom-gosudarstvennogo-reestra-danii?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Недавние обновления Windows могут вызвать сбои в работе службы «Удалённый рабочий стол»",
+          "url": "https://habr.com/ru/news/1094708/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094708"
+        },
+        {
+          "title": "В России запретят P2P‑сделки с криптовалютой c июля 2027 года",
+          "url": "https://habr.com/ru/news/1094724/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094724"
+        },
+        {
+          "title": "Microsoft представила Xbox Nano Controller",
+          "url": "https://habr.com/ru/news/1094710/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094710"
+        },
+        {
+          "title": "В Москве протестируют новую дорожную разметку в виде цветных стрелок",
+          "url": "https://habr.com/ru/news/1094706/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094706"
+        },
+        {
+          "title": "Google без уведомления привязывает номер телефона ко всем аккаунтам",
+          "url": "https://habr.com/ru/news/1094694/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094694"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
+          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
+        },
+        {
+          "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
+          "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
+        },
+        {
+          "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
+          "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
+        },
+        {
+          "title": "Если вы ищете работу, но не можете найти",
+          "url": "https://tproger.ru/articles/esli-vy-ishhete-rabotu-no-ne-mozhete-najti"
+        },
+        {
+          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
+          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261015-1048: Самара 21.2°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
