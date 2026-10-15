@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261014-2115",
-  "generated_at": "2026-10-14T21:15:30Z",
+  "id": "digest-20261015-0302",
+  "generated_at": "2026-10-15T03:02:00Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 14.1,
-    "feels_like_c": 12.9,
+    "temp_c": 12.3,
+    "feels_like_c": 10.9,
     "description": "Пасмурно",
-    "wind_ms": 5.1
+    "wind_ms": 6.6
   },
   "news": {
     "vc.ru": [
@@ -15,12 +15,12 @@
         "url": "https://vc.ru/money/3193997-sber-ataka-bespilotnikov-data-tsentr-saratovskaya-oblast?from=rss"
       },
       {
-        "title": "OpenAI нашла прослушку в переговорной для руководства — в установке «жучка» обвинили одного из инженеров",
-        "url": "https://vc.ru/legal/3193875-openai-obnaruzhila-proslushku-v-peregovornoy?from=rss"
-      },
-      {
         "title": "Хакер получил доступ к данным 8,8 млн человек из государственного реестра Дании — он утверждает, что использовал пароль «123456»",
         "url": "https://vc.ru/services/3194953-vzlom-gosudarstvennogo-reestra-danii?from=rss"
+      },
+      {
+        "title": "OpenAI нашла прослушку в переговорной для руководства — в установке «жучка» обвинили одного из инженеров",
+        "url": "https://vc.ru/legal/3193875-openai-obnaruzhila-proslushku-v-peregovornoy?from=rss"
       },
       {
         "title": "Минцифры попросило операторов связи до начала ноября 2026 года не блокировать звонки от банков, которые не заключили с ними соглашения о маркировке вызовов",
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
+        "title": "Представлен открытый проект NetWatch для диагностики сетевой активности",
+        "url": "https://habr.com/ru/news/1094358/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094358"
+      },
+      {
+        "title": "Выпуск BATorrent 4.9 — BitTorrent-клиента, созданного на C++, Qt 6 и libtorrent-rasterbar",
+        "url": "https://habr.com/ru/news/1094242/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094242"
+      },
+      {
+        "title": "Агенты Claude Code превратили список научных статей в настоящую лабораторию, которую можно запустить прямо в браузере",
+        "url": "https://habr.com/ru/news/1094538/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094538"
+      },
+      {
         "title": "Сделал CEO AI: помощника для обсуждения задач и работы с ИИ-агентами",
         "url": "https://habr.com/ru/news/1094526/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094526"
       },
       {
         "title": "Игры для PS5 теперь можно запускать на Xbox: разработчик портировал эмулятор KytyPS5",
         "url": "https://habr.com/ru/news/1094522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094522"
-      },
-      {
-        "title": "RoboParty опубликовала исходники открытого человекоподобного робота RP1",
-        "url": "https://habr.com/ru/news/1094508/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094508"
-      },
-      {
-        "title": "На взломанной PlayStation 5 запустили Qwen с 27 млрд параметров и 2-битным квантованием",
-        "url": "https://habr.com/ru/news/1094494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094494"
-      },
-      {
-        "title": "Онлайн сервисы стали подвергать цензуре песни",
-        "url": "https://habr.com/ru/news/1094490/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094490"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261014-2115: Самара 14.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261015-0302: Самара 12.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
