@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261015-1048",
-  "generated_at": "2026-10-15T10:48:32Z",
+  "id": "digest-20261015-1614",
+  "generated_at": "2026-10-15T16:14:47Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 21.2,
-    "feels_like_c": 18.5,
-    "description": "Преимущественно ясно",
-    "wind_ms": 11.9
+    "temp_c": 15.0,
+    "feels_like_c": 13.4,
+    "description": "Переменная облачность",
+    "wind_ms": 5.6
   },
   "news": {
     "vc.ru": [
@@ -23,34 +23,34 @@
         "url": "https://vc.ru/money/3196097-t-bank-otmenil-komissii-za-perevody-v-tailand?from=rss"
       },
       {
-        "title": "Россияне начали получать звонки от банков с маркировкой сторонних компаний — до этого операторы обещали блокировать вызовы банков, которые не заключили договоры на маркировку",
-        "url": "https://vc.ru/services/3195826-zvonki-ot-bankov-s-markirovkoy-storonnikh-kompaniy?from=rss"
+        "title": "«Яндекс» восстановил доступ к «Директу» — можно пополнить баланс, запустить созданные ранее кампании или остановить активные",
+        "url": "https://vc.ru/marketing/3197091-yandeks-vosstanovil-dostup-k-direktu?from=rss"
       },
       {
-        "title": "Хакер получил доступ к данным 8,8 млн человек из государственного реестра Дании — он утверждает, что использовал пароль «123456»",
-        "url": "https://vc.ru/services/3194953-vzlom-gosudarstvennogo-reestra-danii?from=rss"
+        "title": "Ledger приостановил продажи в семи странах и запретил авторизованным продавцам размещать товары на витринах после атаки — хакеры устанавливали в аппаратные криптокошельки жучки для кражи seed-фраз",
+        "url": "https://vc.ru/crypto/3196605-ledger-priostanovil-prodazhi-v-semi-stranakh-posle-ataki-hakerov?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Недавние обновления Windows могут вызвать сбои в работе службы «Удалённый рабочий стол»",
-        "url": "https://habr.com/ru/news/1094708/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094708"
+        "title": "За месяц до релиза GTA 6 Rockstar выкатила новый трейлер и прорекламировала PS5",
+        "url": "https://habr.com/ru/companies/ggsel/news/1094908/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094908"
       },
       {
-        "title": "В России запретят P2P‑сделки с криптовалютой c июля 2027 года",
-        "url": "https://habr.com/ru/news/1094724/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094724"
+        "title": "ИИ-агенты в разработке, PaaS-сервисы для работы с данными и автоматизация документации: анонсы на GoCloud Tech 2026",
+        "url": "https://habr.com/ru/companies/cloud_ru/news/1094868/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094868"
       },
       {
-        "title": "Microsoft представила Xbox Nano Controller",
-        "url": "https://habr.com/ru/news/1094710/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094710"
+        "title": "SpaceX вернула Starship 40 на Starbase",
+        "url": "https://habr.com/ru/news/1094888/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094888"
       },
       {
-        "title": "В Москве протестируют новую дорожную разметку в виде цветных стрелок",
-        "url": "https://habr.com/ru/news/1094706/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094706"
+        "title": "VK JT TeamLead: встречаемся с тимлидами в Москве и Санкт-Петербурге",
+        "url": "https://habr.com/ru/companies/vk/news/1094884/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094884"
       },
       {
-        "title": "Google без уведомления привязывает номер телефона ко всем аккаунтам",
-        "url": "https://habr.com/ru/news/1094694/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094694"
+        "title": "В Google Play нашли поддельный Google Chrome с более 100 000 загрузок",
+        "url": "https://habr.com/ru/news/1094880/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094880"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261015-1048: Самара 21.2°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261015-1614: Самара 15.0°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
