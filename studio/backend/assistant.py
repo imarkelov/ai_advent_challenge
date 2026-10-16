@@ -1209,6 +1209,12 @@ class AssistantService:
         `system_prompt` (день 35) — переопределение инструкции агента
         из `agents/*.md`; None — встроенный `_ASK_SYSTEM` (поведение
         HTTP-пути не меняется).
+
+        Git-контекст (день 36): состояние репозитория (ветка, изменённые
+        файлы, последние коммиты) добавляется в промпт отдельным блоком
+        фактов. Без него вопрос «какая сейчас ветка?» получал выдуманный
+        ответ: ветка — это состояние репозитория, а не документ, и в
+        индексе её нет по определению (найдено живой проверкой).
         """
         if not question or not question.strip():
             raise AssistantError("Пустой вопрос")
@@ -1226,7 +1232,10 @@ class AssistantService:
                     "source": h.get("source"),
                     "quote": (h.get("text") or "")[:400]}
                    for h in hits]
-        if not hits:
+        # Живое состояние репозитория — отдельно от найденных фрагментов.
+        git_facts = self._git_facts()
+
+        if not hits and not git_facts:
             return {"question": question, "answer": (
                 "В документации и коде проекта нет фрагментов, "
                 "отвечающих на этот вопрос."),
@@ -1236,16 +1245,65 @@ class AssistantService:
             f"[{i}] {h.get('file')} :: {h.get('section')}\n"
             f"{(h.get('text') or '')[:1500]}"
             for i, h in enumerate(hits, 1))
-        answer = self._llm(system_prompt or _ASK_SYSTEM,
-                           f"Вопрос: {question}\n\nКонтекст:\n{context}")
+        prompt = f"Вопрос: {question}\n"
+        if git_facts:
+            # Блок идёт ПЕРЕД документами: это факт о «сейчас», а не
+            # выдержка из файла, и модель не должна искать его в чанках.
+            prompt += (f"\nТекущее состояние репозитория (факты, не "
+                       f"требуют поиска по документации):\n{git_facts}\n")
+        prompt += f"\nКонтекст из документации и кода:\n{context or '(нет)'}"
+        answer = self._llm(system_prompt or _ASK_SYSTEM, prompt)
         llm_used = bool(answer)
         if not answer:
+            # Без LLM: факты о репозитории + извлечение из найденного.
+            # git-факты идут ОДИН раз (в промпте они были отдельным
+            # блоком, здесь — частью ответа, а не дописаны дважды).
             answer = self._extractive_answer(question, hits)
-        return {"question": question, "answer": answer, "sources": sources,
-                "found": True, "llm": llm_used,
-                "llm_error": None if llm_used else self._llm_error,
-                "recall_total":
-                res.get("recall_total", len(hits))}
+            if git_facts:
+                answer = f"{git_facts}\n\n{answer}"
+        out = {"question": question, "answer": answer, "sources": sources,
+               "found": True, "llm": llm_used,
+               "llm_error": None if llm_used else self._llm_error,
+               "recall_total": res.get("recall_total", len(hits))}
+        if git_facts:
+            out["git_facts"] = git_facts
+        return out
+
+    def _git_facts(self) -> str:
+        """Текстовая сводка состояния репозитория для промпта.
+
+        Возвращает пустую строку, если git недоступен: вопрос про
+        архитектуру не должен ломаться от отсутствия репозитория.
+        """
+        try:
+            ctx = self.git.context()
+        except Exception:                           # noqa: BLE001
+            return ""
+        if not ctx.get("available"):
+            return ""
+        lines = [f"- Текущая git-ветка: {ctx.get('branch') or '—'}"]
+        tracked = list(ctx.get("tracked") or [])
+        untracked = list(ctx.get("untracked") or [])
+        lines.append(f"- Изменённых файлов в рабочем дереве: "
+                     f"{len(tracked) + len(untracked)}")
+        if tracked:
+            lines.append("- Изменены: "
+                         + ", ".join(f"`{p}`" for p in tracked[:10])
+                         + (" …" if len(tracked) > 10 else ""))
+        if untracked:
+            lines.append("- Новые (не в git): "
+                         + ", ".join(f"`{p}`" for p in untracked[:10])
+                         + (" …" if len(untracked) > 10 else ""))
+        try:
+            log = self.git.log(5)
+        except Exception:                           # noqa: BLE001
+            log = []
+        if log:
+            lines.append("- Последние коммиты:")
+            for c in log:
+                lines.append(f"    {c.get('hash')} ({c.get('date')}) "
+                             f"{c.get('subject')}")
+        return "\n".join(lines)
 
     @staticmethod
     def _extractive_answer(question: str, hits: list) -> str:

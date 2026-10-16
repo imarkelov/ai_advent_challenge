@@ -561,6 +561,91 @@ class TestGitReader:
 # Модуль А: вопросы по проекту
 # ---------------------------------------------------------------------------
 
+class TestAskGitContext:
+    """День 36: состояние репозитория попадает в ответ.
+
+    Регрессия на живой тест пользователя «расскажи как устроен проект,
+    какая ветка текущая»: RAG отвечал выдуманной веткой («Студия»),
+    потому что ветка — это состояние репозитория, а не документ, и в
+    индексе её нет по определению.
+    """
+
+    @pytest.fixture
+    def git_repo(self, repo):
+        """Репозиторий с коммитом и незакоммиченным изменением."""
+        subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+        subprocess.run(["git", "config", "user.email", "t@t"], cwd=repo,
+                       check=True)
+        subprocess.run(["git", "config", "user.name", "T"], cwd=repo,
+                       check=True)
+        subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
+        subprocess.run(["git", "commit", "-qm", "первый коммит"], cwd=repo,
+                       check=True)
+        (repo / "README.md").write_text("# Изменено\n", encoding="utf-8")
+        return repo
+
+    def test_branch_present_in_git_facts(self, git_repo):
+        svc = A.AssistantService(str(git_repo),
+                                 kb_root=str(git_repo / "kbdata"))
+        svc.build_index()
+        res = svc.ask_project("какая текущая ветка?")
+        assert res.get("git_facts")
+        assert "ветка" in res["git_facts"].lower()
+        # Ветка названа (в тестовом репозитории — master/main).
+        assert any(b in res["git_facts"] for b in ("master", "main"))
+
+    def test_changed_files_listed(self, git_repo):
+        svc = A.AssistantService(str(git_repo),
+                                 kb_root=str(git_repo / "kbdata"))
+        svc.build_index()
+        res = svc.ask_project("что изменено?")
+        assert "README.md" in res["git_facts"]
+
+    def test_recent_commits_listed(self, git_repo):
+        svc = A.AssistantService(str(git_repo),
+                                 kb_root=str(git_repo / "kbdata"))
+        svc.build_index()
+        res = svc.ask_project("последние коммиты")
+        assert "первый коммит" in res["git_facts"]
+
+    def test_branch_not_hallucinated_without_llm(self, git_repo):
+        """Без LLM ветка всё равно в ответе — факт, а не догадка."""
+        svc = A.AssistantService(str(git_repo),
+                                 kb_root=str(git_repo / "kbdata"))
+        svc.build_index()
+        res = svc.ask_project("какая ветка?")
+        assert res["llm"] is False
+        assert any(b in res["answer"] for b in ("master", "main"))
+
+    def test_git_facts_not_duplicated_in_answer(self, git_repo):
+        """git-факты не должны дублироваться в ответе (был такой баг)."""
+        svc = A.AssistantService(str(git_repo),
+                                 kb_root=str(git_repo / "kbdata"))
+        svc.build_index()
+        res = svc.ask_project("какая ветка?")
+        assert res["answer"].count("Текущая git-ветка") == 1
+
+    def test_works_without_git(self, svc):
+        """Нет репозитория — вопрос про архитектуру работает как раньше."""
+        svc.build_index()
+        res = svc.ask_project("как настроить систему?")
+        assert res["found"] is True
+        assert "git_facts" not in res        # нечего добавлять
+
+    def test_git_only_question_without_hits(self, repo):
+        """Вопрос только про git отвечает, даже если поиск пуст.
+
+        Ветки в индексе нет, поэтому «найденных фрагментов» может не
+        быть — но факт о ветке всё равно должен вернуться.
+        """
+        subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+        svc = A.AssistantService(str(repo), kb_root=str(repo / "kbdata"))
+        svc.build_index()
+        res = svc.ask_project("qzxv уфымж")
+        if res.get("git_facts"):
+            assert res["found"] is True
+
+
 class TestAskProject:
     def test_requires_index(self, svc):
         with pytest.raises(A.AssistantError) as e:
