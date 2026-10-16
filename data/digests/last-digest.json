@@ -1,37 +1,45 @@
 {
-  "id": "digest-20261016-1600",
-  "generated_at": "2026-10-16T16:00:53Z",
+  "id": "digest-20261016-2027",
+  "generated_at": "2026-10-16T20:27:51Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 15.1,
-    "feels_like_c": 13.9,
+    "temp_c": 12.3,
+    "feels_like_c": 11.1,
     "description": "Пасмурно",
-    "wind_ms": 5.1
+    "wind_ms": 4.7
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Tesla представила новый Roadster — во время презентации машина разогналась до 100 км/ч за 0,81 с и без трамплина пролетела над другими моделями компании",
-        "url": "https://vc.ru/transport/3197814-tesla-predstavila-obnovlennyj-roadster?from=rss"
-      },
-      {
         "title": "«Раз средствами не пользуются»: GPT-5.6 Sol подобрала ключ к чужому криптокошельку и потратила с него ETH в тестовой сети",
         "url": "https://vc.ru/crypto/3198251-incident-s-gpt-5-6-sol-ispolzovanie-chuzhogo-kryptokoshelka?from=rss"
+      },
+      {
+        "title": "Tesla представила новый Roadster — во время презентации машина разогналась до 100 км/ч за 0,81 с и без трамплина пролетела над другими моделями компании",
+        "url": "https://vc.ru/transport/3197814-tesla-predstavila-obnovlennyj-roadster?from=rss"
       },
       {
         "title": "«Вкусно — и точка» начала тестировать выдачу заказов через постаматы внутри ресторанов",
         "url": "https://vc.ru/food/3198689-vkusno-i-tochka-testiruet-vydachu-zakazov-cherez-postamaty?from=rss"
       },
       {
-        "title": "«Самокат» начал предлагать пользователям доплатить за оформление заказа ниже минимальной суммы",
-        "url": "https://vc.ru/services/3198317-samakot-predlagaet-dostavku-pri-zakaze-nizhe-minimalnoy-summyi?from=rss"
+        "title": "«Яндекс» восстановил доступ к кабинету «Бизнеса», просмотр отчётов в «Метрике» и работу основных инструментов в «Вебмастере»",
+        "url": "https://vc.ru/marketing/3199382-yandeks-vosstanovil-dostup-k-biznes-kabinetu?from=rss"
       },
       {
-        "title": "LinkedIn начал тестировать монетизацию видео и отдельную ленту с публикациями только от контактов",
-        "url": "https://vc.ru/services/3198773-linkedin-testiruet-monetizatsiyu-video?from=rss"
+        "title": "«Самокат» начал предлагать пользователям доплатить за оформление заказа ниже минимальной суммы",
+        "url": "https://vc.ru/services/3198317-samakot-predlagaet-dostavku-pri-zakaze-nizhe-minimalnoy-summyi?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "NVIDIA выпустила Nemotron 3.5 Super VL",
+        "url": "https://habr.com/ru/companies/bothub/news/1095494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095494"
+      },
+      {
+        "title": "LinkedIn запустила новые инструменты для заработка прямо на платформе: платные консультации и монетизацию видео",
+        "url": "https://habr.com/ru/news/1095464/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095464"
+      },
       {
         "title": "Неизменяемые операционные системы, ИИ и победители конкурса: итоги ХXII конференции разработчиков свободных программ",
         "url": "https://habr.com/ru/companies/basealtspo/news/1095414/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095414"
@@ -43,14 +51,6 @@
       {
         "title": "Представлен открытый плеер CloudMus для «Яндекс Музыки» и YouTube Music для ПК на Linux и Windows",
         "url": "https://habr.com/ru/news/1095396/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095396"
-      },
-      {
-        "title": "Perfscale news #15. Локальная документация, обновленный bench, и метрик сервер",
-        "url": "https://habr.com/ru/news/1095374/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095374"
-      },
-      {
-        "title": "PVS-Studio 8.01: OWASP Benchmark, поддержка JDK 25, Go 1.27 и многое другое",
-        "url": "https://habr.com/ru/companies/pvs-studio/news/1095366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095366"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261016-1600: Самара 15.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261016-2027: Самара 12.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
