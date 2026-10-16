@@ -1189,12 +1189,17 @@ class AssistantService:
 
     # ---------- А. Вопросы по проекту ----------
 
-    def ask_project(self, question: str, top_k: int = 5) -> dict:
+    def ask_project(self, question: str, top_k: int = 5,
+                    system_prompt: str | None = None) -> dict:
         """Ответ на вопрос о структуре/архитектуре по RAG (документация +
         код проекта).
 
         Без LLM возвращается extractive-ответ: заголовки и первые
         строки найденных фрагментов — это честно полезно и не врёт.
+
+        `system_prompt` (день 35) — переопределение инструкции агента
+        из `agents/*.md`; None — встроенный `_ASK_SYSTEM` (поведение
+        HTTP-пути не меняется).
         """
         if not question or not question.strip():
             raise AssistantError("Пустой вопрос")
@@ -1222,7 +1227,7 @@ class AssistantService:
             f"[{i}] {h.get('file')} :: {h.get('section')}\n"
             f"{(h.get('text') or '')[:1500]}"
             for i, h in enumerate(hits, 1))
-        answer = self._llm(_ASK_SYSTEM,
+        answer = self._llm(system_prompt or _ASK_SYSTEM,
                            f"Вопрос: {question}\n\nКонтекст:\n{context}")
         llm_used = bool(answer)
         if not answer:
@@ -1249,7 +1254,8 @@ class AssistantService:
     # ---------- Б. Ревью изменений ----------
 
     def review_diff(self, diff: str | None = None, base: str | None = None,
-                    with_llm: bool = True) -> dict:
+                    with_llm: bool = True,
+                    system_prompt: str | None = None) -> dict:
         """Ревью PR/изменений: разбор diff → детерминированные находки →
         сопоставление с документацией → отчёт.
 
@@ -1314,7 +1320,7 @@ class AssistantService:
         recommendations = self._review_recommendations(findings)
         llm_note = ""
         if with_llm and findings:
-            llm_note = self._llm(_REVIEW_SYSTEM,
+            llm_note = self._llm(system_prompt or _REVIEW_SYSTEM,
                                  "Находки:\n" + "\n".join(
                                      f"- [{x['severity']}] {x['rule']}: "
                                      f"{x['message']} ({x['file']}:"
@@ -1362,11 +1368,15 @@ class AssistantService:
     # ---------- В. Поддержка ----------
 
     def support_answer(self, ticket_id: str, question: str | None = None,
-                       top_k: int = 4) -> dict:
+                       top_k: int = 4,
+                       system_prompt: str | None = None) -> dict:
         """Ответ по тикету с персонализацией из CRM.
 
         Контекст CRM (план, оплата, роль, история) инжектится в промпт и
         возвращается в блоке `context` — персонализация наблюдаема.
+
+        `system_prompt` (день 35) — инструкция агента из `agents/*.md`;
+        None — встроенный `_SUPPORT_SYSTEM`.
         """
         if not ticket_id or not ticket_id.strip():
             raise AssistantError("Не указан id тикета")
@@ -1414,7 +1424,8 @@ class AssistantService:
             user_prompt = (f"Вопрос клиента: {question}\n\n"
                            f"Контекст базы знаний:\n{kb_text or '(нет)'}")
 
-        answer = self._llm(_SUPPORT_SYSTEM, user_prompt, max_tokens=800)
+        answer = self._llm(system_prompt or _SUPPORT_SYSTEM, user_prompt,
+                           max_tokens=800)
         llm_used = bool(answer)
         if not answer:
             answer = self._fallback_support(ticket, user, ctx, sources)
