@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261016-1037",
-  "generated_at": "2026-10-16T10:37:36Z",
+  "id": "digest-20261016-1600",
+  "generated_at": "2026-10-16T16:00:53Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 19.1,
-    "feels_like_c": 16.9,
-    "description": "Ясно",
-    "wind_ms": 9.9
+    "temp_c": 15.1,
+    "feels_like_c": 13.9,
+    "description": "Пасмурно",
+    "wind_ms": 5.1
   },
   "news": {
     "vc.ru": [
@@ -15,45 +15,53 @@
         "url": "https://vc.ru/transport/3197814-tesla-predstavila-obnovlennyj-roadster?from=rss"
       },
       {
+        "title": "«Раз средствами не пользуются»: GPT-5.6 Sol подобрала ключ к чужому криптокошельку и потратила с него ETH в тестовой сети",
+        "url": "https://vc.ru/crypto/3198251-incident-s-gpt-5-6-sol-ispolzovanie-chuzhogo-kryptokoshelka?from=rss"
+      },
+      {
+        "title": "«Вкусно — и точка» начала тестировать выдачу заказов через постаматы внутри ресторанов",
+        "url": "https://vc.ru/food/3198689-vkusno-i-tochka-testiruet-vydachu-zakazov-cherez-postamaty?from=rss"
+      },
+      {
         "title": "«Самокат» начал предлагать пользователям доплатить за оформление заказа ниже минимальной суммы",
         "url": "https://vc.ru/services/3198317-samakot-predlagaet-dostavku-pri-zakaze-nizhe-minimalnoy-summyi?from=rss"
       },
       {
-        "title": "Американский сервис для совместной работы Miro с основателями из Перми заблокировал доступ по IP для россиян",
-        "url": "https://vc.ru/services/3197185-miro-zablokiroval-dostup-dlya-rossiyan?from=rss"
-      },
-      {
-        "title": "Ledger приостановил продажи в семи странах и запретил авторизованным продавцам размещать товары на витринах после атаки — хакеры устанавливали в аппаратные криптокошельки жучки для кражи seed-фраз",
-        "url": "https://vc.ru/crypto/3196605-ledger-priostanovil-prodazhi-v-semi-stranakh-posle-ataki-hakerov?from=rss"
-      },
-      {
-        "title": "Ledger представил смартфон со встроенным криптокошельком за $849 — с него нельзя звонить и отправлять сообщения",
-        "url": "https://vc.ru/tech/3197945-ledger-atom-smartfon-s-kriptokoshelkom?from=rss"
+        "title": "LinkedIn начал тестировать монетизацию видео и отдельную ленту с публикациями только от контактов",
+        "url": "https://vc.ru/services/3198773-linkedin-testiruet-monetizatsiyu-video?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "GLM 5.3 Flash и DeepSeek V4.1 Flash стали бесплатными в OpenCode",
-        "url": "https://habr.com/ru/companies/haulmont/news/1095202/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095202"
+        "title": "Неизменяемые операционные системы, ИИ и победители конкурса: итоги ХXII конференции разработчиков свободных программ",
+        "url": "https://habr.com/ru/companies/basealtspo/news/1095414/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095414"
       },
       {
-        "title": "Tesla представила новый Roadster в трёх версиях: Performance, Thrust и Rocket",
-        "url": "https://habr.com/ru/news/1095194/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095194"
+        "title": "Meta* выпустила SDK для разработки браузерных VR‑приложений",
+        "url": "https://habr.com/ru/news/1095402/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095402"
       },
       {
-        "title": "Вышло обновление для GitHub Apps: что изменилось в управлении репозиториями",
-        "url": "https://habr.com/ru/companies/selectel/news/1094962/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094962"
+        "title": "Представлен открытый плеер CloudMus для «Яндекс Музыки» и YouTube Music для ПК на Linux и Windows",
+        "url": "https://habr.com/ru/news/1095396/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095396"
       },
       {
-        "title": "Владельцы предзаказов Call of Duty: Modern Warfare 4 получили доступ к сюжетной кампании",
-        "url": "https://habr.com/ru/companies/ggsel/news/1095174/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095174"
+        "title": "Perfscale news #15. Локальная документация, обновленный bench, и метрик сервер",
+        "url": "https://habr.com/ru/news/1095374/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095374"
       },
       {
-        "title": "Check Point прокомментировала информацию о возможном уходе из России",
-        "url": "https://habr.com/ru/news/1095160/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095160"
+        "title": "PVS-Studio 8.01: OWASP Benchmark, поддержка JDK 25, Go 1.27 и многое другое",
+        "url": "https://habr.com/ru/companies/pvs-studio/news/1095366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095366"
       }
     ],
     "tproger": [
+      {
+        "title": "Искусственный интеллект для дошкольников: рейтинг 5 курсов и развивающих программ",
+        "url": "https://tproger.ru/articles/iskusstvennyj-intellekt-dlya-dowkolnikov-rejting-5-kursov-i-raz"
+      },
+      {
+        "title": "ИИ-платформы для бизнеса: сравнение решений 2026 года",
+        "url": "https://tproger.ru/articles/ii-platformy-dlya-biznesa-sravnenie-rewenij-2026-goda"
+      },
       {
         "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
         "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
@@ -65,16 +73,8 @@
       {
         "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
         "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
-      },
-      {
-        "title": "Если вы ищете работу, но не можете найти",
-        "url": "https://tproger.ru/articles/esli-vy-ishhete-rabotu-no-ne-mozhete-najti"
-      },
-      {
-        "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
-        "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
       }
     ]
   },
-  "summary": "Сводка digest-20261016-1037: Самара 19.1°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261016-1600: Самара 15.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
