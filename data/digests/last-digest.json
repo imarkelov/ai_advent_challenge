@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261015-2053",
-  "generated_at": "2026-10-15T20:53:54Z",
+  "id": "digest-20261016-0259",
+  "generated_at": "2026-10-16T02:59:12Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 12.7,
-    "feels_like_c": 11.2,
-    "description": "Переменная облачность",
-    "wind_ms": 5.9
+    "temp_c": 10.5,
+    "feels_like_c": 9.0,
+    "description": "Преимущественно ясно",
+    "wind_ms": 5.4
   },
   "news": {
     "vc.ru": [
@@ -23,15 +23,27 @@
         "url": "https://vc.ru/crypto/3196605-ledger-priostanovil-prodazhi-v-semi-stranakh-posle-ataki-hakerov?from=rss"
       },
       {
-        "title": "ЦБ: проводить p2p-сделки с криптовалютой можно будет до 1 июля 2027 года",
-        "url": "https://vc.ru/crypto/3195921-cb-razreshayet-p2p-sdelki-s-kriptovalyutoy?from=rss"
-      },
-      {
         "title": "Федеральный суд США обязал возобновить программу розыгрыша грин-карт — о её приостановке рассказали в 2025 году",
         "url": "https://vc.ru/migration/3196287-federalnyj-sud-ssha-vosstanovil-programmu-loterei-grin-kart?from=rss"
+      },
+      {
+        "title": "ЦБ: проводить p2p-сделки с криптовалютой можно будет до 1 июля 2027 года",
+        "url": "https://vc.ru/crypto/3195921-cb-razreshayet-p2p-sdelki-s-kriptovalyutoy?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "Вышел открытый проект LumineCapture — инструмент для создания скриншотов в Linux, ориентированный на быстродействие",
+        "url": "https://habr.com/ru/news/1094728/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094728"
+      },
+      {
+        "title": "Выпуск nginx 1.31.7",
+        "url": "https://habr.com/ru/news/1094584/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094584"
+      },
+      {
+        "title": "Один клик позволял обойти обязательный вход в учётную запись Microsoft при настройке Windows 11. Microsoft это отключила",
+        "url": "https://habr.com/ru/news/1093676/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093676"
+      },
       {
         "title": "Разработчик напечатал защиту для носа своей собаки — теперь её носит более 500 питомцев",
         "url": "https://habr.com/ru/news/1094990/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094990"
@@ -39,18 +51,6 @@
       {
         "title": "Учебный проект MIT превратился в одобренное устройство для уменьшения тремора",
         "url": "https://habr.com/ru/news/1094988/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094988"
-      },
-      {
-        "title": "Браузерный игровой движок LittleJS получил поддержку 3D‑рендера и редактор уровней",
-        "url": "https://habr.com/ru/news/1094972/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094972"
-      },
-      {
-        "title": "Meta* выпустила Muse Spark Open: запуск на 2 Mac Studio и не только",
-        "url": "https://habr.com/ru/companies/bothub/news/1094968/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094968"
-      },
-      {
-        "title": "Miro блокирует доступ из России и Беларуси — и, кажется, всем всё равно",
-        "url": "https://habr.com/ru/news/1094948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094948"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261015-2053: Самара 12.7°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261016-0259: Самара 10.5°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
