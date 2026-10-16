@@ -821,9 +821,18 @@ def _inv_tagged_log(rel: str, text: str) -> list:
     * `print("error")` — нарушение;
     * упоминание `print()` внутри строки — НЕ вызов и не проверяется
       (позиция вызова берётся по тексту без литералов, см. `_code_only`).
+
+    **Исключение — CLI (`cli.py`).** Там stdout не лог, а САМ ПРОДУКТ:
+    `print(render_review(...))` — это вывод команды, который читает
+    человек и парсит пайп. Требовать на него `[Tag]` нельзя: тег попал
+    бы в вывод и сломал его (и `--json`, и `| grep`). Поэтому файлы-точки
+    входа CLI из правила исключены — иначе инвариант ругался бы на
+    корректный код, и доверие к проверке потерялось бы.
     """
     bad = []
     if not rel.startswith("studio/backend/") or "/tests/" in rel:
+        return bad
+    if os.path.basename(rel) == "cli.py":
         return bad
     code = _code_only(text)
     lines = text.splitlines()

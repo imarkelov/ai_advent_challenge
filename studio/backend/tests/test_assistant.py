@@ -401,6 +401,39 @@ class TestInvariants:
         assert any(v["rule"] == "module-docstring"
                    for v in res["violations"])
 
+    def test_cli_stdout_is_not_logging(self, repo):
+        """В CLI `print` — это продукт, а не диагностика: тег не требуется.
+
+        Иначе инвариант ругался бы на корректный `print(render(...))` и
+        требовал бы `[Tag]` в выводе команды, ломая `--json` и пайпы.
+        """
+        (repo / "studio/backend/cli.py").write_text(
+            '"""CLI."""\nprint("это вывод команды, а не лог")\n',
+            encoding="utf-8")
+        res = A.check_invariants(str(repo), paths=["studio/backend/cli.py"])
+        assert res["clean"] is True
+
+    def test_regular_module_still_needs_tag(self, repo):
+        """Исключение сделано ТОЛЬКО для cli.py — правило не ослаблено."""
+        (repo / "studio/backend/service.py").write_text(
+            '"""Модуль."""\nprint("безликая диагностика")\n',
+            encoding="utf-8")
+        res = A.check_invariants(str(repo),
+                                 paths=["studio/backend/service.py"])
+        assert any(v["rule"] == "tagged-log"
+                   for v in res["violations"])
+
+    def test_real_repo_is_clean(self):
+        """Реальный репозиторий проходит проверку инвариантов.
+
+        Регрессия: день 35 добавил `cli.py` с 24 `print()` вывода, и
+        инвариант начал ругаться на корректный код (24 находки).
+        """
+        repo_root = os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)))))
+        res = A.check_invariants(repo_root)
+        assert res["clean"] is True, res["violations"][:5]
+
 
 # ---------------------------------------------------------------------------
 # Поиск использований
