@@ -885,3 +885,319 @@ export function apiSeriesCompare(
 ): Promise<SeriesCompareResult> {
   return apiPost('/series/compare', { queries, profiles })
 }
+
+// ── Локальная LLM как сетевой сервис (день 30) ──────────────────────────────
+// Шлюз OpenAI-совместимого API: клиенты с ключами, rate limit (RPM/TPM),
+// лимит контекста с LLM-компрессией, учёт использования.
+// GET  /api/gateway/status     → адрес в LAN, модели, предупреждение
+// GET  /api/gateway/clients    → клиенты (ключ маскирован)
+// POST /api/gateway/clients    → создать/обновить; key — ТОЛЬКО в ответе
+// DELETE /api/gateway/clients/{name}
+// GET  /api/gateway/usage      → счётчики по клиентам + окно лимитов
+// GET  /api/gateway/rejections → лог отклонённых запросов
+// POST /api/gateway/reset      → сбросить счётчики клиента
+
+export interface GatewayClient {
+  name: string
+  rpm: number
+  tpm: number
+  max_context: number
+  max_output_tokens: number
+  allow_models: string[]
+  enabled: boolean
+  note: string
+  created_at: number
+  key_masked: string
+}
+
+export interface GatewayClientCreated extends GatewayClient {
+  key: string | null
+}
+
+export interface GatewayStatus {
+  enabled: boolean
+  host: string
+  port: number
+  lan_url: string
+  chat_url: string
+  models: string[]
+  clients: number
+  tls: boolean
+  note: string
+}
+
+export interface GatewayUsageEntry {
+  client: string
+  requests: number
+  tokens_in: number
+  tokens_out: number
+  tokens_total: number
+  rejected: number
+  compressed: number
+  last_seen?: number
+  last_latency?: number
+  avg_latency?: number
+  limits?: { rpm: number; tpm: number; max_context: number }
+  window?: { requests: number; tokens: number }
+}
+
+export interface GatewayUsage {
+  usage: Record<string, GatewayUsageEntry>
+  totals: { requests: number; tokens: number; rejected: number }
+}
+
+export interface GatewayRejection {
+  ts: number
+  client: string
+  code: string
+  status: number
+  message: string
+}
+
+export interface GatewayClientInput {
+  name: string
+  rpm?: number
+  tpm?: number
+  max_context?: number
+  max_output_tokens?: number
+  allow_models?: string[]
+  enabled?: boolean
+  note?: string
+  rotate_key?: boolean
+}
+
+export function apiGatewayStatus(): Promise<GatewayStatus> {
+  return apiGet('/gateway/status')
+}
+
+export function apiGatewayClients(): Promise<{ clients: GatewayClient[] }> {
+  return apiGet('/gateway/clients')
+}
+
+export function apiGatewayClientUpsert(
+  input: GatewayClientInput,
+): Promise<GatewayClientCreated> {
+  return apiPost('/gateway/clients', input)
+}
+
+export function apiGatewayClientDelete(
+  name: string,
+): Promise<{ ok: boolean; name: string }> {
+  return apiDelete(`/gateway/clients/${encodeURIComponent(name)}`)
+}
+
+export function apiGatewayUsage(): Promise<GatewayUsage> {
+  return apiGet('/gateway/usage')
+}
+
+export function apiGatewayRejections(
+  limit = 50,
+): Promise<{ rejections: GatewayRejection[] }> {
+  return apiGet(`/gateway/rejections?limit=${limit}`)
+}
+
+export function apiGatewayReset(name: string): Promise<{ ok: boolean; name: string }> {
+  return apiPost('/gateway/reset', { name })
+}
+
+// ── Ассистент разработчика и поддержки (дни 30–34) ──────────────────────────
+// Единый инструмент: RAG-вопросы по документации и коду проекта, ревью
+// изменений (PR review), обработка тикетов с учётом CRM и автономные
+// файловые сценарии.
+
+export interface AssistantSource {
+  file: string
+  section?: string
+  chunk_id?: string
+  score?: number
+  source?: string
+  quote: string
+}
+
+export interface AssistantAsk {
+  question: string
+  answer: string
+  sources: AssistantSource[]
+  found: boolean
+  llm: boolean
+  llm_error?: string | null
+  recall_total?: number
+}
+
+export interface AssistantFinding {
+  rule: string
+  severity: 'high' | 'medium' | 'low'
+  message: string
+  file: string | null
+  line: number | null
+  snippet?: string
+}
+
+export interface AssistantFileChange {
+  path: string
+  added: number
+  removed: number
+  is_new: boolean
+  is_deleted: boolean
+}
+
+export interface AssistantRecommendation {
+  rule: string
+  advice: string
+}
+
+export interface AssistantReview {
+  source: string
+  summary: {
+    files: number
+    added: number
+    removed: number
+    findings: number
+    by_severity: { high: number; medium: number; low: number }
+  }
+  files: AssistantFileChange[]
+  findings: AssistantFinding[]
+  affected_docs: { file: string; section?: string; because?: string }[]
+  recommendations: AssistantRecommendation[]
+  llm_note: string
+}
+
+export interface AssistantTicket {
+  id: string
+  user_id: string
+  subject: string
+  body: string
+  topic: string
+  status: string
+  priority: string
+  tags?: string[]
+  created_at?: string
+  resolution?: string | null
+}
+
+export interface AssistantTickets {
+  tickets: AssistantTicket[]
+  stats: {
+    users: number
+    tickets: number
+    by_status: Record<string, number>
+    available: boolean
+  }
+}
+
+export interface AssistantSupport {
+  ticket_id: string
+  found: boolean
+  answer: string
+  llm: boolean
+  llm_error?: string | null
+  sources: AssistantSource[]
+  context: {
+    found: boolean
+    user: {
+      id?: string
+      name?: string
+      plan?: string
+      role?: string
+      payment_status?: string
+      channel?: string
+      registered_at?: string
+    } | null
+    ticket: {
+      id?: string
+      topic?: string
+      status?: string
+      priority?: string
+    } | null
+    history_count: number
+    applied: string[]
+  }
+}
+
+export interface AssistantScenario {
+  name: string
+  title: string
+  params: string[]
+  description: string
+}
+
+export interface AssistantScenarioResult {
+  scenario: string
+  duration_ms: number
+  ok: boolean
+  summary: string
+  changed_files: string[]
+  diff: string
+  dry_run?: boolean
+  report?: string
+  result?: unknown
+}
+
+export interface AssistantStatus {
+  indexed: boolean
+  documents: number
+  chunks: number
+  strategy?: string | null
+  embedder?: string | null
+  built_at?: string | null
+  llm_available: boolean
+  crm: AssistantTickets['stats']
+  git: { available: boolean; branch?: string | null; changed: number }
+  corpus: { files: number; chars: number; by_source: Record<string, number> }
+}
+
+export interface AssistantGit {
+  available: boolean
+  branch?: string | null
+  tracked: string[]
+  untracked: string[]
+  diff: string
+  diff_lines: number
+  repo_root?: string
+}
+
+export function apiAssistantStatus(): Promise<AssistantStatus> {
+  return apiGet('/assistant/status')
+}
+
+export function apiAssistantIndex(strategy = 'structural'): Promise<unknown> {
+  return apiPost('/assistant/index', { strategy })
+}
+
+export function apiAssistantAsk(question: string, top_k = 5): Promise<AssistantAsk> {
+  return apiPost('/assistant/ask', { question, top_k })
+}
+
+export function apiAssistantReview(input: {
+  diff?: string
+  base?: string
+  with_llm?: boolean
+}): Promise<AssistantReview> {
+  return apiPost('/assistant/review', input)
+}
+
+export function apiAssistantTickets(): Promise<AssistantTickets> {
+  return apiGet('/assistant/tickets')
+}
+
+export function apiAssistantSupport(
+  ticket_id: string,
+  question?: string,
+): Promise<AssistantSupport> {
+  return apiPost('/assistant/support', { ticket_id, question })
+}
+
+export function apiAssistantScenarios(): Promise<{ scenarios: AssistantScenario[] }> {
+  return apiGet('/assistant/scenarios')
+}
+
+export function apiAssistantScenario(
+  name: string,
+  params: Record<string, unknown> = {},
+): Promise<AssistantScenarioResult> {
+  return apiPost('/assistant/scenario', { name, params })
+}
+
+export function apiAssistantGit(): Promise<AssistantGit> {
+  return apiGet('/assistant/git')
+}

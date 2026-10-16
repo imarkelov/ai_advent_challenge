@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "users": [
+    {
+      "id": "u-1001",
+      "name": "Игорь Владимирович",
+      "email": "igor@example.com",
+      "plan": "team",
+      "role": "admin",
+      "payment_status": "ok",
+      "registered_at": "2026-01-14",
+      "channel": "web",
+      "locale": "ru",
+      "tickets_count": 2
+    },
+    {
+      "id": "u-1002",
+      "name": "Мария Соколова",
+      "email": "maria.s@example.com",
+      "plan": "pro",
+      "role": "developer",
+      "payment_status": "ok",
+      "registered_at": "2026-02-03",
+      "channel": "telegram",
+      "locale": "ru",
+      "tickets_count": 1
+    },
+    {
+      "id": "u-1003",
+      "name": "Alex Petrov",
+      "email": "alex@example.com",
+      "plan": "free",
+      "role": "user",
+      "payment_status": "failed",
+      "registered_at": "2026-03-21",
+      "channel": "email",
+      "locale": "en",
+      "tickets_count": 3
+    },
+    {
+      "id": "u-1004",
+      "name": "Ольга Ким",
+      "email": "olga.kim@example.com",
+      "plan": "enterprise",
+      "role": "admin",
+      "payment_status": "pending",
+      "registered_at": "2025-11-08",
+      "channel": "web",
+      "locale": "ru",
+      "tickets_count": 1
+    }
+  ]
+}

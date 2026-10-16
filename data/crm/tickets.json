@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "tickets": [
+    {
+      "id": "T-5001",
+      "user_id": "u-1001",
+      "subject": "Не приходит письмо сброса пароля",
+      "body": "Запрашиваю сброс пароля третий раз, письмо не приходит. Проверял спам — пусто. Домен корпоративный.",
+      "topic": "auth",
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-04-02T09:14:00Z",
+      "tags": [
+        "auth",
+        "email",
+        "password-reset"
+      ],
+      "resolution": null
+    },
+    {
+      "id": "T-5002",
+      "user_id": "u-1002",
+      "subject": "Как подключить локальную модель Ollama?",
+      "body": "Хочу выключить внешний API и работать на своей машине. Какая модель нужна для поиска по документам?",
+      "topic": "configuration",
+      "status": "open",
+      "priority": "medium",
+      "created_at": "2026-04-03T11:02:00Z",
+      "tags": [
+        "ollama",
+        "local",
+        "embedder",
+        "rag"
+      ],
+      "resolution": null
+    },
+    {
+      "id": "T-5003",
+      "user_id": "u-1003",
+      "subject": "Оплата не прошла, доступ закрыт",
+      "body": "Карта отклонена, но деньги списались. Доступ к проекту пропал. Прошу вернуть доступ.",
+      "topic": "billing",
+      "status": "open",
+      "priority": "high",
+      "created_at": "2026-04-03T16:40:00Z",
+      "tags": [
+        "billing",
+        "payment-failed",
+        "access"
+      ],
+      "resolution": null
+    },
+    {
+      "id": "T-5004",
+      "user_id": "u-1004",
+      "subject": "Лимит контекста в шлюзе: как увеличить?",
+      "body": "Развернули шлюз для команды, упираемся в max context при длинных диалогах. Как настроить лимиты на клиента?",
+      "topic": "configuration",
+      "status": "open",
+      "priority": "medium",
+      "created_at": "2026-04-04T08:20:00Z",
+      "tags": [
+        "gateway",
+        "max-context",
+        "limits",
+        "lan"
+      ],
+      "resolution": null
+    },
+    {
+      "id": "T-5005",
+      "user_id": "u-1002",
+      "subject": "Реранкер не находит нужный документ",
+      "body": "При включённом реранкере ответы стали хуже, чем без него. Порог релевантности не помогает.",
+      "topic": "configuration",
+      "status": "closed",
+      "priority": "low",
+      "created_at": "2026-03-28T13:05:00Z",
+      "tags": [
+        "rag",
+        "reranker",
+        "min-score"
+      ],
+      "resolution": "Порог min_score применяется относительно лучшего результата при выключенном реранкере; при включённом — абсолютный. Снизили min_score до 0.3, проблема ушла."
+    },
+    {
+      "id": "T-5006",
+      "user_id": "u-1001",
+      "subject": "MCP-сервер не подключается по stdio",
+      "body": "Прописал свой сервер в mcp_servers.json, статус остаётся «не подключён».",
+      "topic": "configuration",
+      "status": "closed",
+      "priority": "medium",
+      "created_at": "2026-03-30T10:00:00Z",
+      "tags": [
+        "mcp",
+        "stdio",
+        "json-rpc"
+      ],
+      "resolution": "Команда сервера указывалась относительным путём. Нужен абсолютный либо доступный в PATH; проверено через scripts/check_mcp_tools.py."
+    }
+  ]
+}

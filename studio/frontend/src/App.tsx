@@ -7,6 +7,8 @@ import ChatPanel from './components/ChatPanel'
 import SettingsOverlay from './components/SettingsOverlay'
 import McpOverlay from './components/McpOverlay'
 import SeriesOverlay from './components/SeriesOverlay'
+import ServiceOverlay from './components/ServiceOverlay'
+import AssistantOverlay from './components/AssistantOverlay'
 
 export default function App() {
   return (
@@ -18,6 +20,8 @@ export default function App() {
       <SettingsOverlay />
       <McpOverlay />
       <SeriesOverlay />
+      <ServiceOverlay />
+      <AssistantOverlay />
     </StudioProvider>
   )
 }

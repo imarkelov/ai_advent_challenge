@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
@@ -25,6 +25,12 @@ try:  # пакетный режим: uvicorn studio.backend.main:app из кор
     from .series import (TOP_K, SeriesError, SeriesFinder, catalog_stats,
                          load_report)
     from .tuning import PROFILES
+    # День 30: локальная LLM как приватный сетевой сервис.
+    from .gateway import (DEFAULT_GATEWAY_PORT, GatewayConfig, GatewayError,
+                          GatewayService, OllamaTransport, UsageStore, mask_key)
+    # Дни 30–34: единый AI-ассистент (RAG по проекту, ревью, поддержка,
+    # автономные файловые сценарии).
+    from .assistant import (AssistantError, AssistantService, ScenarioError)
 except ImportError:  # dev-режим: uvicorn main:app из studio/backend
     from agent import (CONTEXT_LIMITS, DEFAULT_CONTEXT_LIMIT, MEMORY_RULE,
                        PROFILE_INTERVIEW_TEXT, StudioAgent)
@@ -35,6 +41,9 @@ except ImportError:  # dev-режим: uvicorn main:app из studio/backend
     from series import (TOP_K, SeriesError, SeriesFinder, catalog_stats,
                         load_report)
     from tuning import PROFILES
+    from gateway import (DEFAULT_GATEWAY_PORT, GatewayConfig, GatewayError,
+                         GatewayService, OllamaTransport, UsageStore, mask_key)
+    from assistant import (AssistantError, AssistantService, ScenarioError)
 
 # Секреты/настройки — из .env в корне репозитория.
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
@@ -45,6 +54,10 @@ DATA_DIR = str(Path(__file__).resolve().parents[1] / "data")
 # База знаний (день 21): <repo>/data/kb — тот же корень репозитория, что и
 # дефолтный repo_root в kb.py (два уровня вверх от studio/backend).
 KB_DIR = str(Path(__file__).resolve().parents[2] / "data" / "kb")
+
+# Корень репозитория (дни 30–34): корпус проекта ассистента — README,
+# docs/, openspec/, код бэкенда и фронтенда; CRM — data/crm/*.json.
+REPO_ROOT = str(Path(__file__).resolve().parents[2])
 
 # Максимальная длина текста результата tools/call в сообщении диалога.
 MCP_RESULT_MAX = 8000
@@ -77,12 +90,34 @@ def _list_kb_uploads(kb_dir: str) -> list:
             if os.path.isfile(os.path.join(up_dir, fn))]
 
 
+def _lan_ip() -> str:
+    """LAN-адрес машины для подключения с других устройств (день 30).
+
+    Определяется без обращений в сеть: UDP-сокет «подключается» к
+    внешнему адресу, и ядро выбирает исходящий интерфейс. Пакеты не
+    отправляются. Если интерфейс не определился (нет сети) — loopback,
+    чтобы сервис оставался честно описанным, а не падал.
+    """
+    import socket
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.settimeout(0.2)
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
+    except OSError:
+        return "127.0.0.1"
+
+
 def create_app(agent: StudioAgent | None = None,
                kb: "KnowledgeBase | None" = None,
-               series: "SeriesFinder | None" = None) -> FastAPI:
-    """Создаёт FastAPI-приложение. agent, kb и series inject-ятся для
-    тестов; по умолчанию — StudioAgent(DATA_DIR), KnowledgeBase(KB_DIR)
-    (день 21) и SeriesFinder() (день 29 — каталог из data/series)."""
+               series: "SeriesFinder | None" = None,
+               gateway: "GatewayService | None" = None,
+               assistant: "AssistantService | None" = None) -> FastAPI:
+    """Создаёт FastAPI-приложение. agent, kb, series, gateway и assistant
+    inject-ятся для тестов; по умолчанию — StudioAgent(DATA_DIR),
+    KnowledgeBase(KB_DIR) (день 21), SeriesFinder() (день 29 — каталог из
+    data/series), GatewayService (день 30 — шлюз локальной LLM в LAN) и
+    AssistantService (дни 30–34 — ассистент разработчика и поддержки)."""
     agent = agent or StudioAgent(DATA_DIR)
     kb = kb or KnowledgeBase(KB_DIR)
     # Профиль `studio` не задаёт модель (она берётся из общего конфига) —
@@ -90,6 +125,29 @@ def create_app(agent: StudioAgent | None = None,
     # модели и Ollama ответит 400.
     series_finder = series or SeriesFinder(
         default_model=agent.get_config().get("model"))
+    # День 30: шлюз к Ollama для устройств в локальной сети. Ollama
+    # остаётся на loopback — наружу смотрит только шлюз, где есть ключи,
+    # лимиты и учёт.
+    if gateway is None:
+        gw_config = GatewayConfig(Path(DATA_DIR) / "gateway.json")
+        # Дефолтный клиент из .env: сервис доступен сразу после запуска.
+        gw_config.bootstrap_from_env(os.environ.get("GATEWAY_CLIENT_KEY", ""),
+                                     name=os.environ.get("GATEWAY_CLIENT_NAME",
+                                                         "default"))
+        gateway = GatewayService(
+            config=gw_config,
+            usage=UsageStore(Path(DATA_DIR) / "gateway_usage.json"),
+            transport=OllamaTransport(agent.ollama_base_url,
+                                      os.environ.get("OLLAMA_API_KEY", "ollama")),
+            models_provider=lambda: [m["id"] for m in agent.list_models()
+                                     if m.get("local")],
+        )
+    # Дни 30–34: ассистент. Корпус — документация и код проекта, индекс
+    # отдельный (data/kb/project/), т.е. загрузки пользователя дня 21 не
+    # затрагиваются. Агент передаётся для LLM (опционально: без него
+    # модули работают в детерминированном режиме).
+    if assistant is None:
+        assistant = AssistantService(REPO_ROOT, agent=agent)
     app = FastAPI(title="Студия")
 
     @app.on_event("shutdown")
@@ -1041,6 +1099,266 @@ def create_app(agent: StudioAgent | None = None,
         if bad:
             raise HTTPException(400, f"Неизвестный профиль: {bad[0]}")
         return series_finder.compare(queries, profiles)
+
+    # ---------- день 30: локальная LLM как приватный сетевой сервис ----------
+    # Наружу (в LAN) смотрит только шлюз: у него есть ключи клиентов,
+    # rate limit, лимит контекста с LLM-компрессией и учёт. Ollama
+    # остаётся на loopback.
+
+    def _gateway_error(exc: GatewayError) -> JSONResponse:
+        """Ошибка шлюза в формате OpenAI (status + error.code)."""
+        headers = {}
+        if exc.retry_after:
+            headers["Retry-After"] = str(exc.retry_after)
+        return JSONResponse(exc.to_body(), status_code=exc.status,
+                            headers=headers or None)
+
+    @app.post("/v1/chat/completions")
+    def gateway_chat(body: dict, request: Request):
+        """OpenAI-совместимый чат через шлюз (день 30).
+
+        Совместим с любым OpenAI-клиентом: достаточно указать base_url
+        `http://<LAN-IP>:<порт>/v1` и ключ клиента. Поддерживается
+        `stream: true` (SSE-прокси).
+        """
+        auth = request.headers.get("authorization")
+        host = request.client.host if request.client else None
+        if body.get("stream"):
+            # Стриминг: конвейер шлюза (аутентификация/лимиты/компрессия)
+            # выполняется до первого байта, поэтому ошибки отдаём обычным
+            # JSON-ответом — клиент видит причину, а не пустой поток.
+            try:
+                prepared = gateway.prepare(body, auth_header=auth)
+            except GatewayError as exc:
+                return _gateway_error(exc)
+
+            def gen():
+                yield from gateway.stream(prepared)
+
+            return StreamingResponse(gen(), media_type="text/event-stream",
+                                     headers=prepared.headers)
+        try:
+            result = gateway.handle_chat(body, auth_header=auth,
+                                         request_host=host)
+        except GatewayError as exc:
+            return _gateway_error(exc)
+        # Заголовки видны клиенту: сжал ли шлюз контекст и чей это клиент.
+        gw = result.get("gateway") or {}
+        return JSONResponse(result, headers={
+            "x-gateway-client": str(gw.get("client", "")),
+            "x-gateway-compressed": ("true" if gw.get("compressed") else "false"),
+            "x-gateway-max-context": str(gw.get("max_context", "")),
+        })
+
+    @app.get("/v1/models")
+    def gateway_models():
+        """Список локальных моделей в формате OpenAI."""
+        return {"object": "list",
+                "data": [{"id": m, "object": "model", "owned_by": "ollama"}
+                         for m in gateway.available_models()]}
+
+    @app.get("/api/gateway/status")
+    def gateway_status(request: Request):
+        """Состояние сервиса + адрес для подключения с других устройств.
+
+        Порт берётся из фактического запроса (`request.url.port`), а не из
+        константы: иначе при запуске на нестандартном порту клиенту
+        выдавался бы неверный адрес. `GATEWAY_HOST`/`GATEWAY_PORT`
+        остаются ручным override (например, за обратным прокси).
+        """
+        host = os.environ.get("GATEWAY_HOST") or _lan_ip()
+        env_port = os.environ.get("GATEWAY_PORT")
+        if env_port:
+            port = int(env_port)
+        else:
+            port = request.url.port or DEFAULT_GATEWAY_PORT
+        return gateway.status(host=host, port=port)
+
+    @app.get("/api/gateway/clients")
+    def gateway_clients():
+        """Клиенты шлюза (ключи маскированы, хэш не отдаётся)."""
+        return {"clients": [c.to_public() for c in gateway.config.list_clients()]}
+
+    @app.post("/api/gateway/clients")
+    def gateway_client_upsert(body: dict):
+        """Создать/обновить клиента. Полный ключ — только в этом ответе."""
+        name = body.get("name")
+        if not isinstance(name, str) or not name.strip():
+            raise HTTPException(400, "Поле name обязательно")
+        limits = ("rpm", "tpm", "max_context", "max_output_tokens")
+        kwargs = {}
+        for key in limits:
+            if key in body and body[key] is not None:
+                try:
+                    kwargs[key] = int(body[key])
+                except (TypeError, ValueError):
+                    raise HTTPException(400, f"Поле {key} должно быть целым числом")
+        if "allow_models" in body and body["allow_models"] is not None:
+            am = body["allow_models"]
+            if not isinstance(am, list):
+                raise HTTPException(400, "Поле allow_models должно быть списком")
+            kwargs["allow_models"] = [str(x) for x in am]
+        if "enabled" in body and body["enabled"] is not None:
+            kwargs["enabled"] = bool(body["enabled"])
+        if "note" in body and body["note"] is not None:
+            kwargs["note"] = str(body["note"])
+        if body.get("rotate_key"):
+            kwargs["rotate_key"] = True
+        try:
+            client, key = gateway.config.upsert(name.strip(), **kwargs)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc))
+        out = client.to_public()
+        # Ключ возвращается ОДИН раз — при создании или повороте.
+        out["key"] = key
+        out["key_masked"] = mask_key(key) if key else ""
+        return out
+
+    @app.delete("/api/gateway/clients/{name}")
+    def gateway_client_delete(name: str):
+        """Удалить клиента шлюза."""
+        if not gateway.config.delete(name):
+            raise HTTPException(404, f"Клиент «{name}» не найден")
+        return {"ok": True, "name": name}
+
+    @app.get("/api/gateway/usage")
+    def gateway_usage():
+        """Использование по клиентам + текущее окно лимитов."""
+        stats = gateway.usage.all_stats()
+        for name, entry in stats.items():
+            client = gateway.config.get(name)
+            if client is not None:
+                entry["limits"] = {"rpm": client.rpm, "tpm": client.tpm,
+                                   "max_context": client.max_context}
+            entry["window"] = gateway.limiter.snapshot(name)
+        return {"usage": stats,
+                "totals": {
+                    "requests": sum(s["requests"] for s in stats.values()),
+                    "tokens": sum(s["tokens_total"] for s in stats.values()),
+                    "rejected": sum(s["rejected"] for s in stats.values()),
+                }}
+
+    @app.get("/api/gateway/rejections")
+    def gateway_rejections(limit: int = 50):
+        """Последние отклонённые запросы с причиной (401/403/404/413/429)."""
+        limit = max(1, min(int(limit), 200))
+        return {"rejections": gateway.usage.rejections(limit)}
+
+    @app.post("/api/gateway/reset")
+    def gateway_reset(body: dict):
+        """Сбросить счётчики клиента (и его окно лимитов)."""
+        name = body.get("name")
+        if not isinstance(name, str) or not name.strip():
+            raise HTTPException(400, "Поле name обязательно")
+        gateway.usage.reset(name.strip())
+        gateway.limiter.reset(name.strip())
+        return {"ok": True, "name": name.strip()}
+
+    # ---------- Дни 30–34: ассистент разработчика и поддержки ----------
+    # Роуты только валидируют вход и форматируют ответ; вся логика — в
+    # AssistantService (assistant.py). Ошибки — RU-текстом (400/404/409).
+
+    @app.get("/api/assistant/status")
+    def assistant_status():
+        """Состояние ассистента: индекс проекта, LLM, CRM, git."""
+        return assistant.status()
+
+    @app.post("/api/assistant/index")
+    def assistant_index(body: dict | None = None):
+        """Собрать/пересобрать индекс проекта (документация + код)."""
+        strategy = (body or {}).get("strategy", "structural")
+        if strategy not in ("fixed", "structural"):
+            raise HTTPException(400, "strategy: fixed|structural")
+        try:
+            return assistant.build_index(strategy=strategy)
+        except KBError as e:
+            raise HTTPException(409, str(e))
+
+    @app.post("/api/assistant/ask")
+    def assistant_ask(body: dict):
+        """Вопрос по проекту (RAG по документации и коду)."""
+        question = (body or {}).get("question")
+        if not isinstance(question, str) or not question.strip():
+            raise HTTPException(400, "Поле question обязательно")
+        top_k = max(1, min(int((body or {}).get("top_k", 5)), 20))
+        try:
+            return assistant.ask_project(question, top_k=top_k)
+        except AssistantError as e:
+            raise HTTPException(409, str(e))
+
+    @app.post("/api/assistant/review")
+    def assistant_review(body: dict | None = None):
+        """Ревью изменений: diff текстом либо ветка для сравнения."""
+        body = body or {}
+        diff = body.get("diff")
+        base = body.get("base")
+        if diff is not None and not isinstance(diff, str):
+            raise HTTPException(400, "Поле diff должно быть строкой")
+        if base is not None and not isinstance(base, str):
+            raise HTTPException(400, "Поле base должно быть строкой")
+        try:
+            return assistant.review_diff(
+                diff=diff, base=base,
+                with_llm=bool(body.get("with_llm", True)))
+        except AssistantError as e:
+            raise HTTPException(400, str(e))
+
+    @app.get("/api/assistant/tickets")
+    def assistant_tickets(status: str | None = None,
+                          priority: str | None = None,
+                          topic: str | None = None):
+        """Тикеты из CRM с фильтрами."""
+        return {"tickets": assistant.tickets.list_tickets(
+                    status=status, priority=priority, topic=topic),
+                "stats": assistant.tickets.stats()}
+
+    @app.get("/api/assistant/tickets/{ticket_id}")
+    def assistant_ticket(ticket_id: str):
+        """Один тикет с контекстом пользователя."""
+        ctx = assistant.tickets.context(ticket_id)
+        if not ctx.get("found"):
+            raise HTTPException(404, ctx.get("reason", "Тикет не найден"))
+        return ctx
+
+    @app.post("/api/assistant/support")
+    def assistant_support(body: dict):
+        """Ответ поддержки по тикету (персонализация из CRM)."""
+        ticket_id = (body or {}).get("ticket_id")
+        if not isinstance(ticket_id, str) or not ticket_id.strip():
+            raise HTTPException(400, "Поле ticket_id обязательно")
+        question = (body or {}).get("question")
+        if question is not None and not isinstance(question, str):
+            raise HTTPException(400, "Поле question должно быть строкой")
+        try:
+            return assistant.support_answer(ticket_id, question=question)
+        except AssistantError as e:
+            raise HTTPException(400, str(e))
+
+    @app.get("/api/assistant/scenarios")
+    def assistant_scenarios():
+        """Каталог автономных файловых сценариев."""
+        return {"scenarios": assistant.scenarios()}
+
+    @app.post("/api/assistant/scenario")
+    def assistant_scenario(body: dict):
+        """Запустить сценарий по цели (find_usages, update_docs, …)."""
+        name = (body or {}).get("name")
+        if not isinstance(name, str) or not name.strip():
+            raise HTTPException(400, "Поле name обязательно")
+        params = (body or {}).get("params") or {}
+        if not isinstance(params, dict):
+            raise HTTPException(400, "Поле params должно быть объектом")
+        try:
+            return assistant.run_scenario(name.strip(), **params)
+        except ScenarioError as e:
+            raise HTTPException(400, str(e))
+        except AssistantError as e:
+            raise HTTPException(400, str(e))
+
+    @app.get("/api/assistant/git")
+    def assistant_git():
+        """Git-контекст: ветка, изменённые файлы, diff рабочего дерева."""
+        return assistant.git.context()
 
     return app
 

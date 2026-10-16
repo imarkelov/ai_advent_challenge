@@ -282,6 +282,9 @@ export default function ChatPanel() {
     state, activeProfile, sendMessage, setModel,
     openSettings, closeSettings, openMcp, closeMcp,
     openSeries, closeSeries,
+    openService, closeService,
+    openAssistant, closeAssistant,
+    openMobileSidebar,
     activeTask, chatMode, setChatMode, sendTaskMessage,
     callMcpTool, setDialogueRag,
   } = useStudio()
@@ -575,6 +578,15 @@ export default function ChatPanel() {
   return (
     <main className="panel chat">
       <header className="chat-head">
+        <button
+          type="button"
+          className="btn-icon sidebar-burger"
+          aria-label="Открыть список диалогов"
+          title="Диалоги и память"
+          onClick={openMobileSidebar}
+        >
+          ☰
+        </button>
         <h1 className="chat-title">{active ? active.title : 'Нет активного диалога'}</h1>
         <div className="chat-head-actions">
           {active && (
@@ -631,6 +643,24 @@ export default function ChatPanel() {
             onClick={() => (state.seriesOpen ? closeSeries() : openSeries())}
           >
             🎬
+          </button>
+          <button
+            type="button"
+            className="btn-icon service-toggle"
+            aria-label="Сервис"
+            title="Сервис: локальная LLM для устройств в сети"
+            onClick={() => (state.serviceOpen ? closeService() : openService())}
+          >
+            🌐
+          </button>
+          <button
+            type="button"
+            className="btn-icon assistant-toggle"
+            aria-label="Ассистент"
+            title="Ассистент: вопросы по проекту, ревью, поддержка, сценарии"
+            onClick={() => (state.assistantOpen ? closeAssistant() : openAssistant())}
+          >
+            🛠
           </button>
           <button
             type="button"

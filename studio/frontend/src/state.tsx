@@ -212,6 +212,13 @@ export interface StudioState {
   mcpOpen: boolean
   // Overlay «Сериалы» (день 29): панель поиска сериалов по своей кнопке
   seriesOpen: boolean
+  // Overlay «Сервис» (день 30): панель сетевого сервиса локальной LLM
+  serviceOpen: boolean
+  // Overlay «Ассистент» (дни 30–34): ассистент разработчика и поддержки
+  assistantOpen: boolean
+  // Мобильный сайдбар (день 30): на узких экранах список диалогов
+  // выезжает поверх чата по кнопке «☰»
+  mobileSidebarOpen: boolean
   // Инварианты (день 14): жёсткие правила (ассистент не меняет, пользователь — вкл/выкл)
   invariants: Invariant[]
   // Нарушение активного инварианта (SSE invariant_violation, день 14):
@@ -271,6 +278,9 @@ export function initialState(): StudioState {
     settingsOpen: false,
     mcpOpen: false,
     seriesOpen: false,
+    serviceOpen: false,
+    assistantOpen: false,
+    mobileSidebarOpen: false,
     invariants: [],
     invariantViolation: null,
     mcpServers: [],
@@ -381,6 +391,15 @@ export type StudioAction =
    // День 29: overlay «Сериалы» (поиск сериалов) — открыть / закрыть
    | { type: 'open-series' }
    | { type: 'close-series' }
+   // День 30: overlay «Сервис» (сетевой сервис локальной LLM)
+   | { type: 'open-service' }
+   | { type: 'close-service' }
+   // Дни 30–34: overlay «Ассистент» (разработчик и поддержка)
+   | { type: 'open-assistant' }
+   | { type: 'close-assistant' }
+   // День 30: мобильный сайдбар (☰) — открыть/закрыть
+   | { type: 'open-mobile-sidebar' }
+   | { type: 'close-mobile-sidebar' }
   | { type: 'invariants'; invariants: Invariant[] }
   | { type: 'invariant-violation'; patterns: string[] }
   | { type: 'mcp'; mcpServers: McpServer[]; mcpTools: McpTool[] }
@@ -554,6 +573,18 @@ export function reducer(state: StudioState, action: StudioAction): StudioState {
       return { ...state, seriesOpen: true }
     case 'close-series':
       return { ...state, seriesOpen: false }
+    case 'open-service':
+      return { ...state, serviceOpen: true }
+    case 'close-service':
+      return { ...state, serviceOpen: false }
+    case 'open-assistant':
+      return { ...state, assistantOpen: true }
+    case 'close-assistant':
+      return { ...state, assistantOpen: false }
+    case 'open-mobile-sidebar':
+      return { ...state, mobileSidebarOpen: true }
+    case 'close-mobile-sidebar':
+      return { ...state, mobileSidebarOpen: false }
     case 'invariants':
       return { ...state, invariants: action.invariants }
     case 'mcp':
@@ -611,6 +642,18 @@ export interface StudioApi {
   seriesOpen: boolean
   openSeries: () => void
   closeSeries: () => void
+  // Overlay «Сервис» (день 30): сетевой сервис локальной LLM
+  serviceOpen: boolean
+  openService: () => void
+  closeService: () => void
+  // Overlay «Ассистент» (дни 30–34): разработчик и поддержка
+  assistantOpen: boolean
+  openAssistant: () => void
+  closeAssistant: () => void
+  // Мобильный сайдбар (день 30): ☰ — открыть/закрыть
+  mobileSidebarOpen: boolean
+  openMobileSidebar: () => void
+  closeMobileSidebar: () => void
   refreshMemory: () => Promise<void>
   setMemoryToggle: (layer: 'st' | 'wm' | 'lt', on: boolean) => Promise<void>
   // Инварианты (день 14): перечитать/добавить/переключить/удалить — все
@@ -1099,6 +1142,36 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'close-series' })
   }, [])
 
+  // Открыть overlay «Сервис» (день 30)
+  const openService = useCallback(() => {
+    dispatch({ type: 'open-service' })
+  }, [])
+
+  // Закрыть overlay «Сервис» (кнопка «×» / клик по фону)
+  const closeService = useCallback(() => {
+    dispatch({ type: 'close-service' })
+  }, [])
+
+  // Открыть overlay «Ассистент» (дни 30–34)
+  const openAssistant = useCallback(() => {
+    dispatch({ type: 'open-assistant' })
+  }, [])
+
+  // Закрыть overlay «Ассистент» (кнопка «×» / клик по фону)
+  const closeAssistant = useCallback(() => {
+    dispatch({ type: 'close-assistant' })
+  }, [])
+
+  // Открыть мобильный сайдбар (день 30, кнопка «☰»)
+  const openMobileSidebar = useCallback(() => {
+    dispatch({ type: 'open-mobile-sidebar' })
+  }, [])
+
+  // Закрыть мобильный сайдбар (клик по фону или выбор диалога)
+  const closeMobileSidebar = useCallback(() => {
+    dispatch({ type: 'close-mobile-sidebar' })
+  }, [])
+
   // Перечитать память (после изменений в MemoryTab)
   const refreshMemory = useCallback(async () => {
     dispatch({ type: 'memory', memory: await apiGet<MemoryState>('/memory') })
@@ -1287,6 +1360,15 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     seriesOpen: state.seriesOpen,
     openSeries,
     closeSeries,
+    serviceOpen: state.serviceOpen,
+    openService,
+    closeService,
+    assistantOpen: state.assistantOpen,
+    openAssistant,
+    closeAssistant,
+    mobileSidebarOpen: state.mobileSidebarOpen,
+    openMobileSidebar,
+    closeMobileSidebar,
     refreshMemory,
     setMemoryToggle,
     refreshInvariants,
