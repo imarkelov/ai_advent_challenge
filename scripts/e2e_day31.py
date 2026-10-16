@@ -639,17 +639,16 @@ def part_b() -> bool:
     record("B0 зонд Ollama", "PASS",
            f"моделей={len(models)}, выбрана {model}")
 
-    # Выбираем модель для ассистента через конфиг Студии. Текущую модель
-    # запоминаем и ВОЗВРАЩАЕМ в конце: e2e не должен менять настройки
-    # пользователя как побочный эффект прогона.
-    _, cfg_before = http("/api/config", method="GET")
-    prev_model = (cfg_before or {}).get("model")
-    st3, _ = http("/api/config", method="POST", json_body={"model": model})
-    setup_ok = st3 == 200
-    record("B0b модель ассистента", "PASS" if setup_ok else "SKIP",
-           f"модель={model}" + ("" if setup_ok else
-                                f" (HTTP {st3}) — отвечает модель "
-                                "по умолчанию"))
+    # Модель НЕ переключаем: ассистент работает с той моделью, что задана
+    # в конфиге Студии (при локальной модели `_ensure_local_model`
+    # маршрутизирует её на Ollama). Прогон e2e не должен менять настройки
+    # пользователя — попытка «подставить» локальную модель оставляла
+    # изменённый config.json при аварийном завершении.
+    _, cfg = http("/api/config", method="GET")
+    cur_model = (cfg or {}).get("model")
+    record("B0b модель ассистента", "PASS" if cur_model else "SKIP",
+           f"модель из конфига: {cur_model or '— не задана'}; "
+           f"локальных в Ollama: {len(models)}")
 
     # B1 — живой сервер отвечает
     code, status = http("/api/assistant/status", method="GET")
@@ -706,12 +705,6 @@ def part_b() -> bool:
                f"LLM-рекомендации={'есть' if rev.get('llm_note') else 'нет'}")
     else:
         record("B4 ревью реального diff с LLM", "FAIL", f"HTTP {code}")
-
-    # Возвращаем прежнюю модель: прогон e2e не должен менять настройки.
-    if prev_model and prev_model != model:
-        back, _ = http("/api/config", method="POST",
-                       json_body={"model": prev_model})
-        log(f"  модель возвращена к {prev_model} (HTTP {back})")
 
     return True
 
