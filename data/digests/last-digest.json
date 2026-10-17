@@ -1,15 +1,19 @@
 {
-  "id": "digest-20261017-1006",
-  "generated_at": "2026-10-17T10:06:02Z",
+  "id": "digest-20261017-1453",
+  "generated_at": "2026-10-17T14:53:44Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 14.8,
+    "temp_c": 14.7,
     "feels_like_c": 12.7,
     "description": "Пасмурно",
-    "wind_ms": 7.3
+    "wind_ms": 5.5
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Криптобиржа Bitget внесла Россию в список стран, в которых запрещено пользоваться сервисом",
+        "url": "https://vc.ru/crypto/3199827-kriptobirzha-bitget-zapret-rossiya-i-belarusiya?from=rss"
+      },
       {
         "title": "«Раз средствами не пользуются»: GPT-5.6 Sol подобрала ключ к чужому криптокошельку и потратила с него ETH в тестовой сети",
         "url": "https://vc.ru/crypto/3198251-incident-s-gpt-5-6-sol-ispolzovanie-chuzhogo-kryptokoshelka?from=rss"
@@ -19,38 +23,34 @@
         "url": "https://vc.ru/transport/3197814-tesla-predstavila-obnovlennyj-roadster?from=rss"
       },
       {
-        "title": "Криптобиржа Bitget внесла Россию в список стран, в которых запрещено пользоваться сервисом",
-        "url": "https://vc.ru/crypto/3199827-kriptobirzha-bitget-zapret-rossiya-i-belarusiya?from=rss"
-      },
-      {
         "title": "«Яндекс» восстановил доступ к кабинету «Бизнеса», просмотр отчётов в «Метрике» и работу основных инструментов в «Вебмастере»",
         "url": "https://vc.ru/marketing/3199382-yandeks-vosstanovil-dostup-k-biznes-kabinetu?from=rss"
       },
       {
-        "title": "«Вкусно — и точка» начала тестировать выдачу заказов через постаматы внутри ресторанов",
-        "url": "https://vc.ru/food/3198689-vkusno-i-tochka-testiruet-vydachu-zakazov-cherez-postamaty?from=rss"
+        "title": "Пользователи в Санкт-Петербурге пожаловались на сбой в работе домашнего интернета",
+        "url": "https://vc.ru/services/3200207-sboj-interneta-v-sankt-peterburge?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Google обсуждает с книжными издателями запуск официального раздела с аудиокнигами на YouTube",
-        "url": "https://habr.com/ru/news/1095574/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095574"
+        "title": "Claude за полчаса разгадал загадку АНБ, которой больше 25 лет. Ответ был у криптографов под носом",
+        "url": "https://habr.com/ru/news/1095620/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095620"
       },
       {
-        "title": "Sony представила новый Walkman за 5 899 $ с корпусом из позолоченной меди",
-        "url": "https://habr.com/ru/companies/selectel/news/1095086/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095086"
+        "title": "ИИ спроектировал пистолет для печати на 3D‑принтере",
+        "url": "https://habr.com/ru/news/1095640/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095640"
       },
       {
-        "title": "Выпуск платформы совместной разработки Forgejo v17.0",
-        "url": "https://habr.com/ru/news/1095210/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095210"
+        "title": "Sony получила патент на технологию вывода на экран предсказанного изображения",
+        "url": "https://habr.com/ru/news/1095616/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095616"
       },
       {
-        "title": "Релиз Memtest86+ v9.00",
-        "url": "https://habr.com/ru/news/1095106/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095106"
+        "title": "TSMC рассматривает возможность работы с проектом Илона Маска в Техасе",
+        "url": "https://habr.com/ru/companies/selectel/news/1095094/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095094"
       },
       {
-        "title": "NVIDIA выпустила Nemotron 3.5 Super VL",
-        "url": "https://habr.com/ru/companies/bothub/news/1095494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095494"
+        "title": "Razer представила игровую беспроводную гарнитуру Barracuda V2 Pro",
+        "url": "https://habr.com/ru/news/1095612/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095612"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261017-1006: Самара 14.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261017-1453: Самара 14.7°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
