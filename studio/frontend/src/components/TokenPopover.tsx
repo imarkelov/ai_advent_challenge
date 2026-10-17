@@ -1,7 +1,8 @@
 // Токен-поповер: всплывающее окно рядом с кольцом токенов (TokenGauge,
-// hover). Содержимое — те же данные, что были в блоке «Токены» сайдбара:
-// лимит контекста с progress-баром, последний usage (prompt/completion/
-// total), сессионные токены, модель.
+// hover). Показывает расход и остаток ОКНА диалога: окно модели (реальный
+// num_ctx), занято (промпт последнего запроса + резерв на ответ),
+// сколько осталось для диалога и сколько ещё полных ходов влезает; ниже —
+// последний usage (prompt/completion/total), сессионные токены, модель.
 // Растягивается за drag-grip в правом нижнем углу (pointer events,
 // min 320×200, max — вьюпорт минус отступы; паттерн модалки JSON дня 8);
 // размер сохраняется в localStorage (token-pop-size) и применяется при
@@ -55,12 +56,24 @@ interface TokenPopoverProps {
 export default function TokenPopover({ onHover, onClose }: TokenPopoverProps) {
   const { state } = useStudio()
   const t = state.tokens
-  const limit = t?.context_limit ?? 0
+  const limit = t?.context_window ?? t?.context_limit ?? 0
   const last = t?.last
   const lastTotal = last?.total ?? null
+  const outputBudget = t?.max_output_tokens ?? 0
+  // Занято окна: промпт последнего запроса + резерв под ответ (ответ в
+  // окно не входит — он уже написан, но место под следующий зарезервировано)
+  const occupied =
+    t?.occupied_tokens ?? (last != null ? last.prompt + outputBudget : null)
+  const remaining =
+    t?.remaining_for_dialog ?? (limit > 0 && occupied != null ? Math.max(0, limit - occupied) : null)
+  const turns = t?.full_in_turns ?? (remaining != null && last && last.prompt > 0
+    ? Math.floor(remaining / last.prompt)
+    : null)
   // Заполнение progress-бара: тот же расчёт, что у кольца гейджа
-  const pct = limit > 0 && lastTotal != null ? Math.min(100, (lastTotal / limit) * 100) : 0
+  const pct = limit > 0 && occupied != null ? Math.min(100, (occupied / limit) * 100) : 0
   const warn = pct > 90
+  const fmt = (n: number | null | undefined) =>
+    n == null ? '—' : n.toLocaleString('ru-RU')
 
   const [size, setSize] = useState(() => {
     const s = loadSize()
@@ -125,11 +138,11 @@ export default function TokenPopover({ onHover, onClose }: TokenPopoverProps) {
       onMouseEnter={onHover}
     >
       <div className="token-pop-body">
-        <div className="pop-title">Лимит контекста</div>
+        <div className="pop-title">Окно диалога</div>
         <div
           className="pop-progress"
           role="progressbar"
-          aria-label="Заполнение лимита контекста"
+          aria-label="Заполнение окна контекста"
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(pct)}
@@ -140,9 +153,24 @@ export default function TokenPopover({ onHover, onClose }: TokenPopoverProps) {
           />
         </div>
         <div className="pop-row">
-          <span>последний запрос</span>
-          <b>{limit > 0 && lastTotal != null ? `${lastTotal} / ${limit}` : '—'}</b>
+          <span>занято</span>
+          <b data-testid="tokens-occupied">
+            {limit > 0 && occupied != null ? `${fmt(occupied)} / ${fmt(limit)}` : '—'}
+          </b>
         </div>
+        <div className="pop-row">
+          <span>осталось для диалога</span>
+          <b data-testid="tokens-remaining">{fmt(remaining)}</b>
+        </div>
+        <div className="pop-row">
+          <span>резерв на ответ</span>
+          <b>{outputBudget ? fmt(outputBudget) : '—'}</b>
+        </div>
+        <div className="pop-row">
+          <span>ещё влезет</span>
+          <b data-testid="tokens-turns">{turns != null ? `${turns} ход(ов)` : '—'}</b>
+        </div>
+        <div className="pop-title">Последний запрос</div>
         <div className="pop-row">
           <span>prompt</span>
           <b>{last?.prompt ?? '—'}</b>
@@ -161,7 +189,10 @@ export default function TokenPopover({ onHover, onClose }: TokenPopoverProps) {
         </div>
         <div className="pop-row">
           <span>модель</span>
-          <b>{state.config?.model ?? '—'}</b>
+          <b>
+            {state.config?.model ?? '—'}
+            {t?.context_window_method === 'static' ? ' (окно: справочник)' : ''}
+          </b>
         </div>
       </div>
       <div className="token-pop-grip" title="Растянуть" onPointerDown={onGripDown} />

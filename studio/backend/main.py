@@ -956,8 +956,17 @@ def create_app(agent: StudioAgent | None = None,
 
     @app.get("/api/tokens")
     def tokens():
-        """Последний usage, сессионные токены и лимит контекста модели."""
+        """Токены последнего запроса и остаток окна модели.
+
+        `context_limit` — РЕАЛЬНОЕ окно (num_ctx Ollama, а не максимум
+        архитектуры): иначе UI обещает место, которого нет. Остаток
+        считается из занятого места (prompt последнего запроса: системный
+        промпт + инварианты + профиль + память + история) с вычетом
+        резерва под ответ (`max_tokens` конфига) — `remaining_for_dialog`.
+        """
         usage = agent.last_usage()
+        cfg = agent.get_config()
+        model = cfg["model"]
         last = None
         if usage:
             reasoning = (usage.get("completion_tokens_details") or {}).get("reasoning_tokens") or 0
@@ -965,9 +974,29 @@ def create_app(agent: StudioAgent | None = None,
                     "completion": usage.get("completion_tokens", 0),
                     "reasoning": reasoning,
                     "total": usage.get("total_tokens", 0)}
-        model = agent.get_config()["model"]
+        window_method = "ollama_show"
+        try:
+            window = agent.model_context_window(model)
+        except Exception:                    # noqa: BLE001 — UI не должен падать
+            window = None
+        if not window:
+            window = CONTEXT_LIMITS.get(model, DEFAULT_CONTEXT_LIMIT)
+            window_method = "static"
+        output_budget = int(cfg.get("max_tokens") or 0)
+        used = int((last or {}).get("prompt") or 0)
+        occupied = used + output_budget
+        remaining = max(0, window - occupied)
         return {"last": last, "session": agent.session_tokens(),
-                "context_limit": CONTEXT_LIMITS.get(model, DEFAULT_CONTEXT_LIMIT)}
+                "context_limit": window,
+                "context_window": window,
+                "context_window_method": window_method,
+                "max_output_tokens": output_budget,
+                "used_tokens": used,
+                "occupied_tokens": occupied,
+                "remaining_for_dialog": remaining,
+                "full_in_turns": (remaining // used) if used else None,
+                "percent": round(min(100.0, occupied * 100.0 / window), 1)
+                if window else 0.0}
 
     # ---------- правила агента ----------
 
@@ -1273,6 +1302,15 @@ def create_app(agent: StudioAgent | None = None,
             return assistant.build_index(strategy=strategy)
         except KBError as e:
             raise HTTPException(409, str(e))
+
+    @app.get("/api/assistant/agents")
+    def assistant_agents():
+        """Агенты из `agents/*.md`: метаданные, ошибки разбора.
+
+        Промпты — документы, а не код: UI и API видят ровно то, что
+        лежит в репозитории (сейчас 4 агента × 2 исполнения).
+        """
+        return assistant.agents_info()
 
     @app.post("/api/assistant/ask")
     def assistant_ask(body: dict):

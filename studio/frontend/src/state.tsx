@@ -141,7 +141,24 @@ export interface TokenLast {
 export interface TokenState {
   last: TokenLast | null
   session: { prompt: number; completion: number; total: number }
+  // Окно контекста модели: РЕАЛЬНОЕ (num_ctx Ollama), а не максимум
+  // архитектуры — старые бэкенды отдают только context_limit.
   context_limit: number
+  context_window?: number
+  context_window_method?: 'ollama_show' | 'static'
+  // Резерв под ответ модели (max_tokens конфига): столько окна занимает
+  // ответ, а не диалог.
+  max_output_tokens?: number
+  // Занято промптом последнего запроса (system + инварианты + профиль +
+  // память + история).
+  used_tokens?: number
+  // Занято всего: промпт + резерв на ответ.
+  occupied_tokens?: number
+  // Сколько осталось диалогу: окно − занятое.
+  remaining_for_dialog?: number
+  // Сколько ещё полных «ходов» помещается (без учёта роста истории).
+  full_in_turns?: number | null
+  percent?: number
 }
 
 export interface RequestSummary {

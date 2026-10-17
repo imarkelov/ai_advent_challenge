@@ -52,3 +52,11 @@ data/kb/
 # (нужны для отчёта и тестов). Сырой ответ Wikidata (4000 строк, 3 МБ)
 # регенерируется scripts/fetch_series.py — не в git.
 data/series/catalog_raw.json
+
+# Кэш RAG CLI-ассистента (день 31): пересобирается сам, в git не нужен.
+.dev_assistant_rag.json
+
+# Выгрузка RAG-корпуса для ручной проверки (scripts/export_rag_project.py,
+# scripts/package_rag_upload.py) — генерируется, в git не нужна.
+rag_export/
+rag_upload/

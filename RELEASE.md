@@ -1,3 +1,127 @@
+# Release Notes — day31-cli-assistant (дни 30–37)
+
+Ветка: `day31-cli-assistant` (от `day30-34-dev-assistant`).
+
+## Что в релизе
+
+**Шлюз локальной LLM, автономный CLI-ассистент с гибридным RAG, агенты
+в Markdown без хардкода промптов, видимость токенов и остатка окна.**
+
+Пять направлений:
+
+1. **День 30 — шлюз локальной LLM** (`studio/backend/gateway.py`): Ollama
+   остаётся на loopback, наружу в LAN смотрит только шлюз — ключи
+   клиентов (SHA-256), rate limit RPM/TPM, `max_context` с LLM-компрессией,
+   учёт использования, вкладка «Сервис» в UI.
+2. **День 31 — автономный CLI-ассистент** (`dev_assistant.py`): вопросы по
+   проекту, git-инструменты по MCP, создание файлов, встроенный RAG.
+3. **День 36 — RAG отвечает по запросу**: гибридный поиск (BM25 + bge-m3
+   через Ollama), гейт релевантности, отказ вместо ответа «по соседнему
+   разделу», самопересборка индекса по хэшу корпуса.
+4. **Промпты агентов — документы**: `agents/*.md` (4 агента × 2
+   исполнения), `assistant.py` больше не содержит `_ASK_SYSTEM` /
+   `_REVIEW_SYSTEM` / `_SUPPORT_SYSTEM`; карта пайплайна —
+   `docs/PIPELINE.md`, команда агентов — `docs/AGENTS.md`.
+5. **День 37 — токены и окно диалога**: окно берётся из `num_ctx` модели
+   (`Ollama /api/show`), UI показывает «занято / окно» и «осталось для
+   диалога», CLI-ассистент печатает промпт/ответ/остаток после каждого
+   ответа.
+
+```
+ вопрос ──▶ agents/<name>.api.md (промпт, документ)
+         ─▶ AssistantService (assistant.py) ─▶ ProjectKnowledgeBase
+         ─▶ kb.py :: search_rag  (векторы Ollama + BM25 + RRF)
+         ─▶ LLM (Ollama / GPustack) ─▶ ответ + sources
+         ─▶ GET /api/tokens: окно модели, занято, остаток
+```
+
+## Ключевые решения
+
+* **Один источник правды** — `AssistantService`: CLI (`studio/backend/
+  cli.py`) и HTTP (`main.py`) не дублируют логику.
+* **Промпт — документ.** Разбор `agents/*.md` — `agents.py` (без
+  YAML-пакета), кэш по mtime: правка промпта без перезапуска.
+  Нет файла/битый frontmatter → детерминированный ответ, а не молчаливая
+  подмена текста.
+* **RAG с порогом.** Фрагменты уходят в промпт только при достаточной
+  близости (плотность cosine + IDF терминов); посторонний вопрос →
+  честное «в документации этого нет».
+* **Эмбеддер — по делу.** `nomic-embed-text` не различал вопросы на
+  корпусе проекта (cosine топ-5 отличался на 0.01), поэтому у
+  `dev_assistant.py` свой `bge-m3` (`DEV_ASSISTANT_EMBED_MODEL`).
+* **Окно — не справочник.** `min(num_ctx, *.context_length)`; справочник
+  `CONTEXT_LIMITS` — только fallback и помечен в API.
+
+## Находки живой проверки
+
+| Что | Как было | Как стало |
+|---|---|---|
+| «как устроен шлюз?» | цитата из `CLI-CHEATSHEET.md` — просто пример команды | ответ по `llm-gateway/spec.md`, `gateway.py` |
+| «кто ты?» | документ про редизайн задач | честный отказ, модель не вызывается |
+| `.dev_assistant_rag.json` в репозитории | индексировался как документ — ответы по устаревшим чанкам | корпус только проект, индекс пересобирается сам |
+| окно `gemma3:27b` | 131072 (максимум архитектуры) | 8192 (`num_ctx` Modelfile) |
+| промпт ответа | строка `_ASK_SYSTEM` в Python | `agents/project-qa.api.md` |
+| `gateway.py` в индексе | один чанк на 100 КБ, докстринг модуля | секции по `# ----` и константам — порт находится |
+
+## Финальные цифры
+
+* бэкенд: **1207 passed, 6 skipped** (`studio/backend/tests`)
+* CLI-ассистент: `tests/test_day31_cli.py` — 19, `tests/test_day31_rag_relevance.py` — 25
+* фронтенд: `tsc -b` 0 ошибок, `npm run build` успешно, vitest **330 passed**
+* `scripts/e2e_day31.py --part-a-only` — **PASS 17, FAIL 0**
+* корпус проекта: **231 документ → 4566 чанков** (включая `agents/*.md`)
+* ассистент на живом Ollama: `промпт 2047 + ответ 487 = 2534, окно 8 192, остаток 5 658`
+
+## API/CLI-контракт
+
+| Что | Где |
+|---|---|
+| `GET /api/assistant/agents` | агенты из `agents/*.md` + ошибки разбора |
+| `GET /api/tokens` | `context_window`, `max_output_tokens`, `used_tokens`, `occupied_tokens`, `remaining_for_dialog`, `full_in_turns` |
+| `POST /api/gateway/*`, `/v1/*` | шлюз: ключи, лимиты, компрессия, учёт |
+| `cli.py agents list\|show` | каталог и полный промпт агента |
+| `dev_assistant.py` (`/help`, `/git`, `/files`, `/status`, `/search`) | автономный ассистент |
+
+## Демо и воспроизведение
+
+```bash
+# из корня репозитория
+PY=.venv/bin/python
+ollama pull bge-m3                       # один раз для dev_assistant.py
+$PY studio/backend/cli.py ask "где лежит архитектура пайплайна?"
+$PY dev_assistant.py                     # интерактивная сессия (/help, вопросы)
+scripts/demo_video_day36.sh              # тот же сценарий для записи экрана
+$PY scripts/e2e_day31.py --part-a-only
+$PY -m pytest studio/backend/tests tests/test_day31_cli.py \
+    tests/test_day31_rag_relevance.py -q
+```
+
+## Ограничения
+
+* Пороги RAG калиброваны на корпусе проекта (≈3 тыс. фрагментов):
+  на маленьком проекте порог BM25 масштабируется, но универсальной
+  настройки нет.
+* `full_in_turns` — оптимистичная оценка «сейчас»: следующий ход вырастет
+  на длину истории.
+* `tools` в frontmatter агентов — метаданные, не маршрутизация;
+  `temperature` из md в веб-вызове пока не применяется.
+* `rag_export/` и `rag_upload/` генерируются скриптами и в git не
+  попадают.
+
+## Коммиты
+
+| Коммит | Что |
+|---|---|
+| `feat(day30)`: шлюз локальной LLM | `studio/backend/gateway.py`, `tests/test_gateway*.py`, `ServiceTab`/`ServiceOverlay` |
+| `feat(day31)`: автономный CLI-ассистент | `dev_assistant.py`, `studio/mcp_servers/git_branch.py`, `tests/test_day31_cli.py` |
+| `feat(day36)`: RAG отвечает по запросу | гибридный поиск, гейт релевантности, `tests/test_day31_rag_relevance.py` |
+| `refactor(prompts)`: агенты — документы | промпты из `assistant.py` → `agents/*.md`, `GET /api/assistant/agents` |
+| `docs(pipeline)`: карта пайплайна и агентов | `docs/PIPELINE.md`, `docs/AGENTS.md` |
+| `feat(tokens)`: окно диалога и остаток | `agent.model_context_window`, `/api/tokens`, `TokenGauge`/`TokenPopover` |
+| `docs(rag)`: выгрузка RAG и демо-скрипт | `scripts/export_rag_project.py`, `scripts/package_rag_upload.py`, `scripts/demo_video_day36.sh` |
+
+---
+
 # Release Notes — day35-cli-md-agents (день 35)
 
 Ветка: `day35-cli-md-agents` (от `day30-34-dev-assistant`).

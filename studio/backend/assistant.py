@@ -44,10 +44,12 @@ from datetime import datetime, timezone
 
 try:                                    # пакет: studio.backend.assistant
     from . import kb as kb_mod
+    from .agents import AgentError, AgentRegistry
     from .kb import (CorpusDoc, HashEmbedder, KnowledgeBase, KBError,
                      read_json)
 except ImportError:                     # flat: backend-каталог в sys.path
     import kb as kb_mod
+    from agents import AgentError, AgentRegistry
     from kb import (CorpusDoc, HashEmbedder, KnowledgeBase, KBError,
                     read_json)
 
@@ -88,6 +90,16 @@ CORPUS_RULES = [
 
 CORPUS_EXTS = {".md", ".py", ".ts", ".tsx", ".js", ".jsx", ".txt",
                ".json", ".yaml", ".yml", ".css"}
+
+def _extra_agent_files(repo_root: str) -> list[tuple[str, str]]:
+    """`agents/*.md` как правила корпуса с источником `agents`."""
+    agents_dir = os.path.join(repo_root, AGENTS_DIRNAME)
+    try:
+        names = sorted(os.listdir(agents_dir))
+    except OSError:
+        return []
+    return [(AGENTS_DIRNAME + "/" + n, "agents")
+            for n in names if n.endswith(".md")]
 
 # Пути, в которые сценариям разрешено писать (относительно корня проекта).
 WRITE_ALLOWLIST = ("README.md", "CHANGELOG.md", "docs/", "openspec/")
@@ -134,7 +146,10 @@ class ProjectCorpus:
     def __init__(self, repo_root: str, rules=None,
                  max_file_bytes: int = MAX_FILE_BYTES):
         self.repo_root = os.path.abspath(repo_root)
-        self.rules = list(rules if rules is not None else CORPUS_RULES)
+        # Правила по умолчанию + агенты: промпт агента — документ проекта,
+        # и вопрос про назначение агента ищется в его собственном файле.
+        self.rules = list(rules if rules is not None
+                          else CORPUS_RULES + _extra_agent_files(self.repo_root))
         self.max_file_bytes = max_file_bytes
 
     def _read(self, path: str) -> str | None:
@@ -1027,30 +1042,17 @@ def _replace_autogen_section(text: str, body: str) -> tuple:
 # Сервис ассистента
 # ---------------------------------------------------------------------------
 
-# Промпт ответа по проекту: отвечать только по найденному контексту.
-_ASK_SYSTEM = (
-    "Ты — ассистент разработчика в проекте «Студия». Отвечай ТОЛЬКО на "
-    "основе приведённого контекста из документации и кода проекта. "
-    "Если в контексте нет ответа — скажи прямо, что данных нет, и "
-    "предложи, где искать. Ссылайся на файлы по именам. Отвечай "
-    "кратко и по делу, на русском."
-)
-
-_SUPPORT_SYSTEM = (
-    "Ты — агент поддержки продукта «Студия». Отвечай вежливо и по "
-    "делу, опираясь на контекст базы знаний. Учитывай данные "
-    "пользователя из CRM: план и статус оплаты влияют на тон и "
-    "предлагаемые шаги, роль — на глубину технических деталей. "
-    "Не выдумывай факты о продукте, которых нет в контексте. "
-    "Отвечай на русском."
-)
-
-_REVIEW_SYSTEM = (
-    "Ты — код-ревьюер. По приведённым детерминированным находкам и "
-    "сводке изменений сформулируй краткие рекомендации по улучшению. "
-    "Не выдумывай новые проблемы и номера строк — опирайся только на "
-    "список находок. Максимум 5 пунктов, на русском."
-)
+# Промпты агентов живут ТОЛЬКО в `agents/*.md` (frontmatter + тело) —
+# правка инструкции не требует правки Python. Если файл агента пропал,
+# `AgentRegistry.prompt_for` поднимает AgentError, и сервис честно
+# деградирует на extractive-ответ, а не на «забытый» встроенный текст.
+AGENTS_DIRNAME = "agents"
+#: Агент, отвечающий на вопросы по проекту (пайплайн, модули, агенты).
+AGENT_FOR_ASK = "project-qa"
+AGENT_FOR_REVIEW = "code-review"
+AGENT_FOR_SUPPORT = "support"
+#: Команды ассистента, которые в веб-интерфейсе исполняются как «api».
+AGENT_EXECUTION_API = "api"
 
 
 # Транслитерация RU→EN для слагов имён файлов. Без неё русский
@@ -1088,9 +1090,13 @@ class AssistantService:
     """
 
     def __init__(self, repo_root: str, agent=None, kb_root: str | None = None,
-                 crm_dir: str | None = None):
+                 crm_dir: str | None = None, agents_dir: str | None = None):
         self.repo_root = os.path.abspath(repo_root)
         self.agent = agent
+        # Реестр агентов из `agents/*.md` — единственный источник
+        # системных промптов (правка md подхватывается по mtime).
+        self.agents = AgentRegistry(
+            agents_dir or os.path.join(self.repo_root, AGENTS_DIRNAME))
         self.pkb = ProjectKnowledgeBase(self.repo_root, kb_root=kb_root)
         self.tickets = TicketStore(self.repo_root, crm_dir=crm_dir)
         self.git = GitReader(self.repo_root)
@@ -1121,6 +1127,32 @@ class AssistantService:
             "corpus": self.pkb.corpus.stats(),
         }
 
+    # ---------- агенты (промпты из agents/*.md) ----------
+
+    def agent_prompt(self, name: str) -> tuple:
+        """(системный промпт агента, пометка о деградации) для API-пути.
+
+        Промпт читается из `agents/<name>.api.md` (fallback на другое
+        исполнение — с пометкой). AgentError (файла нет / битый
+        frontmatter) не роняет запрос: (None, пояснение) — вызывающий
+        код уходит в детерминированный режим.
+        """
+        try:
+            prompt, fallback = self.agents.prompt_for(
+                name, execution=AGENT_EXECUTION_API)
+        except AgentError as e:
+            return None, str(e)
+        note = "" if not fallback else (
+            f"агент {name}: нет {AGENT_EXECUTION_API}-инструкции, "
+            f"взято другое исполнение")
+        return prompt, note
+
+    def agents_info(self) -> dict:
+        """Агенты репозитория (метаданные + ошибки разбора) для API/UI."""
+        return {"agents": [s.to_dict() for s in self.agents.load()],
+                "errors": self.agents.errors(),
+                "dir": self.agents.agents_dir}
+
     def build_index(self, strategy: str = "structural") -> dict:
         """Собрать индекс проекта (офлайн hash-эмбеддер)."""
         res = self.pkb.build_project(strategy=strategy)
@@ -1133,6 +1165,13 @@ class AssistantService:
         """Один вызов LLM. Любая ошибка/отсутствие модели → "" (вызывающий
         код деградирует). Ассистент не должен падать из-за сети."""
         if self.agent is None:
+            return ""
+        if not (system or "").strip():
+            # Промпт агента не загрузился (нет/битый `agents/*.md`) —
+            # без системной инструкции модель отвечает как попало, лучш
+            # честно деградировать на extractive-ответ.
+            self._llm_error = self._llm_error or (
+                "системный промпт агента не загружен (agents/*.md)")
             return ""
         try:
             cfg = self.agent.get_config()
@@ -1207,8 +1246,8 @@ class AssistantService:
         строки найденных фрагментов — это честно полезно и не врёт.
 
         `system_prompt` (день 35) — переопределение инструкции агента
-        из `agents/*.md`; None — встроенный `_ASK_SYSTEM` (поведение
-        HTTP-пути не меняется).
+        из `agents/*.md`; None — промпт агента `project-qa` (`.api.md`)
+        из реестра, а не хардкод в Python.
 
         Git-контекст (день 36): состояние репозитория (ветка, изменённые
         файлы, последние коммиты) добавляется в промпт отдельным блоком
@@ -1252,7 +1291,10 @@ class AssistantService:
             prompt += (f"\nТекущее состояние репозитория (факты, не "
                        f"требуют поиска по документации):\n{git_facts}\n")
         prompt += f"\nКонтекст из документации и кода:\n{context or '(нет)'}"
-        answer = self._llm(system_prompt or _ASK_SYSTEM, prompt)
+        agent_prompt, agent_note = self.agent_prompt(AGENT_FOR_ASK)
+        answer = self._llm(system_prompt or agent_prompt or "", prompt)
+        if not answer and not (system_prompt or agent_prompt):
+            self._llm_error = agent_note or self._llm_error
         llm_used = bool(answer)
         if not answer:
             # Без LLM: факты о репозитории + извлечение из найденного.
@@ -1387,7 +1429,8 @@ class AssistantService:
         recommendations = self._review_recommendations(findings)
         llm_note = ""
         if with_llm and findings:
-            llm_note = self._llm(system_prompt or _REVIEW_SYSTEM,
+            agent_prompt, _agent_note = self.agent_prompt(AGENT_FOR_REVIEW)
+            llm_note = self._llm(system_prompt or agent_prompt or "",
                                  "Находки:\n" + "\n".join(
                                      f"- [{x['severity']}] {x['rule']}: "
                                      f"{x['message']} ({x['file']}:"
@@ -1443,7 +1486,7 @@ class AssistantService:
         возвращается в блоке `context` — персонализация наблюдаема.
 
         `system_prompt` (день 35) — инструкция агента из `agents/*.md`;
-        None — встроенный `_SUPPORT_SYSTEM`.
+        None — промпт агента `support` (`.api.md`) из реестра.
         """
         if not ticket_id or not ticket_id.strip():
             raise AssistantError("Не указан id тикета")
@@ -1491,7 +1534,8 @@ class AssistantService:
             user_prompt = (f"Вопрос клиента: {question}\n\n"
                            f"Контекст базы знаний:\n{kb_text or '(нет)'}")
 
-        answer = self._llm(system_prompt or _SUPPORT_SYSTEM, user_prompt,
+        agent_prompt, _agent_note = self.agent_prompt(AGENT_FOR_SUPPORT)
+        answer = self._llm(system_prompt or agent_prompt or "", user_prompt,
                            max_tokens=800)
         llm_used = bool(answer)
         if not answer:

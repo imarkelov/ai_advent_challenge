@@ -52,6 +52,7 @@ const TOKENS = {
   last: { prompt: 1000, completion: 200, reasoning: 120, total: 1240 },
   session: { prompt: 5000, completion: 2500, total: 7500 },
   context_limit: 32768,
+  max_output_tokens: 1024,
 }
 
 async function renderGauge() {
@@ -60,9 +61,11 @@ async function renderGauge() {
       <TokenGauge />
     </StudioProvider>,
   )
-  const gauge = await screen.findByRole('progressbar', { name: 'Лимит контекста' })
-  // ждём loadAll: число из загруженных токенов
-  await waitFor(() => expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('1.2k'))
+  const gauge = await screen.findByRole('progressbar', { name: 'Окно контекста' })
+  // ждём loadAll: «занято / окно» (1000 промпта + 1024 резерва = 2024)
+  await waitFor(() =>
+    expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('2k/32.8k'),
+  )
   return { ...utils, gauge }
 }
 
@@ -72,29 +75,31 @@ beforeEach(() => {
 })
 
 describe('TokenPopover — открытие/закрытие', () => {
-  it('открывается по hover; строки = данные TokensTab (лимит, usage, сессия, модель)', async () => {
+  it('открывается по hover: окно диалога + расход последнего запроса', async () => {
     stubFetch(TOKENS)
     const { container, gauge } = await renderGauge()
     expect(container.querySelector('.token-pop')).toBeNull()
 
     fireEvent.mouseEnter(gauge)
-    const pop = (await screen.findByText('последний запрос')).closest('.token-pop')
+    const pop = (await screen.findByText('Окно диалога')).closest('.token-pop')
     expect(pop).toBeTruthy()
     expect(pop?.getAttribute('aria-label')).toBe('Токены')
 
     const rows = pop?.querySelectorAll('.pop-row')
-    expect(rows?.length).toBe(6)
+    expect(rows?.length).toBe(9)
     const values = [...(rows ?? [])].map((r) => r.querySelector('b')?.textContent)
+    await waitFor(() => expect(values[0]).toBe('2 024 / 32 768'))
     expect(values).toEqual([
-      '1240 / 32768', // последний запрос: total / лимит
+      '2 024 / 32 768', // занято окна: prompt 1000 + резерв 1024
+      '30 744', // осталось для диалога
+      '1 024', // резерв на ответ
+      '30 ход(ов)', // ещё влезет целиком (30744 / 1000)
       '1000', // prompt
       '200', // completion
       '1240', // total
       '7500', // за сессию
       'qwen3.8-27b', // модель
     ])
-    // progress-бар: 1240 / 32768 → 4
-    expect(pop?.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')).toBe('4')
     // drag-grip на месте
     expect(pop?.querySelector('.token-pop-grip')).toBeTruthy()
   })
@@ -104,7 +109,7 @@ describe('TokenPopover — открытие/закрытие', () => {
     const { container, gauge } = await renderGauge()
 
     fireEvent.mouseEnter(gauge)
-    await screen.findByText('последний запрос')
+    await screen.findByText('Окно диалога')
     expect(container.querySelector('.token-pop')).toBeTruthy()
 
     fireEvent.mouseLeave(gauge)
@@ -122,7 +127,7 @@ describe('TokenPopover — открытие/закрытие', () => {
     const { container, gauge } = await renderGauge()
 
     fireEvent.mouseEnter(gauge)
-    const pop = (await screen.findByText('последний запрос')).closest('.token-pop')
+    const pop = (await screen.findByText('Окно диалога')).closest('.token-pop')
     expect(pop).toBeTruthy()
 
     // ушли с гейджа, но в grace-периоде заехали в поповер
@@ -138,7 +143,7 @@ describe('TokenPopover — открытие/закрытие', () => {
     const { container, gauge } = await renderGauge()
 
     fireEvent.mouseEnter(gauge)
-    await screen.findByText('последний запрос')
+    await screen.findByText('Окно диалога')
     expect(container.querySelector('.token-pop')).toBeTruthy()
 
     fireEvent.click(document.body)
@@ -153,7 +158,7 @@ describe('TokenPopover — размер', () => {
     const { gauge } = await renderGauge()
 
     fireEvent.mouseEnter(gauge)
-    const pop = (await screen.findByText('последний запрос')).closest('.token-pop')
+    const pop = (await screen.findByText('Окно диалога')).closest('.token-pop')
     expect(pop?.style.width).toBe('480px')
     expect(pop?.style.height).toBe('300px')
   })
@@ -164,7 +169,7 @@ describe('TokenPopover — размер', () => {
     const { gauge } = await renderGauge()
 
     fireEvent.mouseEnter(gauge)
-    const pop = (await screen.findByText('последний запрос')).closest('.token-pop')
+    const pop = (await screen.findByText('Окно диалога')).closest('.token-pop')
     // дефолт 340×240
     expect(pop?.style.width).toBe('340px')
     expect(pop?.style.height).toBe('240px')
@@ -175,7 +180,7 @@ describe('TokenPopover — размер', () => {
     const { container, gauge } = await renderGauge()
 
     fireEvent.mouseEnter(gauge)
-    const pop = (await screen.findByText('последний запрос')).closest('.token-pop')
+    const pop = (await screen.findByText('Окно диалога')).closest('.token-pop')
     const grip = pop?.querySelector('.token-pop-grip') as HTMLElement
     expect(grip).toBeTruthy()
     // стартовый размер — дефолт 340×240
@@ -197,7 +202,7 @@ describe('TokenPopover — размер', () => {
     const { gauge } = await renderGauge()
 
     fireEvent.mouseEnter(gauge)
-    const pop = (await screen.findByText('последний запрос')).closest('.token-pop')
+    const pop = (await screen.findByText('Окно диалога')).closest('.token-pop')
     const grip = pop?.querySelector('.token-pop-grip') as HTMLElement
 
     // драг влево-вверх сильнее min: 340−50=290 → 320, 240−60=180 → 200

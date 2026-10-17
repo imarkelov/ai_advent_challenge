@@ -1,6 +1,7 @@
-// Токен-гейдж в шапке чата: SVG-кольцо заполнения лимита контекста
-// (total последнего запроса / context_limit — та же семантика, что
-// progress-бар) + компактное число.
+// Токен-гейдж в шапке чата: SVG-кольцо заполнения окна контекста
+// (занято: промпт последнего запроса + резерв на ответ, к реальному
+// num_ctx модели) + компактное число занятого. Остаток окна —
+// «осталось для диалога» — считается в TokenPopover.
 // По hover — TokenPopover (лимит с progress-баром, последний usage,
 // сессионные токены, модель; растягиваемый, размер в localStorage).
 // Закрытие поповера: mouseleave с grace-периодом 300ms (успеть заехать
@@ -31,11 +32,18 @@ const CLOSE_GRACE_MS = 300
 export default function TokenGauge() {
   const { state } = useStudio()
   const t = state.tokens
-  const limit = t?.context_limit ?? 0
-  const lastTotal = t?.last?.total ?? null
-  // Заполнение кольца: total последнего запроса / лимит контекста
-  const pct = limit > 0 && lastTotal != null ? Math.min(1, lastTotal / limit) : 0
-  const warn = pct > 0.9
+  const limit = t?.context_window ?? t?.context_limit ?? 0
+  // Занято окна: промпт последнего запроса + резерв на ответ. Полный
+  // total (промпт + ответ) в окно не входит: ответ уже написан.
+  const occupied =
+    t?.occupied_tokens ??
+    (t?.last != null ? t.last.prompt + (t.max_output_tokens ?? 0) : null)
+  // Заполнение кольца: занято / окно
+  const pct = limit > 0 && occupied != null ? Math.min(1, occupied / limit) : 0
+  // Предупреждение — по остатку для диалога, а не по «пустому» окну:
+  // 20% места уходит на следующий ввод, системные блоки и резерв ответа
+  // ещё до того, как окно заполнится «до упора».
+  const warn = pct >= 0.8
 
   const [popOpen, setPopOpen] = useState(false)
   const graceTimer = useRef<number | undefined>(undefined)
@@ -59,7 +67,7 @@ export default function TokenGauge() {
     <span
       className={`token-gauge${warn ? ' warn' : ''}`}
       role="progressbar"
-      aria-label="Лимит контекста"
+      aria-label="Окно контекста"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(pct * 100)}
@@ -82,7 +90,12 @@ export default function TokenGauge() {
           strokeDashoffset={CIRC * (1 - pct)}
         />
       </svg>
-      <span className="token-gauge-num">{shortTokens(lastTotal)}</span>
+      <span className="token-gauge-num">
+        {shortTokens(occupied)}
+        {limit > 0 ? (
+          <span className="token-gauge-of">/{shortTokens(limit)}</span>
+        ) : null}
+      </span>
       {popOpen && <TokenPopover onHover={cancelClose} onClose={close} />}
     </span>
   )

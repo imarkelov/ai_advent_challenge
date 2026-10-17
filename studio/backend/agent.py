@@ -50,6 +50,9 @@ CONTEXT_LIMITS = {
     "gemma3:27b": 131072,
 }
 DEFAULT_CONTEXT_LIMIT = 32768
+#: Кэш реальных окон моделей Ollama: модель нужна только при запуске
+#: сервера, а `/api/show` — лишний сетевой вызов на каждый `/api/tokens`.
+OLLAMA_WINDOW_TTL = 300.0
 
 # GPustack выдаёт ключу доступ только к «своей» модели, поэтому у моделей —
 # отдельные ключи. Модель -> переменная окружения с ключом; неизвестной —
@@ -1380,6 +1383,79 @@ class StudioAgent:
         return self._last_usage
 
     # ---------- список моделей ----------
+
+    # ---------- реальное окно контекста модели ----------
+
+    def model_context_window(self, model: str) -> int | None:
+        """Фактическое окно модели с учётом параметра `num_ctx`.
+
+        У Ollama два числа: `model_info.<arch>.context_length` — максимум
+        архитектуры (например 40960), и `num_ctx` из Modelfile / опций —
+        то, сколько памяти реально выделяется под контекст (в наших
+        моделях 8192). Работает по МЕНЬШЕМУ: иначе UI обещает место,
+        которого нет. Для удалённых моделей — `CONTEXT_LIMITS`, затем
+        `DEFAULT_CONTEXT_LIMIT`. `None` — провайдеры недоступны.
+        """
+        if not model:
+            return None
+        if model in LOCAL_MODELS or model in getattr(self, "_local_ids", set()) \
+                or self._looks_local(model):
+            window = self._ollama_window(model)
+            if window is not None:
+                return window
+        limit = CONTEXT_LIMITS.get(model)
+        if limit:
+            return limit
+        if model in LOCAL_MODELS or model in getattr(self, "_local_ids", set()):
+            return None
+        return DEFAULT_CONTEXT_LIMIT
+
+    @staticmethod
+    def _looks_local(model: str) -> bool:
+        """Локальные модели дня 26+ — с тегом Ollama (`name:tag`)."""
+        return ":" in model
+
+    def _ollama_window(self, model: str) -> int | None:
+        """`min(num_ctx из параметров, context_length архитектуры)`."""
+        cache = getattr(self, "_window_cache", None)
+        if cache is None:
+            cache = self._window_cache = {}
+        cached = cache.get(model)
+        if cached and time.time() - cached[0] < OLLAMA_WINDOW_TTL:
+            return cached[1]
+        base = self.ollama_base_url.rstrip("/")
+        if base.endswith("/v1"):
+            base = base[:-3]
+        try:
+            resp = self._client.post(base + "/api/show", json={"model": model})
+            if resp.status_code != 200:
+                return None
+            info = resp.json()
+        except (httpx.HTTPError, ValueError):
+            return None
+        arch_len = None
+        for key, value in (info.get("model_info") or {}).items():
+            if key.endswith(".context_length") and isinstance(value, int) and value > 0:
+                arch_len = value
+                break
+        num_ctx = None
+        params = info.get("parameters") or ""
+        if isinstance(params, dict):
+            num_ctx = params.get("num_ctx")
+        else:
+            for line in str(params).splitlines():
+                parts = line.split()
+                if len(parts) >= 2 and parts[0] == "num_ctx":
+                    try:
+                        num_ctx = int(float(parts[1]))
+                    except ValueError:
+                        num_ctx = None
+        if num_ctx and arch_len:
+            window = min(num_ctx, arch_len)
+        else:
+            window = num_ctx or arch_len
+        cache[model] = (time.time(), window)
+        return window
 
     def list_models(self) -> list:
         """Доступные модели API: [{id, context_limit, local}].

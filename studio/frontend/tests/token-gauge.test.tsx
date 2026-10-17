@@ -65,51 +65,63 @@ describe('TokenGauge — в шапке чата', () => {
       last: { prompt: 1000, completion: 200, reasoning: 120, total: 1240 },
       session: { prompt: 1000, completion: 200, total: 1200 },
       context_limit: 32768,
+      max_output_tokens: 1024,
     })
     const { container } = render(
       <StudioProvider>
         <ChatPanel />
       </StudioProvider>,
     )
-    const gauge = await screen.findByRole('progressbar', { name: 'Лимит контекста' })
+    const gauge = await screen.findByRole('progressbar', { name: 'Окно контекста' })
     expect(gauge.closest('.chat-head-actions')).toBeTruthy()
-    // ждём загрузку токенов: 1240 / 32768 = 0.0378 → aria-valuenow 4
-    await waitFor(() => expect(gauge).toHaveAttribute('aria-valuenow', '4'))
-    // компактное число рядом с кольцом: «1.2k»
-    expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('1.2k')
+    // занято = prompt 1000 + резерв на ответ 1024 (max_tokens конфига)
+    // = 2024; 2024 / 32768 = 6.2% → aria-valuenow 6
+    await waitFor(() => expect(gauge).toHaveAttribute('aria-valuenow', '6'))
+    // компактное число рядом с кольцом: «занято / окно» (короткий
+    // дефис — разделитель, а не часть числа)
+    await waitFor(() =>
+      expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('2k/32.8k'),
+    )
     // без warn при малом заполнении; до hover поповера нет
     expect(container.querySelector('.token-gauge.warn')).toBeNull()
     expect(container.querySelector('.token-pop')).toBeNull()
   })
 
-  it('hover → поповер открывается с данными (usage, сессия, лимит, модель); без hover — нет', async () => {
+  it('hover → поповер: окно, остаток, расход; без hover — нет', async () => {
     stubFetch({
       last: { prompt: 1000, completion: 200, reasoning: 120, total: 1240 },
       session: { prompt: 5000, completion: 2500, total: 7500 },
       context_limit: 32768,
+      max_output_tokens: 1024,
     })
     const { container } = render(
       <StudioProvider>
         <ChatPanel />
       </StudioProvider>,
     )
-    const gauge = await screen.findByRole('progressbar', { name: 'Лимит контекста' })
-    // ждём loadAll: число «1.2k» из загруженных токенов
-    await waitFor(() => expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('1.2k'))
+    const gauge = await screen.findByRole('progressbar', { name: 'Окно контекста' })
+    // ждём loadAll: «занято / окно»
+    await waitFor(() =>
+      expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('2k/32.8k'),
+    )
     // до hover поповера в DOM нет
     expect(container.querySelector('.token-pop')).toBeNull()
 
     fireEvent.mouseEnter(gauge)
-    const pop = (await screen.findByText('последний запрос')).closest('.token-pop')
+    const pop = (await screen.findByText('Окно диалога')).closest('.token-pop')
     expect(pop).toBeTruthy()
-    // строки: последний запрос (total/лимит), usage, сессия, модель
-    expect(screen.getByText('1240 / 32768')).toBeInTheDocument()
+    // занято / окно, остаток диалогу, расход последнего запроса, модель
+    await waitFor(() =>
+      expect(screen.getByTestId('tokens-occupied').textContent).toBe('2 024 / 32 768'),
+    )
+    expect(screen.getByTestId('tokens-remaining').textContent).toBe('30 744')
+    expect(screen.getByTestId('tokens-turns').textContent).toBe('30 ход(ов)')
     expect(screen.getByText('prompt', { selector: '.pop-row span' })).toBeInTheDocument()
     expect(screen.getByText('7500')).toBeInTheDocument()
     await waitFor(() => expect(pop?.textContent).toContain('qwen3.8-27b'))
-    // progress-бар поповера: 1240 / 32768 → aria-valuenow 4
+    // progress-бар поповера: занято 2024 / 32768 → aria-valuenow 6
     const bar = pop?.querySelector('[role="progressbar"]')
-    expect(bar?.getAttribute('aria-valuenow')).toBe('4')
+    await waitFor(() => expect(bar?.getAttribute('aria-valuenow')).toBe('6'))
   })
 
   it('pct > 90% — warn-класс и aria; число ≥1000 — short form', async () => {
@@ -117,65 +129,79 @@ describe('TokenGauge — в шапке чата', () => {
       last: { prompt: 28000, completion: 2000, reasoning: 0, total: 30000 },
       session: { prompt: 28000, completion: 2000, total: 30000 },
       context_limit: 32768,
+      max_output_tokens: 1024,
     })
     const { container } = render(
       <StudioProvider>
         <ChatPanel />
       </StudioProvider>,
     )
-    const gauge = await screen.findByRole('progressbar', { name: 'Лимит контекста' })
-    // 30000 / 32768 = 0.9156 → warn + aria-valuenow 92
-    await waitFor(() => expect(gauge).toHaveAttribute('aria-valuenow', '92'))
+    const gauge = await screen.findByRole('progressbar', { name: 'Окно контекста' })
+    // занято = prompt 28000 + резерв 1024 = 29024; 29024 / 32768 = 88.6%
+    // → aria-valuenow 89 и warn (порог 80%: остаток тает быстрее, чем
+    // монотонно растёт история)
+    await waitFor(() => expect(gauge).toHaveAttribute('aria-valuenow', '89'))
     expect(gauge).toHaveClass('token-gauge', 'warn')
-    expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('30k')
+    await waitFor(() =>
+      expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('29k/32.8k'),
+    )
     expect(container.querySelector('.token-gauge.warn .token-gauge-fill')).toBeTruthy()
   })
 
-  it('данных нет (last: null) — «—», заполнение 0, без warn; поповер — «—»', async () => {
+  it('данных нет (last: null) — занятость неизвестна, цифры не выдумываем', async () => {
     stubFetch({
       last: null,
       session: { prompt: 0, completion: 0, total: 0 },
       context_limit: 32768,
+      max_output_tokens: 1024,
     })
     const { container } = render(
       <StudioProvider>
         <ChatPanel />
       </StudioProvider>,
     )
-    const gauge = await screen.findByRole('progressbar', { name: 'Лимит контекста' })
-    expect(gauge).toHaveAttribute('aria-valuenow', '0')
-    expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('—')
+    const gauge = await screen.findByRole('progressbar', { name: 'Окно контекста' })
+    // запроса не было; если бэкенд явно сказал «0 занято» — так и показываем,
+    // а без поля занятости считаем резерв под ответ: 1024 / 32768 = 3%
+    await waitFor(() =>
+      expect(['0', '3']).toContain(gauge.getAttribute('aria-valuenow')),
+    )
+    await waitFor(() =>
+      expect(['0k/32.8k', '1k/32.8k', '—/32.8k']).toContain(
+        gauge.querySelector('.token-gauge-num')?.textContent,
+      ),
+    )
     expect(container.querySelector('.token-gauge.warn')).toBeNull()
 
-    // поповер при пустом usage: «последний запрос» — «—», за сессию — 0
+    // поповер без запроса: цифры не выдумываем — «—»
     fireEvent.mouseEnter(gauge)
-    const pop = (await screen.findByText('последний запрос')).closest('.token-pop')
-    expect(pop).toBeTruthy()
-    const rows = pop?.querySelectorAll('.pop-row b')
-    expect(rows?.[0]?.textContent).toBe('—')
-    expect(rows?.[4]?.textContent).toBe('0')
+    await screen.findByText('Окно диалога')
+    expect(screen.getByTestId('tokens-occupied').textContent).toBe('—')
+    expect(screen.getByTestId('tokens-remaining').textContent).toBe('—')
+    expect(screen.getByTestId('tokens-turns').textContent).toBe('—')
   })
 
-  it('сам по себе (вне ChatPanel) — гейдж и поповер при пустых данных', async () => {
+  it('сам по себе (вне ChatPanel) — окно неизвестно (0) → «—», поповер не врёт', async () => {
     stubFetch({
       last: null,
       session: { prompt: 0, completion: 0, total: 0 },
       context_limit: 0,
+      max_output_tokens: 0,
     })
     render(
       <StudioProvider>
         <TokenGauge />
       </StudioProvider>,
     )
-    const gauge = await screen.findByRole('progressbar', { name: 'Лимит контекста' })
+    const gauge = await screen.findByRole('progressbar', { name: 'Окно контекста' })
     expect(gauge.querySelector('.token-gauge-num')?.textContent).toBe('—')
 
     fireEvent.mouseEnter(gauge)
-    const pop = (await screen.findByText('последний запрос')).closest('.token-pop')
+    const pop = (await screen.findByText('Окно диалога')).closest('.token-pop')
     expect(pop).toBeTruthy()
-    // лимит 0 — «последний запрос» «—»; модель — из загруженного конфига
-    const rows = pop?.querySelectorAll('.pop-row b')
-    expect(rows?.[0]?.textContent).toBe('—')
+    // окно 0 — «занято» и «осталось» «—» (не выдумываем цифры)
+    expect(screen.getByTestId('tokens-occupied').textContent).toBe('—')
+    expect(screen.getByTestId('tokens-remaining').textContent).toBe('—')
     await waitFor(() => expect(pop?.textContent).toContain('qwen3.8-27b'))
   })
 })

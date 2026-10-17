@@ -510,8 +510,17 @@ def test_chat_invariant_violation_post_guard(tmp_path):
 def test_tokens_before_chat(client):
     r = client.get("/api/tokens")
     assert r.status_code == 200
-    assert r.json() == {"last": None, "session": {"prompt": 0, "completion": 0, "total": 0},
-                        "context_limit": 32768}
+    body = r.json()
+    assert body["last"] is None
+    assert body["session"] == {"prompt": 0, "completion": 0, "total": 0}
+    assert body["context_limit"] == 32768
+    # окно и остаток считаются и без запроса: занят только резерв под ответ
+    assert body["context_window"] == 32768
+    assert body["context_window_method"] in ("ollama_show", "static")
+    assert body["used_tokens"] == 0
+    assert body["occupied_tokens"] == body["max_output_tokens"]
+    assert body["remaining_for_dialog"] == 32768 - body["max_output_tokens"]
+    assert body["full_in_turns"] is None
 
 
 def test_tokens_after_chat(client, dialogue_id):
@@ -524,6 +533,11 @@ def test_tokens_after_chat(client, dialogue_id):
     assert t["last"] == {"prompt": 10, "completion": 5, "reasoning": 2, "total": 15}
     assert t["session"] == {"prompt": 10, "completion": 5, "total": 15}
     assert t["context_limit"] == 32768
+    # остаток окна: промпт последнего запроса + резерв под ответ
+    assert t["used_tokens"] == 10
+    assert t["remaining_for_dialog"] == 32768 - 10 - t["max_output_tokens"]
+    # 10 токенов промпта → ещё ~30 полных ходов в окне
+    assert t["full_in_turns"] > 0
 
 
 # ---------- /api/requests ----------

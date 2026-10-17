@@ -93,7 +93,10 @@ function TaskUsedIcon() {
 }
 
 export default function Sidebar() {
-  const { state, newDialogue, activateDialogue, deleteDialogues, renameDialogue } = useStudio()
+  const {
+    state, newDialogue, activateDialogue, deleteDialogues, renameDialogue,
+    closeMobileSidebar,
+  } = useStudio()
   const { dialogues, activeId, memory } = state
 
   // Режим выбора: чекбоксы на строках, переключатель в заголовке «Диалоги»
@@ -169,7 +172,20 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="panel sidebar">
+    <>
+      {/* Затемнение под мобильным сайдбаром: клик закрывает (только CSS-мобильный) */}
+      <div
+        className={
+          state.mobileSidebarOpen ? 'sidebar-backdrop open' : 'sidebar-backdrop'
+        }
+        aria-hidden="true"
+        onClick={closeMobileSidebar}
+      />
+      <aside
+        className={
+          state.mobileSidebarOpen ? 'panel sidebar mobile-open' : 'panel sidebar'
+        }
+      >
       <div className="brand">◆ AI Studio</div>
 
       <section className="side-block">
@@ -230,7 +246,16 @@ export default function Sidebar() {
                   <button
                     type="button"
                     className={d.id === activeId ? 'dialogue active' : 'dialogue'}
-                    onClick={() => (selectMode ? toggleSelect(d.id) : void activateDialogue(d.id))}
+                    onClick={() => {
+                      if (selectMode) {
+                        toggleSelect(d.id)
+                      } else {
+                        void activateDialogue(d.id)
+                        // На телефоне сайдбар — оверлей: после выбора
+                        // диалога его закрываем, иначе чат не виден.
+                        closeMobileSidebar()
+                      }
+                    }}
                   >
                     <span className="dialogue-title">{d.title}</span>
                     {d.used_task && (
@@ -276,7 +301,15 @@ export default function Sidebar() {
             Удалить ({selected.size})
           </button>
         )}
-        <button type="button" className="btn new-dialogue" onClick={() => void newDialogue()}>
+        <button
+          type="button"
+          className="btn new-dialogue"
+          onClick={() => {
+            void newDialogue()
+            // На телефоне после создания диалога сразу показываем чат.
+            closeMobileSidebar()
+          }}
+        >
           + Новый диалог
         </button>
       </section>
@@ -301,6 +334,7 @@ export default function Sidebar() {
           </li>
         </ul>
       </section>
-    </aside>
+      </aside>
+    </>
   )
 }
