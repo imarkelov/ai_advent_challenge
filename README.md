@@ -39,7 +39,8 @@
 | День 29 | [`day29-local-llm-tuning`](https://github.com/imarkelov/ai_advent_challenge/tree/day29-local-llm-tuning) | Оптимизация локальной LLM под задачу «поиск новых сериалов»: профили инференса (temperature 0.7→0.2, max tokens 2048→512, context window 8192 явно), `num_ctx` через нативный `/api/chat` (OpenAI-совместимый эндпоинт его игнорирует), промпт-шаблон с каталогом и запретом выдумывать, каталог из открытых данных Wikidata (400 сериалов), золотой набор и метрики (формат, верность каталогу, ограничения), замер квантования Q4_K_M / Q8_0; e2e_day29 (Part A 8/8 офлайн + Part B live с проверкой `CONTEXT` через `ollama ps`) |
 | День 30 | [`day30-local-llm-service`](https://github.com/imarkelov/ai_advent_challenge/tree/day30-local-llm-service) | Локальная LLM как приватный сетевой сервис: OpenAI-совместимый шлюз (`POST /v1/chat/completions`, `GET /v1/models`) для устройств в локальной сети; API-ключи клиентов (в конфиге только SHA-256, ключ отдаётся один раз), rate limit RPM/TPM на клиента (скользящее окно, 429 + Retry-After), лимит контекста с автоматической LLM-компрессией старых ходов (сводка цепочкой моделей, последний вопрос сохраняется) и честный 413, потолок ответа, учёт использования и лог отказов; вкладка «Сервис» (адрес в LAN, клиенты, живые счётчики, отказы); Ollama остаётся на loopback — наружу смотрит только шлюз; e2e_day30 (Part A 13/13 офлайн + Part B 8/8 live: реальный LAN-запрос, rate limit, компрессия) |
 | Дни 30–34 | [`day30-34-dev-assistant`](https://github.com/imarkelov/ai_advent_challenge/tree/day30-34-dev-assistant) | Единый AI-ассистент разработчика и поддержки: **RAG по документации и коду проекта** (отдельный индекс `data/kb/project.db`, корпус README/docs/openspec/backend/frontend/scripts с исключением `.venv`/`node_modules`/`data`), **ревью изменений** (разбор unified diff → детерминированные находки с severity и номером строки: `secret`/`bare_except`/`missing_test`/`missing_docs`/`print_call`/`long_line`/`todo` — работает без LLM), **поддержка по тикетам** с персонализацией из CRM (`data/crm/users.json`+`tickets.json`, применённые поля видны в ответе), **5 автономных файловых сценариев** по цели (`find_usages`, `update_docs`, `generate` ADR/changelog/README, `check_invariants`, `diff_report`) с записью только в allow-list (`README.md`/`docs/`/`openspec/`/`CHANGELOG.md`) и отказом вне проекта, git-контекст (только чтение, без мутаций), вкладка «Ассистент» (🛠); `e2e_day31.py` (Part A 17/17 офлайн + Part B live на реальной Ollama) |
-| День 35 | [`day35-cli-md-agents`](https://github.com/imarkelov/ai_advent_challenge/tree/day35-cli-md-agents) | CLI ассистента + агенты в Markdown: терминальный вход в те же модули (`studio/backend/cli.py` — тонкая обёртка над `AssistantService`, без дублей логики RAG/ревью/CRM/сценариев); определения агентов в `agents/*.md` — **4 агента × 2 исполнения = 8 файлов** (`project-qa`, `code-review`, `support`, `file-ops` — каждый `.api.md` и `.cli.md`) с frontmatter (name/execution/description/tools/temperature) и телом-промптом, различающимся по каналу (API — структура/UI, CLI — markdown/пути `файл:строка`/без HTML); команды `agents list|show`, `ask`, `review` (`--fail-on-high` для CI), `tickets`, `support`, `scenarios`, `scenario`, `index`, `status`, `git`; вывод markdown/`--json`/`--out`, коды возврата 0/1, ошибки в stderr без traceback; типизация `--param` (`dry_run=false` реально пишет, а не молча пропускает); `e2e_day32.py` (Part A 26/26 офлайн как реальный подпроцесс + Part B live) |
+| День 32 | [`day32-pr-review`](https://github.com/imarkelov/ai_advent_challenge/tree/day32-pr-review) | Автоматическое AI-ревью PR в CLI + GitHub Action: пайплайн `.github/workflows/ai-review.yml` → действие `.github/actions/ai-pr-review` на `pull_request` (opened/synchronize/reopened), diff и изменённые файлы из git (`base...HEAD`) или API GitHub для форков, RAG по документации и коду проекта (фрагменты README/docs/openspec/кода подбираются к добавленным строкам), детерминированные проверки + инварианты в diff, ревью моделью (`agents/pr-review.cli.md` → **потенциальные баги / архитектурные проблемы / рекомендации**), комментарий в PR (идемпотентный), аннотации `::error`/`::warning` на строки, Summary и артефакт; бюджет промпта под окно Ollama 8192; `cli.py pr-review check|run` (`--diff`/`-`, `--base`, `--github-pr`, `--fail-on-high`, `--no-llm`); модель из `LLM_MODEL`/`LLM_BASE_URL`/`LLM_API_KEY` (Ollama или OpenAI-совместимый сервер), без ключа — детерминированный отчёт; e2e_day32 (Part A 22/22 офлайн + Part B 4/4 live) |
+| День 35 | [`day35-cli-md-agents`](https://github.com/imarkelov/ai_advent_challenge/tree/day35-cli-md-agents) | CLI ассистента + агенты в Markdown: терминальный вход в те же модули (`studio/backend/cli.py` — тонкая обёртка над `AssistantService`, без дублей логики RAG/ревью/CRM/сценариев); определения агентов в `agents/*.md` — **4 агента × 2 исполнения = 8 файлов** (`project-qa`, `code-review`, `support`, `file-ops` — каждый `.api.md` и `.cli.md`) с frontmatter (name/execution/description/tools/temperature) и телом-промптом, различающимся по каналу (API — структура/UI, CLI — markdown/пути `файл:строка`/без HTML); команды `agents list|show`, `ask`, `review` (`--fail-on-high` для CI), `tickets`, `support`, `scenarios`, `scenario`, `index`, `status`, `git`; вывод markdown/`--json`/`--out`, коды возврата 0/1, ошибки в stderr без traceback; типизация `--param` (`dry_run=false` реально пишет, а не молча пропускает); `e2e_day35.py` (Part A 26/26 офлайн как реальный подпроцесс + Part B live) |
 
 ## День 7: как работает сервис
 
@@ -3901,3 +3902,190 @@ ollama pull bge-m3                      # один раз, ~1.2 ГБ
 считает его точным, но следующий ход вырастет на длину истории, поэтому
 `full_in_turns` — оптимистичная оценка «сейчас». Точный профиль памяти
 (llm-токены по блокам) не измеряется — цена в отдельном вызове модели.
+
+---
+
+## День 32: автоматизация ревью кода (CLI + GitHub Action)
+
+### Задание и что сделано
+
+Задание — настроить пайплайн, в котором ассистент анализирует новый PR:
+получает diff и изменённые файлы, использует RAG (документация + код) и
+выдаёт текст ревью с тремя блоками — **потенциальные баги**,
+**архитектурные проблемы**, **рекомендации**.
+
+Реализовано **только в CLI** (без веб-вкладки): пайплайн —
+`studio/backend/pr_review.py` + команда `cli.py pr-review`, запуск —
+GitHub Action `.github/workflows/ai-review.yml`, который вызывает
+переиспользуемое действие `.github/actions/ai-pr-review`.
+
+```
+pull_request (opened / synchronize / reopened / ready_for_review)
+  │
+  ▼  .github/workflows/ai-review.yml      права: contents read, pull-requests write
+  │     concurrency: новый пуш отменяет ревью старой версии
+  │
+  ▼  .github/actions/ai-pr-review
+  ├─ (1) cli.py pr-review check          что доступно пайплайну: RAG, LLM, git, PR
+  ├─ (2) cli.py index                    индекс корпуса проекта (документация + код)
+  ├─ (3) cli.py pr-review run
+  │        ├─ diff и изменённые файлы    git diff origin/<base>...HEAD
+  │        │                              или API GitHub (PR из форка)
+  │        ├─ RAG                        фрагменты README/docs/openspec/кода,
+  │        │                              релевантные добавленным строкам
+  │        ├─ проверки                   check_diff + инварианты проекта в diff
+  │        ├─ модель                     agents/pr-review.cli.md → 3 блока
+  │        └─ отчёт                      review.md + review.json
+  ├─ (4) комментарий в PR                идемпотентно: повторный прогон обновляет
+  ├─ (5) аннотации ::error/::warning     на строки diff во вкладке Files changed
+  └─ (6) $GITHUB_STEP_SUMMARY, артефакт ai-pr-review (markdown + JSON, 30 дней)
+```
+
+### Как пользоваться
+
+```bash
+# 1. Локально: ревью ветки против master (как в CI)
+.venv/bin/python studio/backend/cli.py pr-review check
+.venv/bin/python studio/backend/cli.py index
+.venv/bin/python studio/backend/cli.py pr-review run --base origin/master \
+    --out review.md --json-out review.json
+
+# 2. Пайп: diff из stdin, отчёт в stdout
+git diff origin/master...HEAD | .venv/bin/python studio/backend/cli.py \
+    pr-review run --diff -
+
+# 3. Блокирующий режим для CI: код 1 при находке уровня «критично»
+.venv/bin/python studio/backend/cli.py pr-review run --diff pr.diff --fail-on-high
+
+# 4. PR из форка: ветки нет в рабочем дереве — diff берётся из API
+.venv/bin/python studio/backend/cli.py pr-review run --github-pr owner/repo#42
+```
+
+Ключи опций: `--annotations` (workflow-команды), `--comment OWNER/REPO#N`
+(комментарий в PR), `--step-summary FILE` (сводка в Summary запуска),
+`--title`, `--top-k` (фрагментов RAG на файл), `--json` / `--out` /
+`--json-out`, `--no-llm` (детерминированный режим).
+
+### Как включается модель в CI
+
+В Action модель задаётся секретом и переменными репозитория
+(Settings → Secrets and variables → Actions):
+
+| Что | Где | Значение по умолчанию |
+|---|---|---|
+| `LLM_API_KEY` | **secret** | пусто → детерминированный отчёт |
+| `LLM_MODEL` | variable | `openai/gpt-4o-mini` |
+| `LLM_BASE_URL` | variable | `https://openrouter.ai/api/v1` |
+
+Это любой OpenAI-совместимый сервер: OpenRouter, OpenAI, vLLM,
+**собственная Ollama на VPS** (`LLM_MODEL=qwen3:8b`,
+`LLM_BASE_URL=http://<адрес>:11434/v1`). Локальный `localhost:11434` из
+GitHub Actions недоступен — поэтому `AssistantService._llm` дня 32
+умеет брать модель из `LLM_*` (поведение дней 28–36 по умолчанию не
+меняется: без `LLM_MODEL` используется конфиг Студии).
+
+Без ключа пайплайн **не падает**: отчёт строится детерминированно
+(изменённые файлы, находки, рекомендации по правилам проекта), а в
+комментарии и Summary прямо написано, что модель недоступна и почему.
+
+### Что сделано в деталях
+
+1. **Diff и изменённые файлы** — три источника, один разбор
+   (`assistant.parse_unified_diff`): файл, stdin (`-`), git
+   (`--base <ref>...HEAD`), API GitHub для форков. Файлы получают статус
+   `added`/`modified`/`renamed`/`deleted` (переименование — парой
+   `old → new`) и счётчики `+/-`. Пустой diff — ошибка, а не молчаливая
+   подмена изменениями рабочего дерева.
+2. **RAG по документации и коду** — дифф режется на окна; из окна
+   берутся термины (идентификаторы кода, имена модулей, слова без
+   стоп-слов Python/JS), по ним ищется корпус проекта (`README`,
+   `docs/`, `openspec/`, код бэкенда и фронтенда — индекс `cli.py
+   index`, сеть не нужна). В промпт попадают фрагменты с пометкой
+   «связано с `<изменённый файл>`» — модель понимает, с чем сопоставляет
+   документацию. Промпты агентов `agents/*.md` ищутся отдельно: правка
+   инструкции модели — тоже архитектурное изменение.
+3. **Детерминированные проверки** — `assistant.check_diff`
+   (`secret`, `bare_except`, `missing_test`, `missing_docs`,
+   `print_call`, `long_line`, `todo`) плюс **инварианты проекта,
+   сработавшие именно в добавленных строках** (`print` в бэкенде,
+   документированный публичный API через `__all__`, tagged-log): правило
+   применяется к «виртуальному файлу» из строк `+`, поэтому
+   унаследованные нарушения в PR не шумят, а две проверки дня 32 —
+   изменение зависимостей без документации и правка CI — дают
+   предупреждения даже когда код не тронут.
+4. **Ревью моделью** — промпт агента `agents/pr-review.cli.md`
+   (frontmatter + тело, как в дне 35) и контекст: метаданные PR, дифф,
+   находки, RAG-фрагменты, промпты агентов. Ответ разбирается в три
+   секции: XML-теги, markdown-заголовки или пункты списка; нераспознанный
+   ответ не теряется, а уходит в «Рекомендации», «нечего сказать» —
+   не считается находкой.
+5. **Отчёт** — markdown для комментария PR: заголовок, сводка цифр,
+   таблица изменённых файлов, три блока, детерминированные находки,
+   «сворачиваемый» блок RAG (на что опиралось ревью); JSON для
+   машинной обработки (`review.json`); короткая сводка для
+   `$GITHUB_STEP_SUMMARY`; аннотации `::error` (критично) и
+   `::warning` на строки diff.
+6. **Идемпотентный комментарий** — отчёт несёт маркер
+   `<!-- ai-pr-review -->`; повторный прогон обновляет прежний
+   комментарий (PATCH), а не плодит новые.
+7. **Форки и права** — для PR из форка diff и файлы читаются через API
+   (`GET /repos/{repo}/pulls/{n}` с `Accept: …v3.diff`); `GITHUB_TOKEN`
+   на таких PR имеет только `read`, поэтому публикация комментария —
+   «best effort»: при отказе отчёт остаётся артефактом и в Summary.
+8. **Бюджет промпта** — найденная живой проверкой проблема: у Ollama
+   окно **8192 токена**, и большой PR упирался в `HTTP 400 «exceeds the
+   available context size»`. Промпт собирается по долям бюджета
+   (метаданные 6 %, находки 14 %, дифф 44 %, RAG 26 %, промпты агентов
+   10 %), усечение видно в `prompt` JSON-отчёта; лимит —
+   `REVIEW_MAX_PROMPT_CHARS` (по умолчанию 26 000 символов ≈ 6–7 тыс.
+   токенов).
+
+### Живая проверка
+
+Один и тот же прогон на ветке дня 32 (`git diff origin/master...HEAD` —
+17 файлов, +13 194 строки) реальной локальной моделью
+`josiefied-qwen3-8b-abliterated`:
+
+| Проверка | Результат |
+|---|---|
+| `pr-review check` | RAG: индекс 233 док. / 4 594 чанка; LLM: модель из `LLM_*`; git доступен |
+| `pr-review run --base origin/master` | **3 мин 11 с**; баги 6, архитектура 5, рекомендации 5 — с путями `файл:строка` |
+| До бюджета промпта | `HTTP 400 … exceeds the available context size (8192)` — исправлено (см. п. 8) |
+| Живая модель на CI-подобном кейсе | `✅ RAG`, три блока: 6 / 4 / 5 пунктов, аннотации на строки 6 и 13 |
+
+### Проверка
+
+| Проверка | Результат |
+|---|---|
+| E2E дня 32 | `scripts/e2e_day32.py` — **PASS 26, FAIL 0, SKIP 0** (Part A 22 офлайн: ожидание/индекс/три блока/что видит модель/RAG/проверки/git/stdin/`--fail-on-high`/деградация/аннотации/Summary/артефакты/комментарий/форк/пустой diff/файлы Action/промпт агента/отчёт; Part B 4 live) |
+| Тесты дня 32 | `tests/test_day32_pr_review.py` — **36 passed** (CLI подпроцессом в сборном git-репозитории, модель — фейковый OpenAI-сервер, GitHub — фейковый REST, сеть не используется) |
+| Регрессия бэкенда | `studio/backend/tests` — **1207 passed, 6 skipped** |
+| Промпт агента | `agents/pr-review.cli.md` — только CLI-исполнение; в API-запросе реестр честно помечает `fallback` |
+
+Демо-видео дня 32: `day32_ai_pr_review.mp4` (1 мин 57 с, папка
+`ai_advent_day32_video` на рабочем столе) — кадры собраны из
+**реального вывода** пайплайна живой моделью (`scripts/make_day32_video.py`
+плюс сценарий `scripts/day32_video_script.json`).
+Пайплайн на GitHub — `.github/workflows/ai-review.yml` и
+`.github/actions/ai-pr-review/action.yml`.
+
+```bash
+# Проверка (из корня репозитория)
+.venv/bin/python scripts/e2e_day32.py --part-a-only     # ожидание → индекс → ревью → PR
+.venv/bin/python scripts/e2e_day32.py                   # + живая Ollama (Part B)
+.venv/bin/python -m pytest tests/test_day32_pr_review.py -q
+```
+
+**Ограничения (осознанные).** (1) У эмбеддера корпуса в CI —
+офлайн hash-режим (`cli.py index` без ключей): семантика слабее, чем у
+bge-m3 в автономном ассистенте, зато прогон детерминирован и не зависит
+от сети; порог релевантности не применяется, лишние фрагменты
+отсекаются бюджетом промпта. (2) Одна модель отвечает за три блока —
+баг, не видимый в 26 тыс. символов контекста, не будет найден; для
+больших PR сборка Action обрезает дифф и пишет об этом в отчёте.
+(3) `--fail-on-high` смотрит только на детерминированные находки:
+пункты модели не блокируют merge (решение за человеком). (4) Если в
+CI-репозитории нет `docs/` и `agents/`, RAG работает по тому корпусу,
+который есть; отсутствие индекса — предупреждение, а не провал.
+(5) Комментарий в PR публикуется по маркеру отчёта, поэтому ручная
+правка содержимого комментария перезапишется следующим прогоном.

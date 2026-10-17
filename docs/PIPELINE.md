@@ -10,6 +10,7 @@
 | Вход | Кто запускает | Промпт агента |
 |---|---|---|
 | CLI | `studio/backend/cli.py`, `ask` / `review` / `support` / `scenario` | `agents/<name>.cli.md` |
+| CI (GitHub Action) | `cli.py pr-review run` на `pull_request` (день 32) | `agents/pr-review.cli.md` |
 | CLI (автономный) | `dev_assistant.py`, вопрос без команды | `SYSTEM_PROMPT` в `dev_assistant.py` (свой инструмент, свой поиск) |
 | Веб | `AssistantTab.tsx` → `POST /api/assistant/*` | `agents/<name>.api.md` |
 
@@ -68,7 +69,37 @@ git diff → assistant.py :: parse_unified_diff   (parse_unified_diff)
 Модель **не ищет** проблемы — она только объясняет уже найденные
 (промпт это запрещает прямо).
 
-## 3. Поддержка по тикетам (CRM)
+## 3. Ревью PR в CI (день 32)
+
+```
+pull_request (opened/synchronize/reopened)
+  ▼ .github/workflows/ai-review.yml → .github/actions/ai-pr-review
+  ▼ (1) cli.py pr-review check     pr_review.preflight: индекс, LLM, git, PR
+  ▼ (2) cli.py index               индекс корпуса проекта (hash-эмбеддер, офлайн)
+  ▼ (3) cli.py pr-review run
+       pr_review.load_diff        git diff origin/<base>...HEAD
+                                  | API GitHub (форк) | файл | stdin
+       pr_review.build_changed_files   added/modified/renamed/deleted + +/-
+       pr_review.retrieve_context      RAG: окна по хункам → термины →
+                                        pkb.search_project → фрагменты [i]
+       pr_review.check_invariants_in_diff / check_global
+       pr_review.build_review_prompt   агент (agents/pr-review.cli.md) +
+                                        дифф + находки + RAG (бюджет долями)
+       service._llm                LLM_MODEL/LLM_BASE_URL (Ollama или
+                                   OpenAI-совместимый) либо конфиг Студии
+       pr_review.parse_llm_review  <bugs>/<architecture>/<recommendations>
+                                   или markdown-заголовки → 3 секции
+  ▼ (4) отчёт
+       render_markdown   → --comment (PATCH/POST по маркеру) и артефакт
+       render_step_summary → $GITHUB_STEP_SUMMARY
+       annotations       → ::error/::warning file=…,line=…
+  ▼ (5) код возврата: 1 при --fail-on-high и находке уровня «критично»
+```
+
+Сети у поиска нет; LLM — единственный сетевой шаг. Без неё отчёт всё
+равно содержит файлы, находки, инварианты и рекомендации по правилам.
+
+## 4. Поддержка по тикетам (CRM)
 
 ```
 ticket_id → assistant.py :: TicketStore.context  (data/crm/*.json)
@@ -77,7 +108,7 @@ ticket_id → assistant.py :: TicketStore.context  (data/crm/*.json)
           → без модели — _fallback_support (факты CRM + фрагменты БЗ)
 ```
 
-## 4. Автономный CLI-ассистент (`dev_assistant.py`)
+## 5. Автономный CLI-ассистент (`dev_assistant.py`)
 
 Отдельный инструмент дня 31 — не использует сервис `assistant.py`,
 поэтому у него свой поиск и свой промпт:
@@ -103,7 +134,7 @@ ticket_id → assistant.py :: TicketStore.context  (data/crm/*.json)
 отвечал не по запросу. `bge-m3` различает в разы — см. README,
 раздел «День 36».
 
-## 5. Токены и окно диалога
+## 6. Токены и окно диалога
 
 ```
 GET /api/tokens
@@ -130,12 +161,16 @@ GET /api/tokens
 LLMClient.last_usage`), окно — `LLMClient.context_window()` из `/api/show`.
 В вызов модели `num_ctx` передаётся из модели, а не константой 8192.
 
-## 6. Где что лежит (сводная таблица)
+## 7. Где что лежит (сводная таблица)
 
 | Что | Файл |
 |---|---|
 | Промпты агентов (веб) | `agents/<name>.api.md` |
 | Промпты агентов (CLI) | `agents/<name>.cli.md` |
+| Ревью PR: пайплайн, RAG, отчёт | `studio/backend/pr_review.py` |
+| CI: триггер и права | `.github/workflows/ai-review.yml` |
+| CI: шаги ревью (переиспользуемое действие) | `.github/actions/ai-pr-review/action.yml` |
+| Модель для CI из окружения | `assistant.py :: AssistantService._llm`, `_env_llm_target` |
 | Разбор и реестр агентов | `studio/backend/agents.py` |
 | Сервис: поиск, ревью, CRM, сценарии | `studio/backend/assistant.py` |
 | Индекс и гибридный поиск (веб) | `studio/backend/kb.py` |
@@ -147,7 +182,7 @@ LLMClient.last_usage`), окно — `LLMClient.context_window()` из `/api/sho
 | Список агентов в API | `GET /api/assistant/agents` |
 | Токены и остаток окна | `GET /api/tokens`, `TokenGauge.tsx`, `TokenPopover.tsx` |
 
-## 7. Как проверить руками
+## 8. Как проверить руками
 
 ```bash
 # из корня репозитория
@@ -163,4 +198,9 @@ $PY studio/backend/cli.py ask "для чего нужен агент support?"
 
 # автономный ассистент
 $PY dev_assistant.py "где лежит архитектура пайплайна?"
+
+# ревью PR как в CI: что доступно, затем отчёт по ветке
+$PY studio/backend/cli.py pr-review check
+$PY studio/backend/cli.py pr-review run --base origin/master --out review.md
+git diff origin/master...HEAD | $PY studio/backend/cli.py pr-review run --diff -
 ```

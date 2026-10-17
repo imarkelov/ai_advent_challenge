@@ -1,3 +1,78 @@
+# Release Notes — day32-pr-review (день 32)
+
+Ветка: `day32-pr-review` (от `day31-cli-assistant`).
+
+## Что в релизе
+
+**Автоматическое AI-ревью pull request: пайплайн в GitHub Actions,
+который получает diff и изменённые файлы, поднимает RAG по документации и
+коду проекта и публикует ревью с тремя блоками — потенциальные баги,
+архитектурные проблемы, рекомендации. Только CLI, без веб-вкладки.**
+
+Сделано:
+
+1. **Пайплайн** — `.github/workflows/ai-review.yml` (триггер
+   `pull_request`: opened / synchronize / reopened / ready_for_review,
+   `concurrency` отменяет ревью устаревшей версии, права `contents: read`
+   + `pull-requests: write`) вызывает переиспользуемое действие
+   `.github/actions/ai-pr-review` (его можно подключить в другом
+   репозитории): `pr-review check` → `index` → `pr-review run` →
+   комментарий в PR → аннотации → Summary → артефакт.
+2. **Ядро** — `studio/backend/pr_review.py`: diff из файла / stdin / git /
+   API GitHub (форки), изменённые файлы со статусами, RAG-окна по
+   хункам, инварианты проекта в добавленных строках, промпт с бюджетом,
+   разбор ответа модели в три секции, markdown/JSON-отчёт, preflight,
+   идемпотентный комментарий, workflow-аннотации.
+3. **CLI** — `cli.py pr-review check|run` с `--diff` (`-` = stdin),
+   `--base`, `--github-pr`, `--title`, `--top-k`, `--fail-on-high`,
+   `--annotations`, `--comment`, `--step-summary`, `--json`, `--out`,
+   `--json-out`, `--no-llm`.
+4. **Модель в CI** — `AssistantService._llm` берёт модель из `LLM_MODEL` /
+   `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_BACKEND` (Ollama или любой
+   OpenAI-совместимый сервер), иначе — конфиг Студии (прежнее поведение);
+   без ключа пайплайн работает детерминированно и честно об этом пишет.
+5. **Агент** — `agents/pr-review.cli.md` (frontmatter + тело-промпт):
+   три раздела, только факты из диффа/RAG/находок, номера строк из диффа.
+
+## Что найдено живой проверкой (и исправлено)
+
+| Находка | Исправление |
+|---|---|
+| Большой PR у Ollama давал `HTTP 400 … exceeds the available context size (8192)` | промпт собирается по долям бюджета (26 000 символов ≈ 6–7 тыс. токенов), усечение видно в `prompt` отчёта |
+| Первой «чат-моделью» в `/api/tags` могла оказаться embedding-модель (`bge-m3`) → 400 на `/chat/completions` | Part B e2e выбирает модель с capability `completion` |
+| `agents/pr-review.api.md` отсутствует → `AgentRegistry` помечал бы api-запрос `fallback` | в CLI-пути промпт берётся из `.cli.md`; в тестах реестра `pr-review` учтён явно |
+| `scripts/e2e_day32.py` содержал e2e дня 35 (ошибка имени) | переименован в `scripts/e2e_day35.py`, день 32 получил свой e2e |
+| RAG возвращал случайные фрагменты по односложным «stem»-запросам (`new`, `readme`) | код-термины, стоп-слова Python/JS, stem только для файлов со строками изменений |
+
+## Проверка
+
+| Проверка | Результат |
+|---|---|
+| `scripts/e2e_day32.py` | **PASS 26, FAIL 0, SKIP 0** (Part A 22 офлайн + Part B 4 live на локальной Ollama `josiefied-qwen3-8b-abliterated`) |
+| `tests/test_day32_pr_review.py` | **36 passed** |
+| `studio/backend/tests` | **1207 passed, 6 skipped** |
+| `tests/test_day31_cli.py`, `tests/test_day31_rag_relevance.py` | см. прогон в разделе проверки |
+| Живой прогон на ветке | 17 файлов / +13 194 строки → 3 мин 11 с, три блока заполнены моделью |
+
+```bash
+.venv/bin/python scripts/e2e_day32.py --part-a-only
+.venv/bin/python -m pytest tests/test_day32_pr_review.py -q
+```
+
+## Коммиты
+
+| Коммит | Что |
+|---|---|
+| `feat(day32)`: пайплайн ревью PR | `studio/backend/pr_review.py` — diff/файлы, RAG, проверки, промпт, отчёт, GitHub |
+| `feat(day32)`: CLI `pr-review` | `cli.py` — `check`/`run`, stdin, `--github-pr`, комментарий, аннотации |
+| `feat(day32)`: GitHub Action | `.github/workflows/ai-review.yml`, `.github/actions/ai-pr-review/action.yml` |
+| `feat(day32)`: агент ревью PR | `agents/pr-review.cli.md` |
+| `feat(llm)`: модель из окружения | `AssistantService._llm` + `_env_llm_target` (Ollama / OpenAI-совместимый) |
+| `test(day32)`: e2e и тесты | `scripts/e2e_day32.py`, `tests/test_day32_pr_review.py` |
+| `docs(day32)`: README/RELEASE/PIPELINE/AGENTS/`.env.example` | раздел дня 32, карта пайплайна, переменные окружения |
+
+---
+
 # Release Notes — day31-cli-assistant (дни 30–37)
 
 Ветка: `day31-cli-assistant` (от `day30-34-dev-assistant`).
