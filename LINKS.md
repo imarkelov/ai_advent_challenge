@@ -4,8 +4,10 @@
 
 - GitHub: <https://github.com/imarkelov/ai_advent_challenge/tree/day32-pr-review>
 - Базовая ветка: `day31-cli-assistant`
-- Pull request: `day32-pr-review → day31-cli-assistant` — на нём сам
-  пайплайн `.github/workflows/ai-review.yml` и запускается.
+- Pull request: ветка запушена, PR не создавался (по просьбе). Чтобы
+  пайплайн сработал, откройте PR `day32-pr-review → day31-cli-assistant`:
+  <https://github.com/imarkelov/ai_advent_challenge/compare/day31-cli-assistant...day32-pr-review?expand=1>
+  — `.github/workflows/ai-review.yml` запустится на нём.
 
 ## Демо-видео (день 32: AI-ревью PR)
 
