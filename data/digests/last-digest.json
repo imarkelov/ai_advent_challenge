@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261017-1453",
-  "generated_at": "2026-10-17T14:53:44Z",
+  "id": "digest-20261017-2002",
+  "generated_at": "2026-10-17T20:02:50Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 14.7,
-    "feels_like_c": 12.7,
+    "temp_c": 11.6,
+    "feels_like_c": 9.8,
     "description": "Пасмурно",
-    "wind_ms": 5.5
+    "wind_ms": 3.6
   },
   "news": {
     "vc.ru": [
@@ -33,6 +33,10 @@
     ],
     "habr": [
       {
+        "title": "Apple в правилах App Store запретила разработчикам скрывать реальные возможности приложений на время модерации",
+        "url": "https://habr.com/ru/news/1095676/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095676"
+      },
+      {
         "title": "Claude за полчаса разгадал загадку АНБ, которой больше 25 лет. Ответ был у криптографов под носом",
         "url": "https://habr.com/ru/news/1095620/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095620"
       },
@@ -47,10 +51,6 @@
       {
         "title": "TSMC рассматривает возможность работы с проектом Илона Маска в Техасе",
         "url": "https://habr.com/ru/companies/selectel/news/1095094/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095094"
-      },
-      {
-        "title": "Razer представила игровую беспроводную гарнитуру Barracuda V2 Pro",
-        "url": "https://habr.com/ru/news/1095612/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095612"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261017-1453: Самара 14.7°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261017-2002: Самара 11.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
