@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261017-0251",
-  "generated_at": "2026-10-17T02:51:20Z",
+  "id": "digest-20261017-1006",
+  "generated_at": "2026-10-17T10:06:02Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 9.5,
-    "feels_like_c": 7.8,
+    "temp_c": 14.8,
+    "feels_like_c": 12.7,
     "description": "Пасмурно",
-    "wind_ms": 4.7
+    "wind_ms": 7.3
   },
   "news": {
     "vc.ru": [
@@ -19,38 +19,38 @@
         "url": "https://vc.ru/transport/3197814-tesla-predstavila-obnovlennyj-roadster?from=rss"
       },
       {
+        "title": "Криптобиржа Bitget внесла Россию в список стран, в которых запрещено пользоваться сервисом",
+        "url": "https://vc.ru/crypto/3199827-kriptobirzha-bitget-zapret-rossiya-i-belarusiya?from=rss"
+      },
+      {
         "title": "«Яндекс» восстановил доступ к кабинету «Бизнеса», просмотр отчётов в «Метрике» и работу основных инструментов в «Вебмастере»",
         "url": "https://vc.ru/marketing/3199382-yandeks-vosstanovil-dostup-k-biznes-kabinetu?from=rss"
       },
       {
         "title": "«Вкусно — и точка» начала тестировать выдачу заказов через постаматы внутри ресторанов",
         "url": "https://vc.ru/food/3198689-vkusno-i-tochka-testiruet-vydachu-zakazov-cherez-postamaty?from=rss"
-      },
-      {
-        "title": "«Самокат» начал предлагать пользователям доплатить за оформление заказа ниже минимальной суммы",
-        "url": "https://vc.ru/services/3198317-samakot-predlagaet-dostavku-pri-zakaze-nizhe-minimalnoy-summyi?from=rss"
       }
     ],
     "habr": [
       {
+        "title": "Google обсуждает с книжными издателями запуск официального раздела с аудиокнигами на YouTube",
+        "url": "https://habr.com/ru/news/1095574/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095574"
+      },
+      {
+        "title": "Sony представила новый Walkman за 5 899 $ с корпусом из позолоченной меди",
+        "url": "https://habr.com/ru/companies/selectel/news/1095086/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095086"
+      },
+      {
+        "title": "Выпуск платформы совместной разработки Forgejo v17.0",
+        "url": "https://habr.com/ru/news/1095210/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095210"
+      },
+      {
+        "title": "Релиз Memtest86+ v9.00",
+        "url": "https://habr.com/ru/news/1095106/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095106"
+      },
+      {
         "title": "NVIDIA выпустила Nemotron 3.5 Super VL",
         "url": "https://habr.com/ru/companies/bothub/news/1095494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095494"
-      },
-      {
-        "title": "LinkedIn запустила новые инструменты для заработка прямо на платформе: платные консультации и монетизацию видео",
-        "url": "https://habr.com/ru/news/1095464/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095464"
-      },
-      {
-        "title": "Неизменяемые операционные системы, ИИ и победители конкурса: итоги ХXII конференции разработчиков свободных программ",
-        "url": "https://habr.com/ru/companies/basealtspo/news/1095414/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095414"
-      },
-      {
-        "title": "Meta* выпустила SDK для разработки браузерных VR‑приложений",
-        "url": "https://habr.com/ru/news/1095402/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095402"
-      },
-      {
-        "title": "Представлен открытый плеер CloudMus для «Яндекс Музыки» и YouTube Music для ПК на Linux и Windows",
-        "url": "https://habr.com/ru/news/1095396/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095396"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261017-0251: Самара 9.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261017-1006: Самара 14.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
