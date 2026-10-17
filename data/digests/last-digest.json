@@ -1,10 +1,10 @@
 {
-  "id": "digest-20261016-2027",
-  "generated_at": "2026-10-16T20:27:51Z",
+  "id": "digest-20261017-0251",
+  "generated_at": "2026-10-17T02:51:20Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 12.3,
-    "feels_like_c": 11.1,
+    "temp_c": 9.5,
+    "feels_like_c": 7.8,
     "description": "Пасмурно",
     "wind_ms": 4.7
   },
@@ -19,12 +19,12 @@
         "url": "https://vc.ru/transport/3197814-tesla-predstavila-obnovlennyj-roadster?from=rss"
       },
       {
-        "title": "«Вкусно — и точка» начала тестировать выдачу заказов через постаматы внутри ресторанов",
-        "url": "https://vc.ru/food/3198689-vkusno-i-tochka-testiruet-vydachu-zakazov-cherez-postamaty?from=rss"
-      },
-      {
         "title": "«Яндекс» восстановил доступ к кабинету «Бизнеса», просмотр отчётов в «Метрике» и работу основных инструментов в «Вебмастере»",
         "url": "https://vc.ru/marketing/3199382-yandeks-vosstanovil-dostup-k-biznes-kabinetu?from=rss"
+      },
+      {
+        "title": "«Вкусно — и точка» начала тестировать выдачу заказов через постаматы внутри ресторанов",
+        "url": "https://vc.ru/food/3198689-vkusno-i-tochka-testiruet-vydachu-zakazov-cherez-postamaty?from=rss"
       },
       {
         "title": "«Самокат» начал предлагать пользователям доплатить за оформление заказа ниже минимальной суммы",
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261016-2027: Самара 12.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261017-0251: Самара 9.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
