@@ -36,10 +36,12 @@ try:                                    # пакет: studio.backend.cli
     from .assistant import AssistantError, AssistantService, ScenarioError
     from .agents import AgentError, AgentRegistry
     from .agent import StudioAgent
+    from . import pr_review
 except ImportError:                     # flat: backend-каталог в sys.path
     from assistant import AssistantError, AssistantService, ScenarioError
     from agents import AgentError, AgentRegistry
     from agent import StudioAgent
+    import pr_review
 
 # Каталог агентов по умолчанию — `<repo>/agents` (три уровня вверх от
 # studio/backend/cli.py). Модуль живёт в studio/backend, а не в studio/:
@@ -521,6 +523,107 @@ def cmd_scenario(args, svc, reg) -> int:
     return 0
 
 
+def _flag(args, name: str) -> bool:
+    """Значение флага, даже если у подкоманды его нет (общий `--no-llm`)."""
+    return bool(getattr(args, name, False))
+
+
+def _read_text_source(path: str, what: str) -> str:
+    """Прочитать файл по пути; `-` — stdin (пайп в CI: `git diff | cli`)."""
+    if path == "-":
+        return sys.stdin.read()
+    if not os.path.isfile(path):
+        raise CLIError(f"{what} не найден: {path}")
+    with open(path, encoding="utf-8") as f:
+        return f.read()
+
+
+def _rule(text: str, width: int = 74) -> str:
+    return f"# {text[:width - 2]} ".ljust(width, "=")
+
+
+def cmd_pr_review(args, svc, reg) -> int:
+    """Первый шаг Action'а: что доступно пайплайну (RAG, LLM, git, PR)."""
+    github = pr_review.github_context()
+    with_llm = not (_flag(args, "no_llm")
+                    or _flag(args, "global_no_llm") or svc.agent is None)
+    pf = pr_review.preflight(svc, github=github, diff_text=args.diff,
+                             with_llm=with_llm)
+    if args.json:
+        print(json.dumps(pf, ensure_ascii=False, indent=2))
+    else:
+        print(pr_review.render_preflight(pf))
+    # Без индекса RAG молчит, но детерминированный отчёт остаётся
+    # полезным — это предупреждение, а не провал пайплайна.
+    return 0
+
+
+def cmd_pr_review_run(args, svc, reg) -> int:
+    """Полное AI-ревью PR: diff → RAG → проверки → модель → отчёт."""
+    diff_text = None
+    if args.diff:
+        diff_text = _read_text_source(args.diff, "Файл diff")
+    if not diff_text and args.github_pr:
+        # Форк: ветки PR в рабочем дереве нет — diff и файлы отдаёт API.
+        repo, _, num = args.github_pr.rpartition("#")
+        if not repo or not num.isdigit():
+            raise CLIError("--github-pr ожидается в формате owner/repo#123")
+        diff_text = pr_review.GitHubClient().pull_diff(repo, int(num))
+    with_llm = not (_flag(args, "no_llm")
+                    or _flag(args, "global_no_llm") or svc.agent is None)
+
+    pr = pr_review.github_context() or {}
+    if args.title:
+        pr["title"] = args.title
+    if not diff_text and args.base:
+        pr.setdefault("base_ref", args.base)
+    res = pr_review.run_pr_review(svc, diff_text=diff_text, base=args.base,
+                                  pr=pr, with_llm=with_llm,
+                                  top_k_rag=args.top_k)
+
+    # $GITHUB_STEP_SUMMARY: сводка видна прямо на странице запуска.
+    if args.step_summary:
+        with open(args.step_summary, "a", encoding="utf-8") as f:
+            f.write(pr_review.render_step_summary(res) + "\n")
+    # Короткая сводка в PR (с доп. флагом) и workflow-аннотации.
+    if args.comment:
+        repo, num = args.comment.rsplit("#", 1)
+        client = pr_review.GitHubClient()
+        client.upsert_comment(repo, int(num),
+                              pr_review.render_markdown(res))
+        print(f"Комментарий в {args.comment}: обновлён/создан",
+              file=sys.stderr)
+    if args.annotations:
+        for line in pr_review.annotations(res):
+            print(line)
+
+    markdown = pr_review.render_markdown(res)
+    # --out (markdown) и --json-out (данные) пишутся раздельно: в CI
+    # нужны оба — артефакт для человека, JSON для машинной проверки.
+    if args.out:
+        with open(args.out, "w", encoding="utf-8") as f:
+            f.write(markdown.rstrip() + "\n")
+    if args.json_out:
+        with open(args.json_out, "w", encoding="utf-8") as f:
+            json.dump(res, f, ensure_ascii=False, indent=2)
+    if args.out or args.json_out:
+        # В файлы — и НЕ в stdout: журнал CI остаётся коротким, полный
+        # отчёт лежит в артефакте и комментарии.
+        written = ", ".join(x for x in (args.out, args.json_out) if x)
+        print(_rule("AI-ревью PR") + "\n"
+              + pr_review.render_step_summary(res) + "\n"
+              + f"Полный отчёт: {written}")
+    else:
+        print(json.dumps(res, ensure_ascii=False, indent=2) if args.json
+              else markdown)
+
+    if args.fail_on_high and any(
+            f.get("severity") == "high" for f in res.get("findings", [])):
+        print("[!] Есть находки уровня «критично»", file=sys.stderr)
+        return 1
+    return 0
+
+
 def _emit(text: str, args) -> None:
     """Вывод результата: в файл (`--out`) или в stdout."""
     out_path = getattr(args, "out", None)
@@ -549,7 +652,10 @@ def build_parser() -> argparse.ArgumentParser:
                "  cli.py review --base master --out review.md\n"
                "  cli.py support T-5003\n"
                "  cli.py scenario find_usages --param "
-               "symbol=compress_messages\n")
+               "symbol=compress_messages\n"
+               "  cli.py pr-review check\n"
+               "  git diff origin/master...HEAD | cli.py pr-review run "
+               "--diff - --out review.md\n")
     p.add_argument("--repo", help="корень репозитория (по умолчанию — "
                                   "определяется от файла)")
     p.add_argument("--debug", action="store_true",
@@ -631,6 +737,44 @@ def build_parser() -> argparse.ArgumentParser:
     common(cn)
     pg = sub.add_parser("git", help="git-контекст")
     common(pg)
+
+    # pr-review (день 32): пайплайн автоматического ревью PR.
+    ppr = sub.add_parser(
+        "pr-review",
+        help="AI-ревью PR: diff → RAG (документация + код) → баги, "
+             "архитектура, рекомендации")
+    sub_pr = ppr.add_subparsers(dest="pr_action", metavar="ДЕЙСТВИЕ")
+    prun = sub_pr.add_parser(
+        "run", help="построить ревью PR (markdown или --json)")
+    prun.add_argument("--diff", metavar="FILE|-",
+                      help="unified diff из файла или stdin (`-`)")
+    prun.add_argument("--base",
+                      help="ветка для сравнения (git diff base...HEAD)")
+    prun.add_argument("--github-pr", metavar="OWNER/REPO#N",
+                      help="взять diff из API GitHub (для PR из форка)")
+    prun.add_argument("--title", help="заголовок PR для отчёта")
+    prun.add_argument("--top-k", type=int, default=4, dest="top_k",
+                      help="фрагментов RAG на изменённый файл (по умолчанию 4)")
+    prun.add_argument("--fail-on-high", action="store_true",
+                      dest="fail_on_high",
+                      help="код возврата 1 при критичных находках")
+    prun.add_argument("--annotations", action="store_true",
+                      help="workflow-команды GitHub ::warning/::error "
+                           "(аннотации на строки diff)")
+    prun.add_argument("--comment", metavar="OWNER/REPO#N",
+                      help="опубликовать отчёт комментарием в PR "
+                           "(повторный прогон обновляет старый)")
+    prun.add_argument("--json-out", metavar="FILE", dest="json_out",
+                      help="записать данные отчёта в JSON (для CI)")
+    prun.add_argument("--step-summary", metavar="FILE", dest="step_summary",
+                      help="дописать сводку в $GITHUB_STEP_SUMMARY")
+    common(prun, out=True)
+    pchk = sub_pr.add_parser("check",
+                             help="что доступно пайплайну (RAG, LLM, git, PR)")
+    pchk.add_argument("--diff", metavar="FILE", help="файл diff (если передан)")
+    pchk.add_argument("--no-llm", action="store_true", dest="no_llm",
+                      help="считать LLM отключённой")
+    common(pchk)
     return p
 
 
@@ -645,6 +789,13 @@ HANDLERS = {
     "support": cmd_support,
     "scenarios": cmd_scenarios,
     "scenario": cmd_scenario,
+    "pr-review": cmd_pr_review,
+}
+
+# Действия `pr-review`: check (предполётная проверка) и run (ревью).
+PR_ACTIONS = {
+    "run": cmd_pr_review_run,
+    "check": cmd_pr_review,
 }
 
 
@@ -673,8 +824,14 @@ def main(argv=None) -> int:
                                 with_agent=not getattr(args,
                                                        "global_no_llm",
                                                        False))
+        if args.command == "pr-review":
+            action = getattr(args, "pr_action", None) or "run"
+            if action not in PR_ACTIONS:
+                raise CLIError(f"Неизвестное действие pr-review: {action}")
+            return PR_ACTIONS[action](args, svc, reg)
         return HANDLERS[args.command](args, svc, reg)
-    except (CLIError, AssistantError, ScenarioError, AgentError) as e:
+    except (CLIError, AssistantError, ScenarioError, AgentError,
+            pr_review.PRError) as e:
         print(f"Ошибка: {e}", file=sys.stderr)
         if getattr(args, "debug", False):
             raise

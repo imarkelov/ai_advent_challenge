@@ -1163,37 +1163,57 @@ class AssistantService:
 
     def _llm(self, system: str, user: str, max_tokens: int = 700) -> str:
         """Один вызов LLM. Любая ошибка/отсутствие модели → "" (вызывающий
-        код деградирует). Ассистент не должен падать из-за сети."""
+        код деградирует). Ассистент не должен падать из-за сети.
+
+        Модель выбирается из переменных окружения (день 32), если они
+        заданы, иначе — конфиг Студии (поведение дней 28–36 не меняется):
+
+        * `LLM_MODEL` — имя модели (у OpenAI-совместимого провайдера —
+          с префиксом: `openai/gpt-4o-mini`, `openrouter/...`);
+        * `LLM_BACKEND` — `auto` (по префиксу) | `ollama` | `openai`;
+        * `LLM_BASE_URL` (по умолчанию `OLLAMA_BASE_URL`),
+          `LLM_API_KEY` (по умолчанию `OLLAMA_API_KEY`).
+
+        Зачем: GitHub Action дня 32 не видит localhost:11434 — Ollama
+        остаётся на машине разработчика, а CI обращается к любому
+        серверу с OpenAI-совместимым `/chat/completions` (OpenAI,
+        OpenRouter, vLLM, собственная Ollama за туннелем).
+        """
         if self.agent is None:
             return ""
         if not (system or "").strip():
             # Промпт агента не загрузился (нет/битый `agents/*.md`) —
-            # без системной инструкции модель отвечает как попало, лучш
+            # без системной инструкции модель отвечает как попало, лучше
             # честно деградировать на extractive-ответ.
             self._llm_error = self._llm_error or (
                 "системный промпт агента не загружен (agents/*.md)")
             return ""
         try:
-            cfg = self.agent.get_config()
-            model = cfg.get("model")
-            if not model:
-                self._llm_error = "в конфиге не задана модель"
-                return ""
-            self._ensure_local_model(model)
+            env_model = (os.environ.get("LLM_MODEL") or "").strip()
+            if env_model:
+                model, base, headers = self._env_llm_target(env_model)
+            else:
+                cfg = self.agent.get_config()
+                model = cfg.get("model")
+                if not model:
+                    self._llm_error = "в конфиге не задана модель"
+                    return ""
+                self._ensure_local_model(model)
+                base = self.agent._base_for(model)
+                headers = self.agent._auth_header_for(model)
             body = {"model": model, "max_tokens": max_tokens,
                     "temperature": 0.2,
                     "messages": [{"role": "system", "content": system},
                                  {"role": "user", "content": user}]}
             resp = self.agent._client.post(
-                self.agent._base_for(model) + "/chat/completions",
-                headers=self.agent._auth_header_for(model),
+                base + "/chat/completions", headers=headers,
                 json=body, timeout=120)
             if resp.status_code != 200:
                 # Причину СОХРАНЯЕМ, а не глотаем: иначе «LLM не ответила»
                 # выглядит одинаково при 401 (нет ключа), 404 (нет модели)
                 # и таймауте — диагностировать невозможно.
                 self._llm_error = (f"HTTP {resp.status_code} от "
-                                   f"{self.agent._base_for(model)}")
+                                   f"{base} (модель {model})")
                 return ""
             data = resp.json()
             choices = data.get("choices") or []
@@ -1214,6 +1234,29 @@ class AssistantService:
         except Exception as e:                      # noqa: BLE001
             self._llm_error = f"{type(e).__name__}: {e}"
             return ""
+
+    @staticmethod
+    def _env_llm_target(model: str) -> tuple:
+        """(model, base_url, headers) для модели из `LLM_MODEL`.
+
+        `auto` — Ollama при базе на localhost (или если модель есть в
+        `/api/tags`), иначе OpenAI-совместимый провайдер с префиксом
+        в имени (`openai/`, `openrouter/`, …). Явный backend важнее
+        эвристики: `LLM_BACKEND=openai` и `LLM_BACKEND=ollama`.
+        """
+        backend = (os.environ.get("LLM_BACKEND") or "auto").strip().lower()
+        base = (os.environ.get("LLM_BASE_URL")
+                or os.environ.get("OLLAMA_BASE_URL")
+                or "http://localhost:11434/v1").rstrip("/")
+        key = (os.environ.get("LLM_API_KEY")
+               or os.environ.get("OLLAMA_API_KEY") or "")
+        if backend not in ("openai", "ollama"):
+            backend = ("ollama" if "localhost" in base or "127.0.0.1" in base
+                       else "openai")
+        headers = {"Content-Type": "application/json"}
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
+        return model, base, headers
 
     def _ensure_local_model(self, model: str) -> None:
         """Зарегистрировать локальную модель в агенте перед вызовом.

@@ -280,15 +280,19 @@ class TestRealAgents:
                     for n in ("project-qa", "code-review", "support",
                               "file-ops")
                     for e in ("api", "cli")}
+        # День 32 добавил агента `pr-review` (только CLI: его вызывают
+        # из GitHub Action, веб-вкладки у него нет) — это осознанное
+        # расширение поставки, а не нарушение «4 × 2».
+        expected |= {"pr-review.cli.md"}
         actual = {f for f in os.listdir(REAL_AGENTS) if f.endswith(".md")}
         assert actual == expected
 
     def test_registry_loads_without_errors(self):
         r = G.AgentRegistry(REAL_AGENTS)
         assert r.errors() == []
-        assert len(r.load()) == 8
-        assert r.names() == ["code-review", "file-ops", "project-qa",
-                             "support"]
+        assert len(r.load()) == 9
+        assert r.names() == ["code-review", "file-ops", "pr-review",
+                             "project-qa", "support"]
 
     @pytest.mark.parametrize("name", ["project-qa", "code-review",
                                       "support", "file-ops"])
@@ -306,6 +310,11 @@ class TestRealAgents:
         """Исполнения различаются содержимым, а не только именем файла."""
         r = G.AgentRegistry(REAL_AGENTS)
         for name in r.names():
+            if name == "pr-review":
+                # День 32: агент только CLI (fallback на cli-исполнение
+                # помечен `fallback`, чтобы не выдавать его за api).
+                assert r.get(name, "api").fallback is True
+                continue
             api = r.get(name, "api").system_prompt
             cli = r.get(name, "cli").system_prompt
             assert api != cli, f"{name}: промпты api/cli совпадают"
@@ -314,6 +323,8 @@ class TestRealAgents:
         """CLI-промпты учитывают терминал (главная причина разделения)."""
         r = G.AgentRegistry(REAL_AGENTS)
         for name in r.names():
+            if name == "pr-review":
+                continue          # канал — комментарий PR/CI, не терминал
             p = r.get(name, "cli").system_prompt.lower()
             assert "html" in p or "терминал" in p, name
 

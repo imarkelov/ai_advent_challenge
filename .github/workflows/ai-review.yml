@@ -1,0 +1,68 @@
+# День 32: автоматическое AI-ревью PR.
+#
+# На каждый pull request пайплайн:
+#   1. получает diff и изменённые файлы (для форка — через API GitHub);
+#   2. строит RAG-индекс корпуса проекта (документация + код);
+#   3. гоняет детерминированные проверки проекта;
+#   4. просит модель сформулировать «потенциальные баги», «архитектурные
+#      проблемы» и «рекомендации»;
+#   5. публикует отчёт комментарием в PR, аннотациями на строки diff
+#      и артефактом для истории.
+#
+# Сам пайплайн — `.github/actions/ai-pr-review/action.yml` (его можно
+# подключить и в другой репозиторий), а здесь только триггеры и права.
+name: AI PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  # Ручной запуск: проверить пайплайн, не открывая PR.
+  workflow_dispatch: {}
+
+# Минимально нужные права: прочитать код PR и написать комментарий.
+# На событиях из форков `write` не выдаётся — пайплайн это учтёт и
+# оставит отчёт артефактом.
+permissions:
+  contents: read
+  pull-requests: write
+
+# Новый пуш в PR отменяет ревью прежней версии: в комментарии должно
+# быть мнение о последнем коммите, а не о устаревшем.
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ai-review:
+    name: Ассистент: ревью PR
+    runs-on: ubuntu-latest
+    # Черновики не ревьюим: автор ещё не просил смотреть.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Полная история нужна для `git diff base...HEAD` и для того,
+          # чтобы корпус проекта (README, docs/, код) индексировался
+          # без пропусков.
+          fetch-depth: 0
+
+      - name: Установить окружение ассистента
+        run: |
+          python -m pip install --quiet --disable-pip-version-check \
+            httpx python-dotenv pytest
+
+      # Модель: переменные LLM_MODEL / LLM_BASE_URL и секрет
+      # LLM_API_KEY (Settings → Secrets and variables → Actions).
+      # По умолчанию здесь — Ollama на машине через `run-model.sh serve`
+      # (OpenAI-совместимый API, туннель: см. docs/CLI-CHEATSHEET.md,
+      # раздел «День 32»). Без LLM_API_KEY пайплайн работает в
+      # детерминированном режиме и честно об этом пишет — ревью не
+      # падает из-за отсутствия ключа.
+      - name: AI-ревью
+        uses: ./.github/actions/ai-pr-review
+        with:
+          llm-model: ${{ vars.LLM_MODEL || 'abl27' }}
+          llm-base-url: ${{ vars.LLM_BASE_URL || 'https://llm.imarkelov.example/v1' }}
+          llm-api-key: ${{ secrets.LLM_API_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}

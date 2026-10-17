@@ -1,0 +1,152 @@
+name: AI PR Review
+description: >-
+  Ревью pull request ассистентом: diff и изменённые файлы → RAG по
+  документации и коду → детерминированные проверки → потенциальные
+  баги, архитектурные проблемы, рекомендации. Отчёт — комментарием в PR,
+  аннотациями на строки diff, артефактом и в Summary запуска.
+author: ai-advent-challenge
+
+inputs:
+  llm-model:
+    description: >-
+      Модель для ревью. `provider/name` для облачного OpenAI-совместимого
+      сервера (openai/gpt-4o-mini, openrouter/…) или имя модели
+      локального сервера (Ollama `/v1`, `run-model.sh serve` — MLX), если
+      `llm-base-url` указывает на него. Имя модели для MLX-сервера —
+      произвольное (`abl27`, `base8`): пайплайн ему не верит, а
+      передаёт как есть.
+    required: false
+    default: abl27
+  llm-base-url:
+    description: OpenAI-совместимый базовый URL (без `/chat/completions`).
+    required: false
+    default: https://llm.imarkelov.example/v1
+  llm-api-key:
+    description: >-
+      Ключ модели. Пусто — детерминированный отчёт без модели (пайплайн
+      не падает).
+    required: false
+    default: ""
+  github-token:
+    description: >-
+      Токен для чтения diff PR из форка и для комментария.
+      На PR из форка без прав — комментарий пропускается, отчёт идёт
+      артефактом.
+    required: false
+    default: ${{ github.token }}
+  fail-on-high:
+    description: >-
+      `true` — пайплайн падает (exit 1) при находке уровня «критично»:
+      секрет в коде, `except:` без типа и т.п. По умолчанию ревью не
+      блокирует PR.
+    required: false
+    default: "false"
+  model-window-note:
+    description: >-
+      Потолок промпта в символах (доля окна модели). Пусто — дефолт
+      26 000 символов (~6–7 тыс. токенов): влезает в окно Ollama 8192.
+      Для моделей с большим окном можно поднять.
+    required: false
+    default: ""
+
+outputs:
+  report:
+    description: Путь к markdown-отчёту (объект `{path, ...}` media).
+    value: ${{ steps.review.outputs.report }}
+  findings:
+    description: Число детерминированных находок.
+    value: ${{ steps.review.outputs.findings }}
+  llm:
+    description: `true`, если разделы сформулировала модель.
+    value: ${{ steps.review.outputs.llm }}
+
+runs:
+  using: composite
+  steps:
+    - name: Предполётная проверка (RAG, LLM, git, PR)
+      shell: bash
+      env:
+        LLM_MODEL: ${{ inputs.llm-model }}
+        LLM_BASE_URL: ${{ inputs.llm-base-url }}
+        LLM_API_KEY: ${{ inputs.llm-api-key }}
+      run: |
+        set -euo pipefail
+        python studio/backend/cli.py pr-review check | tee -a "$GITHUB_STEP_SUMMARY"
+
+    - name: Индекс проекта для RAG (документация + код)
+      shell: bash
+      # Офлайн hash-эмбеддер: в CI нет Ollama, а индекс нужен каждый
+      # прогон (кэш межу запусками — лишняя точка отказа для PR).
+      run: python studio/backend/cli.py index
+
+    - name: AI-ревью PR
+      id: review
+      shell: bash
+      env:
+        LLM_MODEL: ${{ inputs.llm-model }}
+        LLM_BASE_URL: ${{ inputs.llm-base-url }}
+        LLM_API_KEY: ${{ inputs.llm-api-key }}
+        LLM_BACKEND: ${{ contains(inputs.llm-base-url, 'localhost') && 'ollama' || 'openai' }}
+        REVIEW_MAX_PROMPT_CHARS: ${{ inputs.model-window-note }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ github.event.pull_request.number || '' }}
+        PR_FORK: ${{ github.event.pull_request.head.repo.fork || 'false' }}
+        IS_DRAFT: ${{ github.event.pull_request.draft || 'false' }}
+      run: |
+        set -uo pipefail   # без -e: код 1 при --fail-on-high ожидаем
+
+        # PR из форка: ветки PR нет в рабочем дереве — diff берём из API.
+        if [ "$PR_FORK" = "true" ] && [ -n "$PR_NUMBER" ]; then
+          DIFF_ARGS=(--github-pr "$GITHUB_REPOSITORY#$PR_NUMBER")
+        else
+          DIFF_ARGS=(--base "origin/${{ github.base_ref }}")
+        fi
+
+        # Ручной запуск (workflow_dispatch) — ревью последних изменений
+        # ветки: base_ref у события PR пуст, git-источник его не требует.
+        if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+          DIFF_ARGS=()
+          if ! git diff HEAD~1 --quiet 2>/dev/null; then
+            git diff HEAD~1 > pr.diff && DIFF_ARGS=(--diff pr.diff)
+          else
+            echo "::notice::Ручной запуск без изменений — нечего ревьюить"
+            exit 0
+          fi
+        fi
+
+        EXTRA=()
+        if [ "$IS_DRAFT" = "true" ]; then
+          EXTRA+=(--title "черновик PR")
+        fi
+        if [ "${{ inputs.fail-on-high }}" = "true" ]; then
+          EXTRA+=(--fail-on-high)
+        fi
+
+        CODE=0
+        python studio/backend/cli.py pr-review run "${DIFF_ARGS[@]}" \
+          --out review.md --json --out-json review.json \
+          --annotations --step-summary "$GITHUB_STEP_SUMMARY" \
+          ${PR_NUMBER:+--comment "$GITHUB_REPOSITORY#$PR_NUMBER"} \
+          "${EXTRA[@]}" || CODE=$?
+
+        if [ -f review.json ]; then
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+        import json
+        d = json.load(open("review.json", encoding="utf-8"))
+        print("report=review.md")
+        print(f"findings={d.get('summary', {}).get('findings', 0)}")
+        print(f"llm={'true' if d.get('llm') else 'false'}")
+        PY
+        fi
+        exit $CODE
+
+    - name: Артефакт отчёта
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ai-pr-review
+        path: |
+          review.md
+          review.json
+        if-no-files-found: warn
+        retention-days: 30
