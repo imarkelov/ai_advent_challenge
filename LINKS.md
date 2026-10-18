@@ -4,10 +4,30 @@
 
 - GitHub: <https://github.com/imarkelov/ai_advent_challenge/tree/day32-pr-review>
 - Базовая ветка: `day31-cli-assistant`
-- Pull request: ветка запушена, PR не создавался (по просьбе). Чтобы
-  пайплайн сработал, откройте PR `day32-pr-review → day31-cli-assistant`:
-  <https://github.com/imarkelov/ai_advent_challenge/compare/day31-cli-assistant...day32-pr-review?expand=1>
-  — `.github/workflows/ai-review.yml` запустится на нём.
+- Pull request: ветка запушена (`1b9509c`), PR не создавался (по просьбе).
+
+## Как запустить
+
+1. **Настройки модели** (один раз) — Settings → Secrets and variables →
+   Actions:
+   - variable `LLM_BASE_URL` — OpenAI-совместимый адрес вашей Ollama
+     (`http://<host>:11434/v1`) или `run-model.sh serve` (`http://<host>:8080/v1`);
+   - variable `LLM_MODEL` — имя модели (`qwen3:8b`, `abl27`);
+   - secret `LLM_API_KEY` (`ollama` для Ollama; секрет обязателен —
+     секреты добавятся в список, только если он есть);
+   - публикуемый адрес должен быть доступен из GitHub-раннеров (local
+     `localhost` — нет; нужен туннель/VPS).
+   Без ключа пайплайн всё равно отработает — детерминированным отчётом.
+2. **Запустить на PR** — открыть PR и нажать «Create pull request»:
+   <https://github.com/imarkelov/ai_advent_challenge/compare/day31-cli-assistant...day32-pr-review?expand=1>
+3. **Где смотреть** — Actions → «AI PR Review»:
+   <https://github.com/imarkelov/ai_advent_challenge/actions/workflows/ai-review.yml>
+   (комментарий появится в самом PR, сводка — в Summary запуска,
+   отчёт — в артефакте `ai-pr-review`).
+4. **Ручной запуск без PR** (workflow_dispatch, ревью последнего
+   коммита выбранной ветки):
+   <https://github.com/imarkelov/ai_advent_challenge/actions/workflows/ai-review.yml> →
+   «Run workflow» → ветка `day32-pr-review`.
 
 ## Демо-видео (день 32: AI-ревью PR)
 
