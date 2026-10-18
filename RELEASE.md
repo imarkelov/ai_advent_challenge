@@ -1,3 +1,202 @@
+# Release Notes — day33-support-assistant (день 33)
+
+Ветка: [`day33-support-assistant`](https://github.com/imarkelov/ai_advent_challenge/tree/day33-support-assistant)
+(от `day26-local-llm`).
+
+## Что и почему
+
+**Ассистент поддержки пользователей** с CLI-интерфейсом. Задание: мини-сервис,
+который отвечает на вопросы о текущем проекте, использует RAG (FAQ,
+документация) и учитывает контекст пользователя/тикета; CRM подключается
+через MCP (JSON с пользователями и тикетами).
+
+Решение — CLI (`python -m support`), потому что в репозитории уже есть
+CLI-харнес дня 26 (myharness) и навык собирать stdio-MCP-серверы
+(дни 16–20). Ассистент берёт тикет, подтягивает клиента **через MCP**,
+ищет статьи **RAG** и отвечает оператору с источниками и следующим шагом.
+
+- **RAG** (`support/retrieval.py`): поле-взвешенный BM25 (title > tags >
+  body) + хэш-эмбеддинги char-3-грамм (как в БЗ Студии, без сети) + RRF,
+  порог `min_score`, инфлексия («почта»/«почты», «вход»/«входить»).
+  Стоп-слова + «общие» слова поддержки («работает», «проблема») не включают
+  совпадение — «какой у вас офис в Москве» даёт честное `no_match`.
+- **MCP-CRM** (`tools/mcp_servers/crm_get_ticket.py`, `crm_get_user.py`;
+  `support/crm.py`): 1 сервер = 1 тул на каркасе дня 20, клиент — транспорт
+  Студии (`studio/backend/mcp.py`), JSON `tools/crm.json` (3 клиента,
+  3 тикета). Модель может вызвать инструменты сама (tool-loop, `tools`
+  в payload). MCP не поднялся — фолбэк на тот же JSON, CLI показывает
+  источник контекста.
+- **Контекст в ответе** (`support/session.py`): system-промпт с тикетом
+  (тема/статус/приоритет/переписка/факты/`sync_status`), профилем клиента
+  (тариф, история, заметки) и выдержками БЗ `[n]`; список источников,
+  процитированные/неиспользованные, детерминированный **next_action**
+  (резервный код 2FA, заявка на возврат, allowlist IP, эскалация).
+  Вопрос вне базы — отказ без LLM-вызова (паттерн дня 24).
+- **LLM** (`support/llm.py`): OpenAI-совместимый `/chat/completions`,
+  ключ по модели из `.env` (несколько ключей GPustack в одном файле),
+  стриминг для CLI; reasoning-модель иногда тратит весь `max_tokens` на
+  рассуждение — клиент помечает `empty`, сессия делает один повтор с
+  удвоенным лимитом (двойной пустой ответ — честная ошибка LLMError).
+- **CLI** (`support/cli.py`): `/tickets`, `/ticket <id>`, `/sources`,
+  `/tools`, `/help`, `/exit`, `--offline` (без модели), `--demo`
+  (скриптовый прогон). UTF-8/сp1251-безопасный вывод.
+
+## Данные
+
+- `tools/crm.json` — users (профиль, тариф, история, заметки) + tickets
+  (сообщения, факты, состояние аккаунта): TCK-4101 «не работает вход»
+  (U-101, 2FA по SMS), TCK-4200 «двойное списание» (U-102), TCK-4300
+  «401 в API из CI» (U-103).
+- `tools/kb.json` — 10 статей FAQ/документации: вход и SMS-код, cookie,
+  2FA/резервные коды/email-подтверждение, 401 API, двойное списание,
+  счёт/акт, смена тарифа, проект «Студия», формат ответа поддержки,
+  статусы/SLA.
+- Env: `SUPPORT_CRM_FILE`, `SUPPORT_KB_FILE`.
+
+## Запуск
+
+```bash
+python -m support --ticket TCK-4101   # REPL с контекстом тикета (MCP + RAG + LLM)
+python -m support --offline --demo    # без LLM: RAG + MCP, детерминизм
+```
+
+## Тесты и e2e
+
+- `python -m pytest tests/test_support_day33.py -q` — **47 passed**
+  (MCP-серверы по stdio/подпроцессу, MCP-мост, офлайн-фолбэк, RAG
+  с ожидаемыми статьями и `no_match`, порог, источники/цитаты,
+  контекст тикета в промпте, next_action по семантике тикета, tool-loop
+  (включая лимит раундов), повтор при reasoning-пустом ответе,
+  парсинг tool_calls/стрима, CLI `--offline --demo`).
+- Весь набор репозитория на момент релиза был зелёным (`78 passed`); после
+  финальных правок дёшевого RAG-контура два MCP/CLI-теста суточного прогона
+  падают на таймауте подпроцесса — прогон тестов на этот момент не
+  повторялся (по просьбе: только ключи + доки).
+- `python scripts/e2e_day33.py` — **38 PASS / 0 FAIL / 0 SKIP** (прогон до
+  финальных правок ретривера):
+  Part A (офлайн, MUST): MCP-серверы, MCP-мост, RAG 7/7, no_match,
+  промпт с тикетом и БЗ, источники/цитаты/next_action, CLI;
+  Part B (live, real LLM `deepseek-v4-flash` + real MCP):
+  B1 «Почему не работает авторизация?» на TCK-4101 (3.7 s, ссылки на
+  данные тикета и БЗ), B2 второй тикет (двойное списание — другой контекст
+  и источники), B3 честный отказ вне базы, B4 CLI со стримингом на
+  TCK-4300. Транскрипт: `.omo/evidence/day33/transcript.json`.
+
+## Файлы
+
+- Create: `support/{__init__,__main__,retrieval,crm,llm,session,cli}.py`,
+  `tools/{_support_store.py,crm.json,kb.json}`,
+  `tools/mcp_servers/{crm_get_ticket,crm_get_user}.py`,
+  `tests/test_support_day33.py`, `scripts/e2e_day33.py`.
+- Docs: `README.md` (строка дня 33 + секция), `RELEASE.md` (этот файл).
+
+## Демо-видео и ключи
+
+Видео рабочего прогона, где пользователь сам задаёт вопросы по заданию
+(`/tickets` → `/ticket TCK-4101` → «Почему не работает авторизация?» →
+«Что ответить клиенту?» → «А если SMS совсем не доставляется?» →
+«Сколько стоит билет на Марс?»), снято с реального CLI: настоящие
+MCP-серверы CRM (stdio), настоящий RAG и настоящая LLM.
+
+- Файл: `day33_support_demo.mp4` в папке «AI Advent Challenge - видео»
+  на рабочем столе (в git не попадает), 2640×1880, h264, ~27 с.
+- Каждый ход показывает: загрузку тикета и клиента через MCP
+  (`get_ticket`/`get_user`), выдержки RAG со score, ответ модели,
+  список источников, «процитированы/не использованы» и «Следующий шаг».
+- Честное поведение видно на последнем вопросе: в базе знаний нет статьи
+  про Марс → ответ без LLM-вызова и эскалация.
+
+Ключи (проверка на момент релиза, ключи лежат только в `.env`,
+который в `.gitignore` и в репозиторий не попадает):
+
+| Модель | Переменная | Результат |
+| --- | --- | --- |
+| `deepseek-v4-flash` | `GPUSTACK_KEY_DEEPSEEK` | OK (`ok`, 132 токена) |
+| `glm-5.3-flash` | `GPUSTACK_KEY_GLM` | OK (`ok`, 64 токена) |
+| `gpt-4o` | `GPUSTACK_API_KEY` | OK (`ok`, 121 токен) |
+
+`qwen3.8-27b` с этими ключами недоступен (HTTP 403 «Api key not allowed to
+access model qwen3.8-27b») — ассистент по умолчанию использует
+`deepseek-v4-flash`.
+
+## Ограничения
+
+- CRM и база знаний — JSON-файлы в репозитории (демо-данные, не секреты);
+  внешняя CRM не подключалась намеренно (задание допускает JSON).
+- Хэш-эмбеддер — офлайн-замена векторного поиска: семантическая нога
+  работает как тай-брейк внутри лексических кандидатов (честное «не знаю»
+  важнее ложных совпадений).
+- Модель GPustack с общим ключом `GPUSTACK_API_KEY` не имеет доступа к
+  `deepseek-v4-flash`/`glm-5.3-flash` — используется ключ конкретной модели
+  из `.env` (`GPUSTACK_KEY_DEEPSEEK`); при смене модели ключ подбирается
+  автоматически.
+
+---
+
+# Release Notes — day26-local-llm (день 26)
+
+Ветка: [`day26-local-llm`](https://github.com/imarkelov/ai_advent_challenge/tree/day26-local-llm)
+(от `day25-task-memory`).
+
+## Что в релизе
+
+**Локальная LLM (Ollama в Docker) + CLI-харнес myharness** (Textual
+TUI). Ollama — контейнер `ollama` (сеть `mynet`, volume
+`ollama-data`), порт **11435** на хосте (нативный 11434 занят пустым
+экземпляром). Модели: `qwen3.5:9b` (дефолт), `qwen3-coder:30b`,
+`gemma4:12b`. Харнес — Python, Textual 8.2.8, HTTP-клиент stdlib
+`urllib` (единственная новая зависимость — `textual`).
+
+- **3 панели**: верхняя — статус Ollama/модель/профиль/thinking/статус;
+  рабочая — стриминг Markdown-ответа + метрики (⏱ total, ↑ prompt t/s,
+  ↓ gen t/s, Σ токены из done-кадра Ollama) + блок размышлений 🧠
+  (Ctrl+R сворачивает/разворачивает); нижняя — прогресс-бар «N % до
+  сжатия» + «окно по парам: N из 15».
+- **Профили** — `местная` (дефолт, RU-ассистент), `dev`, `raw`
+  (`myharness/profiles.py`); переключение `/profile`.
+- **Команды** — `/model`, `/profile`, `/think on|off`, `/compact`
+  (авто при ≥ 80 % окна), `/reset`, `/help`, `/exit`; ключи
+  `Ctrl+R` / `Esc` (стоп стрима) / `Q`.
+- **Сжатие истории** — 1 пара = user+assistant, окно 15 пар
+  (`PAIR_WINDOW`); старее окна — одна LLM-сводка в голове истории
+  (best-effort, сбой не ломает чат).
+- **`num_ctx = 8192` закреплён в chat-payload** (`DEFAULT_NUM_CTX`):
+  по умолчанию Ollama выделяет 4096, а прогресс-бар должен отражать
+  реально выделенный контекст; `context_limit(model)` — справочно
+  (`*.num_ctx` → `*.context_length` → fallback 4096; у qwen3.5:9b
+  архитектура — 262144).
+- **Windows cp1251** — `__main__.py` reconfigure'ит stdout c
+  `errors="replace"` (паттерн фикса дня 18; символы метрик ●⏱↑↓Σ вне
+  кода).
+
+## E2E — `scripts/e2e_day26.py`
+
+Part A — офлайн-детерминированное ядро (MUST PASS): NDJSON-разбор,
+метрики из done/промежуточных кадров, `format_metrics` (k-нотация),
+профили, `/`-стрип в клиенте. Part B — live (`localhost:11435`,
+`qwen3.5:9b`), best-effort: 3 запроса разной сложности (задание дня):
+B1 логика (→ «Боря», 97 tok / 13.1 s), B2 код (`merge_sorted`, 232 tok
+/ 13.4 s), B3 reasoning (√2 иррационален, `think: true` →
+thinking-блок 5862 симв., ~1k tok / 131.5 s). Транскрипт (ответы,
+thinking, метрики) → `.omo/evidence/day26/transcript.json`. Exit 0 для
+PASS/SKIP, 1 для FAIL.
+
+## Проверка
+
+13 юнит-тестов PASS (офлайн); headless TUI-smoke PASS (3 панели,
+офлайн-статус); e2e — **17 PASS / 0 FAIL / 0 SKIP** (A 5/5 + B live
+12/12). Скриншоты TUI: `docs/day26_harness.png`,
+`docs/day26_harness_thinking.png` (данные реального прогона).
+Бенчмарк qwen3.5:9b (CPU/Vulkan, RX 7800 XT 16GB): prompt ~62–72 t/s,
+gen ~10–14 t/s, thinking подтверждён.
+Демо-видео (live, qwen3.5:9b):
+`C:\Users\migor\OneDrive\Рабочий стол\AI Advent Challenge - видео\day26_demo.mp4`
+(desktop, **НЕ в репозитории**), 205.4 s, 2640×1632, ~2.9 МБ —
+`--demo`-сессия: B1 (логика) + B3 (reasoning, 🧠-блок мыслей, Ctrl+R),
+реальный стриминг, метрики и прогресс-бар контекста.
+
+---
+
 # Release Notes — day25-task-memory (день 25)
 
 Ветка: [`day25-task-memory`](https://github.com/imarkelov/ai_advent_challenge/tree/day25-task-memory)

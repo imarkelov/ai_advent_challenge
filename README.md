@@ -30,6 +30,8 @@
 | День 23 | [day23-rerank-filter](https://github.com/imarkelov/ai_advent_challenge/tree/day23-rerank-filter) | Реранкинг и фильтрация: настройка `min_score` (0..1, 0 = off) — порог релевантности в `search_rag` после реранкера (абсолютный `rerank_score ≥ min_score`) или относительно лучшего результата без него (`score ≥ min_score × best`), фильтрация до среза top-k с полями `filtered`/`dropped`, query rewrite в сравнении (LLM-перефраз вопроса при T=0 с фолбэком на исходный), 4-режимный compare (plain \| rag \| rag+filter \| rag+rewrite) + UI-секция с 4 панелями и чипом «фильтр ≥ X» |
 | День 24 | [day24-rag-citations](https://github.com/imarkelov/ai_advent_challenge/tree/day24-rag-citations) | Цитаты, источники и анти-галлюцинации: обязательные источники (source + section/chunk_id) + verbatim-цитаты в RAG-ответе, [n]-маркеры, режим «не знаю» при 0 релевантных чанков (без LLM-вызова), панель «Источники и цитаты» в чате, e2e_day24 (10 вопросов) |
 | День 25 | [`day25-task-memory`](https://github.com/imarkelov/ai_advent_challenge/tree/day25-task-memory) | Мини-чат с RAG + памятью (production-like): история диалога, RAG-контекст при каждом вопросе, ответ с учётом найденного, источники на каждом ответе + «память задачи» (task state): цель диалога, уточнения, зафиксированные ограничения/термины (авто-обновление LLM-вызовом после хода, инъекция в system-промпт, вкладка «Задача», REST per-диалог); e2e_day25: 2 длинных сценария (12 + 10 сообщений) — цель не теряется, источники 100 % ответов |
+| День 26 | [`day26-local-llm`](https://github.com/imarkelov/ai_advent_challenge/tree/day26-local-llm) | Локальная LLM (Ollama в Docker) + CLI-харнес myharness: Textual TUI с 3 панелями (статус / стриминг-ответ с метриками ⏱↑↓Σ / прогресс-бар контекста + окно по парам), блок размышлений 🧠 (Ctrl+R сворачивает), профили местная/dev/raw, команды /model /profile /think /compact /reset /help, num_ctx=8192 закреплён в payload (честный прогресс-бар «до сжатия»); 3 запроса разной сложности в e2e_day26 (логика / код / reasoning с thinking) + транскрипт `.omo/evidence/day26/transcript.json` |
+| День 33 | [day33-support-assistant](https://github.com/imarkelov/ai_advent_challenge/tree/day33-support-assistant) | Ассистент поддержки: CLI (интерфейс работы) — RAG по FAQ/документации проекта + контекст пользователя/тикета через MCP (CRM JSON: users/tickets), ответ с источниками [n] и следующим шагом оператора; e2e_day33 |
 
 ## День 7: как работает сервис
 
@@ -2427,3 +2429,267 @@ sources 12/12; S2: done 10/10, sources 10/10; goal-recall PASS в
 каждом ответе, чекпоинты вкладки «Задача» (после сообщений 4/8/12 и
 4/10), раскрытие панели источников.
 Ветка `day25-task-memory` (от `day24-rag-citations`).
+
+## День 26: Локальная LLM (Ollama) + CLI-харнес myharness
+
+### Что это
+
+Локальная LLM без облака: **Ollama в Docker** (контейнер `ollama`,
+сеть `mynet`, volume `ollama-data`) + собственный **CLI-харнес
+`myharness`** — TUI на **Textual 8.2.8** (Python, HTTP-клиент —
+stdlib `urllib`, единственная новая зависимость — `textual`). Три
+панели:
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│ myharness ● Ollama, ollama/qwen3.5:9b   Профиль: местная   thinking: off │
+├──────────────────────────────────────────────────────────────────────┤
+│ › Как называется функция для суммирования списка?                     │
+│                                                                       │
+│ В Python это встроенная функция sum: …                                │
+│ ⏱ 3.2 s   ↑ 45.3 t/s (prompt)   ↓ 9.3 t/s (gen)   Σ 118 tok           │
+│ ─ 🧠 размышление (629 симв., Ctrl+R) ─  [Ctrl+R сворачивает/разворачивает] │
+├──────────────────────────────────────────────────────────────────────┤
+│ ▓▓▓▓▓░░░░░░░░░░░░░ 23 % до сжатия     окно по парам: 2 из 15          │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+- **Верхняя панель** — статус Ollama (● онлайн / ○ офлайн), модель,
+  профиль, режим thinking, статус (стримится/ошибка).
+- **Рабочая область** — промпт `>`, стриминг ответа (Markdown, live),
+  метрики последнего запроса из done-кадра Ollama (⏱ total, ↑
+  prompt t/s, ↓ gen t/s, Σ токены), блок размышлений 🧠
+  (thinking-модели; Ctrl+R — сворачивать/разворачивать).
+- **Нижняя панель** — прогресс-бар «N % до сжатия» + окно по парам
+  «N из 15» (1 пара = user + assistant).
+
+### Профили и команды
+
+| Профиль | System-промпт |
+| --- | --- |
+| `местная` (дефолт) | RU-концепт «локальный ассистент: краткие, точные ответы, без приветствий» |
+| `dev` | senior-разработчик: код + краткие пояснения |
+| `raw` | пустой (модель без инструкций) |
+
+Команды: `/model [имя]`, `/profile [имя]`, `/think on|off`,
+`/compact` (сжать старые пары LLM-сводкой; авто при ≥ 80 % окна),
+`/reset`, `/help`, `/exit`. Ключи: `Ctrl+R` (мысли), `Esc` (стоп
+стрима), `Q` (выйти). Сжатие: последние `PAIR_WINDOW = 15` пар в
+истории, старее — одна сводка (LLM-вызов, best-effort).
+
+### num_ctx: честный прогресс-бар
+
+Ollama по умолчанию выделяет модели 4096 токенов контекста, а
+архитектура qwen3.5:9b поддерживает 262144
+(`model_info.qwen35.context_length` через `POST /api/show`). Чтобы
+прогресс-бар «до сжатия» отражал реальность, харнес **явно пинит
+`options.num_ctx = 8192`** в каждом chat-payload
+(`DEFAULT_NUM_CTX`); лимит бара = 8192. `context_limit(model)`
+остаётся справочно: `*.num_ctx` → `*.context_length` → fallback 4096.
+
+### Инфраструктура (Docker)
+
+- Контейнер `ollama` создан/пересоздан:
+  `docker run -d --name ollama --network mynet -v ollama-data:/root/.ollama -p 11435:11434 ollama/ollama`
+  (порт 11435 на хосте — нативный Ollama 11434 занят другим
+  экземпляром без моделей).
+- Модели: `qwen3.5:9b` (дефолт харнеса), `qwen3-coder:30b`,
+  `gemma4:12b`. GPU: AMD RX 7800 XT 16GB, 32GB RAM — инференс CPU/Vulkan.
+- Бенчмарк qwen3.5:9b: prompt ~62–72 t/s, gen ~10–14 t/s, thinking
+  работает (`message.thinking` в кадрах, 3–6k симв.).
+
+### Запуск
+
+```bash
+# Ollama (уже запущен):
+docker ps --filter name=ollama          # :11435
+
+# харнес:
+pip install textual
+python -m myharness                     # base URL: env OLLAMA_BASE_URL → .env → http://localhost:11435
+```
+
+`__main__.py` читает `OLLAMA_BASE_URL` из окружения, иначе из `.env`
+в корне, иначе дефолт; на Windows (cp1251) reconfigure'ит stdout c
+`errors="replace"` (паттерн дня 18 — символы метрик вне кода).
+
+### Файлы
+
+| Файл | Назначение |
+| --- | --- |
+| `myharness/ollama_client.py` | `OllamaClient` (available/list_models/context_limit/chat_stream/chat), `Metrics`, `metrics_from_frame`, `format_metrics`, `parse_ndjson` (NDJSON-кадры `/api/chat`) |
+| `myharness/profiles.py` | `PROFILES` (местная/dev/raw), `DEFAULT_PROFILE` |
+| `myharness/app.py` | `MyHarnessApp` (Textual): 3 панели, `ThinkingBlock`, стриминг-воркер, команды, сжатие, bindings |
+| `myharness/__main__.py` | точка входа: .env-загрузка, cp1251-фикс, args `--model/--url` |
+| `tests/test_myharness.py` | 13 офлайн-тестов (NDJSON, метрики, format, профили, context_limit num_ctx/context_length, чат-агрегация) |
+| `scripts/e2e_day26.py` | Part A — офлайн-ядро (MUST PASS); Part B — live 3 запроса (best-effort) + транскрипт |
+| `docs/day26_harness.png`, `docs/day26_harness_thinking.png` | скриншоты TUI (стриминг + раскрытый блок мыслей, данные реального прогона) |
+| `.omo/evidence/day26/transcript.json` | транскрипт live-прогона (ответы, thinking, метрики) — gitignored |
+
+### Проверка задания
+
+- **Локальная LLM запущена** ✓ — Docker-контейнер, `GET
+  /api/tags` на `localhost:11435` отдаёт 3 модели.
+- **HTTP API** ✓ — стриминг NDJSON `/api/chat`, метрики из done-кадра.
+- **3 запроса разной сложности** ✓ (e2e Part B):
+  - B1 логика — «Аня старше Бори, Вера старше Ани…» → ответ «Боря», 97 tok / 13.1 s;
+  - B2 код — `merge_sorted(a, b)` на Python → рабочий код, 232 tok / 13.4 s;
+  - B3 reasoning — доказательство иррациональности √2 c `think: true`
+    → доказательство + thinking-блок 5862 симв., ~1k tok / 131.5 s.
+- **Демо-видео** (live, qwen3.5:9b, реальный стриминг в TUI):
+  `C:\Users\migor\OneDrive\Рабочий стол\AI Advent Challenge - видео\day26_demo.mp4`
+  (desktop, **НЕ в репозитории**), 205.4 s, 2640×1632, ~2.9 МБ, h264
+  faststart. Сессия `python -m myharness --demo`: `/think off` → B1
+  «Кто самый младший?» → «Боря» (метрики ⏱↑↓Σ на экране) → `/think on`
+  → B3 доказательство иррациональности √2 с раскрытием 🧠-блока мыслей,
+  Ctrl+R сворачивает/разворачивает, прогресс-бар контекста.
+
+### Статус
+
+13 юнит-тестов PASS (офлайн); headless TUI-smoke PASS (3 панели
+рендерятся, офлайн-статус честный); e2e `scripts/e2e_day26.py` —
+**17 PASS / 0 FAIL / 0 SKIP** (Part A 5/5 MUST + Part B live 12/12).
+Ветка `day26-local-llm` (от `day25-task-memory`).
+
+## День 33: ассистент поддержки пользователей (CLI)
+
+### Задание
+
+Мини-сервис поддержки: ассистент отвечает на вопросы о текущем проекте,
+использует RAG (FAQ, документация) и учитывает контекст пользователя/тикета.
+Контекст подключается через MCP: CRM в виде JSON (пользователи и тикеты).
+
+### Что сделано
+
+CLI-ассистент (`python -m support`), который по конкретному тикету отвечает
+оператору поддержки: находит статьи FAQ/документации (RAG), подтягивает
+клиента и историю обращения через **MCP** (два stdio-сервера CRM) и выдаёт
+ответ со ссылками на источники и конкретным следующим шагом.
+
+- **RAG по базе знаний** — гибридный поиск (`support/retrieval.py`):
+  поле-взвешенный BM25 (заголовок > теги > текст) + хэш-эмбеддинги
+  (char-3-граммы, как в БЗ Студии) + фузия RRF, порог релевантности,
+  инфлексия («почта»/«почты»). Нет лексического совпадения — честное
+  «в базе знаний нет ответа» **без вызова LLM** (паттерн дня 24).
+- **Контекст тикета через MCP** — серверы `crm_get_ticket` (тул
+  `get_ticket`) и `crm_get_user` (тул `get_user`) на общем каркасе дня 20
+  (`studio/mcp_servers/_mcp_base.py`), транспорт — клиент Студии
+  (`studio/backend/mcp.py`). Тикет и клиент грузятся при выборе тикета,
+  а модель может вызвать инструменты сама (tool-loop, OpenAI `tools`).
+- **Ответ с учётом контекста** — в system-промпт уходят данные тикета
+  (тема/статус/приоритет/переписка/факты/`sync_status`), профиль клиента
+  (тариф, история обращений, заметки) и выдержки из базы со ссылками `[n]`.
+  В ответе: стриминг, список источников (ранг, `id`, заголовок, скор),
+  какие источники процитированы, и **«Следующий шаг оператора»**
+  (резервный код 2FA, заявка на возврат, allowlist IP и т. п.).
+- **CLI-интерфейс** — REPL с командами `/tickets`, `/ticket TCK-4101`,
+  `/sources`, `/tools`, `/help`, `/exit`; офлайн-режим `--offline`
+  (без модели, детерминизм для тестов/демо) и `--demo` (скриптовый
+  прогон для записи видео).
+
+### Данные
+
+| Файл | Что внутри |
+| ---- | ---------- |
+| `tools/crm.json` | CRM: `users` (профиль, тариф, история, заметки) и `tickets` (тема, статус, приоритет, переписка, факты, `sync_status`) — 3 клиента, 3 тикета |
+| `tools/kb.json` | База знаний: 10 статей FAQ/документации (вход и 2FA, SMS-код, cookie, 401 в API, двойное списание, счёт/акт, тариф, проект «Студия», формат ответа поддержки, статусы/SLA) |
+
+Env-переопределения: `SUPPORT_CRM_FILE`, `SUPPORT_KB_FILE`.
+
+### MCP
+
+| Сервер (`tools/mcp_servers/`) | Тул | Аргумент | Возврат |
+| --- | --- | --- | --- |
+| `crm_get_ticket.py` | `get_ticket` | `ticket_id` | тикет: id, subject, status, priority, user_id, messages[], facts[], sync_status |
+| `crm_get_user.py` | `get_user` | `user_id` | пользователь: name, email, company, plan, role, account_status, history[], notes |
+
+Протокол — stdio JSON-RPC 2.0 (`initialize` → `tools/list` → `tools/call`),
+как в днях 16–20. Если MCP не поднялся, ассистент работает по тем же данным
+из JSON (фолбэк), CLI честно пишет «контекст: JSON (MCP недоступен)».
+
+### Запуск
+
+```bash
+pip install textual          # не нужно для CLI; нужен myharness дня 26
+python -m support                       # REPL; тикет выбрать: /ticket TCK-4101
+python -m support --ticket TCK-4101     # сразу с тикетом
+python -m support --offline --demo      # без LLM: RAG + MCP, детерминизм
+```
+
+Модель — OpenAI-совместимый `/chat/completions` (по умолчанию GPustack,
+`deepseek-v4-flash`; ключ по модели из `.env`: `GPUSTACK_KEY_DEEPSEEK` /
+`GPUSTACK_KEY_GLM` / `GPUSTACK_API_KEY`). Переопределения:
+`--model`, `--base-url`, env `SUPPORT_MODEL`, `SUPPORT_API_KEY`.
+
+### Пример (live, день 33)
+
+```
+› /ticket TCK-4101
+Тикет открыт:
+  [контекст: MCP] TCK-4101 · Не работает вход в систему · in_progress/high
+  клиент: Анна Смирнова · Заповедник-онлайн · тариф Бизнес
+  [MCP] get_ticket(ticket_id=TCK-4101) -> ok
+  [MCP] get_user(user_id=U-101) -> ok
+
+› Почему не работает авторизация?
+  [RAG] [1] FAQ-AUTH-01 — Вход в систему: не приходит SMS-код подтверждения (score 1.00)
+  [RAG] [2] FAQ-AUTH-03 — Как включить и сбросить 2FA (score 0.79)
+Ответ: Причина не в пароле: он принят, проблема на втором шаге 2FA — не доставляется
+SMS-код [1]. Рекомендую: 1) проверить номер телефона… 2) запросить код повторно через
+60 секунд… 3) сгенерировать резервный код 2FA (действует 10 минут) [2] …
+Источники:
+  [1] FAQ-AUTH-01 — Вход в систему: не приходит SMS-код подтверждения
+  [2] FAQ-AUTH-03 — Как включить и сбросить 2FA
+  процитированы: FAQ-AUTH-02, FAQ-AUTH-01
+Следующий шаг: проверить доставку SMS через провайдера и выдать резервный код 2FA …
+```
+
+Вопрос вне базы («Сколько стоит билет на Марс?») — честный отказ без
+LLM-вызова и эскалация; ни фраза из тикета, ни хэш-эмбеддинги не могут
+«выдумать» ответ.
+
+### Тесты и e2e
+
+| Что | Команда | Итог |
+| --- | --- | --- |
+| Юниты/интеграция (47) | `python -m pytest tests/test_support_day33.py -q` | PASS |
+| Весь офлайн-набор репозитория | `python -m pytest tests -q` | 78 passed |
+| e2e дня 33 | `python scripts/e2e_day33.py` | **38 PASS / 0 FAIL / 0 SKIP** |
+
+E2E: Part A (MUST PASS, офлайн) — MCP-серверы по stdio, MCP-мост, RAG
+по 7 вопросам + «не знаю», контекст тикета в промпте, источники/цитаты,
+next_action, CLI `--offline`; Part B (live, real LLM + real MCP) — B1
+«Почему не работает авторизация?» на TCK-4101, B2 второй тикет
+(двойное списание), B3 честный отказ, B4 CLI со стримингом на TCK-4300.
+Транскрипт: `.omo/evidence/day33/transcript.json` (gitignored).
+
+### Демо-видео
+
+`day33_support_demo.mp4` (папка «AI Advent Challenge - видео» на рабочем
+столе, в git не попадает, ~27 с, 2640×1880): имитация работы пользователя
+с ассистентом — `/tickets`, `/ticket TCK-4101`, затем четыре вопроса,
+включая «Почему не работает авторизация?» и вопрос вне базы знаний.
+На экране видно, как контекст тикета и клиента приходит через MCP, какие
+статьи нашёл RAG (со score), ответ модели с ссылками `[n]`, источники и
+следующий шаг оператора. Записано с реального CLI (MCP + RAG + LLM).
+
+Ключи (только в `.env`, в git не попадают): `deepseek-v4-flash`
+(`GPUSTACK_KEY_DEEPSEEK`), `glm-5.3-flash` (`GPUSTACK_KEY_GLM`) и
+`gpt-4o` (`GPUSTACK_API_KEY`) — проверены, отвечают `ok`; `qwen3.8-27b`
+с этими ключами недоступен (403).
+
+### Файлы дня
+
+| Файл | Назначение |
+| --- | --- |
+| `support/retrieval.py` | гибридный поиск по базе знаний (BM25 полей + хэш-вектор, RRF, порог, «не знаю») |
+| `support/crm.py` | MCP-мост к CRM: реестр инструментов, tool-loop диспетчер, офлайн-фолбэк на JSON |
+| `support/llm.py` | клиент `/chat/completions` (tools, стриминг, ключи по моделям, повод для повторного вызова при reasoning-пустом ответе) |
+| `support/session.py` | ход «вопрос → ответ по тикету»: промпт с контекстом, источники/цитаты, next_action, tool-loop |
+| `support/cli.py`, `support/__main__.py` | REPL `python -m support` |
+| `tools/_support_store.py` | чтение CRM/KB JSON (`tools/crm.json`, `tools/kb.json`) |
+| `tools/mcp_servers/crm_get_ticket.py`, `crm_get_user.py` | MCP-серверы CRM (1 сервер = 1 тул, stdlib) |
+| `tests/test_support_day33.py` | 47 офлайн-тестов |
+| `scripts/e2e_day33.py` | e2e (Part A офлайн + Part B live) |
+
+Ветка `day33-support-assistant` (от `day26-local-llm`).
