@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261018-0252",
-  "generated_at": "2026-10-18T02:52:52Z",
+  "id": "digest-20261018-1019",
+  "generated_at": "2026-10-18T10:19:32Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 10.5,
-    "feels_like_c": 8.1,
+    "temp_c": 15.8,
+    "feels_like_c": 12.0,
     "description": "Пасмурно",
-    "wind_ms": 3.7
+    "wind_ms": 10.0
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "VK сообщила об атаке беспилотников на дата-центр в Ленинградской области",
+        "url": "https://vc.ru/services/3200928-vk-soobshchila-ob-atake-na-data-tsentr-v-leningradskoy-oblasti?from=rss"
+      },
+      {
+        "title": "Ozon рассказал об атаке на логистический центр в Санкт-Петербурге",
+        "url": "https://vc.ru/marketplace/3200948-ozon-ataka-logisticheskij-tsentr-sankt-peterburg?from=rss"
+      },
       {
         "title": "Криптобиржа Bitget внесла Россию в список стран, в которых запрещено пользоваться сервисом",
         "url": "https://vc.ru/crypto/3199827-kriptobirzha-bitget-zapret-rossiya-i-belarusiya?from=rss"
       },
       {
+        "title": "Арестованный инженер OpenAI попросил суд отпустить его под залог — он отрицает, что планировал «побег» из США",
+        "url": "https://vc.ru/legal/3200065-inzhener-openai-abdulrahman-alfazan-prosit-zalog?from=rss"
+      },
+      {
         "title": "«Раз средствами не пользуются»: GPT-5.6 Sol подобрала ключ к чужому криптокошельку и потратила с него ETH в тестовой сети",
         "url": "https://vc.ru/crypto/3198251-incident-s-gpt-5-6-sol-ispolzovanie-chuzhogo-kryptokoshelka?from=rss"
-      },
-      {
-        "title": "Tesla представила новый Roadster — во время презентации машина разогналась до 100 км/ч за 0,81 с и без трамплина пролетела над другими моделями компании",
-        "url": "https://vc.ru/transport/3197814-tesla-predstavila-obnovlennyj-roadster?from=rss"
-      },
-      {
-        "title": "«Яндекс» восстановил доступ к кабинету «Бизнеса», просмотр отчётов в «Метрике» и работу основных инструментов в «Вебмастере»",
-        "url": "https://vc.ru/marketing/3199382-yandeks-vosstanovil-dostup-k-biznes-kabinetu?from=rss"
-      },
-      {
-        "title": "Пользователи в Санкт-Петербурге пожаловались на сбой в работе домашнего интернета",
-        "url": "https://vc.ru/services/3200207-sboj-interneta-v-sankt-peterburge?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Apple в правилах App Store запретила разработчикам скрывать реальные возможности приложений на время модерации",
-        "url": "https://habr.com/ru/news/1095676/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095676"
+        "title": "Хакеры взломали 1 900 аккаунтов GitHub и атаковали 30 000 репозиториев",
+        "url": "https://habr.com/ru/companies/selectel/news/1095718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095718"
       },
       {
-        "title": "Claude за полчаса разгадал загадку АНБ, которой больше 25 лет. Ответ был у криптографов под носом",
-        "url": "https://habr.com/ru/news/1095620/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095620"
+        "title": "Выпуск обновления OpenRGB 1.1 — открытого проекта для управления RGB‑подсветкой периферии",
+        "url": "https://habr.com/ru/news/1095580/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095580"
       },
       {
-        "title": "ИИ спроектировал пистолет для печати на 3D‑принтере",
-        "url": "https://habr.com/ru/news/1095640/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095640"
+        "title": "Вышло обновление кроссплатформенного открытого многофункционального архиватора PeaZip 11.4",
+        "url": "https://habr.com/ru/news/1095678/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095678"
       },
       {
-        "title": "Sony получила патент на технологию вывода на экран предсказанного изображения",
-        "url": "https://habr.com/ru/news/1095616/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095616"
+        "title": "VK сообщила об атаке на дата-центр компании в Ленинградской области, сервисы «ВКонтакте» доступны в обычном режиме",
+        "url": "https://habr.com/ru/news/1095754/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095754"
       },
       {
-        "title": "TSMC рассматривает возможность работы с проектом Илона Маска в Техасе",
-        "url": "https://habr.com/ru/companies/selectel/news/1095094/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095094"
+        "title": "Выпуск открытого проекта OpenWin — альтернативы Ninite для Windows",
+        "url": "https://habr.com/ru/news/1095656/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095656"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261018-0252: Самара 10.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261018-1019: Самара 15.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
