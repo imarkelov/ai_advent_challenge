@@ -26,7 +26,7 @@ studio2/
 │   │   ├── researcher.py
 │   │   ├── testwriter.py
 │   │   ├── debugger.py
-│   │   └── momus.py
+│   │   └── reviewer.py
 │   └── tests/
 ├── frontend/               # React 19 + Vite + TS, чистый старт
 ├── data/                   # рантайм: config.json, mcp_servers.json (gitignore)
@@ -49,14 +49,14 @@ qa-lead:
   4. provision — сборка APK (assemble) + запуск AVD
   5. execute — gradlew connectedAndroidTest
   6. debug — при fail: adb dump → правка теста → повтор (лимит)
-  7. momus — Momus (**другая LLM**), вердикт green/red по загруженным/из MCP тестам
+  7. review — Reviewer (**другая LLM**), вердикт green/red по загруженным/из MCP тестам
   8. fail → round 2 study (новые факты в RAG) → назад к write
-  9. done — test_report.md + momus_report.md
+  9. done — test_report.md + review_report.md
 ```
 
 Оркестрация: **Supervisor + специализированные субагенты** с SDD на каждого
-(без внешних фреймворков). Разделение ролей изолировано, Momus — отдельная
-модель, цикл «2 круга → вопрос человеку» встроен.
+(без внешних фреймворков). Разделение ролей изолировано, ревью отдельной моделью,
+цикл «2 круга → вопрос человеку» встроен.
 
 ### 1.3 Папка `doc/` (документы и база знаний)
 
@@ -67,14 +67,14 @@ doc/
 │   ├── researcher.md
 │   ├── testwriter.md
 │   ├── debugger.md
-│   ├── momus.md
+│   ├── reviewer.md
 │   ├── device-inspector.md
 │   └── orchestrator-protocol.md
 ├── templates/
 │   ├── sdd.md
 │   ├── run-summary.md
 │   ├── question.md
-│   └── momus-report.md
+│   └── review-report.md
 ├── kb/                        RAG-корпус, пишет агент + человек
 │   ├── architecture.md
 │   ├── patterns.md
@@ -88,7 +88,7 @@ doc/
     ├── sdd/agent_*.md
     ├── test_generated/*.kt
     ├── logs/
-    ├── momus_report.md
+    ├── review_report.md
     └── test_report.md
 ```
 
@@ -152,13 +152,13 @@ Pipeline (запуск, live SSE, карточки субагентов, про�
     "researcher": { "provider": "ollama", "model": "qwen3.5:9b",      "temperature": 0.2 },
     "testwriter": { "provider": "ollama", "model": "qwen3-coder:30b", "temperature": 0.4 },
     "debugger":   { "provider": "ollama", "model": "qwen3-coder:30b", "temperature": 0.3 },
-    "momus":   { "provider": "ollama", "model": "gemma4:12b",      "temperature": 0.1 }
+    "reviewer":   { "provider": "ollama", "model": "gemma4:12b",      "temperature": 0.1 }
   },
   "critic": { "must_differ_from_author": true }
 }
 ```
 
-- Инвариант `critic.must_differ_from_author`: momus != testwriter (модель).
+- Инвариант `critic.must_differ_from_author`: Reviewer != testwriter (модель).
 - Fallback: провайдер недоступен → баннер + переезд на `fake` или `ollama`.
 - `data/` в `.gitignore`, ключи маскируются в UI.
 
@@ -207,7 +207,7 @@ Pipeline (запуск, live SSE, карточки субагентов, про�
 | `test_written` | path, loc |
 | `gradle_log` | line |
 | `adb_dump` | screen, nodes, path |
-| `momus_verdict` | verdict, path |
+| `review_verdict` | verdict, path |
 | `question` | question_id, role, text, options |
 | `question_answered` | question_id |
 | `run_done` | status, report_path |
@@ -236,8 +236,8 @@ UI-переключатель `Live | Fake (демо)` в Models. e2e по ум�
 
 ### 2.6 Инварианты
 
-1. `momus.model != testwriter.model` при `must_differ_from_author`.
-2. Стейдж-переходы: `sdd → study → skeleton → write → provision → execute → debug → momus → (study|done)` (гейты — см. 4.10).
+1. `reviewer.model != testwriter.model` при `must_differ_from_author`.
+2. Стейдж-переходы: `sdd → study → skeleton → write → provision → execute → debug → review → (study|done)` (гейты — см. 4.10).
 3. `max_rounds=2`; после 2 кругов — только `question` или `fail`.
 4. Субагент не пишет вне своего `doc/runs/<run_id>/`.
 5. `doc/kb` пишет только researcher; testwriter — только `test_generated/`.
@@ -284,7 +284,7 @@ Sidebar: текст + счётчик, активный — полоса `--accen
 
 Блоки: **SDD** (список файлов) → **Протокол** (роли: статус-точка,
 роль, модель моноширинно, прогресс) → **Стейдж** (`sdd→study→skeleton→write→
-provision→execute→debug→momus→done`) → **Журнал** (`ts [роль] действие`,
+provision→execute→debug→review→done`) → **Журнал** (`ts [роль] действие`,
 append-only, автоскролл).
 
 Статус-точки: `●` выполняется, `○` ожидает, `✓` готово, `✕` ошибка.
@@ -316,7 +316,7 @@ loading — скелет-строки; empty — одна подсказка; er
 | `researcher.md` | Исследователь | git (branch/log/diff/blame) + RAG → `kb/*.md` | не пишет тесты |
 | `testwriter.md` | Тестировщик | каркас → Kotlin-тест по SDD + patterns | не правит kb |
 | `debugger.md` | Дебаггер | разбирает fail: adb-дамп, правки теста | не меняет требования |
-| `momus.md` | Момус (**другая LLM**) | ревью **загруженных/из MCP** тестов → зелёный/красный | не пишет тест |
+| `reviewer.md` | Ревьюер (**другая LLM**) | ревью **загруженных/из MCP** тестов → зелёный/красный | не пишет тест |
 | `device-inspector.md` | Разведчик экрана | adb dump → `kb/screens/<screen>.md` | не пишет тесты |
 | `orchestrator-protocol.md` | Протокол | общие правила: роли, handoff, лимиты, формат обмена | — |
 
@@ -355,12 +355,12 @@ loading — скелет-строки; empty — одна подсказка; er
 1. Читает ТК из `doc/tasks/<id>.md` + MCP-Allure (если подключён).
 2. Определяет затронутые экраны (ТК + git diff ветки).
 3. Генерит SDD: `agent_researcher.md`, `agent_testwriter.md`, `agent_debugger.md`,
-   `agent_momus.md`, `agent_qa-lead.md`.
+   `agent_reviewer.md`, `agent_qa-lead.md`.
 4. Порядок: `researcher → testwriter(skeleton) → [GATE апрув] → testwriter(write)
-   → [GATE выбор исполнения] → provision → execute → debug → momus`.
+   → [GATE выбор исполнения] → provision → execute → debug → review`.
 5. `need_question` → пробрасывает `question` в SSE, ждёт ответ, перезапускает
    того же субагента с добавленным ответом.
-6. `momus.verdict = red` (для загруженных тестов) → round 2: researcher
+6. `reviewer.verdict = red` (для загруженных тестов) → round 2: researcher
    дописывает факты → повторный прогон.
 7. 2 круга исчерпаны → `need_question` или `fail`.
 8. Пишет `test_report.md`.
@@ -397,7 +397,7 @@ loading — скелет-строки; empty — одна подсказка; er
 4. Реальный баг продукта → `fail` с описанием (тест не «подкручивать»).
 5. Пишет примечания в `sdd/agent_debugger.md`.
 
-### 4.7 Правила `momus` — только результаты загруженных/из MCP тестов
+### 4.7 Правила `reviewer` — только результаты загруженных/из MCP тестов
 
 | # | Проверка | Результат |
 |---|---|---|
@@ -407,7 +407,7 @@ loading — скелет-строки; empty — одна подсказка; er
 | 4 | Ссылка на ТК в MCP существует и актуальна | `valid` / `stale` |
 
 Вердикт `green` — все тесты прогона прошли и стабильны; иначе `red`.
-Пишет `runs/<id>/momus_report.md`. Для **сгенерированных** в этом run тестов
+Пишет `runs/<id>/review_report.md`. Для **сгенерированных** в этом run тестов
 ревью не блокирует пайплайн.
 
 ### 4.8 Гейт выбора исполнения (`execution_choice`)
@@ -462,7 +462,7 @@ loading — скелет-строки; empty — одна подсказка; er
 ```
 sdd → study → skeleton → [GATE: апрув каркаса] → write
    → [GATE: выбор исполнения] → provision → execute → debug
-   → momus (загруженные/из MCP) → (round 2 | done)
+   → review (загруженные/из MCP) → (round 2 | done)
 ```
 
 Новые SSE-события: `skeleton_ready`, `skeleton_updated`, `skeleton_approved`,
@@ -477,10 +477,10 @@ sdd → study → skeleton → [GATE: апрув каркаса] → write
 1. Каждая роль получает только свой SDD + разрешённые артефакты.
 2. `allowed_tools` — жёсткий фильтр: неразрешённый вызов → ошибка.
 3. Одна роль = одна модель из конфига ролей.
-4. Момус не может быть той же моделью, что тестировщик.
+4. Ревьюер не может быть той же моделью, что тестировщик.
 5. Переход `skeleton → write` — только после `skeleton_approved`.
 6. Переход `write → provision` — только после `execution_chosen`.
-7. Momus валидирует только загруженные/из MCP тесты.
+7. Reviewer валидирует только загруженные/из MCP тесты.
 
 ## 5. Исполнение Android
 
@@ -592,7 +592,7 @@ debug:     screenshot + dump_ui → классификация (4.6) → пра�
 | E2E | полный run на fake-LLM + проверка артефактов | `scripts/e2e_day35.py` |
 
 Инвариантные тесты:
-1. `momus.model != testwriter.model`.
+1. `reviewer.model != testwriter.model`.
 2. Без `skeleton_approved` переход в `write` → 400.
 3. Без `execution_chosen` переход в `provision` → 400.
 4. Инструмент вне `allowed_tools` → ошибка.
@@ -602,14 +602,14 @@ debug:     screenshot + dump_ui → классификация (4.6) → пра�
 
 ### 6.2 Демо-сценарий
 
-1. Models: 3 модели Ollama, статус `ok`, Momus — `gemma4:12b`.
+1. Models: 3 модели Ollama, статус `ok`, Reviewer — `gemma4:12b`.
 2. MCP: подключить Allure-сервер.
 3. RAG: дерево `doc/kb`, «Переиндексировать».
 4. Tasks: выбрать `TC-4217`.
 5. Pipeline → «Запустить», live-трейс.
 6. `skeleton`: показать каркас, правка, «Утвердить».
 7. `execution_choice`: выбрать вариант.
-8. `momus_report.md` — зелёный.
+8. `review_report.md` — зелёный.
 9. `test_report.md` + сгенерированный `.kt`.
 10. `doc/kb/patterns.md` — «выведет паттерны написания».
 
@@ -646,6 +646,6 @@ debug:     screenshot + dump_ui → классификация (4.6) → пра�
 - [ ] `scripts/e2e_day35.py` — PASS на fake.
 - [ ] Демо записано, скриншоты в `docs/`.
 - [ ] `doc/agents/*.md` правятся без кода.
-- [ ] Momus гарантированно на другой модели.
+- [ ] Reviewer гарантированно на другой модели.
 - [ ] Ключи проверены, отчёт в release notes.
 - [ ] Push в `origin/day35-qa-lead-orchestrator`.
