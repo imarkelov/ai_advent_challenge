@@ -1,6 +1,6 @@
 # Day 35 — QA-Lead Orchestrator (studio2)
 
-Статус: черновик (секции 1–1.2 согласованы; секции 2+ в работе).
+Статус: согласовано (секции 1–6, self-review пройден).
 Дата: 2026-10-18.
 Проект: **новый, `studio2/`**, `studio/` не трогаем.
 
@@ -20,6 +20,7 @@ studio2/
 │   ├── git_ops.py          # ветки, log, diff, blame
 │   ├── android.py          # adb: dump, screencap, tap, wait
 │   ├── gradle.py           # ./gradlew connectedAndroidTest
+│   ├── mcp.py              # stdio/HTTP MCP-клиент + реестр (command/url/env)
 │   ├── roles.py            # загружает и парсит doc/agents/*.md (front-matter + тело)
 │   ├── pipeline/
 │   │   ├── lead.py         # qa-lead: SDD-генерация, оркестрация, round-лимиты
@@ -186,6 +187,9 @@ Pipeline (запуск, live SSE, карточки субагентов, про�
 | POST | `/api/runs` | `{task_id, repo_path, branch}` → `{run_id}` |
 | GET | `/api/runs` \| `/api/runs/{id}` | история / состояние |
 | GET | `/api/runs/{id}/stream` | SSE |
+| GET/PUT | `/api/runs/{id}/skeleton` | каркас теста (чтение/правка) |
+| POST | `/api/runs/{id}/approve-skeleton` | гейт: апрув каркаса |
+| POST | `/api/runs/{id}/execution-choice` | гейт: `{choice}` |
 | POST | `/api/runs/{id}/answer` | `{question_id, text}` |
 | POST | `/api/runs/{id}/cancel` | остановить |
 
@@ -207,6 +211,11 @@ Pipeline (запуск, live SSE, карточки субагентов, про�
 | `test_written` | path, loc |
 | `gradle_log` | line |
 | `adb_dump` | screen, nodes, path |
+| `skeleton_ready` | path, steps, tags, assumptions |
+| `skeleton_updated` | path, by (human/agent) |
+| `skeleton_approved` | path, at |
+| `execution_choice` | options (до ответа) |
+| `execution_chosen` | choice (`as_loaded` \| `generated`) |
 | `review_verdict` | verdict, path |
 | `question` | question_id, role, text, options |
 | `question_answered` | question_id |
@@ -649,3 +658,28 @@ debug:     screenshot + dump_ui → классификация (4.6) → пра�
 - [ ] Reviewer гарантированно на другой модели.
 - [ ] Ключи проверены, отчёт в release notes.
 - [ ] Push в `origin/day35-qa-lead-orchestrator`.
+
+## 7. Self-review спеки
+
+Проверка выполнена, замечания исправлены:
+
+1. **Плейсхолдеры** - в шаблонах SDD/вопроса/каркаса `<...>` оставлены осознанно:
+   это подстановочные поля шаблона, заполняемые кодом, а не незавершённые требования.
+   Статус документа переведён из «черновик» в «согласовано».
+2. **Согласованность SSE** - секция 2.3 дополнена событиями гейтов
+   (skeleton_ready, skeleton_updated, skeleton_approved, execution_choice,
+   execution_chosen), которые ранее упоминались только в 4.10.
+3. **Согласованность API** - в таблицу 2.2 добавлены эндпоинты каркаса и гейтов
+   (GET/PUT /api/runs/{id}/skeleton, pprove-skeleton, execution-choice).
+4. **Раскладка модулей** - добавлен ackend/mcp.py (MCP-клиент и реестр),
+   без него MCP-эндпоинты не имели реализации.
+5. **Стейдж-флоу** - единый порядок во всех секциях:
+   sdd → study → skeleton → write → provision → execute → debug → review → (study|done).
+6. **Роль ревьюера** - во всех секциях eviewer, инвариант
+   eviewer.model != testwriter.model.
+7. **Скоуп** - одна подсистема (QA-пайплайн + UI), один план реализации;
+   декомпозиция не требуется.
+8. **Амбигуити** - уточнено: ревьюер валидирует только загруженные/из MCP тесты
+   и не блокирует сгенерированные; оба гейта обязательны до исполнения.
+
+Остаточный риск: GPUSTACK недоступен без VPN - демо и e2e идут на Ollama/ake.
