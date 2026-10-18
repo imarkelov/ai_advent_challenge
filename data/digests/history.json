@@ -7072,5 +7072,85 @@
       ]
     },
     "summary": "Сводка digest-20261018-1519: погода недоступна (<urlopen error [Errno 101] Network is unreachable>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261018-2002",
+    "generated_at": "2026-10-18T20:02:19Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 11.5,
+      "feels_like_c": 8.9,
+      "description": "Пасмурно",
+      "wind_ms": 2.8
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Искусственный»: почти документалка о том, «как мы оказались в нынешней точке», играющий в бога Сэм Альтман и Юра Борисов «в центре внимания»",
+          "url": "https://vc.ru/media/3185287-film-iskusstvennyj-sam-altman-i-yura-borisov?from=rss"
+        },
+        {
+          "title": "Mercedes-AMG представила трёхмоторный электрический внедорожник GT SUV мощностью до 1153 л.с.",
+          "url": "https://vc.ru/transport/3201199-mercedes-amg-gt-suv-elektricheskij-vnedorozhnik?from=rss"
+        },
+        {
+          "title": "VK сообщила об атаке беспилотников на дата-центр в Ленинградской области",
+          "url": "https://vc.ru/services/3200928-vk-soobshchila-ob-atake-na-data-tsentr-v-leningradskoy-oblasti?from=rss"
+        },
+        {
+          "title": "Ozon рассказал об атаке на логистический центр в Санкт-Петербурге",
+          "url": "https://vc.ru/marketplace/3200948-ozon-ataka-logisticheskij-tsentr-sankt-peterburg?from=rss"
+        },
+        {
+          "title": "Криптобиржа Bitget внесла Россию в список стран, в которых запрещено пользоваться сервисом",
+          "url": "https://vc.ru/crypto/3199827-kriptobirzha-bitget-zapret-rossiya-i-belarusiya?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Apple начала продавать чехлы для iPhone Duo, которые крепятся к корпусу на клеевую полоску",
+          "url": "https://habr.com/ru/news/1095922/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095922"
+        },
+        {
+          "title": "Bitdefender обнаружила вредоносное ПО в прошивках китайских Android‑смартфонов на платформе MediaTek",
+          "url": "https://habr.com/ru/news/1095912/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095912"
+        },
+        {
+          "title": "В Anthropic стали меньше нанимать джунов и больше проводить времени на совещаниях",
+          "url": "https://habr.com/ru/news/1095894/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095894"
+        },
+        {
+          "title": "MapQuest начал показывать, где установлены камеры Flock и другие ALPR‑системы",
+          "url": "https://habr.com/ru/news/1095880/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095880"
+        },
+        {
+          "title": "Утечка данных в Burger King Japan: скомпрометирована информация 11 млн клиентов",
+          "url": "https://habr.com/ru/news/1095864/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095864"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "ИИ-образование для детей: рейтинг 10 школ и курсов по искусственному интеллекту в 2026 году",
+          "url": "https://tproger.ru/articles/ii-obrazovanie-dlya-detej-rejting-10-wkol-i-kursov-po-iskusstven"
+        },
+        {
+          "title": "Искусственный интеллект для дошкольников: рейтинг 5 курсов и развивающих программ",
+          "url": "https://tproger.ru/articles/iskusstvennyj-intellekt-dlya-dowkolnikov-rejting-5-kursov-i-raz"
+        },
+        {
+          "title": "ИИ-платформы для бизнеса: сравнение решений 2026 года",
+          "url": "https://tproger.ru/articles/ii-platformy-dlya-biznesa-sravnenie-rewenij-2026-goda"
+        },
+        {
+          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
+          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
+        },
+        {
+          "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
+          "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261018-2002: Самара 11.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
