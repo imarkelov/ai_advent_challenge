@@ -10,6 +10,13 @@ import httpx
 
 from config import resolve_provider
 
+
+def _root(url: str) -> str:
+    """Убирает /v1 и хвостовой слэш: пути /v1/... добавляются при вызове."""
+    base = url.rstrip("/").strip()
+    return base[:-3].rstrip("/") if base.endswith("/v1") else base
+
+
 FAKE_RESPONSES = {
     "qa-lead": '{"status": "done", "artifacts": [], "summary": "SDD готовы", "question": null}',
     "researcher": '{"status": "done", "artifacts": ["kb/architecture.md", "kb/patterns.md"], "summary": "Проект изучен", "question": null}',
@@ -63,7 +70,7 @@ class LlmClient:
 
     def _http_chat(self, provider: dict, role: str, messages: list[dict],
                    system: str | None) -> str:
-        base = (provider.get("base_url") or "").rstrip("/")
+        base = _root(provider.get("base_url") or "")
         if not base:
             raise LlmError(f"для провайдера {provider['name']} не задан base_url")
         payload = {
@@ -107,7 +114,7 @@ class LlmClient:
 
     def _provider_config(self, provider_name: str) -> dict:
         provider = self.config["providers"].get(provider_name) or {}
-        base = (provider.get("base_url") or "").rstrip("/")
+        base = _root(provider.get("base_url") or "")
         if not base:
             raise LlmError(f"провайдер {provider_name} не настроен")
         headers = {}
