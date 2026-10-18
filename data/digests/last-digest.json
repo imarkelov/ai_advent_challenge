@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261017-2002",
-  "generated_at": "2026-10-17T20:02:50Z",
+  "id": "digest-20261018-0252",
+  "generated_at": "2026-10-18T02:52:52Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 11.6,
-    "feels_like_c": 9.8,
+    "temp_c": 10.5,
+    "feels_like_c": 8.1,
     "description": "Пасмурно",
-    "wind_ms": 3.6
+    "wind_ms": 3.7
   },
   "news": {
     "vc.ru": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261017-2002: Самара 11.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261018-0252: Самара 10.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
