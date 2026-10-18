@@ -3941,30 +3941,53 @@ pull_request (opened / synchronize / reopened / ready_for_review)
   └─ (6) $GITHUB_STEP_SUMMARY, артефакт ai-pr-review (markdown + JSON, 30 дней)
 ```
 
-### Как пользоваться
+### Локальный запуск — одна команда
 
 ```bash
-# 1. Локально: ревью ветки против master (как в CI)
+# из корня репозитория (модель берётся из .env: LLM_* / OLLAMA_*)
+bash scripts/day32_pr_review.sh demo
+```
+
+Скрипт [scripts/day32_pr_review.sh](scripts/day32_pr_review.sh) собирает
+git-репозиторий с реальным PR (база `main` → ветка
+`feature/users-api`, модуль с секретом, голым `except` и правкой
+документации — [scripts/day32_demo_repo.py](scripts/day32_demo_repo.py)) и
+прогоняет пайплайн так же, как это делает Action: `pr-review check` →
+`index` → `pr-review run --base main` → комментарий-ready отчёт.
+Результат — в `.day32_review/review.md` и `review.json`.
+
+```bash
+# ревью изменений ЭТОГО репозитория против ветки (по умолчанию origin/master)
+bash scripts/day32_pr_review.sh repo --base origin/master
+
+# публичный PR из GitHub (для форков diff берётся через API)
+GITHUB_TOKEN=... bash scripts/day32_pr_review.sh owner/repo#42
+
+# без модели (детерминированный отчёт, без сети)
+bash scripts/day32_pr_review.sh demo --no-llm
+```
+
+Что делает тот же пайплайн вручную:
+
+```bash
 .venv/bin/python studio/backend/cli.py pr-review check
 .venv/bin/python studio/backend/cli.py index
 .venv/bin/python studio/backend/cli.py pr-review run --base origin/master \
     --out review.md --json-out review.json
 
-# 2. Пайп: diff из stdin, отчёт в stdout
+# diff из stdin (пайп)
 git diff origin/master...HEAD | .venv/bin/python studio/backend/cli.py \
     pr-review run --diff -
 
-# 3. Блокирующий режим для CI: код 1 при находке уровня «критично»
+# блокирующий режим: код 1 при находке уровня «критично»
 .venv/bin/python studio/backend/cli.py pr-review run --diff pr.diff --fail-on-high
-
-# 4. PR из форка: ветки нет в рабочем дереве — diff берётся из API
-.venv/bin/python studio/backend/cli.py pr-review run --github-pr owner/repo#42
 ```
 
 Ключи опций: `--annotations` (workflow-команды), `--comment OWNER/REPO#N`
 (комментарий в PR), `--step-summary FILE` (сводка в Summary запуска),
-`--title`, `--top-k` (фрагментов RAG на файл), `--json` / `--out` /
-`--json-out`, `--no-llm` (детерминированный режим).
+`--github-pr OWNER/REPO#N` (diff из API, для форков), `--title`,
+`--top-k` (фрагментов RAG на файл), `--no-llm`, `--json` / `--out` /
+`--json-out`.
 
 ### Как включается модель в CI
 
@@ -4058,16 +4081,17 @@ GitHub Actions недоступен — поэтому `AssistantService._llm` �
 | Проверка | Результат |
 |---|---|
 | E2E дня 32 | `scripts/e2e_day32.py` — **PASS 26, FAIL 0, SKIP 0** (Part A 22 офлайн: ожидание/индекс/три блока/что видит модель/RAG/проверки/git/stdin/`--fail-on-high`/деградация/аннотации/Summary/артефакты/комментарий/форк/пустой diff/файлы Action/промпт агента/отчёт; Part B 4 live) |
-| Тесты дня 32 | `tests/test_day32_pr_review.py` — **36 passed** (CLI подпроцессом в сборном git-репозитории, модель — фейковый OpenAI-сервер, GitHub — фейковый REST, сеть не используется) |
+| Тесты дня 32 | `tests/test_day32_pr_review.py` — **39 passed** (CLI подпроцессом в сборном git-репозитории, модель — фейковый OpenAI-сервер, GitHub — фейковый REST, сеть не используется) |
 | Регрессия бэкенда | `studio/backend/tests` — **1207 passed, 6 skipped** |
 | Промпт агента | `agents/pr-review.cli.md` — только CLI-исполнение; в API-запросе реестр честно помечает `fallback` |
 
-Демо-видео дня 32: `day32_ai_pr_review.mp4` (1 мин 57 с, папка
-`ai_advent_day32_video` на рабочем столе) — кадры собраны из
-**реального вывода** пайплайна живой моделью (`scripts/make_day32_video.py`
-плюс сценарий `scripts/day32_video_script.json`).
-Пайплайн на GitHub — `.github/workflows/ai-review.yml` и
-`.github/actions/ai-pr-review/action.yml`.
+Демо-видео дня 32: `day32_ai_pr_review.mp4` (1 мин 07 с, **без
+звука**, папка `ai_advent_day32_video` на рабочем столе) — запись
+экрана живого запуска `scripts/day32_pr_review.sh demo`: терминал →
+проверка → индекс → ответ модели → готовый `review.md` с тремя блоками.
+Кадры строятся из фактического вывода этого прогона
+(`scripts/make_day32_video.py`: псевдотерминал → транскрипт → кадры →
+ffmpeg, без звука).
 
 ```bash
 # Проверка (из корня репозитория)

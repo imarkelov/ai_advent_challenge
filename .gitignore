@@ -60,3 +60,7 @@ data/series/catalog_raw.json
 # scripts/package_rag_upload.py) — генерируется, в git не нужна.
 rag_export/
 rag_upload/
+
+# День 32: вывод локального запуска ревью PR (scripts/day32_pr_review.sh) —
+# отчёты и демо-репозиторий генерируются, в git не нужны.
+.day32_review/

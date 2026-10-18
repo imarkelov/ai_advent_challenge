@@ -2903,3 +2903,46 @@ Task-промпты собираются только из состояния з
 только из `.env`, который в `.gitignore`. В треке и истории только имена
 env-переменных (`GPUSTACK_API_KEY`, `GPUSTACK_KEY_DEEPSEEK`,
 `GPUSTACK_KEY_GLM`) — без значений.
+
+---
+
+# Дополнение к day32-pr-review — локальный запуск и видео
+
+Ветка: `day32-pr-review` (после PR-отчёта выше).
+
+## Локальный запуск одной командой
+
+```bash
+bash scripts/day32_pr_review.sh demo               # демо-PR + живая модель из .env
+bash scripts/day32_pr_review.sh repo --base origin/master
+GITHUB_TOKEN=... bash scripts/day32_pr_review.sh owner/repo#42
+bash scripts/day32_pr_review.sh demo --no-llm      # без сети и модели
+```
+
+- `scripts/day32_pr_review.sh` — тот же пайплайн, что в Action
+  (`check` → `index` → `run`), модели из `.env`, отчёты в
+  `.day32_review/` (`review.md`, `review.json`, `summary.md`);
+- `scripts/day32_demo_repo.py` — собирает git-репозиторий с PR:
+  модуль с секретом, голым `except`, без тестов, плюс правка
+  документации, которая противоречит коду (для RAG);
+- `cli.py pr-review run` теперь принимает `--no-llm` (он же глобальный
+  флаг) — раньше лаунчер с этим флагом падал на разборе аргументов;
+- `.day32_review/` добавлен в `.gitignore`.
+
+## Демо-видео без озвучки
+
+`~/Desktop/ai_advent_day32_video/day32_ai_pr_review.mp4` — 1 мин 07 с,
+**без звука**: запись экрана живого прогона `day32_pr_review.sh demo`
+(терминал → `check` → `index` → ответ модели → `review.md` с тремя
+блоками). Кадры строятся из фактического вывода прогона
+(`scripts/make_day32_video.py`: псевдотерминал → транскрипт → кадры →
+ffmpeg, без звука); сценарий `day32_video_script.json` удалён, он был
+нужен только озвучиваемой версии.
+
+## Проверка
+
+| Проверка | Результат |
+|---|---|
+| `tests/test_day32_pr_review.py` | **39 passed** (+3: демо-репозиторий, `demo --no-llm` через лаунчер, `pr-review run --no-llm`) |
+| Лаунчер вживую | `demo` с Ollama → `review.md`, три блока от живого ответа; `demo --no-llm` → детерминированный отчёт |
+| Видео | 67 с, 1600×1000, 30 fps, H.264 **без аудиодорожки**; QC кадров — нет вылезания текста за границы |

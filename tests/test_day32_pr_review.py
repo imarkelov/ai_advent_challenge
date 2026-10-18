@@ -783,3 +783,63 @@ class TestAgentPrompt:
                       "Рекомендации"):
             assert title in text
         assert "не выдумывай" in text.lower()
+
+
+# ---------------------------------------------------------------------------
+# 8. Локальный запуск одной командой (scripts/day32_pr_review.sh)
+# ---------------------------------------------------------------------------
+
+LAUNCHER = os.path.join(REPO, "scripts", "day32_pr_review.sh")
+DEMO_REPO = os.path.join(REPO, "scripts", "day32_demo_repo.py")
+
+
+def _launcher(args, cwd=REPO, timeout=900):
+    env = _env(REPO)
+    proc = subprocess.run(["bash", LAUNCHER] + args, cwd=cwd,
+                          capture_output=True, text=True, env=env,
+                          timeout=timeout)
+    return proc.returncode, proc.stdout, proc.stderr
+
+
+class TestLocalLauncher:
+    def test_demo_builds_pr_repo(self, tmp_path):
+        code = subprocess.run([sys.executable, DEMO_REPO,
+                               str(tmp_path / "demo")],
+                              capture_output=True, text=True).returncode
+        assert code == 0
+        log = subprocess.run(["git", "log", "--oneline", "--all"],
+                             cwd=tmp_path / "demo", capture_output=True,
+                             text=True).stdout
+        diff = subprocess.run(["git", "diff", "--name-status",
+                               "main...feature/users-api"],
+                              cwd=tmp_path / "demo", capture_output=True,
+                              text=True).stdout
+        assert "feat(users)" in log
+        assert "studio/backend/users_api.py" in diff
+        assert "docs/USERS.md" in diff
+
+    def test_demo_runs_pipeline_offline(self, tmp_path):
+        """`demo --no-llm` — одна команда: check → index → run → отчёт."""
+        out = tmp_path / "out"
+        env = _env(REPO, OUT_DIR=str(out))
+        proc = subprocess.run(["bash", LAUNCHER, "demo", "--no-llm"],
+                              cwd=REPO, capture_output=True, text=True,
+                              env=env, timeout=1800)
+        assert proc.returncode == 0, proc.stderr
+        assert "RAG" in proc.stdout and "Индекс собран" in proc.stdout
+        assert (out / "review.md").exists()
+        assert (out / "review.json").exists()
+        data = json.loads((out / "review.json").read_text(encoding="utf-8"))
+        assert data["llm"] is False
+        assert data["changed_files"]
+        assert data["review"]["recommendations"]
+
+    def test_run_accepts_no_llm(self, indexed, diff_file, tmp_path):
+        """`--no-llm` принимается и подкомандой pr-review run."""
+        code, _o, err = cli(indexed, "pr-review", "run", "--diff", diff_file,
+                            "--no-llm", "--json-out",
+                            str(tmp_path / "r.json"))
+        assert code == 0, err
+        data = json.loads((tmp_path / "r.json").read_text(encoding="utf-8"))
+        assert data["llm"] is False
+        assert "no-llm" in (data["llm_error"] or "")

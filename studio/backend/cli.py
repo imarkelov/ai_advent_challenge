@@ -755,6 +755,9 @@ def build_parser() -> argparse.ArgumentParser:
     prun.add_argument("--title", help="заголовок PR для отчёта")
     prun.add_argument("--top-k", type=int, default=4, dest="top_k",
                       help="фрагментов RAG на изменённый файл (по умолчанию 4)")
+    prun.add_argument("--no-llm", action="store_true", dest="no_llm",
+                      help="без LLM (детерминированный отчёт; то же, "
+                           "что глобальный --no-llm)")
     prun.add_argument("--fail-on-high", action="store_true",
                       dest="fail_on_high",
                       help="код возврата 1 при критичных находках")

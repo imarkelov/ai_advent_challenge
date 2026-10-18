@@ -29,21 +29,29 @@
    <https://github.com/imarkelov/ai_advent_challenge/actions/workflows/ai-review.yml> →
    «Run workflow» → ветка `day32-pr-review`.
 
+## Локальный запуск
+
+```bash
+# из корня репозитория:
+bash scripts/day32_pr_review.sh demo
+```
+
+- демо с живой моделью из `.env`: `bash scripts/day32_pr_review.sh demo`
+- ревью этого репозитория против ветки: `bash scripts/day32_pr_review.sh repo --base origin/master`
+- публичный PR: `GITHUB_TOKEN=... bash scripts/day32_pr_review.sh owner/repo#42`
+- без модели: `bash scripts/day32_pr_review.sh demo --no-llm`
+- результат: `.day32_review/review.md` (+ `review.json`, `summary.md`)
+
 ## Демо-видео (день 32: AI-ревью PR)
 
 - Яндекс Диск: _— (заполнить после загрузки)_
-- Локальная копия: `day32_ai_pr_review.mp4` (1 мин 57 с, 1600×1000,
-  ~1.6 МБ, H.264 + голос) — папка `ai_advent_day32_video` на рабочем
-  столе. Рядом — `real_output.json`: фактический вывод прогона, из
-  которого собраны кадры.
-- Сценарий (все кадры — **реальный вывод** пайплайна, не картинки):
-  `git log`/`git diff --name-status` ветки PR → `pr-review check`
-  (индекса ещё нет) → `index` (238 документов, 4 540 чанков) →
-  `check` повторно (`✅ RAG: индекс проекта`) → `pr-review run --base
-  main` на живой Ollama → что именно получила модель (промпт, RAG-фрагменты
-  с пометкой «← какой файл», находки) → три блока отчёта (баги,
-  архитектура, рекомендации) → аннотации `::error`/`::warning` и
-  комментарий в PR → `scripts/e2e_day32.py` (PASS 26) и тесты.
+- Локальная копия: `day32_ai_pr_review.mp4` (1 мин 07 с, 1600×1000,
+  **без звука**) — папка `ai_advent_day32_video` на рабочем столе.
+  Рядом: `review.md` (отчёт прогона) и `transcript.txt` (полный вывод).
+- Сценарий: запись экрана живого запуска `scripts/day32_pr_review.sh demo` —
+  демо-репозиторий с PR → `pr-review check` → `index` (239 документов) →
+  `run --base main` на живой Ollama → `review.md` с тремя блоками
+  (потенциальные баги / архитектурные проблемы / рекомендации).
 
 ## Воспроизвести
 
@@ -53,11 +61,9 @@
 .venv/bin/python studio/backend/cli.py index
 .venv/bin/python studio/backend/cli.py pr-review run --base origin/master --out review.md
 
-# перезаписать видео (нужны: ffmpeg или .venv/bin/pip install imageio-ffmpeg pillow,
-# macOS `say` с голосом Milena)
-DAY32_LLM_ENV_JSON='{"LLM_MODEL":"qwen3:8b","LLM_BACKEND":"ollama"}' \
-  .venv/bin/python scripts/make_day32_video.py \
-    --script scripts/day32_video_script.json --out day32_ai_pr_review.mp4
+# перезаписать видео (нужны: ffmpeg или .venv/bin/pip install imageio-ffmpeg pillow)
+# видео без звука: псевдотерминал → транскрипт прогона → кадры → ffmpeg
+.venv/bin/python scripts/make_day32_video.py --out day32_ai_pr_review.mp4
 ```
 
 ---
