@@ -136,9 +136,114 @@ Models (провайдер+ключ+модель на роль, проверка
 MCP (подключение серверов: command/url/env), Tasks (список ТК),
 Pipeline (запуск, live SSE, карточки субагентов, просмотр SDD, карточка вопроса).
 
-## 2. Открытые секции
+## 2. API-контракты и LLM-маршрутизация
 
-- SEC 2 — API-контракты, LLM-маршрутизация (fake/ollama/gpustack), SSE-протокол.
+### 2.1 Модели по ролям (`data/config.json`)
+
+```json
+{
+  "providers": {
+    "ollama":   { "base_url": "http://localhost:11435", "api_key": null },
+    "gpustack": { "base_url": "https://gpustack.data.lmru.tech/v1", "api_key": "..." },
+    "fake":     { "base_url": null, "api_key": null }
+  },
+  "roles": {
+    "qa-lead":    { "provider": "ollama", "model": "qwen3-coder:30b", "temperature": 0.2 },
+    "researcher": { "provider": "ollama", "model": "qwen3.5:9b",      "temperature": 0.2 },
+    "testwriter": { "provider": "ollama", "model": "qwen3-coder:30b", "temperature": 0.4 },
+    "debugger":   { "provider": "ollama", "model": "qwen3-coder:30b", "temperature": 0.3 },
+    "reviewer":   { "provider": "ollama", "model": "gemma4:12b",      "temperature": 0.1 }
+  },
+  "critic": { "must_differ_from_author": true }
+}
+```
+
+- Инвариант `critic.must_differ_from_author`: reviewer != testwriter (модель).
+- Fallback: провайдер недоступен → баннер + переезд на `fake` или `ollama`.
+- `data/` в `.gitignore`, ключи маскируются в UI.
+
+### 2.2 REST-контракты
+
+Ошибки — HTTP + RU-detail.
+
+| Метод | Путь | Назначение |
+|---|---|---|
+| GET | `/api/health` | статус + версия |
+| GET/POST | `/api/config` | провайдеры и роли |
+| GET | `/api/models` | модели провайдера (dropdown) |
+| POST | `/api/models/test` | проверка провайдер+ключ+модель |
+| GET | `/api/doc/tree` | дерево `doc/` |
+| GET | `/api/doc/file?path=` | содержимое MD |
+| POST | `/api/doc/file` | сохранить MD |
+| POST | `/api/doc/upload` | загрузка файла в `doc/kb` или `doc/tasks` |
+| DELETE | `/api/doc/file?path=` | удалить (только `doc/kb`, `doc/tasks`) |
+| POST | `/api/rag/reindex` | переиндексация |
+| GET | `/api/rag/search?q=&limit=` | поиск по RAG |
+| GET/POST/DELETE | `/api/mcp/servers[...]` | реестр MCP |
+| POST | `/api/mcp/servers/{id}/connect` \| `/disconnect` | подключение |
+| GET | `/api/mcp/tools` | инструменты |
+| GET | `/api/tasks` | список ТК из `doc/tasks/` |
+| POST | `/api/runs` | `{task_id, repo_path, branch}` → `{run_id}` |
+| GET | `/api/runs` \| `/api/runs/{id}` | история / состояние |
+| GET | `/api/runs/{id}/stream` | SSE |
+| POST | `/api/runs/{id}/answer` | `{question_id, text}` |
+| POST | `/api/runs/{id}/cancel` | остановить |
+
+### 2.3 SSE-протокол
+
+Формат `data: {json}\n\n`.
+
+| `type` | Поля |
+|---|---|
+| `run_started` | run_id, task |
+| `stage_changed` | stage, round |
+| `agent_started` | role, model |
+| `agent_delta` | role, text |
+| `agent_done` | role, status, summary |
+| `tool_call` | role, tool, args |
+| `tool_result` | role, tool, ok, preview (≤2КБ) |
+| `sdd_written` | role, path, title |
+| `rag_written` | path, bytes |
+| `test_written` | path, loc |
+| `gradle_log` | line |
+| `adb_dump` | screen, nodes, path |
+| `review_verdict` | verdict, path |
+| `question` | question_id, role, text, options |
+| `question_answered` | question_id |
+| `run_done` | status, report_path |
+| `error` | message (RU) |
+
+`question` блокирует пайплайн до `POST /api/runs/{id}/answer`
+(`asyncio.Event` на run_id + таймаут).
+
+### 2.4 LLM-слой `llm.py`
+
+```python
+class LlmClient:
+    def chat(self, spec: AgentSpec, messages: list, tools=None) -> str: ...
+    def stream(self, spec, messages, tools=None) -> Iterator[str]: ...
+```
+
+- `fake` — детерминированные ответы (e2e без сети).
+- `ollama` — OpenAI-совместимый `/v1/chat/completions` (`:11435`).
+- `gpustack` — `POST {base}/chat/completions`, `Authorization: Bearer`.
+- Ретраи ×2, логи в `runs/<id>/logs/llm_<role>_<n>.json`, `usage` в `run.json`.
+
+### 2.5 Live vs fake
+
+UI-переключатель `Live | Fake (демо)` в Models. e2e по умолчанию `fake`.
+Демо — `live` на Ollama.
+
+### 2.6 Инварианты
+
+1. `reviewer.model != testwriter.model` при `must_differ_from_author`.
+2. Стейдж-переходы: `sdd → study → write → provision → execute → debug → review → (study|done)`.
+3. `max_rounds=2`; после 2 кругов — только `question` или `fail`.
+4. Субагент не пишет вне своего `doc/runs/<run_id>/`.
+5. `doc/kb` пишет только researcher; testwriter — только `test_generated/`.
+
+## 3. Открытые секции
+
 - SEC 3 — визуальный стиль («QA-стиль», лаконичный).
 - SEC 4 — промпты ролей и протокол SDD.
 - SEC 5 — исполнение Android (adb-разведка, Gradle, дебаг-цикл).
