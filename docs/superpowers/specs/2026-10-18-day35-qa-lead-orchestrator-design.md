@@ -237,7 +237,7 @@ UI-переключатель `Live | Fake (демо)` в Models. e2e по ум�
 ### 2.6 Инварианты
 
 1. `reviewer.model != testwriter.model` при `must_differ_from_author`.
-2. Стейдж-переходы: `sdd → study → write → provision → execute → debug → review → (study|done)`.
+2. Стейдж-переходы: `sdd → study → skeleton → write → provision → execute → debug → review → (study|done)` (гейты — см. 4.10).
 3. `max_rounds=2`; после 2 кругов — только `question` или `fail`.
 4. Субагент не пишет вне своего `doc/runs/<run_id>/`.
 5. `doc/kb` пишет только researcher; testwriter — только `test_generated/`.
@@ -306,8 +306,183 @@ append-only, автоскролл).
 loading — скелет-строки; empty — одна подсказка; error — красная полоса
 сверху (RU); «агент работает» — пульсирующая точка на `--accent`.
 
-## 4. Открытые секции
+## 4. Роли, промпты и протокол SDD
 
-- SEC 4 — промпты ролей и протокол SDD.
+### 4.1 Состав `doc/agents/`
+
+| Файл | Роль | Делает | Не делает |
+|---|---|---|---|
+| `qa-lead.md` | Оркестратор | читает ТК, генерит SDD, гоняет цикл, собирает отчёт | не пишет код теста |
+| `researcher.md` | Исследователь | git (branch/log/diff/blame) + RAG → `kb/*.md` | не пишет тесты |
+| `testwriter.md` | Тестировщик | каркас → Kotlin-тест по SDD + patterns | не правит kb |
+| `debugger.md` | Дебаггер | разбирает fail: adb-дамп, правки теста | не меняет требования |
+| `reviewer.md` | Ревьюер (**другая LLM**) | ревью **загруженных/из MCP** тестов → зелёный/красный | не пишет тест |
+| `device-inspector.md` | Разведчик экрана | adb dump → `kb/screens/<screen>.md` | не пишет тесты |
+| `orchestrator-protocol.md` | Протокол | общие правила: роли, handoff, лимиты, формат обмена | — |
+
+### 4.2 Шаблон SDD (`doc/templates/sdd.md`)
+
+```markdown
+# SDD — <role>
+
+## Контекст
+- Задача: <TC-4217 — название>
+- Репозиторий / ветка: <path> @ <branch>
+- Изменения в ветке (git): <log/diff summary>
+
+## Цель
+<что должен получить этот субагент>
+
+## Вход
+- RAG: kb/architecture.md, kb/patterns.md, kb/screens/...
+- Артефакты предыдущих ролей: <пути>
+
+## Инструкции
+1. <шаг>
+
+## Ограничения
+- allowed_tools, max_rounds: 2, write_scope
+
+## Формат ответа (JSON)
+{"status":"done|need_question|fail","artifacts":[...],"summary":"...","question":{...}}
+
+## Критерии готовности
+- [ ] ...
+```
+
+### 4.3 Правила `qa-lead`
+
+1. Читает ТК из `doc/tasks/<id>.md` + MCP-Allure (если подключён).
+2. Определяет затронутые экраны (ТК + git diff ветки).
+3. Генерит SDD: `agent_researcher.md`, `agent_testwriter.md`, `agent_debugger.md`,
+   `agent_reviewer.md`, `agent_qa-lead.md`.
+4. Порядок: `researcher → testwriter(skeleton) → [GATE апрув] → testwriter(write)
+   → [GATE выбор исполнения] → provision → execute → debug → review`.
+5. `need_question` → пробрасывает `question` в SSE, ждёт ответ, перезапускает
+   того же субагента с добавленным ответом.
+6. `reviewer.verdict = red` (для загруженных тестов) → round 2: researcher
+   дописывает факты → повторный прогон.
+7. 2 круга исчерпаны → `need_question` или `fail`.
+8. Пишет `test_report.md`.
+
+### 4.4 Правила `researcher` (двухкруговое изучение)
+
+```
+Круг 1: RAG(экран, фича, тег) → git(log/diff/blame) → чтение кода
+        → пишет kb/architecture.md, kb/patterns.md, kb/principles.md
+Круг 2: новый запрос / другой источник (device-inspector) → дописывает kb
+Круги исчерпаны → status=need_question по templates/question.md
+```
+
+Ведёт: `kb/architecture.md` (модули, экраны, навигация, ключевые классы),
+`kb/patterns.md` (Kaspresso/Kakao/Compose, `withTestTag`, `tagged`, Screen-объекты,
+фикстуры `assets/responses`), `kb/principles.md` (что проверяем),
+`kb/screens/<screen>.md` (иерархия + test-теги).
+
+### 4.5 Правила `testwriter`
+
+Два прохода:
+1. **skeleton** — каркас без кода (см. 4.9), ждёт апрув/правки человека.
+2. **write** — превращает утверждённый каркас в Kotlin-тест в
+   `doc/runs/<id>/test_generated/<ClassName>.kt`.
+
+Стиль копирует `kb/patterns.md`, использует **реальные** теги из `kb/screens/`,
+исходники приложения не трогает.
+
+### 4.6 Правила `debugger`
+
+1. Читает логи gradle + скриншот + adb dump на момент падения.
+2. Классифицирует: компиляция / тег не найден / таймаут / реальный баг продукта.
+3. Компиляция/тег/таймаут → правит тест (не более N итераций).
+4. Реальный баг продукта → `fail` с описанием (тест не «подкручивать»).
+5. Пишет примечания в `sdd/agent_debugger.md`.
+
+### 4.7 Правила `reviewer` — только результаты загруженных/из MCP тестов
+
+| # | Проверка | Результат |
+|---|---|---|
+| 1 | Тест проходит на устройстве (gradlew exit=0) | `green` / `red` |
+| 2 | Нет flaky-признаков (повторный прогон) | `stable` / `flaky` |
+| 3 | Тест соответствует ТК из Allure (шаги покрыты) | `matches` / `mismatch` |
+| 4 | Ссылка на ТК в MCP существует и актуальна | `valid` / `stale` |
+
+Вердикт `green` — все тесты прогона прошли и стабильны; иначе `red`.
+Пишет `runs/<id>/review_report.md`. Для **сгенерированных** в этом run тестов
+ревью не блокирует пайплайн.
+
+### 4.8 Гейт выбора исполнения (`execution_choice`)
+
+Перед `provision` пайплайн спрашивает человека:
+
+```
+[question] testwriter: тест готов.
+1. Использовать загруженный из Allure код как есть
+2. Реализовать сгенерированный тест
+3. Посмотреть каркас (см. 4.9)
+```
+
+Ответ фиксируется в `run.json` (`execution_choice`); без ответа переход
+`write → provision` запрещён.
+
+### 4.9 Гейт каркаса (`skeleton`)
+
+Каркас — тест без кода:
+
+```markdown
+# Каркас — AddNewAddressTest (TC-4217)
+
+## Шаги (структура)
+1. Открыть экран «Добавить адрес»
+2. Ввести улицу и дом
+3. Проверить активность кнопки «Принять»
+4. Нажать «Принять»
+5. Проверить возврат на главный экран
+
+## Используемые теги
+- AddressAddUIConstants.ToolbarTitleText
+- AddressSearchUIConstants.TextField
+- AddressAddUIConstants.AcceptButton
+
+## Входные данные
+- строка адреса
+
+## Границы (не проверяем)
+- валидация сервера
+- сохранение адреса в профиль
+
+## Ожидаемые правки человека
+- ...
+```
+
+- Сохраняется в `runs/<id>/skeleton.md`, правится человеком в UI.
+- Только после `skeleton_approved` testwriter генерирует Kotlin.
+
+### 4.10 Стейдж-флоу
+
+```
+sdd → study → skeleton → [GATE: апрув каркаса] → write
+   → [GATE: выбор исполнения] → provision → execute → debug
+   → review (загруженные/из MCP) → (round 2 | done)
+```
+
+Новые SSE-события: `skeleton_ready`, `skeleton_updated`, `skeleton_approved`,
+`execution_choice`, `execution_chosen`.
+
+Новые эндпоинты: `GET/PUT /api/runs/{id}/skeleton`,
+`POST /api/runs/{id}/approve-skeleton`,
+`POST /api/runs/{id}/execution-choice`.
+
+### 4.11 Инварианты ролей
+
+1. Каждая роль получает только свой SDD + разрешённые артефакты.
+2. `allowed_tools` — жёсткий фильтр: неразрешённый вызов → ошибка.
+3. Одна роль = одна модель из конфига ролей.
+4. Ревьюер не может быть той же моделью, что тестировщик.
+5. Переход `skeleton → write` — только после `skeleton_approved`.
+6. Переход `write → provision` — только после `execution_chosen`.
+7. Reviewer валидирует только загруженные/из MCP тесты.
+
+## 5. Открытые секции
+
 - SEC 5 — исполнение Android (adb-разведка, Gradle, дебаг-цикл).
 - SEC 6 — тестирование и демо, ключи, release notes, push.
