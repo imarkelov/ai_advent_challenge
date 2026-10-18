@@ -6996,5 +6996,81 @@
       ]
     },
     "summary": "Сводка digest-20261018-1019: Самара 15.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261018-1519",
+    "generated_at": "2026-10-18T15:19:54Z",
+    "weather": {
+      "error": "<urlopen error [Errno 101] Network is unreachable>"
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "VK сообщила об атаке беспилотников на дата-центр в Ленинградской области",
+          "url": "https://vc.ru/services/3200928-vk-soobshchila-ob-atake-na-data-tsentr-v-leningradskoy-oblasti?from=rss"
+        },
+        {
+          "title": "Mercedes-AMG представила трёхмоторный электрический внедорожник GT SUV мощностью до 1153 л.с.",
+          "url": "https://vc.ru/transport/3201199-mercedes-amg-gt-suv-elektricheskij-vnedorozhnik?from=rss"
+        },
+        {
+          "title": "Ozon рассказал об атаке на логистический центр в Санкт-Петербурге",
+          "url": "https://vc.ru/marketplace/3200948-ozon-ataka-logisticheskij-tsentr-sankt-peterburg?from=rss"
+        },
+        {
+          "title": "Криптобиржа Bitget внесла Россию в список стран, в которых запрещено пользоваться сервисом",
+          "url": "https://vc.ru/crypto/3199827-kriptobirzha-bitget-zapret-rossiya-i-belarusiya?from=rss"
+        },
+        {
+          "title": "Арестованный инженер OpenAI попросил суд отпустить его под залог — он отрицает, что планировал «побег» из США",
+          "url": "https://vc.ru/legal/3200065-inzhener-openai-abdulrahman-alfazan-prosit-zalog?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "MapQuest начал показывать, где установлены камеры Flock и другие ALPR‑системы",
+          "url": "https://habr.com/ru/news/1095880/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095880"
+        },
+        {
+          "title": "Утечка данных в Burger King Japan: скомпрометирована информация 11 млн клиентов",
+          "url": "https://habr.com/ru/news/1095864/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095864"
+        },
+        {
+          "title": "В США арестовали женщину после того, как она преградила путь роботу‑доставщику Uber, чтобы защитить рабочие места людей",
+          "url": "https://habr.com/ru/news/1095858/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095858"
+        },
+        {
+          "title": "Шведские учёные разработали систему ИИ, которая находит скрытое оружие с помощью сигналов Wi‑Fi",
+          "url": "https://habr.com/ru/news/1095854/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095854"
+        },
+        {
+          "title": "Пользователь Reddit заказал iPad mini на немецком Amazon, а вместо него получил MacBook Pro 16 с M5 Pro",
+          "url": "https://habr.com/ru/news/1095848/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095848"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Искусственный интеллект для дошкольников: рейтинг 5 курсов и развивающих программ",
+          "url": "https://tproger.ru/articles/iskusstvennyj-intellekt-dlya-dowkolnikov-rejting-5-kursov-i-raz"
+        },
+        {
+          "title": "ИИ-платформы для бизнеса: сравнение решений 2026 года",
+          "url": "https://tproger.ru/articles/ii-platformy-dlya-biznesa-sravnenie-rewenij-2026-goda"
+        },
+        {
+          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
+          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
+        },
+        {
+          "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
+          "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
+        },
+        {
+          "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
+          "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261018-1519: погода недоступна (<urlopen error [Errno 101] Network is unreachable>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
