@@ -7,11 +7,12 @@
 **Автоматическое AI-ревью pull request: пайплайн в GitHub Actions,
 который получает diff и изменённые файлы, поднимает RAG по документации и
 коду проекта и публикует ревью с тремя блоками — потенциальные баги,
-архитектурные проблемы, рекомендации. Только CLI, без веб-вкладки.**
+архитектурные проблемы, рекомендации. Только CLI, без веб-вкладки. Тот
+же пайплайн запускается локально одной командой.**
 
 Сделано:
 
-1. **Пайплайн** — `.github/workflows/ai-review.yml` (триггер
+1. **Пайплайн в CI** — `.github/workflows/ai-review.yml` (триггер
    `pull_request`: opened / synchronize / reopened / ready_for_review,
    `concurrency` отменяет ревью устаревшей версии, права `contents: read`
    + `pull-requests: write`) вызывает переиспользуемое действие
@@ -27,12 +28,36 @@
    `--base`, `--github-pr`, `--title`, `--top-k`, `--fail-on-high`,
    `--annotations`, `--comment`, `--step-summary`, `--json`, `--out`,
    `--json-out`, `--no-llm`.
-4. **Модель в CI** — `AssistantService._llm` берёт модель из `LLM_MODEL` /
+4. **Локальный запуск одной командой** — `scripts/day32_pr_review.sh`
+   (скрипт по умолчанию — `demo`):
+
+   ```bash
+   bash scripts/day32_pr_review.sh demo            # демо-PR + модель из .env
+   bash scripts/day32_pr_review.sh repo --base origin/master
+   GITHUB_TOKEN=... bash scripts/day32_pr_review.sh owner/repo#42
+   bash scripts/day32_pr_review.sh demo --no-llm   # без сети и модели
+   ```
+
+   `demo` собирает git-репозиторий с PR
+   (`scripts/day32_demo_repo.py`: секрет в коде, голый `except`, нет
+   тестов, документация противоречит коду — чтобы RAG было что
+   сопоставить) и прогоняет `check` → `index` → `run`. Отчёты —
+   `.day32_review/review.md`, `review.json`, `summary.md`.
+5. **Модель** — `AssistantService._llm` берёт модель из `LLM_MODEL` /
    `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_BACKEND` (Ollama или любой
-   OpenAI-совместимый сервер), иначе — конфиг Студии (прежнее поведение);
-   без ключа пайплайн работает детерминированно и честно об этом пишет.
-5. **Агент** — `agents/pr-review.cli.md` (frontmatter + тело-промпт):
+   OpenAI-совместимый сервер, в т.ч. `run-model.sh serve` для MLX),
+   иначе — конфиг Студии (прежнее поведение); без ключа пайплайн
+   работает детерминированно и честно об этом пишет.
+6. **Агент** — `agents/pr-review.cli.md` (frontmatter + тело-промпт):
    три раздела, только факты из диффа/RAG/находок, номера строк из диффа.
+
+## Демо
+
+Видео: `~/Desktop/ai_advent_day32_video/day32_ai_pr_review.mp4` —
+**1 мин 07 с, без звука**, 1600×1000, H.264. Кадры построены из
+фактического вывода живого прогона `scripts/day32_pr_review.sh demo`
+(`scripts/make_day32_video.py`: псевдотерминал → транскрипт → кадры →
+ffmpeg, `-an`); рядом — `review.md` этого прогона и `transcript.txt`.
 
 ## Что найдено живой проверкой (и исправлено)
 
@@ -43,18 +68,21 @@
 | `agents/pr-review.api.md` отсутствует → `AgentRegistry` помечал бы api-запрос `fallback` | в CLI-пути промпт берётся из `.cli.md`; в тестах реестра `pr-review` учтён явно |
 | `scripts/e2e_day32.py` содержал e2e дня 35 (ошибка имени) | переименован в `scripts/e2e_day35.py`, день 32 получил свой e2e |
 | RAG возвращал случайные фрагменты по односложным «stem»-запросам (`new`, `readme`) | код-термины, стоп-слова Python/JS, stem только для файлов со строками изменений |
+| `pr-review run` не принимал `--no-llm` (он был только глобальным), лаунчер с этим флагом падал на разборе аргументов | `--no-llm` добавлен и в подкоманду `run` |
 
 ## Проверка
 
 | Проверка | Результат |
 |---|---|
 | `scripts/e2e_day32.py` | **PASS 26, FAIL 0, SKIP 0** (Part A 22 офлайн + Part B 4 live на локальной Ollama `josiefied-qwen3-8b-abliterated`) |
-| `tests/test_day32_pr_review.py` | **36 passed** |
+| `tests/test_day32_pr_review.py` | **39 passed** (в т.ч. демо-репозиторий, `demo --no-llm` через лаунчер, `pr-review run --no-llm`) |
 | `studio/backend/tests` | **1207 passed, 6 skipped** |
-| `tests/test_day31_cli.py`, `tests/test_day31_rag_relevance.py` | см. прогон в разделе проверки |
+| `tests/test_day31_cli.py`, `tests/test_day31_rag_relevance.py`, `tests/test_day32_pr_review.py` | **80 passed** (до добавления 3 тестов лаунчера) |
 | Живой прогон на ветке | 17 файлов / +13 194 строки → 3 мин 11 с, три блока заполнены моделью |
+| Лаунчер вживую | `demo` на Ollama — три блока от живого ответа; `demo --no-llm` — детерминированный отчёт |
 
 ```bash
+bash scripts/day32_pr_review.sh demo              # локальный запуск
 .venv/bin/python scripts/e2e_day32.py --part-a-only
 .venv/bin/python -m pytest tests/test_day32_pr_review.py -q
 ```
@@ -68,8 +96,17 @@
 | `feat(day32)`: GitHub Action | `.github/workflows/ai-review.yml`, `.github/actions/ai-pr-review/action.yml` |
 | `feat(day32)`: агент ревью PR | `agents/pr-review.cli.md` |
 | `feat(llm)`: модель из окружения | `AssistantService._llm` + `_env_llm_target` (Ollama / OpenAI-совместимый) |
+| `feat(day32)`: локальный запуск | `scripts/day32_pr_review.sh`, `scripts/day32_demo_repo.py`, `cli.py run --no-llm` |
 | `test(day32)`: e2e и тесты | `scripts/e2e_day32.py`, `tests/test_day32_pr_review.py` |
-| `docs(day32)`: README/RELEASE/PIPELINE/AGENTS/`.env.example` | раздел дня 32, карта пайплайна, переменные окружения |
+| `docs(day32)`: README/RELEASE/PIPELINE/AGENTS/`.env.example`/LINKS | раздел дня 32, карта пайплайна, локальный запуск, переменные окружения, ссылки |
+| `docs(day32)`: видео без озвучки | `scripts/make_day32_video.py` (живой pty-прогон → кадры → ffmpeg) |
+
+## Ссылки
+
+- Ветка: <https://github.com/imarkelov/ai_advent_challenge/tree/day32-pr-review>
+- Создать PR (`day32-pr-review → day31-cli-assistant`) — Action запустится
+  на нём: <https://github.com/imarkelov/ai_advent_challenge/compare/day31-cli-assistant...day32-pr-review?expand=1>
+- Прогоны Action: <https://github.com/imarkelov/ai_advent_challenge/actions/workflows/ai-review.yml>
 
 ---
 
@@ -2903,46 +2940,3 @@ Task-промпты собираются только из состояния з
 только из `.env`, который в `.gitignore`. В треке и истории только имена
 env-переменных (`GPUSTACK_API_KEY`, `GPUSTACK_KEY_DEEPSEEK`,
 `GPUSTACK_KEY_GLM`) — без значений.
-
----
-
-# Дополнение к day32-pr-review — локальный запуск и видео
-
-Ветка: `day32-pr-review` (после PR-отчёта выше).
-
-## Локальный запуск одной командой
-
-```bash
-bash scripts/day32_pr_review.sh demo               # демо-PR + живая модель из .env
-bash scripts/day32_pr_review.sh repo --base origin/master
-GITHUB_TOKEN=... bash scripts/day32_pr_review.sh owner/repo#42
-bash scripts/day32_pr_review.sh demo --no-llm      # без сети и модели
-```
-
-- `scripts/day32_pr_review.sh` — тот же пайплайн, что в Action
-  (`check` → `index` → `run`), модели из `.env`, отчёты в
-  `.day32_review/` (`review.md`, `review.json`, `summary.md`);
-- `scripts/day32_demo_repo.py` — собирает git-репозиторий с PR:
-  модуль с секретом, голым `except`, без тестов, плюс правка
-  документации, которая противоречит коду (для RAG);
-- `cli.py pr-review run` теперь принимает `--no-llm` (он же глобальный
-  флаг) — раньше лаунчер с этим флагом падал на разборе аргументов;
-- `.day32_review/` добавлен в `.gitignore`.
-
-## Демо-видео без озвучки
-
-`~/Desktop/ai_advent_day32_video/day32_ai_pr_review.mp4` — 1 мин 07 с,
-**без звука**: запись экрана живого прогона `day32_pr_review.sh demo`
-(терминал → `check` → `index` → ответ модели → `review.md` с тремя
-блоками). Кадры строятся из фактического вывода прогона
-(`scripts/make_day32_video.py`: псевдотерминал → транскрипт → кадры →
-ffmpeg, без звука); сценарий `day32_video_script.json` удалён, он был
-нужен только озвучиваемой версии.
-
-## Проверка
-
-| Проверка | Результат |
-|---|---|
-| `tests/test_day32_pr_review.py` | **39 passed** (+3: демо-репозиторий, `demo --no-llm` через лаунчер, `pr-review run --no-llm`) |
-| Лаунчер вживую | `demo` с Ollama → `review.md`, три блока от живого ответа; `demo --no-llm` → детерминированный отчёт |
-| Видео | 67 с, 1600×1000, 30 fps, H.264 **без аудиодорожки**; QC кадров — нет вылезания текста за границы |

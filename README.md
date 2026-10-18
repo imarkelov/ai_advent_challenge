@@ -39,7 +39,7 @@
 | День 29 | [`day29-local-llm-tuning`](https://github.com/imarkelov/ai_advent_challenge/tree/day29-local-llm-tuning) | Оптимизация локальной LLM под задачу «поиск новых сериалов»: профили инференса (temperature 0.7→0.2, max tokens 2048→512, context window 8192 явно), `num_ctx` через нативный `/api/chat` (OpenAI-совместимый эндпоинт его игнорирует), промпт-шаблон с каталогом и запретом выдумывать, каталог из открытых данных Wikidata (400 сериалов), золотой набор и метрики (формат, верность каталогу, ограничения), замер квантования Q4_K_M / Q8_0; e2e_day29 (Part A 8/8 офлайн + Part B live с проверкой `CONTEXT` через `ollama ps`) |
 | День 30 | [`day30-local-llm-service`](https://github.com/imarkelov/ai_advent_challenge/tree/day30-local-llm-service) | Локальная LLM как приватный сетевой сервис: OpenAI-совместимый шлюз (`POST /v1/chat/completions`, `GET /v1/models`) для устройств в локальной сети; API-ключи клиентов (в конфиге только SHA-256, ключ отдаётся один раз), rate limit RPM/TPM на клиента (скользящее окно, 429 + Retry-After), лимит контекста с автоматической LLM-компрессией старых ходов (сводка цепочкой моделей, последний вопрос сохраняется) и честный 413, потолок ответа, учёт использования и лог отказов; вкладка «Сервис» (адрес в LAN, клиенты, живые счётчики, отказы); Ollama остаётся на loopback — наружу смотрит только шлюз; e2e_day30 (Part A 13/13 офлайн + Part B 8/8 live: реальный LAN-запрос, rate limit, компрессия) |
 | Дни 30–34 | [`day30-34-dev-assistant`](https://github.com/imarkelov/ai_advent_challenge/tree/day30-34-dev-assistant) | Единый AI-ассистент разработчика и поддержки: **RAG по документации и коду проекта** (отдельный индекс `data/kb/project.db`, корпус README/docs/openspec/backend/frontend/scripts с исключением `.venv`/`node_modules`/`data`), **ревью изменений** (разбор unified diff → детерминированные находки с severity и номером строки: `secret`/`bare_except`/`missing_test`/`missing_docs`/`print_call`/`long_line`/`todo` — работает без LLM), **поддержка по тикетам** с персонализацией из CRM (`data/crm/users.json`+`tickets.json`, применённые поля видны в ответе), **5 автономных файловых сценариев** по цели (`find_usages`, `update_docs`, `generate` ADR/changelog/README, `check_invariants`, `diff_report`) с записью только в allow-list (`README.md`/`docs/`/`openspec/`/`CHANGELOG.md`) и отказом вне проекта, git-контекст (только чтение, без мутаций), вкладка «Ассистент» (🛠); `e2e_day31.py` (Part A 17/17 офлайн + Part B live на реальной Ollama) |
-| День 32 | [`day32-pr-review`](https://github.com/imarkelov/ai_advent_challenge/tree/day32-pr-review) | Автоматическое AI-ревью PR в CLI + GitHub Action: пайплайн `.github/workflows/ai-review.yml` → действие `.github/actions/ai-pr-review` на `pull_request` (opened/synchronize/reopened), diff и изменённые файлы из git (`base...HEAD`) или API GitHub для форков, RAG по документации и коду проекта (фрагменты README/docs/openspec/кода подбираются к добавленным строкам), детерминированные проверки + инварианты в diff, ревью моделью (`agents/pr-review.cli.md` → **потенциальные баги / архитектурные проблемы / рекомендации**), комментарий в PR (идемпотентный), аннотации `::error`/`::warning` на строки, Summary и артефакт; бюджет промпта под окно Ollama 8192; `cli.py pr-review check|run` (`--diff`/`-`, `--base`, `--github-pr`, `--fail-on-high`, `--no-llm`); модель из `LLM_MODEL`/`LLM_BASE_URL`/`LLM_API_KEY` (Ollama или OpenAI-совместимый сервер), без ключа — детерминированный отчёт; e2e_day32 (Part A 22/22 офлайн + Part B 4/4 live) |
+| День 32 | [`day32-pr-review`](https://github.com/imarkelov/ai_advent_challenge/tree/day32-pr-review) | Автоматическое AI-ревью PR в CLI + GitHub Action: пайплайн `.github/workflows/ai-review.yml` → действие `.github/actions/ai-pr-review` на `pull_request` (opened/synchronize/reopened), diff и изменённые файлы из git (`base...HEAD`) или API GitHub для форков, RAG по документации и коду проекта (фрагменты README/docs/openspec/кода подбираются к добавленным строкам), детерминированные проверки + инварианты в diff, ревью моделью (`agents/pr-review.cli.md` → **потенциальные баги / архитектурные проблемы / рекомендации**), комментарий в PR (идемпотентный), аннотации `::error`/`::warning` на строки, Summary и артефакт; бюджет промпта под окно Ollama 8192; `cli.py pr-review check|run` (`--diff`/`-`, `--base`, `--github-pr`, `--fail-on-high`, `--no-llm`); **локальный запуск одной командой** `scripts/day32_pr_review.sh demo|repo|owner/repo#N`; модель из `LLM_MODEL`/`LLM_BASE_URL`/`LLM_API_KEY` (Ollama или OpenAI-совместимый сервер), без ключа — детерминированный отчёт; e2e_day32 (Part A 22/22 офлайн + Part B 4/4 live), 39 тестов |
 | День 35 | [`day35-cli-md-agents`](https://github.com/imarkelov/ai_advent_challenge/tree/day35-cli-md-agents) | CLI ассистента + агенты в Markdown: терминальный вход в те же модули (`studio/backend/cli.py` — тонкая обёртка над `AssistantService`, без дублей логики RAG/ревью/CRM/сценариев); определения агентов в `agents/*.md` — **4 агента × 2 исполнения = 8 файлов** (`project-qa`, `code-review`, `support`, `file-ops` — каждый `.api.md` и `.cli.md`) с frontmatter (name/execution/description/tools/temperature) и телом-промптом, различающимся по каналу (API — структура/UI, CLI — markdown/пути `файл:строка`/без HTML); команды `agents list|show`, `ask`, `review` (`--fail-on-high` для CI), `tickets`, `support`, `scenarios`, `scenario`, `index`, `status`, `git`; вывод markdown/`--json`/`--out`, коды возврата 0/1, ошибки в stderr без traceback; типизация `--param` (`dry_run=false` реально пишет, а не молча пропускает); `e2e_day35.py` (Part A 26/26 офлайн как реальный подпроцесс + Part B live) |
 
 ## День 7: как работает сервис
@@ -4081,23 +4081,23 @@ GitHub Actions недоступен — поэтому `AssistantService._llm` �
 | Проверка | Результат |
 |---|---|
 | E2E дня 32 | `scripts/e2e_day32.py` — **PASS 26, FAIL 0, SKIP 0** (Part A 22 офлайн: ожидание/индекс/три блока/что видит модель/RAG/проверки/git/stdin/`--fail-on-high`/деградация/аннотации/Summary/артефакты/комментарий/форк/пустой diff/файлы Action/промпт агента/отчёт; Part B 4 live) |
-| Тесты дня 32 | `tests/test_day32_pr_review.py` — **39 passed** (CLI подпроцессом в сборном git-репозитории, модель — фейковый OpenAI-сервер, GitHub — фейковый REST, сеть не используется) |
+| Тесты дня 32 | `tests/test_day32_pr_review.py` — **39 passed** (CLI подпроцессом в сборном git-репозитории, модель — фейковый OpenAI-сервер, GitHub — фейковый REST, сеть не используется; +3: демо-репозиторий, `demo --no-llm` через лаунчер, `pr-review run --no-llm`) |
 | Регрессия бэкенда | `studio/backend/tests` — **1207 passed, 6 skipped** |
 | Промпт агента | `agents/pr-review.cli.md` — только CLI-исполнение; в API-запросе реестр честно помечает `fallback` |
 
 Демо-видео дня 32: `day32_ai_pr_review.mp4` (1 мин 07 с, **без
-звука**, папка `ai_advent_day32_video` на рабочем столе) — запись
-экрана живого запуска `scripts/day32_pr_review.sh demo`: терминал →
-проверка → индекс → ответ модели → готовый `review.md` с тремя блоками.
-Кадры строятся из фактического вывода этого прогона
-(`scripts/make_day32_video.py`: псевдотерминал → транскрипт → кадры →
-ffmpeg, без звука).
+звука**, папка `ai_advent_day32_video` на рабочем столе) — кадры,
+построенные из фактического вывода прогона
+`scripts/day32_pr_review.sh demo` (`scripts/make_day32_video.py`:
+псевдотерминал → транскрипт → кадры → ffmpeg, без звука). Рядом —
+`review.md` этого прогона и `transcript.txt`.
 
 ```bash
 # Проверка (из корня репозитория)
-.venv/bin/python scripts/e2e_day32.py --part-a-only     # ожидание → индекс → ревью → PR
-.venv/bin/python scripts/e2e_day32.py                   # + живая Ollama (Part B)
-.venv/bin/python -m pytest tests/test_day32_pr_review.py -q
+bash scripts/day32_pr_review.sh demo                    # локальный запуск пайплайна
+.venv/bin/python scripts/e2e_day32.py --part-a-only     # Part A 22 офлайн
+.venv/bin/python scripts/e2e_day32.py                   # + живая Ollama (Part B 4)
+.venv/bin/python -m pytest tests/test_day32_pr_review.py -q   # 39 тестов
 ```
 
 **Ограничения (осознанные).** (1) У эмбеддера корпуса в CI —
