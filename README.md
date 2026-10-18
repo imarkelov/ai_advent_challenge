@@ -1,26 +1,80 @@
 # AI Advent Challenge
 
-Репозиторий для обучения работе с ИИ: каждый день — отдельная ветка
-с выполненным заданием.
+[![GitHub](https://img.shields.io/badge/GitHub-imarkelov%2Fai__advent__challenge-181717?logo=github)](https://github.com/imarkelov/ai_advent_challenge)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![LLM](https://img.shields.io/badge/LLM-OpenAI--compatible-412991)
+![MCP](https://img.shields.io/badge/MCP-stdio%20%2B%20JSON--RPC-1f6feb)
+![stdlib](https://img.shields.io/badge/dependencies-stdlib--only-success)
+
+**30 дней челленджа по ИИ** — от первого запроса к LLM до агентов с
+MCP-инструментами, RAG, памятью и файловыми операциями.
+
+Каждый день — отдельная ветка с рабочим кодом, тестами и e2e-проверкой.
+
+## Недавнее
+
+| День | Что | Скриншот |
+| --- | --- | --- |
+| **34** · [Файловый ассистент](https://github.com/imarkelov/ai_advent_challenge/tree/day34-files-assistant) | CLI по цели: 4 файловых MCP-тула (`read_file`, `search_files`, `write_file`, `diff_files`), LLM tool-loop + офлайн-план, песочница, бэкапы и diff прогона | ![день 34](docs/day34_demo_offline.png) |
+| **33** · [Ассистент поддержки](https://github.com/imarkelov/ai_advent_challenge/tree/day33-support-assistant) | RAG по FAQ/документации + контекст тикета и пользователя через MCP, ответ с источниками `[n]` | ![день 33](docs/day33_support_demo.png) |
+
+```bash
+# день 34: ассистент работает с файлами проекта
+python -m devassist --offline --demo       # офлайн-ядро (без сети/LLM)
+python -m devassist "найди все места, где используется CRMClient"
+python scripts/e2e_day34.py                # 28/28: офлайн + live
+
+# день 33: ассистент поддержки
+python -m support --ticket TCK-4101
+```
+
+```text
+цель («найди, обнови…»)
+        │
+        ▼
+  ┌───────────────┐   tools / tool_calls   ┌──────────────────┐
+  │  LLM (tool-   │ ─────────────────────▶ │  MCP-серверы     │
+  │  loop)        │ ◀───────────────────── │  1 сервер = 1 тул│
+  └───────────────┘  результат (файл:строка)└────────┬─────────┘
+                                                     │
+                                     файлы проекта ──┴── diff / бэкап
+```
+
+## Все дни
 
 | День | Ветка | Задание |
 | ---- | ----- | ------- |
-| День 1 | day1 | Запросы к LLM через API + чат-интерфейс (CLI и Web) |
-| День 2 | day2 | Контроль ответа LLM: формат, лимит длины, условие завершения (stop) |
-| День 3 | day3 | Разные способы рассуждения: 4 стратегии (прямой, пошагово, мета-промт, настраиваемая группа экспертов + синтез) |
-| День 4 | day4 | Температура: один и тот же запрос при T=0 / 0.7 / 1.2 (выбор чекбоксом) + LLM-сравнение ответов (точность, креативность, разнообразие) |
-| День 5 | day5 | Версии моделей: один и тот же промпт (ввод в UI) на слабой/средней/сильной модели — время, TTFT, TPS, токены, стоимость N/A + слепое LLM-сравнение |
-| День 6 | day6 | Простой AI-агент: класс SimpleAgent (system prompt + история + API) + чат-страница с настройками агента и историей запросов |
-| День 7 | day7 | Сохранение контекста: история в history.json, восстановление после перезапуска; TRON-HUD: токены (вход/рассуждения/всего), лимит контекста, toggle рассуждений, выбор модели, история запросов, модалки: редактор системного промпта (с описанием параметров) и JSON последнего API-запроса, новый диалог (архив старых), продолжение диалога из архива (клик — выбранный становится активным, предыдущий закрывается), бейдж непрочитанных диалогов, фикс модалки JSON-запроса |
-| День 8 | day8 | Подсчёт токенов: текущий запрос (live в поле ввода), вся история диалога, ответ модели (эвристический алгоритм, сервер + клиент) + лимит токенов выбранной модели в HUD; модалка JSON-запроса: кнопка «Скопировать» последнего JSON и изменение размера окна (drag-grip в углу) |
-| День 9 | day9 | Управление контекстом: скользящее окно N + LLM-сводка старых сообщений + бенчмарк расхода токенов |
-| День 11 (студия) | day11-studio | Студия: FastAPI + React-чат с LLM (SSE-стриминг), 3 слоя памяти (диалог / рабочая / долговременная), токен-статистика, журнал LLM-запросов |
-| День 12 | day12-user-profile | Персонализация: профиль пользователя per-диалог (имя, роль, тон, стоп-слова), инициализация (интервью / вручную / отказ), автоинъекция в system-промпт, UI: вкладка «Профили» + бейдж в чате |
-| День 13b | day13-task-state-machine | Задача = запрос в режиме «задача» (тумблер чат/задача), карточка процесса в чате (спавн stage-агентов, чек-лист work-шагов, живой вывод), unified FSM planning/execution/validation/done/paused/failed, пошаговое исполнение (1 LLM-вызов на шаг), пауза на границе шага + инструкция |
-| День 14 | day14-invariants | Инварианты: глобальные жёсткие ограничения (архитектура, техрешения, стек, бизнес-правила), хранятся отдельно от диалога, всегда активны, инжектятся в system-промпт + правило конфликтов + server-side гард (отказ при противоречии), вкладка «Инварианты» + тесты конкурса/объяснения отказа |
-| День 15 | day15-plan-review | Проверка плана (plan_review): человеческий гейт одобрения плана между planning и execution (кнопки «Одобрить»/«Отклонить», детект ограничений плана — инварианты/память/табу + альтернатива), фикс done-пост-гарда для согласованного контекста (запрет из одобренного контекста задачи не рубит объяснение альтернативы), пауза во время LLM-вызова валидатора/синтеза, move вкладок Токены/Запрос в сайдбар |
-| День 16 | day16-mcp-connect | Подключение MCP: реестр MCP-серверов (stdio/http) в mcp_servers.json, клиент JSON-RPC (mcp.py), REST /api/mcp/* (список/удалить/подключить/инструменты), отдельная панель «MCP» по своей кнопке «🧩» в шапке чата (рядом с «⚙»; статусы, инструменты подключённых серверов), дефолты: Firecrawl, Git; вызов инструментов из чата (tool-loop): команда /сервер тул, автодополнение, форма аргументов по input_schema, результат сохраняется в диалог и виден LLM |
-| День 17 | day17-mcp-tool-loop | MCP Tool-Loop (LLM-driven): инструменты подключённых серверов уходят в LLM-пейлоад (tools), модель сама вызывает инструмент (tool_calls → MCP-сервер → role: "tool" обратно модели, цикл до 5 итераций); новый stdio MCP-сервер Mock Task Manager (in-memory, только stdlib, get_task_details/create_task); лог-теги [MCP Init]/[LLM Decision]/[MCP Response]/[Final Response]; e2e_day17.py (детерминированное ядро + live best-effort) |
-| День 18 | day18-mcp-digest | Периодический дайджест 24/7: свой stdio MCP-сервер news_weather (4 инструмента: get_weather/get_news/make_digest/get_latest_digest), общий stdlib-коллектор collector.py (погода Open-Meteo + новости vc.ru/habr/tproger, дедуп, top-5), JSON-хранилище data/digests/ (last-digest.json + история, кап 96, атомарная запись), GitHub Actions cron раз в 6 часов — сбор и коммит дайджеста; агент отвечает «покажи сводку» через tool-loop дня 17 (get_latest_digest) |
-| День 19 | day19-mcp-pipeline | Композиция MCP-инструментов: stdio MCP-сервер pipeline_tools (3 компонуемых инструмента search→summarize→saveToFile), stdlib-PDF-движок pdf_writer (полный PDF с кириллицей, встроенный TTF, детерминированные байты), LLM-driven цепочка через tool-loop дня 17 — модель сама решает, какие инструменты вызвать и сколько; saveToFile в форматах md/txt/json/pdf; e2e-гибрид проверяет передачу данных между этапами |
-| День 20 | day20-mcp-orchestration | Orchestration MCP: 10 едицельных локальных MCP-серверов (1 сервер = 1 тул, каркас _mcp_base.py), always-префикс {server}__{tool} + каталог серверов в system-промпте, кап tool-loop 15 (TOOL_LOOP_CAP), реестр 12 дефолтов с миграцией старых мультитул-серверов, бейджи «server · tool», e2e_day20 — 10-шаговый кросс-серверный флоу (порт 8104) |
+| День 1 | [`day1`](https://github.com/imarkelov/ai_advent_challenge/tree/day1) | **API + чат** — LLM через API, интерфейс CLI и Web |
+| День 2 | [`day2`](https://github.com/imarkelov/ai_advent_challenge/tree/day2) | **Контроль ответа** — формат, лимит длины, stop-последовательности |
+| День 3 | [`day3`](https://github.com/imarkelov/ai_advent_challenge/tree/day3) | **Стратегии рассуждений** — прямой, пошагово, мета-промпт, группа экспертов |
+| День 4 | [`day4`](https://github.com/imarkelov/ai_advent_challenge/tree/day4) | **Температура** — T=0 / 0.7 / 1.2 и LLM-сравнение ответов |
+| День 5 | [`day5`](https://github.com/imarkelov/ai_advent_challenge/tree/day5) | **Версии моделей** — слабая/средняя/сильная: TTFT, TPS, токены, слепое сравнение |
+| День 6 | [`day6`](https://github.com/imarkelov/ai_advent_challenge/tree/day6) | **Простой агент** — SimpleAgent: system prompt, история, API |
+| День 7 | [`day7`](https://github.com/imarkelov/ai_advent_challenge/tree/day7) | **Контекст на диске** — history.json, TRON-HUD, архив диалогов |
+| День 8 | [`day8`](https://github.com/imarkelov/ai_advent_challenge/tree/day8) | **Токены** — live-подсчёт, лимит контекста, JSON запроса |
+| День 9 | [`day9`](https://github.com/imarkelov/ai_advent_challenge/tree/day9) | **Управление контекстом** — скользящее окно + LLM-сводка + бенчмарк |
+| День 11 (студия) | [`day11-studio`](https://github.com/imarkelov/ai_advent_challenge/tree/day11-studio) | **Студия** — FastAPI + React, SSE-стриминг, 3 слоя памяти |
+| День 12 | [`day12-user-profile`](https://github.com/imarkelov/ai_advent_challenge/tree/day12-user-profile) | **Персонализация** — профиль пользователя на диалог, интервью, табу |
+| День 13b | [`day13-task-state-machine`](https://github.com/imarkelov/ai_advent_challenge/tree/day13-task-state-machine) | **Задача как FSM** — planning → execution → validation, карточка в чате |
+| День 14 | [`day14-invariants`](https://github.com/imarkelov/ai_advent_challenge/tree/day14-invariants) | **Инварианты** — жёсткие ограничения проекта + server-side гард |
+| День 15 | [`day15-plan-review`](https://github.com/imarkelov/ai_advent_challenge/tree/day15-plan-review) | **Проверка плана** — человеческий гейт между planning и execution |
+| День 16 | [`day16-mcp-connect`](https://github.com/imarkelov/ai_advent_challenge/tree/day16-mcp-connect) | **Подключение MCP** — реестр серверов, JSON-RPC клиент, панель MCP |
+| День 17 | [`day17-mcp-tool-loop`](https://github.com/imarkelov/ai_advent_challenge/tree/day17-mcp-tool-loop) | **MCP tool-loop** — LLM сама вызывает инструменты в цикле |
+| День 18 | [`day18-mcp-digest`](https://github.com/imarkelov/ai_advent_challenge/tree/day18-mcp-digest) | **Дайджест 24/7** — свой MCP-сервер, cron, JSON-хранилище |
+| День 19 | [`day19-mcp-pipeline`](https://github.com/imarkelov/ai_advent_challenge/tree/day19-mcp-pipeline) | **Композиция MCP** — search → summarize → saveToFile, PDF-движок |
+| День 20 | [`day20-mcp-orchestration`](https://github.com/imarkelov/ai_advent_challenge/tree/day20-mcp-orchestration) | **Оркестрация MCP** — 10 едицельных серверов, каталог в промпте |
+| День 33 | [`day33-support-assistant`](https://github.com/imarkelov/ai_advent_challenge/tree/day33-support-assistant) | **Ассистент поддержки** — RAG по FAQ + CRM через MCP, CLI |
+| День 34 | [`day34-files-assistant`](https://github.com/imarkelov/ai_advent_challenge/tree/day34-files-assistant) | **Файловый ассистент** — MCP-тулы над файлами, tool-loop, diff, песочница |
+
+## Как это устроено
+
+- **LLM** — OpenAI-совместимый `/chat/completions` (GPUSTACK, Ollama); ключ
+  всегда из `.env`, в репозиторий не попадает.
+- **MCP** — свои stdio JSON-RPC серверы (1 сервер = 1 инструмент) и
+  LLM-driven tool-loop: модель сама решает, какой инструмент вызвать.
+- **Данные** — JSON на диске с атомарной записью, без БД и внешних сервисов.
+- **Проверки** — pytest + e2e-скрипты с реальным API (offline-ядро всегда
+  проходит, live — best-effort).
+
+Новые дни — в отдельных ветках, старые остаются как есть: репозиторий можно
+читать как хронологию.
