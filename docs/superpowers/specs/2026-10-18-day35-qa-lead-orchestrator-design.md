@@ -482,7 +482,103 @@ sdd → study → skeleton → [GATE: апрув каркаса] → write
 6. Переход `write → provision` — только после `execution_chosen`.
 7. Reviewer валидирует только загруженные/из MCP тесты.
 
-## 5. Открытые секции
+## 5. Исполнение Android
 
-- SEC 5 — исполнение Android (adb-разведка, Gradle, дебаг-цикл).
+### 5.1 Инструменты на машине
+
+| Компонент | Значение |
+|---|---|
+| SDK | `C:\Users\migor\AppData\Local\Android\Sdk` |
+| adb | `%SDK%\platform-tools\adb.exe` (не в PATH — абсолютный путь) |
+| emulator | `%SDK%\emulator\emulator.exe` |
+| AVD | `Pixel_8_Pro_API_33` (default), `Pixel_9_Pro` |
+| platforms | `android-35` |
+| build-tools | 34.0.0, 35.0.0, 35.0.1, 36.0.0 |
+| JDK | Corretto 18 (`JAVA_HOME` задан) |
+| Проект | `~/StudioProjects/lmru--mobile-customer--app` (ветка `develop`) |
+| Gradle | wrapper `gradlew.bat` в корне проекта |
+
+### 5.2 `android.py`
+
+```python
+class AndroidDevice:
+    def list_devices() -> list[Device]      # adb devices -l
+    def boot(avd: str) -> None              # emulator -avd X -no-snapshot
+    def wait_ready(timeout=180) -> None     # sys.boot_completed=1
+    def install(apk: Path) -> None          # adb install -r -t
+    def launch(package: str) -> None        # am start
+    def dump_ui() -> UiNode                 # uiautomator dump → XML → дерево
+    def screenshot() -> Path                # screencap → runs/<id>/logs/
+    def tap(node_or_xy) -> None
+    def type_text(s) -> None
+    def back() -> None
+    def current_activity() -> str           # dumpsys
+```
+
+`dump_ui()` парсит XML в `{class, text, resource-id, content-desc, bounds, children}`,
+сохраняет `runs/<id>/logs/ui_<n>.xml`.
+
+### 5.3 `gradle.py`
+
+```python
+class GradleRunner:
+    def assemble_debug() -> Path       # ./gradlew :android:app:assembleDebug
+    def connected_test(filter: str)    # ./gradlew :android:app:connectedDebugAndroidTest
+                                       #  -Pandroid.testInstrumentationRunnerArguments.class=...
+    def stream_logs() -> Iterator[str] # построчно → SSE gradle_log
+```
+
+Рабочая директория — корень проекта. Таймауты: сборка 25 мин, прогон 15 мин.
+Логи `runs/<id>/logs/gradle_<stage>.log`; парсим `BUILD SUCCESSFUL/FAILED`,
+падения (class, test, stacktrace). Нет `gradlew` → RU-ошибка.
+
+### 5.4 Разведка экрана (`device-inspector`)
+
+```
+1. install APK (или уже установленный)
+2. launch(package)
+3. dump_ui() → ui.xml
+4. извлечь resource-id, text, content-desc, class, clickable
+5. kb/screens/<screen>.md: экран, интерактивные узлы с тегами, дерево
+6. SSE adb_dump {screen, nodes, path}
+```
+
+Закрывает требование «собирать информацию по экрану и тегам → в файл».
+
+### 5.5 Цикл исполнения
+
+```
+provision: assemble_debug → boot(avd) → wait_ready → install → launch → dump_ui
+execute:   connected_test(filter=ClassName) → {passed, failed[], duration}
+debug:     screenshot + dump_ui → классификация (4.6) → правка → повтор (≤2)
+           реальный баг продукта → fail с описанием
+```
+
+### 5.6 Деградация
+
+| Режим | Поведение |
+|---|---|
+| `live` | AVD + gradlew, полный прогон |
+| `adb-only` | разведка экрана работает, `connected_test` → `SKIP` |
+| `fake` | детерминированные артефакты для e2e |
+
+Автовыбор: `adb devices` пуст → `adb-only`; провайдер `fake` → `fake`.
+
+### 5.7 Стабильность
+
+- Каждый adb-вызов: таймаут + 1 ретрай.
+- `adb kill-server` перед стартом.
+- `adb install -r -t`.
+- Эмулятор по умолчанию `Pixel_8_Pro_API_33` (меняется в `config.json`).
+- Логи `runs/<id>/logs/cmd.log` (без секретов).
+
+### 5.8 Безопасность
+
+- Без явного флага не выполняются `adb shell rm` / `pm clear`.
+- `repo_path` — git-репозиторий, `branch` существует.
+- Gradle — только внутри `repo_path`.
+- `doc/runs/` пишется только текущим run.
+
+## 6. Открытые секции
+
 - SEC 6 — тестирование и демо, ключи, release notes, push.
