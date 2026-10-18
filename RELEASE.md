@@ -1,3 +1,63 @@
+# Release Notes — day34-files-assistant (день 34)
+
+Ветка: [`day34-files-assistant`](https://github.com/imarkelov/ai_advent_challenge/tree/day34-files-assistant)
+(от `day33-support-assistant`).
+
+## Что это
+
+Ассистент, который **работает с файлами проекта**, а не только отвечает
+текстом. Задача ставится на уровне цели («найди все места, где используется
+X», «обнови документацию по X», «сгенерируй changelog», «проверь
+соответствие правилам», «подготовь diff») — ассистент сам решает, какие
+файлы искать, читать и менять.
+
+- **Файловые инструменты через MCP** (`tools/mcp_servers/fs_*.py`, stdio
+  JSON-RPC 2.0, 1 сервер = 1 тул, только stdlib):
+  - `read_file` — содержимое файла, число строк, срез `from_line..to_line`;
+  - `search_files` — regex-grep по нескольким файлам, glob-фильтр,
+    совпадения `file:line:text` и сводка `by_file`;
+  - `write_file` — создание/изменение полным содержимым: бэкап, атомарная
+    запись (tmp + `os.replace`), unified diff, `expected_old` от гонки;
+  - `diff_files` — diff/список изменений против бэкапа прогона.
+- **Песочница** (`tools/_fs_sandbox.py`): операции только внутри корня
+  `FS_WORKSPACE`; `.env`, `.git`, `.omo`, `node_modules`, `__pycache__`
+  закрыты; выход за корень — ошибка инструмента.
+- **Агент** (`devassist/agent.py`): LLM tool-loop до 12 итераций (модель
+  сама зовёт тулы и видит результат каждой операции) либо
+  детерминированный офлайн-план (`--offline`) над теми же инструментами.
+- **Прогон и воспроизводимость:** `run_id` задаёт `.devassist/backup/<run_id>/`;
+  `diff_files` сравнивает текущее состояние с бэкапом — повторный прогон даёт
+  тот же diff.
+- **Правила проекта** (`devassist/guardrails.py`): секреты (пустые ключи,
+  хардкод токенов), запрет `print` в production-модулях, stdlib-only в
+  `support/`, `devassist/`, `tools/`, docstring у модулей, README: у каждого
+  дня из таблицы есть раздел.
+- **CLI** (`python -m devassist`): цель одной фразой или REPL с `/diff`,
+  `/files`, `/trace`; `--offline`, `--demo`, `--run-id`.
+
+## Файлы
+
+- `devassist/agent.py`, `bridge.py`, `guardrails.py`, `cli.py`, `__main__.py`;
+- `tools/_fs_sandbox.py`, `tools/mcp_servers/fs_read.py`, `fs_search.py`,
+  `fs_write.py`, `fs_diff.py`;
+- `tests/test_devassist_day34.py` — 6 офлайн-тестов;
+- `scripts/e2e_day34.py` — e2e: Part A офлайн (MUST PASS) + Part B live.
+
+## Проверка
+
+```bash
+python -m devassist --offline --demo
+python scripts/e2e_day34.py     # 28/28 PASS (офлайн + live)
+python -m pytest tests/test_devassist_day34.py -q
+```
+
+Live-прогон (`deepseek-v4-flash`): по цели «найди, где используется Greeter,
+и обнови документацию» модель выполнила `search_files` → `read_file` × N →
+`write_file`, код не менялся — только документация. Транскрипт и видео:
+`.omo/evidence/day34/`.
+
+---
+
 # Release Notes — day33-support-assistant (день 33)
 
 Ветка: [`day33-support-assistant`](https://github.com/imarkelov/ai_advent_challenge/tree/day33-support-assistant)
