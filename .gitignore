@@ -43,3 +43,12 @@ data/pipeline/
 
 # День 20: runtime-состояние задач (task store) — сид регенерируется из кода, не в git
 data/tasks.json
+
+# Day 35: studio2 runtime
+studio2/data/
+studio2/doc/runs/
+studio2/backend/.pytest_cache/
+studio2/backend/__pycache__/
+studio2/frontend/node_modules/
+studio2/frontend/dist/
+!studio2/data/.gitkeep
