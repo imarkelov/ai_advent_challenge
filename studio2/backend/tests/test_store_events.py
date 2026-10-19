@@ -91,6 +91,33 @@ def test_event_bus_question_timeout_returns_none():
     assert asyncio.run(scenario()) is None
 
 
+def test_event_bus_stale_answer_after_consumption_is_rejected():
+    bus = EventBus()
+    bus.register_question("q-old")
+    assert bus.wait_for_answer_sync("q-old", timeout=0.01) is None
+    assert bus.answer("q-old", "поздний ответ") is False
+    bus.register_question("q-new")
+    assert bus.answer("q-old", "поздний ответ") is False
+    assert bus.wait_for_answer_sync("q-new", timeout=0.01) is None
+
+
+def test_event_bus_answer_cannot_satisfy_new_question():
+    bus = EventBus()
+
+    async def scenario():
+        bus.register_question("q1")
+        waiter = asyncio.create_task(bus.wait_for_answer("q1", timeout=2))
+        await asyncio.sleep(0)
+        assert bus.answer("q1", "первый")
+        assert await waiter == "первый"
+        assert bus.answer("q1", "повторный") is False
+        bus.register_question("q2")
+        assert bus.answer("q1", "чужой") is False
+        return await bus.wait_for_answer("q2", timeout=0.01)
+
+    assert asyncio.run(scenario()) is None
+
+
 def test_run_dir_layout_and_write(tmp_path):
     run_dir = RunDir(str(tmp_path / "doc"), "r1")
     run_dir.ensure()

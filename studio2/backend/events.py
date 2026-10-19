@@ -51,6 +51,8 @@ class EventBus:
             await asyncio.wait_for(event.wait(), timeout=timeout)
         except asyncio.TimeoutError:
             return None
+        finally:
+            self._answers.pop(question_id, None)
         return holder[0]
 
     def wait_for_answer_sync(self, question_id: str,
@@ -66,5 +68,6 @@ class EventBus:
         except asyncio.TimeoutError:
             return None
         finally:
+            self._answers.pop(question_id, None)
             loop.close()
         return holder[0]

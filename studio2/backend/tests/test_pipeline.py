@@ -9,8 +9,8 @@ from config import DEFAULT_CONFIG
 from events import EventBus
 from llm import LlmClient
 from pipeline.artifacts import RunDir
-from pipeline.lead import (CriticSameModel, GateError, InvalidTransition, PendingGate,
-                           QaLead, STAGES)
+from pipeline.lead import (ALLOWED_TRANSITIONS, CriticSameModel, GateError,
+                           InvalidTransition, PendingGate, QaLead, STAGES)
 from store import RunStore
 
 REPO_DOC = Path(__file__).resolve().parents[2] / "doc"
@@ -330,7 +330,195 @@ def test_critic_must_differ(env):
         lead.validate_critic()
 
 
+def test_questions_in_one_run_get_distinct_ids(env):
+    lead = _scripted_env(env, {
+        "researcher": [
+            '{"status": "need_question", "artifacts": [], "summary": "", '
+            '"question": {"text": "Какой экран?"}}\n',
+            '{"status": "done", "artifacts": [], "summary": "ok"}\n',
+        ],
+        "testwriter": [
+            '{"status": "need_question", "artifacts": [], "summary": "", '
+            '"question": {"text": "Какой тег?"}}\n',
+            '{"status": "done", "artifacts": [], "summary": "ok"}\n',
+        ],
+    })
+    ids: list[str] = []
+    original_register = lead.bus.register_question
+
+    def register(qid):
+        ids.append(qid)
+        original_register(qid)
+
+    lead.bus.register_question = register
+    lead.bus.wait_for_answer_sync = lambda qid, timeout=1800: "ответ"
+    run = env["run"]
+    run_dir = RunDir(str(env["doc"]), run["id"])
+    lead._run_stage_agent("study", run, run_dir)
+    lead._run_stage_agent("skeleton", run, run_dir)
+    assert len(ids) == 2
+    assert len(set(ids)) == 2
+    assert ids[0].startswith(f"{run['id']}-researcher-")
+    assert ids[1].startswith(f"{run['id']}-testwriter-")
+
+
 def test_cancel_marks_run_cancelled(env):
     env["lead"].cancel(env["run"]["id"])
     assert env["store"].get_run(env["run"]["id"])["status"] == "cancelled"
 
+
+def test_cancelled_run_blocks_start_for_new_lead_instance(env):
+    run_id = env["run"]["id"]
+    env["store"].update_run(run_id, status="cancelled")
+    fresh = _scripted_env(env, {})
+    with pytest.raises(InvalidTransition, match="отменён"):
+        fresh.start(run_id)
+
+
+def test_cancel_stops_in_flight_run(env):
+    lead = _scripted_env(env, {
+        "researcher": [
+            '{"status": "need_question", "artifacts": [], "summary": "", '
+            '"question": {"text": "Какой экран?"}}\n',
+        ],
+    })
+
+    def wait(qid, timeout=1800):
+        env["store"].update_run(env["run"]["id"], status="cancelled")
+        return None
+
+    lead.bus.wait_for_answer_sync = wait
+    with pytest.raises(InvalidTransition, match="отменён"):
+        lead.start(env["run"]["id"])
+    assert env["store"].get_run(env["run"]["id"])["status"] == "cancelled"
+
+
+def _stage_writes(store):
+    """Смены stage в обход `_emit_stage` (round меняется в `_next_round` намеренно)."""
+    writes: list[tuple] = []
+    state = {"emit": 0}
+    original = store.save_run
+    current = store.get_run
+
+    def save_run(run):
+        before = current(run["id"]) or {}
+        if state["emit"]:
+            state["emit"] = 0
+        elif before.get("stage") != run.get("stage"):
+            writes.append((before.get("stage"), before.get("round"),
+                           run.get("stage"), run.get("round")))
+        return original(run)
+
+    store.save_run = save_run
+    return writes, state
+
+
+def test_review_round2_routes_stage_through_emit(env):
+    lead = _scripted_env(env, {
+        "reviewer": ['{"status": "done", "artifacts": ["review_report.md"], '
+                     '"summary": "red"}\n'],
+    })
+
+    def failing(class_name, log_path):
+        return {"success": False, "failures": [], "duration": "1s", "log": "FAILED"}
+
+    lead.gradle = type("G", (), {"connected_test": staticmethod(failing)})()
+    stages: list[tuple[str, int]] = []
+    events: list[dict] = []
+    validated: list[tuple[str, str]] = []
+    state = {"emit": 0}
+    original_validate = lead.validate_transition
+    original_publish = lead.bus.publish
+    original_update = lead.store.update_run
+
+    def update_run(run_id, **fields):
+        if "stage" in fields:
+            state["emit"] += 1
+        return original_update(run_id, **fields)
+
+    def validate(current, nxt):
+        validated.append((current, nxt))
+        original_validate(current, nxt)
+
+    def publish(run_id, event):
+        events.append(event)
+        original_publish(run_id, event)
+
+    def emit(run_id, stage, round_no):
+        current = lead.store.get_run(run_id).get("stage", "")
+        original_validate(current, stage)
+        stages.append((stage, round_no))
+        lead.store.update_run(run_id, stage=stage, round=round_no)
+        lead.bus.publish(run_id, {"type": "stage_changed", "stage": stage,
+                                  "round": round_no})
+
+    run_id = env["run"]["id"]
+    _start_and_gate(lead, run_id)
+    lead.store.update_run = update_run
+    lead._emit_stage = emit
+    lead.validate_transition = validate
+    lead.bus.publish = publish
+    writes, state = _stage_writes(env["store"])
+    lead.resume(run_id)
+
+    assert writes == []
+    assert ("execute", "review") in ALLOWED_TRANSITIONS
+    assert ("debug", "review") in ALLOWED_TRANSITIONS
+    assert ("review", "study") in ALLOWED_TRANSITIONS
+    assert ("study", "skeleton") in ALLOWED_TRANSITIONS
+    assert ("review", 1) in stages and ("review", 2) in stages
+    assert ("study", 2) in stages and ("execute", 2) in stages
+    assert ("review", "study") in validated
+    published = [(event["stage"], event["round"]) for event in events
+                 if event.get("type") == "stage_changed"]
+    assert published == stages
+    run = env["store"].get_run(run_id)
+    assert run["round"] == 2
+    assert run["stage"] == "done"
+    assert run["status"] == "failed"
+    assert run["verdict"] == "red"
+
+
+def test_review_cannot_greenlight_failed_gradle(env):
+    lead = _scripted_env(env, {
+        "reviewer": ['{"status": "done", "artifacts": ["review_report.md"], '
+                     '"summary": "green"}\n'],
+    })
+
+    def failing(class_name, log_path):
+        return {"success": False, "failures": [], "duration": "1s", "log": "FAILED"}
+
+    lead.gradle = type("G", (), {"connected_test": staticmethod(failing)})()
+    run_id = env["run"]["id"]
+    with pytest.raises(PendingGate):
+        lead.start(run_id)
+    lead.approve_skeleton(run_id)
+    lead.choose_execution(run_id, "as_loaded")
+    lead.resume(run_id)
+    assert "reviewer" in lead.llm.calls
+    run = env["store"].get_run(run_id)
+    assert run["verdict"] == "red"
+    assert run["status"] == "failed"
+    report = (env["doc"] / "runs" / run_id / "review_report.md").read_text(encoding="utf-8")
+    assert "**Вердикт:** red" in report
+
+
+def test_reviewer_rejection_is_red(env):
+    lead = _scripted_env(env, {
+        "reviewer": ['{"status": "done", "artifacts": ["review_report.md"], '
+                     '"summary": "тест не соответствует ТК, red"}\n'],
+    })
+
+    def passing(class_name, log_path):
+        return {"success": True, "failures": [], "duration": "1s", "log": ""}
+
+    lead.gradle = type("G", (), {"connected_test": staticmethod(passing)})()
+    run_id = env["run"]["id"]
+    with pytest.raises(PendingGate):
+        lead.start(run_id)
+    lead.approve_skeleton(run_id)
+    lead.choose_execution(run_id, "as_loaded")
+    lead.resume(run_id)
+    run = env["store"].get_run(run_id)
+    assert run["verdict"] == "red"
+    assert run["status"] == "failed"

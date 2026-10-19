@@ -68,4 +68,26 @@ describe('api helpers', () => {
     expect(source.closed).toBe(true)
     expect(events).toEqual([{ type: 'error', message: 'поток прерван' }])
   })
+
+  it('createRunStream ignores onerror after run_done', () => {
+    vi.stubGlobal('EventSource', FakeEventSource)
+    const events: RunEvent[] = []
+    createRunStream('r1', (event) => events.push(event))
+    const source = FakeEventSource.last!
+    source.onmessage!({ data: '{"type": "run_done", "status": "done"}' })
+    source.onerror!()
+    expect(source.closed).toBe(true)
+    expect(events.map((event) => event.type)).toEqual(['run_done'])
+  })
+
+  it('createRunStream ignores onerror after an error frame', () => {
+    vi.stubGlobal('EventSource', FakeEventSource)
+    const events: RunEvent[] = []
+    createRunStream('r1', (event) => events.push(event))
+    const source = FakeEventSource.last!
+    source.onmessage!({ data: '{"type": "error", "message": "сбой агента"}' })
+    source.onerror!()
+    expect(source.closed).toBe(true)
+    expect(events).toEqual([{ type: 'error', message: 'сбой агента' }])
+  })
 })

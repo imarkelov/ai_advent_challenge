@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import re
+from uuid import uuid4
 
 from config import load_config
 from pipeline.artifacts import (RunDir, review_markdown, sdd_text, skeleton_markdown,
@@ -79,7 +80,6 @@ class QaLead:
         self.android = android
         self.gradle = gradle
         self.agents = load_agents(doc_dir)
-        self._cancelled: set[str] = set()
         self.facts: dict[str, list[str]] = {}
 
     # ---------- инварианты ----------
@@ -139,7 +139,6 @@ class QaLead:
         return run
 
     def cancel(self, run_id: str) -> None:
-        self._cancelled.add(run_id)
         self.store.update_run(run_id, status="cancelled")
         self.bus.publish(run_id, {"type": "run_done", "status": "cancelled",
                                   "report_path": ""})
@@ -197,11 +196,13 @@ class QaLead:
         self._provision(run, run_dir)
 
         result = self._execute_loop(run_id, run_dir)
+        fail_verdict_published = False
         from_loaded = self.gradle is not None and run.get("execution_choice") == "as_loaded"
         if result["success"] and not from_loaded:
             verdict = "green"
         elif from_loaded:
             verdict = self._review(run_id, run_dir, result)
+            fail_verdict_published = True
         else:
             verdict = "red"
 
@@ -210,9 +211,13 @@ class QaLead:
             self._finish(run_id, run_dir, "green")
             return
         if run.get("stage") != "review":
-            self.validate_transition(run.get("stage"), "execute")
-        run["stage"] = "review"
-        self.store.save_run(run)
+            self._emit_stage(run_id, "review", round_no)
+        if not fail_verdict_published and not result.get("product_bug"):
+            self.bus.publish(run_id, {
+                "type": "review_verdict",
+                "verdict": "red",
+                "path": "review_report.md",
+            })
         if run.get("round", 1) < MAX_ROUNDS and not result.get("product_bug"):
             self._next_round(run_id, run_dir, result)
             return
@@ -233,9 +238,7 @@ class QaLead:
             "Новый запрос": "Круг 2: найди недостающие факты для падающего теста",
         })
         # study → skeleton уже пройден: утверждение каркаса действует, идём в write.
-        run = self._require(run_id)
-        run["stage"] = "skeleton"
-        self.store.save_run(run)
+        self.store.update_run(run_id, stage="skeleton")
         self._tail(run_id, run_dir)
 
     def _finish(self, run_id: str, run_dir: RunDir, verdict: str) -> None:
@@ -256,11 +259,11 @@ class QaLead:
     # ---------- стадии ----------
 
     def _require(self, run_id: str, allow_done: bool = False) -> dict:
-        if run_id in self._cancelled:
-            raise InvalidTransition("запуск отменён")
         run = self.store.get_run(run_id)
         if run is None:
             raise KeyError(f"запуск {run_id} не найден")
+        if run.get("status") == "cancelled":
+            raise InvalidTransition("запуск отменён")
         if not allow_done and run.get("status") != "running":
             raise InvalidTransition(f"запуск не выполняется: статус {run.get('status')}")
         return run
@@ -343,7 +346,7 @@ class QaLead:
                           ctx: dict, reply: AgentReply) -> AgentReply:
         if reply.status != "need_question":
             return reply
-        qid = f"{run['id']}-{role}"
+        qid = f"{run['id']}-{role}-{uuid4().hex[:6]}"
         question = reply.question or {}
         text = question.get("text", "нужна уточняющая информация")
         try:
@@ -463,20 +466,19 @@ class QaLead:
 
     def _review(self, run_id: str, run_dir: RunDir, result: dict) -> str:
         run = self._require(run_id)
-        self._emit_stage(run_id, "review", run.get("round", 1))
+        round_no = run.get("round", 1)
+        self._emit_stage(run_id, "review", round_no)
         reply = self._run_stage_agent("review", run, run_dir, context={
             "Gradle result": str(result),
         })
-        verdict = self._verdict_from_reply(reply)
-        if not result.get("success"):
-            verdict = "red"
+        # Жёсткое правило: непрошедший Gradle — всегда red, вердикт ревьюера не
+        # может «позеленить» упавший прогон. Зелёный — только Gradle passed
+        # и ревьюер не отклонил.
+        verdict = "red" if not result.get("success") else self._verdict_from_reply(reply)
         self.store.append_log(run_id, "reviewer", f"вердикт: {verdict}")
         self.bus.publish(run_id, {"type": "review_verdict", "verdict": verdict,
                                   "path": "review_report.md"})
         self._write_review(run_id, run_dir, result, verdict)
-        run = self._require(run_id)
-        run["stage"] = ("review" if verdict == "green" else "execute")
-        self.store.save_run(run)
         return verdict
 
     def _write_review(self, run_id: str, run_dir: RunDir, result: dict,

@@ -68,6 +68,34 @@ def test_add_rejects_unknown_type(tmp_path):
         McpServerStore(str(tmp_path)).add({"name": "x", "type": "carrier-pigeon"})
 
 
+@pytest.mark.parametrize("executable", [
+    "powershell.exe",
+    "calc.exe",
+    "C:\\Windows\\System32\\calc.exe",
+    "C:/Windows/System32/PowerShell.exe",
+])
+def test_add_rejects_command_outside_allowlist(tmp_path, executable):
+    store = McpServerStore(str(tmp_path))
+    with pytest.raises(McpError, match="недопустимая команда MCP-сервера"):
+        store.add({"name": "evil", "type": "stdio", "command": [executable, "-c", "x"]})
+    assert store.list() == []
+
+
+def test_add_accepts_absolute_interpreter_path(tmp_path):
+    store = McpServerStore(str(tmp_path))
+    server = store.add({"name": "local", "type": "stdio",
+                        "command": [sys.executable, "server.py"]})
+    assert server["command"][0] == sys.executable
+
+
+def test_check_command_accepts_allowlisted_basenames():
+    from mcp import check_command
+    for executable in ("python3", "node", "node.exe", "npx", "npx.cmd",
+                       "java", "uvx", "bash", "cmd.exe",
+                       "C:\\Tools\\node\\node.exe"):
+        check_command([executable])
+
+
 def test_stdio_connect_lists_tools(tmp_path, test_server):
     store = McpServerStore(str(tmp_path))
     server = store.add({"name": "local", "type": "stdio",

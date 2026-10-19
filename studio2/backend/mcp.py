@@ -9,11 +9,24 @@ from pathlib import Path
 
 PROTOCOL_VERSION = "2024-11-05"
 
+ALLOWED_EXECUTABLES = frozenset({
+    "python", "python.exe", "python3", "node", "node.exe", "npx", "npx.cmd",
+    "java", "java.exe", "uvx", "uvx.exe", "bash", "cmd.exe",
+})
+
 ENV_ALLOWLIST = (
     "PATH", "SYSTEMROOT", "TEMP", "TMP", "HOME", "USERPROFILE",
     "PYTHONPATH", "PYTHONIOENCODING", "JAVA_HOME",
     "ANDROID_HOME", "ANDROID_SDK_ROOT",
 )
+
+
+def check_command(command: list) -> None:
+    if not isinstance(command, list) or not command:
+        raise McpError("для stdio-сервера нужна команда")
+    executable = Path(str(command[0])).name.lower()
+    if executable not in ALLOWED_EXECUTABLES:
+        raise McpError("недопустимая команда MCP-сервера")
 
 
 def scrubbed_env(extra: dict | None = None) -> dict[str, str]:
@@ -56,8 +69,8 @@ class McpServerStore:
         server_type = spec.get("type")
         if server_type not in {"stdio", "http"}:
             raise McpError("тип сервера должен быть stdio или http")
-        if server_type == "stdio" and not spec.get("command"):
-            raise McpError("для stdio-сервера нужна команда")
+        if server_type == "stdio":
+            check_command(spec.get("command") or [])
         if server_type == "http" and not spec.get("url"):
             raise McpError("для http-сервера нужен url")
         server = {
