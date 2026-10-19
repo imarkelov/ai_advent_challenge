@@ -7312,5 +7312,85 @@
       ]
     },
     "summary": "Сводка digest-20261019-1200: Самара 14.6°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261019-2157",
+    "generated_at": "2026-10-19T21:57:37Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 4.2,
+      "feels_like_c": 0.0,
+      "description": "Ясно",
+      "wind_ms": 11.0
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "На фоне кризиса на рынке труда: доктор наук из Принстона откликнулся на 2300 вакансий за два года, но не нашёл работу в США",
+          "url": "https://vc.ru/hr/3203689-krizis-na-rynke-truda-doktor-nauk-iz-prinstona-ne-nashyel-rabotu?from=rss"
+        },
+        {
+          "title": "Российские банки и ЦБ начали бороться со схемой покупки USDT в странах СНГ и продажей в России за наличные — РБК",
+          "url": "https://vc.ru/crypto/3202333-rossiyskie-banki-i-tsb-protiv-shemy-pokupki-usdt-v-sng?from=rss"
+        },
+        {
+          "title": "Олимпиадник, мемолог и любитель погулять по лесу: кто такой Александр Ван, вернувший Meta* в ИИ-гонку",
+          "url": "https://vc.ru/story/3197108-aleksandr-van-novyy-lider-meta-v-gonke-ii?from=rss"
+        },
+        {
+          "title": "ФАС признала недостоверной рекламу «режима 5G» у «Мегафона» — оператор заявил, что удивлён этим решением",
+          "url": "https://vc.ru/legal/3202653-fas-priznala-reklamu-5g-ot-megafona-nedostovernoy?from=rss"
+        },
+        {
+          "title": "Zoom для борьбы с дипфейками начал добавлять значок подтверждения, что пользователь — человек, от стартапа World Сэма Альтмана",
+          "url": "https://vc.ru/services/3203217-zoom-podtverzhdenie-lichnosti-ot-startapa-world?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Minecraft для Xbox One запустили на iOS через слой совместимости",
+          "url": "https://habr.com/ru/news/1096416/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096416"
+        },
+        {
+          "title": "В Windows 11 до сих пор присутствует диспетчер памяти из Windows 95",
+          "url": "https://habr.com/ru/news/1096392/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096392"
+        },
+        {
+          "title": "Стартап Apate борется с мошенниками при помощи ИИ‑агентов, которые общаются с ними под видом жертв",
+          "url": "https://habr.com/ru/news/1096368/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096368"
+        },
+        {
+          "title": "Microsoft и CMU запускают программу PRAISE для начинающих разработчиков",
+          "url": "https://habr.com/ru/news/1096356/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096356"
+        },
+        {
+          "title": "Сутки без человека: как мы в ГНИВЦ выстраиваем управляемую агентскую разработку",
+          "url": "https://habr.com/ru/companies/gnivc/news/1096366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096366"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Обновил, но не работает: как устроен кэш и почему его нельзя просто выключить",
+          "url": "https://tproger.ru/articles/obnovil-no-ne-rabotaet-kak-ustroen-kew-i-pochemu-ego-nelzya-pro"
+        },
+        {
+          "title": "ИИ-образование для детей: рейтинг 10 школ и курсов по искусственному интеллекту в 2026 году",
+          "url": "https://tproger.ru/articles/ii-obrazovanie-dlya-detej-rejting-10-wkol-i-kursov-po-iskusstven"
+        },
+        {
+          "title": "Искусственный интеллект для дошкольников: рейтинг 5 курсов и развивающих программ",
+          "url": "https://tproger.ru/articles/iskusstvennyj-intellekt-dlya-dowkolnikov-rejting-5-kursov-i-raz"
+        },
+        {
+          "title": "ИИ-платформы для бизнеса: сравнение решений 2026 года",
+          "url": "https://tproger.ru/articles/ii-platformy-dlya-biznesa-sravnenie-rewenij-2026-goda"
+        },
+        {
+          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
+          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261019-2157: Самара 4.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
