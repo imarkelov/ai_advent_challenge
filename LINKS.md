@@ -16,3 +16,17 @@
   `digest_search · search`, `digest_summarize · summarize` (split по
   первому `__`, полное имя на hover) → вкладка «Запрос» (payload с
   `{server}__{tool}`-тулами).
+
+
+# Ссылки — день 35 (QA-Lead Orchestrator)
+
+## Ветка
+
+- GitHub: <https://github.com/imarkelov/ai_advent_challenge/tree/day35-qa-lead-orchestrator>
+
+## Демо
+
+- Скриншот: `docs/day35_demo.png`
+- Журнал пайплайна: `docs/day35_pipeline_trace.txt`
+- Отчёт запуска: `docs/day35_report.md`
+- Видео-демо: _будет добавлено после записи_

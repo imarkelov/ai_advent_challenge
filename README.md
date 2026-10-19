@@ -15,6 +15,7 @@ MCP-инструментами, RAG, памятью и файловыми опе
 
 | День | Что | Скриншот |
 | --- | --- | --- |
+| **35** → [qa-lead-orchestrator](https://github.com/imarkelov/ai_advent_challenge/tree/day35-qa-lead-orchestrator) | Автономный QA-пайплайн `studio2`: MD-декларации агентов, RAG по `doc/`, git-изучение, SDD на субагента, каркас теста на апрув, Kotlin-тест, прогон на эмуляторе, ревью отдельной LLM | ![день 35](docs/day35_demo.png) |
 | **34** · [Файловый ассистент](https://github.com/imarkelov/ai_advent_challenge/tree/day34-files-assistant) | CLI по цели: 4 файловых MCP-тула (`read_file`, `search_files`, `write_file`, `diff_files`), LLM tool-loop + офлайн-план, песочница, бэкапы и diff прогона | ![день 34](docs/day34_demo_offline.png) |
 | **33** · [Ассистент поддержки](https://github.com/imarkelov/ai_advent_challenge/tree/day33-support-assistant) | RAG по FAQ/документации + контекст тикета и пользователя через MCP, ответ с источниками `[n]` | ![день 33](docs/day33_support_demo.png) |
 

@@ -1,3 +1,66 @@
+# Release Notes — day35-qa-lead-orchestrator (день 35)
+
+Ветка: [`day35-qa-lead-orchestrator`](https://github.com/imarkelov/ai_advent_challenge/tree/day35-qa-lead-orchestrator).
+
+## Что и зачем
+
+**QA-Lead Orchestrator.** Новый проект `studio2`: автономный QA-пайплайн для
+реального Android-приложения. Агент `qa-lead` изучает проект через git и RAG,
+генерирует SDD на каждого субагента, готовит каркас теста на апрув, пишет
+Kotlin-тест, прогоняет его на эмуляторе, дебажит падения, а ревьюер на отдельной
+модели проверяет загруженные и полученные из MCP тесты.
+
+## Компоненты
+
+- `studio2/backend` — FastAPI: конфиг ролей и провайдеров, RAG (BM25-lite),
+  документы `doc/`, git-адаптер, adb-адаптер, Gradle-runner, MCP-клиент,
+  пайплайн со стадиями и гейтами, SSE.
+- `studio2/doc/agents/*.md` — MD-декларации семи агентов (front-matter + тело).
+- `studio2/doc/kb/*.md` — база знаний: архитектура, паттерны, принципы, экраны.
+- `studio2/frontend` — React + Vite: дашборд QA (модели, RAG, MCP, задачи,
+  pipeline, запуски), SSE-трейс, редактор каркаса, модалка вопроса.
+- `studio2/scripts/e2e_day35.py` — детерминированная e2e-проверка на fake-LLM.
+
+## Стадии
+
+`sdd → study → skeleton → [гейт: апрув каркаса] → write → [гейт: способ исполнения]
+→ provision → execute → debug → review → done`
+
+## Инварианты
+
+1. Модель ревьюера отличается от модели тестировщика.
+2. Без апрува каркаса переход в `write` запрещён.
+3. Без выбора способа исполнения переход в `provision` запрещён.
+4. Инструмент вне `allowed_tools` запрещён.
+5. Третий круг изучения запрещён.
+6. `doc/kb` пишет только исследователь.
+7. Секреты не попадают в `run.json` и логи.
+
+## Тесты
+
+- Бэкенд: `python -m pytest -q` из `studio2/backend`.
+- Фронтенд: `npm test` и `npm run build` из `studio2/frontend`.
+- E2E: `python studio2/scripts/e2e_day35.py` — 11 PASS.
+
+## Проверка ключей
+
+| Ключ | Статус |
+|---|---|
+| `GPUSTACK_BASE_URL` | задан |
+| `GPUSTACK_API_KEY`, `_DEEPSEEK`, `_GLM`, `_EMBED`, `_RERANK` | заданы, но `gpustack.data.lmru.tech` не резолвится без корпоративной сети |
+| `OLLAMA_BASE_URL` | `http://localhost:11435`, Ollama в Docker работает |
+
+Модели Ollama: `qwen3-coder:30b`, `gemma4:12b`, `qwen3.5:9b`.
+Демо идёт на Ollama; e2e — на `fake`. GPUSTACK заработает после подключения к VPN.
+
+## Артефакты демо
+
+- `docs/day35_demo.png`
+- `docs/day35_pipeline_trace.txt`
+- `docs/day35_report.md`
+
+---
+
 # Release Notes — day20-mcp-orchestration (день 20)
 
 Ветка: [`day20-mcp-orchestration`](https://github.com/imarkelov/ai_advent_challenge/tree/day20-mcp-orchestration)
