@@ -1,17 +1,22 @@
 """FastAPI-приложение studio2: конфиг, документы, RAG, задачи, MCP."""
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
 from config import load_config, mask_secret, save_config
 from docstore import DocPathError, DocStore
+from events import EventBus
 from llm import LlmClient, LlmError
 from mcp import McpError, McpRegistry, McpServerStore
+from pipeline.lead import GateError, PendingGate, QaLead
 from rag import RagIndex
+from store import RunStore
 
 BACKEND_DIR = Path(__file__).resolve().parent
 DEFAULT_DOC = BACKEND_DIR.parent / "doc"
@@ -65,6 +70,10 @@ def create_app(doc_dir: str | None = None, data_dir: str | None = None,
     mcp_store = McpServerStore(data_root)
     mcp_registry = McpRegistry(mcp_store)
     app = FastAPI(title="QA-Lead Studio")
+    bus = EventBus()
+    runs = RunStore(data_root)
+    app.state.bus = bus
+    app.state.runs = runs
 
     app.add_middleware(
         CORSMiddleware,
@@ -78,6 +87,12 @@ def create_app(doc_dir: str | None = None, data_dir: str | None = None,
         if llm is None:
             llm = LlmClient(load_config(data_root))
         return llm
+
+    app.state.lead_factory = lambda: QaLead(
+        doc_root, data_root, client(), bus, runs,
+        config=load_config(data_root),
+        rag=rag,
+    )
 
     @app.on_event("shutdown")
     def _shutdown() -> None:
@@ -219,6 +234,124 @@ def create_app(doc_dir: str | None = None, data_dir: str | None = None,
     @app.get("/api/mcp/tools")
     def mcp_tools() -> dict:
         return {"tools": mcp_registry.tools()}
+
+    def _lead() -> QaLead:
+        return app.state.lead_factory()
+
+    def _require_run(run_id: str) -> dict:
+        run = runs.get_run(run_id)
+        if run is None:
+            raise HTTPException(404, f"запуск {run_id} не найден")
+        return run
+
+    def _task_exists(task_id: str) -> bool:
+        return (Path(doc_root) / "tasks" / f"{task_id}.md").exists()
+
+    @app.post("/api/runs", status_code=201)
+    def create_run(body: dict) -> dict:
+        task_id = str(body.get("task_id") or "")
+        repo_path = str(body.get("repo_path") or "")
+        branch = str(body.get("branch") or "")
+        if not _task_exists(task_id):
+            raise HTTPException(400, f"тест-кейс {task_id or '(пусто)'} не найден в doc/tasks")
+        if not repo_path or not branch:
+            raise HTTPException(400, "нужны repo_path и branch")
+        if not (Path(repo_path) / ".git").exists():
+            raise HTTPException(400, f"путь не является git-репозиторием: {repo_path}")
+        run = runs.create_run(task_id, repo_path, branch)
+        return {"run": run}
+
+    @app.get("/api/runs")
+    def list_runs() -> dict:
+        return {"runs": runs.list_runs()}
+
+    @app.get("/api/runs/{run_id}")
+    def get_run(run_id: str) -> dict:
+        return {"run": _require_run(run_id)}
+
+    @app.get("/api/runs/{run_id}/stream")
+    def stream(run_id: str) -> StreamingResponse:
+        _require_run(run_id)
+
+        async def generator():
+            async for event in bus.subscribe(run_id):
+                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+        return StreamingResponse(generator(), media_type="text/event-stream")
+
+    @app.post("/api/runs/{run_id}/start")
+    async def start_run(run_id: str) -> dict:
+        _require_run(run_id)
+        try:
+            await asyncio.to_thread(_lead().start, run_id)
+        except PendingGate:
+            pass
+        except Exception as exc:  # noqa: BLE001
+            bus.publish(run_id, {"type": "error", "message": str(exc)})
+            bus.close(run_id)
+            raise HTTPException(400, str(exc)) from exc
+        return {"run": runs.get_run(run_id)}
+
+    @app.post("/api/runs/{run_id}/resume")
+    async def resume_run(run_id: str) -> dict:
+        run = _require_run(run_id)
+        try:
+            _lead().ensure_gate("write", run)
+            _lead().ensure_gate("provision", run)
+        except GateError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        await asyncio.to_thread(_lead().resume, run_id)
+        return {"run": runs.get_run(run_id)}
+
+    @app.get("/api/runs/{run_id}/skeleton")
+    def get_skeleton(run_id: str) -> dict:
+        run_dir = Path(doc_root) / "runs" / run_id
+        path = run_dir / "skeleton.md"
+        if not path.exists():
+            raise HTTPException(404, "каркас ещё не сформирован")
+        return {"path": "skeleton.md", "content": path.read_text(encoding="utf-8")}
+
+    @app.put("/api/runs/{run_id}/skeleton")
+    def put_skeleton(run_id: str, body: dict) -> dict:
+        _require_run(run_id)
+        content = body.get("content")
+        if not isinstance(content, str) or not content.strip():
+            raise HTTPException(400, "каркас не может быть пустым")
+        run_dir = Path(doc_root) / "runs" / run_id
+        run_dir.mkdir(parents=True, exist_ok=True)
+        (run_dir / "skeleton.md").write_text(content, encoding="utf-8")
+        bus.publish(run_id, {"type": "skeleton_updated", "path": "skeleton.md",
+                             "by": "human"})
+        return {"path": "skeleton.md", "saved": True}
+
+    @app.post("/api/runs/{run_id}/approve-skeleton")
+    def approve_skeleton(run_id: str) -> dict:
+        _require_run(run_id)
+        return {"run": _lead().approve_skeleton(run_id, True)}
+
+    @app.post("/api/runs/{run_id}/execution-choice")
+    def execution_choice(run_id: str, body: dict) -> dict:
+        _require_run(run_id)
+        try:
+            run = _lead().choose_execution(run_id, body.get("choice", ""))
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        return {"run": run}
+
+    @app.post("/api/runs/{run_id}/answer")
+    def answer(run_id: str, body: dict) -> dict:
+        _require_run(run_id)
+        question_id = body.get("question_id")
+        if not bus.answer(question_id, str(body.get("text") or "")):
+            raise HTTPException(404, "вопрос не найден или уже отвечен")
+        bus.publish(run_id, {"type": "question_answered", "question_id": question_id})
+        return {"answered": question_id}
+
+    @app.post("/api/runs/{run_id}/cancel")
+    def cancel(run_id: str) -> dict:
+        _require_run(run_id)
+        _lead().cancel(run_id)
+        return {"run": runs.get_run(run_id)}
 
     return app
 
