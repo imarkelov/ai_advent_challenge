@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from datetime import datetime
 from pathlib import Path
 
 LOG_CAP = 500
+RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$")
 
 
 def _now() -> str:
@@ -24,6 +26,8 @@ class RunStore:
         return self._seq
 
     def _path(self, run_id: str) -> Path:
+        if not isinstance(run_id, str) or not RUN_ID_RE.match(run_id):
+            raise ValueError("недопустимый идентификатор запуска")
         return self.runs_dir / f"{run_id}.json"
 
     def create_run(self, task_id: str, repo_path: str, branch: str) -> dict:

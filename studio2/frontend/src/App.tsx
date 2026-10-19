@@ -1,6 +1,6 @@
 import { useReducer, useState } from 'react'
 import {
-  approveSkeleton, cancelRun, chooseExecution, createRun, createRunStream, resumeRun, startRun,
+  approveSkeleton, cancelRun, chooseExecution, createRun, createRunStream, getRun, resumeRun, startRun,
   answerQuestion, type RunInfo,
 } from './api'
 import Header from './components/Header'
@@ -17,6 +17,11 @@ import TasksTab from './components/TasksTab'
 import { initialState, pipelineReducer } from './state'
 
 const DEFAULT_REPO = 'C:\\Users\\migor\\StudioProjects\\lmru--mobile-customer--app'
+
+export function approveOnly(runId: string | null): Promise<unknown> | null {
+  if (!runId) return null
+  return approveSkeleton(runId)
+}
 
 export default function App() {
   const [tab, setTab] = useState<TabId>('pipeline')
@@ -41,11 +46,8 @@ export default function App() {
   }
 
   const onApprove = async () => {
-    if (!state.runId) return
     try {
-      await approveSkeleton(state.runId)
-      await chooseExecution(state.runId, 'generated')
-      await resumeRun(state.runId)
+      await approveOnly(state.runId)
     } catch (exc) {
       dispatch({ type: 'error', message: (exc as Error).message })
     }
@@ -55,16 +57,44 @@ export default function App() {
     if (!state.runId) return
     try {
       await chooseExecution(state.runId, choice)
+      await resumeRun(state.runId)
+      follow(state.runId)
     } catch (exc) {
       dispatch({ type: 'error', message: (exc as Error).message })
     }
   }
 
-  const openRun = (run: RunInfo) => {
-    setTaskId(run.task_id)
-    setBranch(run.branch)
-    dispatch({ type: 'reset' })
-    follow(run.id)
+  const onCancel = async () => {
+    if (!state.runId) return
+    try {
+      const { run } = await cancelRun(state.runId) as { run: RunInfo }
+      dispatch({ type: 'hydrate', run })
+    } catch (exc) {
+      dispatch({ type: 'error', message: (exc as Error).message })
+    }
+  }
+
+  const openRun = async (run: RunInfo) => {
+    try {
+      const { run: fresh } = await getRun(run.id)
+      setTaskId(fresh.task_id)
+      setBranch(fresh.branch)
+      dispatch({ type: 'hydrate', run: fresh })
+      follow(fresh.id)
+    } catch (exc) {
+      dispatch({ type: 'error', message: (exc as Error).message })
+    }
+  }
+
+  const onAnswer = async (text: string) => {
+    const question = state.question
+    if (!state.runId || !question) return
+    try {
+      await answerQuestion(state.runId, question.id, text)
+      dispatch({ type: 'event', payload: { type: 'question_answered', question_id: question.id } })
+    } catch (exc) {
+      dispatch({ type: 'error', message: (exc as Error).message })
+    }
   }
 
   return (
@@ -78,7 +108,7 @@ export default function App() {
             <input value={taskId} onChange={(event) => setTaskId(event.target.value)} placeholder="TC-4217" />
             <span className="hint">ветка</span>
             <input value={branch} onChange={(event) => setBranch(event.target.value)} placeholder="develop" />
-            {state.runId && <button onClick={() => cancelRun(state.runId!)}>Отменить</button>}
+            {state.runId && <button onClick={() => void onCancel()}>Отменить</button>}
           </div>
           {tab === 'models' && <ModelsTab />}
           {tab === 'rag' && <RagTab />}
@@ -97,13 +127,7 @@ export default function App() {
         <Inspector state={state} />
       </div>
       {state.question && state.runId && (
-        <QuestionModal
-          question={state.question}
-          onSubmit={(text) => {
-            void answerQuestion(state.runId as string, state.question!.id, text)
-            dispatch({ type: 'event', payload: { type: 'question_answered', question_id: state.question!.id } })
-          }}
-        />
+        <QuestionModal question={state.question} onSubmit={(text) => void onAnswer(text)} />
       )}
     </div>
   )

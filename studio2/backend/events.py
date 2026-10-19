@@ -52,3 +52,19 @@ class EventBus:
         except asyncio.TimeoutError:
             return None
         return holder[0]
+
+    def wait_for_answer_sync(self, question_id: str,
+                             timeout: float | None = 1800.0) -> str | None:
+        """Ожидание ответа из синхронного потока (без запущенного event loop)."""
+        entry = self._answers.get(question_id)
+        if entry is None:
+            return None
+        event, holder = entry
+        loop = asyncio.new_event_loop()
+        try:
+            loop.run_until_complete(asyncio.wait_for(event.wait(), timeout=timeout))
+        except asyncio.TimeoutError:
+            return None
+        finally:
+            loop.close()
+        return holder[0]

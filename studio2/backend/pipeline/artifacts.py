@@ -3,9 +3,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from store import RUN_ID_RE
+
 
 class RunDir:
     def __init__(self, doc_dir: str, run_id: str):
+        if not isinstance(run_id, str) or not RUN_ID_RE.match(run_id):
+            raise ValueError("недопустимый идентификатор запуска")
         self.root = Path(doc_dir) / "runs" / run_id
 
     def ensure(self) -> None:
@@ -99,16 +103,20 @@ def skeleton_markdown(test_class: str, task_id: str, steps: list[str], tags: lis
     )
 
 
-def review_markdown(run_id: str, rows: list[dict], verdict: str) -> str:
+def review_markdown(run_id: str, rows: list[dict], verdict: str,
+                    details: list[str] | None = None) -> str:
     body = "\n".join(
         f"| {row.get('test', '—')} | {row.get('status', '—')} | "
         f"{row.get('duration', '')} | {row.get('reason', '')} |"
         for row in rows
     ) or "| — | — | — | — |"
+    extra = ""
+    if details:
+        extra = "\n## Проверки\n" + "\n".join(f"- {line}" for line in details) + "\n"
     return (
         f"# Отчёт ревью — {run_id}\n\n"
         "| Тест | Статус | Длительность | Причина |\n|---|---|---|---|\n"
-        f"{body}\n\n**Вердикт:** {verdict}\n"
+        f"{body}\n{extra}\n**Вердикт:** {verdict}\n"
     )
 
 

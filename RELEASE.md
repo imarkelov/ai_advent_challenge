@@ -26,21 +26,51 @@ Kotlin-тест, прогоняет его на эмуляторе, дебажи
 `sdd → study → skeleton → [гейт: апрув каркаса] → write → [гейт: способ исполнения]
 → provision → execute → debug → review → done`
 
-## Инварианты
+## Инварианты (что реально проверяется кодом)
 
-1. Модель ревьюера отличается от модели тестировщика.
-2. Без апрува каркаса переход в `write` запрещён.
-3. Без выбора способа исполнения переход в `provision` запрещён.
-4. Инструмент вне `allowed_tools` запрещён.
-5. Третий круг изучения запрещён.
-6. `doc/kb` пишет только исследователь.
-7. Секреты не попадают в `run.json` и логи.
+1. Модель ревьюера отличается от модели тестировщика (`validate_critic`).
+2. Гейты в порядке спеки 4.10: `skeleton → write` — только после `skeleton_approved`
+   (проверяется перед `write`), `write → provision` — только после
+   `execution_choice` (проверяется перед `provision`, после `write`). Недостающий
+   выбор исполнения не блокирует генерацию теста.
+3. Стейдж-переходы: только соседние вперёд по
+   `sdd → study → skeleton → write → provision → execute → debug → review → done`
+   плюс `execute → review`, `execute → done`, `debug → execute/review` и
+   `review → study` (круг 2). Любой другой переход — `InvalidTransition`.
+4. `start` идемпотентен: повторный `start` (статус не `running` или стадия не
+   `sdd`) → `InvalidTransition`; `resume` — только из `skeleton`/`write` после
+   утверждения каркаса.
+5. `allowed_tools` роли — жёсткий фильтр (`guard_tools`): инструмент вне
+   `allowed_tools` → `ToolNotAllowed`.
+6. `write_scope`: артефакты, которые субагент вернул, сверяются с `outputs`
+   роли; пути вне scope отбрасываются и пишутся в журнал как отклонённые.
+7. Ревьюер запускается только для `as_loaded` (загруженные/MCP тесты) и даёт
+   вердикт по своему ответу; для `generated` ревьюер пропускается, вердикт —
+   из результата Gradle.
+8. Круг 2: `red` в круге 1 → `round = 2`, возврат `review → study` и повтор
+   `write → provision → execute → debug → review`; после `red` в круге 2 —
+   `verdict = red`, `status = failed`. Максимум 2 круга.
+9. Дебаг: `debugger` ответил `fail` (баг продукта) → `failed`/`red` без повтора;
+   иначе `execute` повторяется не более 2 раз.
+10. Вопрос человека: `need_question` регистрирует вопрос в шине, шлёт SSE
+    `question`, ждёт `POST /answer` (таймаут 30 мин) и повторяет субагента с
+    ответом; нет ответа — запись в журнал и статус `fail`.
+11. `run_id` валидируется (`^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$`); все пути
+    запуска строятся через `RunDir`, обход каталога невозможен.
+12. `api_key` никогда не пишется в `data/config.json`: поля, пришедшие из
+    окружения, вырезаются перед сохранением.
+13. MCP-процесс получает вычищенное окружение (allow-list + объявленный сервером
+    `env`); `GPUSTACK_*`/`OLLAMA_*` секреты в дочерний процесс не попадают.
+14. Через API пишутся только `doc/kb` и `doc/tasks`; `doc/agents` и
+    `doc/templates` доступны только на чтение.
+15. Gradle получает имя тестового класса
+    (`^[A-Za-z_][A-Za-z0-9_]*$`), а не `task_id`.
 
 ## Тесты
 
 - Бэкенд: `python -m pytest -q` из `studio2/backend`.
 - Фронтенд: `npm test` и `npm run build` из `studio2/frontend`.
-- E2E: `python studio2/scripts/e2e_day35.py` — 11 PASS.
+- E2E: `python studio2/scripts/e2e_day35.py` — 13 PASS.
 
 ## Проверка ключей
 
@@ -55,9 +85,8 @@ Kotlin-тест, прогоняет его на эмуляторе, дебажи
 
 ## Артефакты демо
 
-- `docs/day35_demo.png`
-- `docs/day35_pipeline_trace.txt`
-- `docs/day35_report.md`
+Скриншоты и трасса демо (скриншот, `docs/day35_pipeline_trace.txt`,
+`docs/day35_report.md`) будут добавлены после записи демо.
 
 ---
 

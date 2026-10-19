@@ -43,10 +43,10 @@ export default function PipelineTab({
           <h2>Гейты</h2>
           <div className="row">
             <button onClick={onApprove}>Утвердить каркас</button>
-            <button onClick={() => onChooseExecution?.('as_loaded')}>Выбрать способ исполнения</button>
           </div>
           <div className="row" style={{ marginTop: 8 }}>
-            <button onClick={() => onChooseExecution?.('generated')}>Исполнить сгенерированный</button>
+            <button onClick={() => onChooseExecution?.('as_loaded')}>Исполнить загруженный (as_loaded)</button>
+            <button onClick={() => onChooseExecution?.('generated')}>Исполнить сгенерированный (generated)</button>
             {state.executionChosen && <span className="hint">выбрано: {state.executionChosen}</span>}
           </div>
         </div>

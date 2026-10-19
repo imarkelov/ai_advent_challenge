@@ -94,13 +94,16 @@ def main() -> int:
 
         lead.approve_skeleton(run_id)
         lead.choose_execution(run_id, "generated")
+        nbus_events = list(bus.events)
         lead.resume(run_id)
 
         final = store.get_run(run_id)
         check("запуск завершён", final["status"] == "done")
         check("вердикт выставлен", final["verdict"] == "green")
         check("итоговый отчёт есть", (doc / "runs" / run_id / "test_report.md").exists())
-        check("отчёт ревьюера есть", (doc / "runs" / run_id / "review_report.md").exists())
+        check("для generated ревьюер пропущен",
+              not any(e["type"] == "agent_started" and e.get("role") == "reviewer"
+                      for e in nbus_events))
         check("сгенерированный тест лежит в test_generated",
               any((doc / "runs" / run_id / "test_generated").glob("*.kt")))
 

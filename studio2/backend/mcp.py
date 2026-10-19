@@ -9,6 +9,18 @@ from pathlib import Path
 
 PROTOCOL_VERSION = "2024-11-05"
 
+ENV_ALLOWLIST = (
+    "PATH", "SYSTEMROOT", "TEMP", "TMP", "HOME", "USERPROFILE",
+    "PYTHONPATH", "PYTHONIOENCODING", "JAVA_HOME",
+    "ANDROID_HOME", "ANDROID_SDK_ROOT",
+)
+
+
+def scrubbed_env(extra: dict | None = None) -> dict[str, str]:
+    env = {name: os.environ[name] for name in ENV_ALLOWLIST if name in os.environ}
+    env.update({str(k): str(v) for k, v in (extra or {}).items()})
+    return env
+
 
 class McpError(RuntimeError):
     pass
@@ -72,8 +84,7 @@ class McpServerStore:
 
 class _StdioSession:
     def __init__(self, command: list[str], env: dict):
-        full_env = dict(os.environ)
-        full_env.update({str(k): str(v) for k, v in (env or {}).items()})
+        full_env = scrubbed_env(env)
         try:
             self.proc = subprocess.Popen(
                 command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,

@@ -140,7 +140,19 @@ export interface RunEvent {
 export function createRunStream(runId: string, onEvent: (event: RunEvent) => void): EventSource {
   const source = new EventSource(apiUrl(`/runs/${runId}/stream`))
   source.onmessage = (message) => {
-    if (message.data) onEvent(JSON.parse(message.data) as RunEvent)
+    if (!message.data || message.data === '[DONE]') return
+    let event: RunEvent
+    try {
+      event = JSON.parse(message.data) as RunEvent
+    } catch {
+      return
+    }
+    if (!event || typeof event.type !== 'string') return
+    onEvent(event)
+  }
+  source.onerror = () => {
+    source.close()
+    onEvent({ type: 'error', message: 'поток прерван' })
   }
   return source
 }

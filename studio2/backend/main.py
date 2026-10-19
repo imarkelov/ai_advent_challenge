@@ -3,18 +3,21 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+import re
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
-from config import load_config, mask_secret, save_config
+from config import ENV_MAP, load_config, mask_secret, save_config
 from docstore import DocPathError, DocStore
 from events import EventBus
 from llm import LlmClient, LlmError
 from mcp import McpError, McpRegistry, McpServerStore
-from pipeline.lead import GateError, PendingGate, QaLead
+from pipeline.artifacts import RunDir
+from pipeline.lead import GateError, InvalidTransition, PendingGate, QaLead
 from rag import RagIndex
 from store import RunStore
 
@@ -22,6 +25,7 @@ BACKEND_DIR = Path(__file__).resolve().parent
 DEFAULT_DOC = BACKEND_DIR.parent / "doc"
 DEFAULT_DATA = BACKEND_DIR.parent / "data"
 SETTINGS_FIELDS = ("providers", "roles", "critic", "android")
+TASK_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,80}$")
 
 
 def _public_config(cfg: dict) -> dict:
@@ -30,6 +34,18 @@ def _public_config(cfg: dict) -> dict:
         raw = provider.pop("api_key", None)
         provider["api_key_masked"] = mask_secret(raw)
     return out
+
+
+def _strip_env_fields(cfg: dict) -> dict:
+    """Убирает из конфига поля, пришедшие из окружения: они не сохраняются на диск."""
+    for (section, provider, field), env_name in ENV_MAP.items():
+        env_value = os.getenv(env_name)
+        if not env_value:
+            continue
+        node = cfg.get(section, {}).get(provider)
+        if isinstance(node, dict) and node.get(field) == env_value:
+            node[field] = None
+    return cfg
 
 
 def _merge_config(current: dict, updates: dict) -> dict:
@@ -117,6 +133,7 @@ def create_app(doc_dir: str | None = None, data_dir: str | None = None,
                 )
         for provider in merged["providers"].values():
             provider.pop("api_key_masked", None)
+        _strip_env_fields(merged)
         save_config(data_root, merged)
         nonlocal llm
         llm = None
@@ -239,13 +256,24 @@ def create_app(doc_dir: str | None = None, data_dir: str | None = None,
         return app.state.lead_factory()
 
     def _require_run(run_id: str) -> dict:
-        run = runs.get_run(run_id)
+        try:
+            run = runs.get_run(run_id)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
         if run is None:
             raise HTTPException(404, f"запуск {run_id} не найден")
         return run
 
     def _task_exists(task_id: str) -> bool:
-        return (Path(doc_root) / "tasks" / f"{task_id}.md").exists()
+        if not TASK_ID_RE.match(task_id or ""):
+            return False
+        return (Path(doc_root) / "tasks" / f"{task_id}.md").is_file()
+
+    def _run_dir(run_id: str) -> RunDir:
+        try:
+            return RunDir(doc_root, run_id)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
 
     @app.post("/api/runs", status_code=201)
     def create_run(body: dict) -> dict:
@@ -269,6 +297,28 @@ def create_app(doc_dir: str | None = None, data_dir: str | None = None,
     def get_run(run_id: str) -> dict:
         return {"run": _require_run(run_id)}
 
+    @app.get("/api/runs/{run_id}/skeleton")
+    def get_skeleton(run_id: str) -> dict:
+        _require_run(run_id)
+        run_dir = _run_dir(run_id)
+        if not run_dir.skeleton_path.exists():
+            raise HTTPException(404, "каркас ещё не сформирован")
+        return {"path": "skeleton.md",
+                "content": run_dir.read("skeleton.md")}
+
+    @app.put("/api/runs/{run_id}/skeleton")
+    def put_skeleton(run_id: str, body: dict) -> dict:
+        _require_run(run_id)
+        content = body.get("content")
+        if not isinstance(content, str) or not content.strip():
+            raise HTTPException(400, "каркас не может быть пустым")
+        run_dir = _run_dir(run_id)
+        run_dir.root.mkdir(parents=True, exist_ok=True)
+        run_dir.write("skeleton.md", content)
+        bus.publish(run_id, {"type": "skeleton_updated", "path": "skeleton.md",
+                             "by": "human"})
+        return {"path": "skeleton.md", "saved": True}
+
     @app.get("/api/runs/{run_id}/stream")
     def stream(run_id: str) -> StreamingResponse:
         _require_run(run_id)
@@ -286,6 +336,8 @@ def create_app(doc_dir: str | None = None, data_dir: str | None = None,
             await asyncio.to_thread(_lead().start, run_id)
         except PendingGate:
             pass
+        except InvalidTransition as exc:
+            raise HTTPException(400, str(exc)) from exc
         except Exception as exc:  # noqa: BLE001
             bus.publish(run_id, {"type": "error", "message": str(exc)})
             bus.close(run_id)
@@ -294,35 +346,12 @@ def create_app(doc_dir: str | None = None, data_dir: str | None = None,
 
     @app.post("/api/runs/{run_id}/resume")
     async def resume_run(run_id: str) -> dict:
-        run = _require_run(run_id)
-        try:
-            _lead().ensure_gate("write", run)
-            _lead().ensure_gate("provision", run)
-        except GateError as exc:
-            raise HTTPException(400, str(exc)) from exc
-        await asyncio.to_thread(_lead().resume, run_id)
-        return {"run": runs.get_run(run_id)}
-
-    @app.get("/api/runs/{run_id}/skeleton")
-    def get_skeleton(run_id: str) -> dict:
-        run_dir = Path(doc_root) / "runs" / run_id
-        path = run_dir / "skeleton.md"
-        if not path.exists():
-            raise HTTPException(404, "каркас ещё не сформирован")
-        return {"path": "skeleton.md", "content": path.read_text(encoding="utf-8")}
-
-    @app.put("/api/runs/{run_id}/skeleton")
-    def put_skeleton(run_id: str, body: dict) -> dict:
         _require_run(run_id)
-        content = body.get("content")
-        if not isinstance(content, str) or not content.strip():
-            raise HTTPException(400, "каркас не может быть пустым")
-        run_dir = Path(doc_root) / "runs" / run_id
-        run_dir.mkdir(parents=True, exist_ok=True)
-        (run_dir / "skeleton.md").write_text(content, encoding="utf-8")
-        bus.publish(run_id, {"type": "skeleton_updated", "path": "skeleton.md",
-                             "by": "human"})
-        return {"path": "skeleton.md", "saved": True}
+        try:
+            await asyncio.to_thread(_lead().resume, run_id)
+        except (GateError, InvalidTransition) as exc:
+            raise HTTPException(400, str(exc)) from exc
+        return {"run": runs.get_run(run_id)}
 
     @app.post("/api/runs/{run_id}/approve-skeleton")
     def approve_skeleton(run_id: str) -> dict:

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path, PurePosixPath
 
-WRITABLE = {"kb", "tasks", "agents", "templates"}
+WRITABLE = {"kb", "tasks"}
 DELETABLE = {"kb", "tasks"}
 
 

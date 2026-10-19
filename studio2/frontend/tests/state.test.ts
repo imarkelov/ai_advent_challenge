@@ -120,4 +120,50 @@ describe('pipelineReducer', () => {
     const dirty = withState({ stage: 'write', error: 'x' })
     expect(pipelineReducer(dirty, { type: 'reset' })).toEqual(initialState())
   })
+
+  it('hydrate seeds the pipeline from a loaded run', () => {
+    const state = pipelineReducer(initialState(), {
+      type: 'hydrate',
+      run: {
+        id: 'r9',
+        task_id: 'TC-4217',
+        repo_path: 'C:/repo',
+        branch: 'develop',
+        stage: 'review',
+        status: 'failed',
+        round: 2,
+        verdict: 'red',
+        skeleton_approved: true,
+        execution_choice: 'as_loaded',
+      },
+    })
+    expect(state).toMatchObject({
+      runId: 'r9',
+      task: 'TC-4217',
+      repoPath: 'C:/repo',
+      branch: 'develop',
+      stage: 'review',
+      status: 'failed',
+      round: 2,
+      verdict: 'red',
+      skeletonReady: true,
+      executionChosen: 'as_loaded',
+    })
+  })
+
+  it('hydrate clears a previous run journal and error', () => {
+    const dirty = withState({ journal: [{ at: 'x', role: 'r', text: 't' }], error: 'сбой' })
+    const state = pipelineReducer(dirty, {
+      type: 'hydrate',
+      run: {
+        id: 'r2', task_id: 'TC-1', repo_path: 'C:/r', branch: 'main',
+        stage: 'study', status: 'running', round: 1, verdict: null,
+        skeleton_approved: false, execution_choice: null,
+      },
+    })
+    expect(state.journal).toEqual([])
+    expect(state.error).toBeNull()
+    expect(state.skeletonReady).toBe(false)
+    expect(state.executionChosen).toBeNull()
+  })
 })

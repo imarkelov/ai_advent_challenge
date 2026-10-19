@@ -1,4 +1,4 @@
-import type { RunEvent } from './api'
+import type { RunEvent, RunInfo } from './api'
 
 export type AgentStatus = 'running' | 'done' | 'failed' | 'idle'
 
@@ -31,6 +31,8 @@ export interface PendingQuestion {
 export interface PipelineState {
   runId: string | null
   task: string
+  repoPath: string
+  branch: string
   stage: string
   round: number
   status: string
@@ -47,6 +49,7 @@ export interface PipelineState {
 
 export type Action =
   | { type: 'event'; payload: RunEvent }
+  | { type: 'hydrate'; run: RunInfo }
   | { type: 'reset' }
   | { type: 'error'; message: string }
 
@@ -54,6 +57,8 @@ export function initialState(): PipelineState {
   return {
     runId: null,
     task: '',
+    repoPath: '',
+    branch: '',
     stage: 'idle',
     round: 1,
     status: 'idle',
@@ -82,6 +87,22 @@ function withAgent(agents: AgentRow[], role: string): AgentRow[] {
 export function pipelineReducer(state: PipelineState, action: Action): PipelineState {
   if (action.type === 'reset') return initialState()
   if (action.type === 'error') return { ...state, error: action.message }
+  if (action.type === 'hydrate') {
+    const run = action.run
+    return {
+      ...initialState(),
+      runId: run.id,
+      task: run.task_id,
+      repoPath: run.repo_path,
+      branch: run.branch,
+      stage: run.stage,
+      status: run.status,
+      round: run.round,
+      verdict: run.verdict,
+      skeletonReady: run.skeleton_approved || run.stage === 'skeleton',
+      executionChosen: run.execution_choice,
+    }
+  }
 
   const event = action.payload
   switch (event.type) {

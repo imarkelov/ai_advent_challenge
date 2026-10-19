@@ -1,5 +1,18 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { apiGet, apiPost, apiUrl } from '../src/api'
+import { apiGet, apiPost, apiUrl, createRunStream, type RunEvent } from '../src/api'
+
+class FakeEventSource {
+  static last: FakeEventSource | null = null
+  onmessage: ((message: { data: string }) => void) | null = null
+  onerror: (() => void) | null = null
+  closed = false
+  constructor(public url: string) {
+    FakeEventSource.last = this
+  }
+  close() {
+    this.closed = true
+  }
+}
 
 describe('api helpers', () => {
   afterEach(() => {
@@ -32,5 +45,27 @@ describe('api helpers', () => {
     const init = fetchMock.mock.calls[0][1] as RequestInit
     expect(init.method).toBe('POST')
     expect(JSON.parse(String(init.body))).toEqual({ path: 'kb/a.md', content: 'x' })
+  })
+
+  it('createRunStream ignores malformed frames', () => {
+    vi.stubGlobal('EventSource', FakeEventSource)
+    const events: RunEvent[] = []
+    createRunStream('r1', (event) => events.push(event))
+    const source = FakeEventSource.last!
+    source.onmessage!({ data: 'not json' })
+    source.onmessage!({ data: '[DONE]' })
+    source.onmessage!({ data: '{"no": "type"}' })
+    source.onmessage!({ data: '{"type": "stage_changed", "stage": "study"}' })
+    expect(events).toEqual([{ type: 'stage_changed', stage: 'study' }])
+  })
+
+  it('createRunStream reports a broken stream once and closes it', () => {
+    vi.stubGlobal('EventSource', FakeEventSource)
+    const events: RunEvent[] = []
+    createRunStream('r1', (event) => events.push(event))
+    const source = FakeEventSource.last!
+    source.onerror!()
+    expect(source.closed).toBe(true)
+    expect(events).toEqual([{ type: 'error', message: 'поток прерван' }])
   })
 })

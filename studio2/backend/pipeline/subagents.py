@@ -28,6 +28,18 @@ def check_tool_allowed(spec: AgentSpec, tool: str) -> None:
         raise ToolNotAllowed(f"роль {spec.role} не может вызывать {tool}")
 
 
+def guard_tools(spec: AgentSpec, tools) -> list[str]:
+    """Жёсткий фильтр инструментов роли: любой инструмент вне allowed_tools — ошибка."""
+    if tools is None:
+        return []
+    allowed: list[str] = []
+    for tool in tools:
+        name = tool.get("name") if isinstance(tool, dict) else str(tool)
+        check_tool_allowed(spec, name)
+        allowed.append(name)
+    return allowed
+
+
 def parse_reply(text: str) -> AgentReply:
     match = JSON_RE.search(text or "")
     if not match:

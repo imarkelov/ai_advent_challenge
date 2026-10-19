@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import PipelineTab from '../src/components/PipelineTab'
 import { initialState } from '../src/state'
@@ -31,7 +31,18 @@ describe('PipelineTab', () => {
   it('shows skeleton gate actions when ready', () => {
     render(<PipelineTab state={{ ...base, skeletonReady: true, runId: 'r1' }} dispatch={vi.fn()} />)
     expect(screen.getByText('Утвердить каркас')).toBeInTheDocument()
-    expect(screen.getByText('Выбрать способ исполнения')).toBeInTheDocument()
+    expect(screen.getByText('Исполнить загруженный (as_loaded)')).toBeInTheDocument()
+    expect(screen.getByText('Исполнить сгенерированный (generated)')).toBeInTheDocument()
+  })
+
+  it('approve button does not choose an execution mode', async () => {
+    const onChoose = vi.fn()
+    const onApprove = vi.fn()
+    render(<PipelineTab state={{ ...base, skeletonReady: true, runId: 'r1' }} dispatch={vi.fn()}
+      onApprove={onApprove} onChooseExecution={onChoose} />)
+    fireEvent.click(screen.getByText('Утвердить каркас'))
+    expect(onApprove).toHaveBeenCalledTimes(1)
+    expect(onChoose).not.toHaveBeenCalled()
   })
 
   it('does not show gates without a skeleton', () => {

@@ -93,7 +93,22 @@ def test_resume_blocked_without_gates(env):
     _start(client.app.state.lead_factory(), run_id)
     response = client.post(f"/api/runs/{run_id}/resume")
     assert response.status_code == 400
-    assert "запрещён" in response.json()["detail"]
+    assert "утверждения каркаса" in response.json()["detail"]
+
+
+def test_gate_order_blocks_only_at_provision(env):
+    client, _, repo = env
+    run_id = client.post("/api/runs", json={
+        "task_id": "TC-4217", "repo_path": repo, "branch": "b",
+    }).json()["run"]["id"]
+    _start(client.app.state.lead_factory(), run_id)
+    assert client.post(f"/api/runs/{run_id}/approve-skeleton").status_code == 200
+    response = client.post(f"/api/runs/{run_id}/resume")
+    assert response.status_code == 400
+    assert "provision" in response.json()["detail"]
+    run = client.get(f"/api/runs/{run_id}").json()["run"]
+    assert run["stage"] == "write"
+    assert run["status"] == "running"
 
 
 def test_gates_then_resume_completes(env):
