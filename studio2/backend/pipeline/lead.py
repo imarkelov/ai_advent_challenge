@@ -291,10 +291,13 @@ class QaLead:
                 repo_path=run["repo_path"],
                 branch=run["branch"],
                 git_summary=git_summary[:4000],
-                goal=spec.body[:400],
+                goal=spec.body[:1500],
                 rag_inputs=", ".join(spec.inputs),
                 artifacts="—",
-                instructions="Выполни роль согласно своему описанию.",
+                instructions=(
+                    f"Роль: {spec.display_name or role}. "
+                    "Следуй телу декларации агента и верни ответ строго по формату ниже."
+                ),
                 allowed_tools=", ".join(spec.allowed_tools),
                 max_rounds=spec.max_rounds,
                 write_scope=", ".join(spec.outputs) or "—",

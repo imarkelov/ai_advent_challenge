@@ -33,6 +33,8 @@ class DocStore:
     def tree(self) -> list[dict]:
         nodes = []
         for child in sorted(self.root.iterdir()):
+            if child.name == "runs":
+                continue
             if child.is_dir():
                 files = sorted(p.relative_to(self.root).as_posix()
                                for p in child.rglob("*") if p.is_file())

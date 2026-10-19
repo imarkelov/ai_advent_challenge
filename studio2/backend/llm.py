@@ -17,6 +17,19 @@ def _root(url: str) -> str:
     return base[:-3].rstrip("/") if base.endswith("/v1") else base
 
 
+MAX_TOKENS = 1024
+
+
+def _message_text(message: dict) -> str:
+    """Текст ответа. Reasoning-модели (qwen3.5, gemma4) кладут всё в `reasoning`
+    и оставляют `content` пустым, поэтому при пустом content берём reasoning."""
+    content = (message.get("content") or "").strip()
+    if content:
+        return content
+    reasoning = (message.get("reasoning") or message.get("reasoning_content") or "").strip()
+    return reasoning
+
+
 FAKE_RESPONSES = {
     "qa-lead": '{"status": "done", "artifacts": [], "summary": "SDD готовы", "question": null}',
     "researcher": '{"status": "done", "artifacts": ["kb/architecture.md", "kb/patterns.md"], "summary": "Проект изучен", "question": null}',
@@ -76,13 +89,14 @@ class LlmClient:
         payload = {
             "model": provider["model"],
             "temperature": provider.get("temperature", 0.2),
+            "max_tokens": MAX_TOKENS,
             "messages": ([{"role": "system", "content": system}] if system else []) + messages,
         }
         headers = {}
         if provider.get("api_key"):
             headers["Authorization"] = f"Bearer {provider['api_key']}"
         last_error: Exception | None = None
-        with httpx.Client(transport=self._transport, timeout=180.0) as client:
+        with httpx.Client(transport=self._transport, timeout=300.0) as client:
             for _ in range(2):
                 try:
                     response = client.post(f"{base}/v1/chat/completions",
@@ -91,7 +105,8 @@ class LlmClient:
                         raise LlmError(
                             f"LLM вернула {response.status_code}: {response.text[:300]}"
                         )
-                    content = response.json()["choices"][0]["message"]["content"]
+                    message = response.json()["choices"][0]["message"]
+                    content = _message_text(message)
                     self._log(role, payload, content)
                     return content
                 except (httpx.HTTPError, KeyError, ValueError, LlmError) as exc:

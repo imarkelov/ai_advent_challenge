@@ -92,3 +92,33 @@ def test_test_model_reports_error_without_raising():
     result = LlmClient(cfg, transport=httpx.MockTransport(handler)).test_model("reviewer")
     assert result["ok"] is False
     assert result["provider"] == "ollama"
+
+
+def test_reasoning_field_is_used_when_content_empty():
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"choices": [{"message": {
+            "content": "",
+            "reasoning": '{"status": "done", "artifacts": [], "summary": "ok"}',
+        }}]})
+
+    cfg = _cfg()
+    cfg["roles"]["researcher"] = {"provider": "ollama", "model": "m", "temperature": 0.2}
+    reply = LlmClient(cfg, transport=httpx.MockTransport(handler)).chat(
+        "researcher", [{"role": "user", "content": "hi"}]
+    )
+    assert json.loads(reply)["status"] == "done"
+
+
+def test_payload_limits_max_tokens():
+    seen = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["max_tokens"] = json.loads(request.content).get("max_tokens")
+        return httpx.Response(200, json={"choices": [{"message": {"content": "ok"}}]})
+
+    cfg = _cfg()
+    cfg["roles"]["researcher"] = {"provider": "ollama", "model": "m", "temperature": 0.2}
+    LlmClient(cfg, transport=httpx.MockTransport(handler)).chat(
+        "researcher", [{"role": "user", "content": "hi"}]
+    )
+    assert isinstance(seen["max_tokens"], int) and seen["max_tokens"] > 0
