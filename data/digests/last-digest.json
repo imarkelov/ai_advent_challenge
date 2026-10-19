@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261018-2002",
-  "generated_at": "2026-10-18T20:02:19Z",
+  "id": "digest-20261019-0306",
+  "generated_at": "2026-10-19T03:06:00Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 11.5,
-    "feels_like_c": 8.9,
-    "description": "Пасмурно",
-    "wind_ms": 2.8
+    "temp_c": 10.4,
+    "feels_like_c": 8.0,
+    "description": "Переменная облачность",
+    "wind_ms": 1.9
   },
   "news": {
     "vc.ru": [
@@ -33,6 +33,10 @@
     ],
     "habr": [
       {
+        "title": "Коммиттер PostgreSQL: LLM‑ревью нашло в версии 19 больше ошибок, чем успели исправить",
+        "url": "https://habr.com/ru/news/1095950/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095950"
+      },
+      {
         "title": "Apple начала продавать чехлы для iPhone Duo, которые крепятся к корпусу на клеевую полоску",
         "url": "https://habr.com/ru/news/1095922/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095922"
       },
@@ -47,10 +51,6 @@
       {
         "title": "MapQuest начал показывать, где установлены камеры Flock и другие ALPR‑системы",
         "url": "https://habr.com/ru/news/1095880/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095880"
-      },
-      {
-        "title": "Утечка данных в Burger King Japan: скомпрометирована информация 11 млн клиентов",
-        "url": "https://habr.com/ru/news/1095864/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095864"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261018-2002: Самара 11.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261019-0306: Самара 10.4°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
