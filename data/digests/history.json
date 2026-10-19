@@ -7232,5 +7232,85 @@
       ]
     },
     "summary": "Сводка digest-20261019-0306: Самара 10.4°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261019-1200",
+    "generated_at": "2026-10-19T12:00:36Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 14.6,
+      "feels_like_c": 10.9,
+      "description": "Ясно",
+      "wind_ms": 18.0
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Российские банки и ЦБ начали бороться со схемой покупки USDT в странах СНГ и продажей в России за наличные — РБК",
+          "url": "https://vc.ru/crypto/3202333-rossiyskie-banki-i-tsb-protiv-shemy-pokupki-usdt-v-sng?from=rss"
+        },
+        {
+          "title": "ФАС признала недостоверной рекламу «режима 5G» у «Мегафона» — оператор заявил, что удивлён этим решением",
+          "url": "https://vc.ru/legal/3202653-fas-priznala-reklamu-5g-ot-megafona-nedostovernoy?from=rss"
+        },
+        {
+          "title": "«Искусственный»: почти документалка о том, «как мы оказались в нынешней точке», играющий в бога Сэм Альтман и Юра Борисов «в центре внимания»",
+          "url": "https://vc.ru/media/3185287-film-iskusstvennyj-sam-altman-i-yura-borisov?from=rss"
+        },
+        {
+          "title": "Олимпиадник, мемолог и любитель погулять по лесу: кто такой Александр Ван, вернувший Meta* в ИИ-гонку",
+          "url": "https://vc.ru/story/3197108-aleksandr-van-novyy-lider-meta-v-gonke-ii?from=rss"
+        },
+        {
+          "title": "Илон Маск пообещал в 2027 году передать по одной акции SpaceX «каждому ребёнку в США»",
+          "url": "https://vc.ru/money/3202790-ilon-mask-planirovat-peredat-aktsii-spacex-detyam-v-ssha?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "От выгрузок к анализу: вебинар о работе с данными 1С и других систем",
+          "url": "https://habr.com/ru/companies/infostart/news/1096246/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096246"
+        },
+        {
+          "title": "Anthropic направит 5% своих акций в свой Фонд общественного блага",
+          "url": "https://habr.com/ru/news/1096242/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096242"
+        },
+        {
+          "title": "Okdesk замкнул контур управления эксплуатацией: обновление модуля для автоматизации ТОиР",
+          "url": "https://habr.com/ru/companies/okdesk/news/1096240/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096240"
+        },
+        {
+          "title": "Вебинар: Kube-scheduler изнутри: как Kubernetes выбирает ноду для пода",
+          "url": "https://habr.com/ru/companies/astralinux/news/1096228/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096228"
+        },
+        {
+          "title": "Tesla Roadster с предзаказом до $250000 может вообще не выйти в продажу: компания не гарантирует поставку авто",
+          "url": "https://habr.com/ru/news/1096218/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096218"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "ИИ-образование для детей: рейтинг 10 школ и курсов по искусственному интеллекту в 2026 году",
+          "url": "https://tproger.ru/articles/ii-obrazovanie-dlya-detej-rejting-10-wkol-i-kursov-po-iskusstven"
+        },
+        {
+          "title": "Искусственный интеллект для дошкольников: рейтинг 5 курсов и развивающих программ",
+          "url": "https://tproger.ru/articles/iskusstvennyj-intellekt-dlya-dowkolnikov-rejting-5-kursov-i-raz"
+        },
+        {
+          "title": "ИИ-платформы для бизнеса: сравнение решений 2026 года",
+          "url": "https://tproger.ru/articles/ii-platformy-dlya-biznesa-sravnenie-rewenij-2026-goda"
+        },
+        {
+          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
+          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
+        },
+        {
+          "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
+          "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261019-1200: Самара 14.6°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
