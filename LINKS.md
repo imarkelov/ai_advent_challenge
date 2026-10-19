@@ -30,3 +30,11 @@
 - Журнал пайплайна: `docs/day35_pipeline_trace.txt`
 - Отчёт запуска: `docs/day35_report.md`
 - Видео-демо: _будет добавлено после записи_
+
+## Скриншоты
+
+- экран Pipeline: docs/day35_demo.png
+- модели по ролям: docs/day35_models.png
+- RAG-редактор: docs/day35_rag.png
+- реестр MCP: docs/day35_mcp.png
+- список ТК: docs/day35_tasks.png
