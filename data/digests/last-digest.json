@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261019-2157",
-  "generated_at": "2026-10-19T21:57:37Z",
+  "id": "digest-20261020-0315",
+  "generated_at": "2026-10-20T03:15:06Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 4.2,
-    "feels_like_c": 0.0,
-    "description": "Ясно",
-    "wind_ms": 11.0
+    "temp_c": 1.7,
+    "feels_like_c": -1.9,
+    "description": "Переменная облачность",
+    "wind_ms": 7.1
   },
   "news": {
     "vc.ru": [
@@ -33,6 +33,14 @@
     ],
     "habr": [
       {
+        "title": "Выпуск версии OpenWrt 25.12.6",
+        "url": "https://habr.com/ru/news/1096244/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096244"
+      },
+      {
+        "title": "Вышло обновление Media Player Classic — Home Cinema 2.8.4",
+        "url": "https://habr.com/ru/news/1096034/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096034"
+      },
+      {
         "title": "Minecraft для Xbox One запустили на iOS через слой совместимости",
         "url": "https://habr.com/ru/news/1096416/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096416"
       },
@@ -43,14 +51,6 @@
       {
         "title": "Стартап Apate борется с мошенниками при помощи ИИ‑агентов, которые общаются с ними под видом жертв",
         "url": "https://habr.com/ru/news/1096368/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096368"
-      },
-      {
-        "title": "Microsoft и CMU запускают программу PRAISE для начинающих разработчиков",
-        "url": "https://habr.com/ru/news/1096356/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096356"
-      },
-      {
-        "title": "Сутки без человека: как мы в ГНИВЦ выстраиваем управляемую агентскую разработку",
-        "url": "https://habr.com/ru/companies/gnivc/news/1096366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096366"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261019-2157: Самара 4.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261020-0315: Самара 1.7°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
