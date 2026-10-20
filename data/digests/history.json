@@ -7472,5 +7472,85 @@
       ]
     },
     "summary": "Сводка digest-20261020-0315: Самара 1.7°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261020-1053",
+    "generated_at": "2026-10-20T10:53:22Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 9.2,
+      "feels_like_c": 5.4,
+      "description": "Преимущественно ясно",
+      "wind_ms": 8.5
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Хакеры взломали систему управления серверами VMmanager, принадлежащую «Группе Астра»",
+          "url": "https://vc.ru/services/3205145-vzlom-sistemy-upravleniya-vmmanager-ot-gruppy-astra?from=rss"
+        },
+        {
+          "title": "На фоне кризиса на рынке труда: доктор наук из Принстона откликнулся на 2300 вакансий за два года, но не нашёл работу в США",
+          "url": "https://vc.ru/hr/3203689-krizis-na-rynke-truda-doktor-nauk-iz-prinstona-ne-nashyel-rabotu?from=rss"
+        },
+        {
+          "title": "«Ъ» обнаружил, что МТС предлагает для доступа к 5G подключить платный тариф — оператор говорит, что 5G можно пользоваться бесплатно, а подписка даёт дополнительный трафик",
+          "url": "https://vc.ru/services/3205277-mts-predlagaet-platnyj-dostup-k-5g?from=rss"
+        },
+        {
+          "title": "Япония запустила экспедицию к Фобосу за образцами грунта с него — это будет первая посадка на спутник Марса",
+          "url": "https://vc.ru/future/3204925-yaponiya-zapustila-missiyu-k-fobosu-dlya-polucheniya-obraztsov-grunta?from=rss"
+        },
+        {
+          "title": "Российские банки и ЦБ начали бороться со схемой покупки USDT в странах СНГ и продажей в России за наличные — РБК",
+          "url": "https://vc.ru/crypto/3202333-rossiyskie-banki-i-tsb-protiv-shemy-pokupki-usdt-v-sng?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Финансовый директор AWS пошутил о финансовых издержкахи из‑за ИИ",
+          "url": "https://habr.com/ru/news/1096686/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096686"
+        },
+        {
+          "title": "Бизнес предложил обязать производителей предустанавливать российские ОС на ноутбуки, продающиеся в РФ",
+          "url": "https://habr.com/ru/news/1096684/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096684"
+        },
+        {
+          "title": "Холодильники во французских супермаркетах оставались уязвимыми по сети несколько месяцев",
+          "url": "https://habr.com/ru/news/1096676/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096676"
+        },
+        {
+          "title": "FirstVDS: работа вендора над устранением уязвимости в VMmanager 6 всё ещё продолжается",
+          "url": "https://habr.com/ru/news/1096670/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096670"
+        },
+        {
+          "title": "Вышла версия Glow 26.14 — инструмента для системного анализа аппаратных и программных возможностей ПК на Windows 10/11",
+          "url": "https://habr.com/ru/news/1096176/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096176"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Обновил, но не работает: как устроен кэш и почему его нельзя просто выключить",
+          "url": "https://tproger.ru/articles/obnovil-no-ne-rabotaet-kak-ustroen-kew-i-pochemu-ego-nelzya-pro"
+        },
+        {
+          "title": "ИИ-образование для детей: рейтинг 10 школ и курсов по искусственному интеллекту в 2026 году",
+          "url": "https://tproger.ru/articles/ii-obrazovanie-dlya-detej-rejting-10-wkol-i-kursov-po-iskusstven"
+        },
+        {
+          "title": "Искусственный интеллект для дошкольников: рейтинг 5 курсов и развивающих программ",
+          "url": "https://tproger.ru/articles/iskusstvennyj-intellekt-dlya-dowkolnikov-rejting-5-kursov-i-raz"
+        },
+        {
+          "title": "ИИ-платформы для бизнеса: сравнение решений 2026 года",
+          "url": "https://tproger.ru/articles/ii-platformy-dlya-biznesa-sravnenie-rewenij-2026-goda"
+        },
+        {
+          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
+          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261020-1053: Самара 9.2°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
