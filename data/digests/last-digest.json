@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261020-1053",
-  "generated_at": "2026-10-20T10:53:22Z",
+  "id": "digest-20261020-1617",
+  "generated_at": "2026-10-20T16:17:52Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 9.2,
-    "feels_like_c": 5.4,
-    "description": "Преимущественно ясно",
-    "wind_ms": 8.5
+    "temp_c": 5.3,
+    "feels_like_c": 2.5,
+    "description": "Переменная облачность",
+    "wind_ms": 3.6
   },
   "news": {
     "vc.ru": [
@@ -19,62 +19,62 @@
         "url": "https://vc.ru/hr/3203689-krizis-na-rynke-truda-doktor-nauk-iz-prinstona-ne-nashyel-rabotu?from=rss"
       },
       {
+        "title": "«Яндекс» вернул возможность запускать новые кампании в «Директе» и управлять старыми",
+        "url": "https://vc.ru/marketing/3205578-yandeks-vosstanovil-dostup-k-direktu?from=rss"
+      },
+      {
+        "title": "Криптобиржа MEXC вслед за Bitget объявила о прекращении предоставления услуг пользователям в России и Беларуси",
+        "url": "https://vc.ru/crypto/3206027-kriptobirzha-mexc-prekrashchaet-uslugi-dlya-polzovateley-v-rossii-i-belarusi?from=rss"
+      },
+      {
         "title": "«Ъ» обнаружил, что МТС предлагает для доступа к 5G подключить платный тариф — оператор говорит, что 5G можно пользоваться бесплатно, а подписка даёт дополнительный трафик",
         "url": "https://vc.ru/services/3205277-mts-predlagaet-platnyj-dostup-k-5g?from=rss"
-      },
-      {
-        "title": "Япония запустила экспедицию к Фобосу за образцами грунта с него — это будет первая посадка на спутник Марса",
-        "url": "https://vc.ru/future/3204925-yaponiya-zapustila-missiyu-k-fobosu-dlya-polucheniya-obraztsov-grunta?from=rss"
-      },
-      {
-        "title": "Российские банки и ЦБ начали бороться со схемой покупки USDT в странах СНГ и продажей в России за наличные — РБК",
-        "url": "https://vc.ru/crypto/3202333-rossiyskie-banki-i-tsb-protiv-shemy-pokupki-usdt-v-sng?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Финансовый директор AWS пошутил о финансовых издержкахи из‑за ИИ",
-        "url": "https://habr.com/ru/news/1096686/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096686"
+        "title": "«Яндекс»: продолжаем восстанавливать полную функциональность «Яндекс 360»",
+        "url": "https://habr.com/ru/news/1096908/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096908"
       },
       {
-        "title": "Бизнес предложил обязать производителей предустанавливать российские ОС на ноутбуки, продающиеся в РФ",
-        "url": "https://habr.com/ru/news/1096684/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096684"
+        "title": "В США тимлид отправил резюме в собственную команду и получил отказ за 6 минут, так как HR переложили отбор на нейросеть",
+        "url": "https://habr.com/ru/news/1096876/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096876"
       },
       {
-        "title": "Холодильники во французских супермаркетах оставались уязвимыми по сети несколько месяцев",
-        "url": "https://habr.com/ru/news/1096676/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096676"
+        "title": "В Руцентре объединили усилия с «Лабораторией Касперского» для защиты доменной инфраструктуры",
+        "url": "https://habr.com/ru/companies/runity/news/1096890/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096890"
       },
       {
-        "title": "FirstVDS: работа вендора над устранением уязвимости в VMmanager 6 всё ещё продолжается",
-        "url": "https://habr.com/ru/news/1096670/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096670"
+        "title": "Inception выпустила Mercury 3, диффузионную LLM со скоростью 1 068 токенов в секунду",
+        "url": "https://habr.com/ru/companies/koda/news/1096840/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096840"
       },
       {
-        "title": "Вышла версия Glow 26.14 — инструмента для системного анализа аппаратных и программных возможностей ПК на Windows 10/11",
-        "url": "https://habr.com/ru/news/1096176/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096176"
+        "title": "Китайцы испытали харвестер, добывающий железо из песка в пустыне",
+        "url": "https://habr.com/ru/news/1096834/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096834"
       }
     ],
     "tproger": [
       {
+        "title": "Почему релизы приходится спасать по ночам и что с этим делать",
+        "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
+      },
+      {
+        "title": "Как я перестал относиться к ИИ как к человеку: опыт соло-разработки двух пет-проектов",
+        "url": "https://tproger.ru/blogs/kak-ya-perestal-otnositsya-k-ii-kak-k-cheloveku-opyt-solo-razrabo"
+      },
+      {
+        "title": "Как написать сопроводительное письмо с помощью ИИ",
+        "url": "https://tproger.ru/articles/kak-napisat-soprovoditelnoe-pismo-s-pomoshhyu-ii"
+      },
+      {
+        "title": "ИИ для детей дошкольного возраста: рейтинг 5 программ и занятий в 2026 году",
+        "url": "https://tproger.ru/articles/ii-dlya-detej-dowkolnogo-vozrasta-rejting-5-programm-i-zanyatij"
+      },
+      {
         "title": "Обновил, но не работает: как устроен кэш и почему его нельзя просто выключить",
         "url": "https://tproger.ru/articles/obnovil-no-ne-rabotaet-kak-ustroen-kew-i-pochemu-ego-nelzya-pro"
-      },
-      {
-        "title": "ИИ-образование для детей: рейтинг 10 школ и курсов по искусственному интеллекту в 2026 году",
-        "url": "https://tproger.ru/articles/ii-obrazovanie-dlya-detej-rejting-10-wkol-i-kursov-po-iskusstven"
-      },
-      {
-        "title": "Искусственный интеллект для дошкольников: рейтинг 5 курсов и развивающих программ",
-        "url": "https://tproger.ru/articles/iskusstvennyj-intellekt-dlya-dowkolnikov-rejting-5-kursov-i-raz"
-      },
-      {
-        "title": "ИИ-платформы для бизнеса: сравнение решений 2026 года",
-        "url": "https://tproger.ru/articles/ii-platformy-dlya-biznesa-sravnenie-rewenij-2026-goda"
-      },
-      {
-        "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
-        "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
       }
     ]
   },
-  "summary": "Сводка digest-20261020-1053: Самара 9.2°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261020-1617: Самара 5.3°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
