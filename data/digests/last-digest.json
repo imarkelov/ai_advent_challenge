@@ -1,37 +1,45 @@
 {
-  "id": "digest-20261020-1617",
-  "generated_at": "2026-10-20T16:17:52Z",
+  "id": "digest-20261020-2112",
+  "generated_at": "2026-10-20T21:12:26Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 5.3,
-    "feels_like_c": 2.5,
-    "description": "Переменная облачность",
-    "wind_ms": 3.6
+    "temp_c": 2.9,
+    "feels_like_c": 0.1,
+    "description": "Ясно",
+    "wind_ms": 2.9
   },
   "news": {
     "vc.ru": [
       {
+        "title": "«Альфа-банк» готовится до конца 2026 года запустить видеоплатформу с фокусом на ИИ-видео, микросериалы и шоу со звёздами — РБК",
+        "url": "https://vc.ru/media/3206196-alfa-bank-zapusk-videoplatformu-s-ii-video?from=rss"
+      },
+      {
         "title": "Хакеры взломали систему управления серверами VMmanager, принадлежащую «Группе Астра»",
         "url": "https://vc.ru/services/3205145-vzlom-sistemy-upravleniya-vmmanager-ot-gruppy-astra?from=rss"
+      },
+      {
+        "title": "Популярный у российских туристов в Турции платёжный сервис Letim объявил о прекращении работы с 30 ноября 2026 года",
+        "url": "https://vc.ru/money/3206139-servis-letim-prekrashchaet-rabotu?from=rss"
       },
       {
         "title": "На фоне кризиса на рынке труда: доктор наук из Принстона откликнулся на 2300 вакансий за два года, но не нашёл работу в США",
         "url": "https://vc.ru/hr/3203689-krizis-na-rynke-truda-doktor-nauk-iz-prinstona-ne-nashyel-rabotu?from=rss"
       },
       {
-        "title": "«Яндекс» вернул возможность запускать новые кампании в «Директе» и управлять старыми",
-        "url": "https://vc.ru/marketing/3205578-yandeks-vosstanovil-dostup-k-direktu?from=rss"
-      },
-      {
         "title": "Криптобиржа MEXC вслед за Bitget объявила о прекращении предоставления услуг пользователям в России и Беларуси",
         "url": "https://vc.ru/crypto/3206027-kriptobirzha-mexc-prekrashchaet-uslugi-dlya-polzovateley-v-rossii-i-belarusi?from=rss"
-      },
-      {
-        "title": "«Ъ» обнаружил, что МТС предлагает для доступа к 5G подключить платный тариф — оператор говорит, что 5G можно пользоваться бесплатно, а подписка даёт дополнительный трафик",
-        "url": "https://vc.ru/services/3205277-mts-predlagaet-platnyj-dostup-k-5g?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "В OrcaSlicer 2.5 появилась поддержка плагинов, функции смешивания цветов и встроенного CAD",
+        "url": "https://habr.com/ru/news/1096948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096948"
+      },
+      {
+        "title": "Разработчик представил заглушку для SD‑слота MacBook, которая показывает статус работы AI‑агентов",
+        "url": "https://habr.com/ru/news/1096932/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096932"
+      },
       {
         "title": "«Яндекс»: продолжаем восстанавливать полную функциональность «Яндекс 360»",
         "url": "https://habr.com/ru/news/1096908/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096908"
@@ -43,14 +51,6 @@
       {
         "title": "В Руцентре объединили усилия с «Лабораторией Касперского» для защиты доменной инфраструктуры",
         "url": "https://habr.com/ru/companies/runity/news/1096890/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096890"
-      },
-      {
-        "title": "Inception выпустила Mercury 3, диффузионную LLM со скоростью 1 068 токенов в секунду",
-        "url": "https://habr.com/ru/companies/koda/news/1096840/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096840"
-      },
-      {
-        "title": "Китайцы испытали харвестер, добывающий железо из песка в пустыне",
-        "url": "https://habr.com/ru/news/1096834/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096834"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261020-1617: Самара 5.3°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261020-2112: Самара 2.9°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
