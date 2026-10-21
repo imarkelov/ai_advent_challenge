@@ -1,18 +1,26 @@
 {
-  "id": "digest-20261021-1106",
-  "generated_at": "2026-10-21T11:06:12Z",
+  "id": "digest-20261021-1633",
+  "generated_at": "2026-10-21T16:33:09Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 8.7,
-    "feels_like_c": 6.0,
-    "description": "Пасмурно",
-    "wind_ms": 3.5
+    "temp_c": 4.6,
+    "feels_like_c": 1.9,
+    "description": "Ясно",
+    "wind_ms": 4.6
   },
   "news": {
     "vc.ru": [
       {
+        "title": "Unitree представила человекоподобного «робота-телохранителя» H2-X — в рекламном ролике он разбивает дверь автомобиля ногой и «защищает» человека",
+        "url": "https://vc.ru/tech/3207799-unitree-h2-x-robot-telohranitel?from=rss"
+      },
+      {
         "title": "Тимлид рассказал на Reddit, как откликнулся на вакансию в своей компании и получил отказ — не прошёл автоматический фильтр",
         "url": "https://vc.ru/hr/3207206-timlid-na-reddit-rasskazal-ob-otkaze-pri-otklyke-na-vakansiyu?from=rss"
+      },
+      {
+        "title": "Дептранс Москвы начал тестировать ровера-заправщика для электромобилей",
+        "url": "https://vc.ru/transport/3207552-depttrans-moskvy-testiruet-mobilnuyu-zaryadnuyu-stantsiyu?from=rss"
       },
       {
         "title": "WSJ: Anthropic за первую половину 2026 года получила чистый убыток в $80,7 млрд и $16,3 млрд выручки",
@@ -21,36 +29,28 @@
       {
         "title": "«Авито Услуги» запустили услугу доставки посылок из одного пункта выдачи в другой",
         "url": "https://vc.ru/services/3207106-avito-uslugi-dostavka-posylok?from=rss"
-      },
-      {
-        "title": "«Альфа-банк» готовится до конца 2026 года запустить видеоплатформу с фокусом на ИИ-видео, микросериалы и шоу со звёздами — РБК",
-        "url": "https://vc.ru/media/3206196-alfa-bank-zapusk-videoplatformu-s-ii-video?from=rss"
-      },
-      {
-        "title": "YouTube начал в тестовом режиме скрывать кнопку дизлайка под видео у части пользователей",
-        "url": "https://vc.ru/services/3207456-youtube-izmenil-interfeys-skryv-knopku-dizlayka?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Amazon предлагает молодежи в Великобритании вакансии с зарплатой от £31 000, опыт работы и резюме не требуются",
-        "url": "https://habr.com/ru/news/1097248/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097248"
+        "title": "Microsoft добавила в PowerToys функцию блокировки кнопки мыши",
+        "url": "https://habr.com/ru/news/1097464/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097464"
       },
       {
-        "title": "«Ъ»: Минпромторг ищет партнёров для российских разработчиков электроники в Индии",
-        "url": "https://habr.com/ru/news/1097240/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097240"
+        "title": "Критическое обновление PHP: инструкция для владельцев коробочного Битрикс24 и сайтов на «1С-Битрикс: Управление сайтом»",
+        "url": "https://habr.com/ru/news/1097474/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097474"
       },
       {
-        "title": "Xbox готовит новые раунды увольнений в октябре, ноябре и январе",
-        "url": "https://habr.com/ru/news/1097208/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097208"
+        "title": "В связи с критическими уязвимостями в PHP часть сайтов в сети отключены для применения фиксов",
+        "url": "https://habr.com/ru/news/1097444/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097444"
       },
       {
-        "title": "Киберспортивная организация Evil Geniuses объявила о прекращении деятельности",
-        "url": "https://habr.com/ru/news/1097154/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097154"
+        "title": "Суд обязал Meta* перечислить руководителей, которые одобрили скачивание книг из онлайн‑библиотек Anna’s Archive и LibGen",
+        "url": "https://habr.com/ru/news/1097452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097452"
       },
       {
-        "title": "Microsoft: у некоторых корпоративных пользователей Edge 155 может не запускаться",
-        "url": "https://habr.com/ru/news/1097178/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097178"
+        "title": "В MWS Tables появился ИИ-помощник для быстрой настройки рабочих процессов",
+        "url": "https://habr.com/ru/companies/mws/news/1097438/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097438"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261021-1106: Самара 8.7°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261021-1633: Самара 4.6°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
