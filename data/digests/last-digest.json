@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261020-2112",
-  "generated_at": "2026-10-20T21:12:26Z",
+  "id": "digest-20261021-0310",
+  "generated_at": "2026-10-21T03:10:37Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.9,
-    "feels_like_c": 0.1,
-    "description": "Ясно",
-    "wind_ms": 2.9
+    "temp_c": 0.7,
+    "feels_like_c": -2.0,
+    "description": "Преимущественно ясно",
+    "wind_ms": 2.5
   },
   "news": {
     "vc.ru": [
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
+        "title": "С начала года из рекомендаций Spotify исключили более 50 млн сгенерированных треков",
+        "url": "https://habr.com/ru/news/1097024/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097024"
+      },
+      {
+        "title": "Релиз открытого музыкального проигрывателя Audacious 4.6.2",
+        "url": "https://habr.com/ru/news/1096782/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096782"
+      },
+      {
+        "title": "Вышло обновление RapidRAW 1.6.6 — открытого редактора изображений RAW",
+        "url": "https://habr.com/ru/news/1096768/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096768"
+      },
+      {
+        "title": "Критическая уязвимость в PHP",
+        "url": "https://habr.com/ru/news/1097016/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097016"
+      },
+      {
         "title": "В OrcaSlicer 2.5 появилась поддержка плагинов, функции смешивания цветов и встроенного CAD",
         "url": "https://habr.com/ru/news/1096948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096948"
-      },
-      {
-        "title": "Разработчик представил заглушку для SD‑слота MacBook, которая показывает статус работы AI‑агентов",
-        "url": "https://habr.com/ru/news/1096932/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096932"
-      },
-      {
-        "title": "«Яндекс»: продолжаем восстанавливать полную функциональность «Яндекс 360»",
-        "url": "https://habr.com/ru/news/1096908/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096908"
-      },
-      {
-        "title": "В США тимлид отправил резюме в собственную команду и получил отказ за 6 минут, так как HR переложили отбор на нейросеть",
-        "url": "https://habr.com/ru/news/1096876/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096876"
-      },
-      {
-        "title": "В Руцентре объединили усилия с «Лабораторией Касперского» для защиты доменной инфраструктуры",
-        "url": "https://habr.com/ru/companies/runity/news/1096890/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096890"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261020-2112: Самара 2.9°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261021-0310: Самара 0.7°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
