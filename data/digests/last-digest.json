@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261021-1633",
-  "generated_at": "2026-10-21T16:33:09Z",
+  "id": "digest-20261021-2112",
+  "generated_at": "2026-10-21T21:12:37Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 4.6,
-    "feels_like_c": 1.9,
+    "temp_c": 2.2,
+    "feels_like_c": -0.6,
     "description": "Ясно",
-    "wind_ms": 4.6
+    "wind_ms": 4.0
   },
   "news": {
     "vc.ru": [
@@ -23,34 +23,34 @@
         "url": "https://vc.ru/transport/3207552-depttrans-moskvy-testiruet-mobilnuyu-zaryadnuyu-stantsiyu?from=rss"
       },
       {
-        "title": "WSJ: Anthropic за первую половину 2026 года получила чистый убыток в $80,7 млрд и $16,3 млрд выручки",
-        "url": "https://vc.ru/money/3206919-anthropic-ubytki-i-riski-ot-ii?from=rss"
+        "title": "«Созданный из звука»: Apple официально объявила о редизайне логотипа Apple Music",
+        "url": "https://vc.ru/design/3208324-redizayn-logotipa-apple-music?from=rss"
       },
       {
-        "title": "«Авито Услуги» запустили услугу доставки посылок из одного пункта выдачи в другой",
-        "url": "https://vc.ru/services/3207106-avito-uslugi-dostavka-posylok?from=rss"
+        "title": "WSJ: Anthropic за первую половину 2026 года получила чистый убыток в $80,7 млрд и $16,3 млрд выручки",
+        "url": "https://vc.ru/money/3206919-anthropic-ubytki-i-riski-ot-ii?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Microsoft добавила в PowerToys функцию блокировки кнопки мыши",
-        "url": "https://habr.com/ru/news/1097464/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097464"
+        "title": "Anthropic представила своего агента Claude Duet",
+        "url": "https://habr.com/ru/companies/bothub/news/1097562/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097562"
       },
       {
-        "title": "Критическое обновление PHP: инструкция для владельцев коробочного Битрикс24 и сайтов на «1С-Битрикс: Управление сайтом»",
-        "url": "https://habr.com/ru/news/1097474/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097474"
+        "title": "Anthropic представили персонального AI-агента Claude Duet на базе Opus 5.5",
+        "url": "https://habr.com/ru/news/1097546/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097546"
       },
       {
-        "title": "В связи с критическими уязвимостями в PHP часть сайтов в сети отключены для применения фиксов",
-        "url": "https://habr.com/ru/news/1097444/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097444"
+        "title": "Таблетка от облысения стала ближе к выходу на рынок после успешных испытаний поздней стадии",
+        "url": "https://habr.com/ru/news/1097522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097522"
       },
       {
-        "title": "Суд обязал Meta* перечислить руководителей, которые одобрили скачивание книг из онлайн‑библиотек Anna’s Archive и LibGen",
-        "url": "https://habr.com/ru/news/1097452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097452"
+        "title": "Разработчик выпустил утилиту для управления подвесом камеры DJI Osmo Pocket 3 из строки меню macOS",
+        "url": "https://habr.com/ru/news/1097504/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097504"
       },
       {
-        "title": "В MWS Tables появился ИИ-помощник для быстрой настройки рабочих процессов",
-        "url": "https://habr.com/ru/companies/mws/news/1097438/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097438"
+        "title": "Toyota показала Land Cruiser 250, которым можно управлять только руками",
+        "url": "https://habr.com/ru/news/1097488/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097488"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261021-1633: Самара 4.6°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261021-2112: Самара 2.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
