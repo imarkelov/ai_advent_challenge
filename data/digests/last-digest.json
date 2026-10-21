@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261021-0310",
-  "generated_at": "2026-10-21T03:10:37Z",
+  "id": "digest-20261021-1106",
+  "generated_at": "2026-10-21T11:06:12Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 0.7,
-    "feels_like_c": -2.0,
-    "description": "Преимущественно ясно",
-    "wind_ms": 2.5
+    "temp_c": 8.7,
+    "feels_like_c": 6.0,
+    "description": "Пасмурно",
+    "wind_ms": 3.5
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Тимлид рассказал на Reddit, как откликнулся на вакансию в своей компании и получил отказ — не прошёл автоматический фильтр",
+        "url": "https://vc.ru/hr/3207206-timlid-na-reddit-rasskazal-ob-otkaze-pri-otklyke-na-vakansiyu?from=rss"
+      },
+      {
+        "title": "WSJ: Anthropic за первую половину 2026 года получила чистый убыток в $80,7 млрд и $16,3 млрд выручки",
+        "url": "https://vc.ru/money/3206919-anthropic-ubytki-i-riski-ot-ii?from=rss"
+      },
+      {
+        "title": "«Авито Услуги» запустили услугу доставки посылок из одного пункта выдачи в другой",
+        "url": "https://vc.ru/services/3207106-avito-uslugi-dostavka-posylok?from=rss"
+      },
       {
         "title": "«Альфа-банк» готовится до конца 2026 года запустить видеоплатформу с фокусом на ИИ-видео, микросериалы и шоу со звёздами — РБК",
         "url": "https://vc.ru/media/3206196-alfa-bank-zapusk-videoplatformu-s-ii-video?from=rss"
       },
       {
-        "title": "Хакеры взломали систему управления серверами VMmanager, принадлежащую «Группе Астра»",
-        "url": "https://vc.ru/services/3205145-vzlom-sistemy-upravleniya-vmmanager-ot-gruppy-astra?from=rss"
-      },
-      {
-        "title": "Популярный у российских туристов в Турции платёжный сервис Letim объявил о прекращении работы с 30 ноября 2026 года",
-        "url": "https://vc.ru/money/3206139-servis-letim-prekrashchaet-rabotu?from=rss"
-      },
-      {
-        "title": "На фоне кризиса на рынке труда: доктор наук из Принстона откликнулся на 2300 вакансий за два года, но не нашёл работу в США",
-        "url": "https://vc.ru/hr/3203689-krizis-na-rynke-truda-doktor-nauk-iz-prinstona-ne-nashyel-rabotu?from=rss"
-      },
-      {
-        "title": "Криптобиржа MEXC вслед за Bitget объявила о прекращении предоставления услуг пользователям в России и Беларуси",
-        "url": "https://vc.ru/crypto/3206027-kriptobirzha-mexc-prekrashchaet-uslugi-dlya-polzovateley-v-rossii-i-belarusi?from=rss"
+        "title": "YouTube начал в тестовом режиме скрывать кнопку дизлайка под видео у части пользователей",
+        "url": "https://vc.ru/services/3207456-youtube-izmenil-interfeys-skryv-knopku-dizlayka?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "С начала года из рекомендаций Spotify исключили более 50 млн сгенерированных треков",
-        "url": "https://habr.com/ru/news/1097024/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097024"
+        "title": "Amazon предлагает молодежи в Великобритании вакансии с зарплатой от £31 000, опыт работы и резюме не требуются",
+        "url": "https://habr.com/ru/news/1097248/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097248"
       },
       {
-        "title": "Релиз открытого музыкального проигрывателя Audacious 4.6.2",
-        "url": "https://habr.com/ru/news/1096782/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096782"
+        "title": "«Ъ»: Минпромторг ищет партнёров для российских разработчиков электроники в Индии",
+        "url": "https://habr.com/ru/news/1097240/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097240"
       },
       {
-        "title": "Вышло обновление RapidRAW 1.6.6 — открытого редактора изображений RAW",
-        "url": "https://habr.com/ru/news/1096768/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096768"
+        "title": "Xbox готовит новые раунды увольнений в октябре, ноябре и январе",
+        "url": "https://habr.com/ru/news/1097208/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097208"
       },
       {
-        "title": "Критическая уязвимость в PHP",
-        "url": "https://habr.com/ru/news/1097016/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097016"
+        "title": "Киберспортивная организация Evil Geniuses объявила о прекращении деятельности",
+        "url": "https://habr.com/ru/news/1097154/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097154"
       },
       {
-        "title": "В OrcaSlicer 2.5 появилась поддержка плагинов, функции смешивания цветов и встроенного CAD",
-        "url": "https://habr.com/ru/news/1096948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096948"
+        "title": "Microsoft: у некоторых корпоративных пользователей Edge 155 может не запускаться",
+        "url": "https://habr.com/ru/news/1097178/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097178"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261021-0310: Самара 0.7°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261021-1106: Самара 8.7°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
