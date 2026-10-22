@@ -1,59 +1,63 @@
 {
-  "id": "digest-20261022-1106",
-  "generated_at": "2026-10-22T11:06:01Z",
+  "id": "digest-20261022-1634",
+  "generated_at": "2026-10-22T16:34:19Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 12.9,
-    "feels_like_c": 9.5,
-    "description": "Преимущественно ясно",
-    "wind_ms": 9.2
+    "temp_c": 8.2,
+    "feels_like_c": 5.7,
+    "description": "Ясно",
+    "wind_ms": 5.5
   },
   "news": {
     "vc.ru": [
       {
+        "title": "Cloudflare зафиксировала «миллионы» атак на сайты по всему миру из-за уязвимости в языке PHP",
+        "url": "https://vc.ru/services/3209892-cloudflare-zafiksirovala-ataki-na-sayty-iz-za-uiazvimosti-php?from=rss"
+      },
+      {
+        "title": "Госдума поддержала в первом чтении законопроект об отнесении семейных микропредприятий к социальным — они смогут рассчитывать на господдержку",
+        "url": "https://vc.ru/legal/3210108-gosduma-zakonoproekt-o-podderzhke-semejnyh-mikropredpriyatiy?from=rss"
+      },
+      {
+        "title": "«Яндекс Пэй» рассказал, что восстановил оформление карт, оплату по QR-коду, накопление кешбэка и обмен баллов «Плюса»",
+        "url": "https://vc.ru/money/3209610-yandeks-pey-vosstanovlenie-oformleniya-kart?from=rss"
+      },
+      {
+        "title": "«Авито» протестирует на платформе чаты для личного общения с отдельным от основного профилем",
+        "url": "https://vc.ru/services/3210229-avito-testiruet-lichnye-chaty-dlya-obshcheniya?from=rss"
+      },
+      {
         "title": "Тимлид рассказал на Reddit, как откликнулся на вакансию в своей компании и получил отказ — не прошёл автоматический фильтр",
         "url": "https://vc.ru/hr/3207206-timlid-na-reddit-rasskazal-ob-otkaze-pri-otklyke-na-vakansiyu?from=rss"
-      },
-      {
-        "title": "Unitree представила человекоподобного «робота-телохранителя» H2-X — в рекламном ролике он разбивает дверь автомобиля ногой и «защищает» человека",
-        "url": "https://vc.ru/tech/3207799-unitree-h2-x-robot-telohranitel?from=rss"
-      },
-      {
-        "title": "Дептранс Москвы начал тестировать ровера-заправщика для электромобилей",
-        "url": "https://vc.ru/transport/3207552-depttrans-moskvy-testiruet-mobilnuyu-zaryadnuyu-stantsiyu?from=rss"
-      },
-      {
-        "title": "«Созданный из звука»: Apple официально объявила о редизайне Apple Music",
-        "url": "https://vc.ru/design/3208324-redizayn-logotipa-apple-music?from=rss"
-      },
-      {
-        "title": "День 1702: госзаказчики в январе-августе 2026 года увеличили закупки серверов и услуг по размещению данных",
-        "url": "https://vc.ru/money/3208990-goszakazchiki-uvelichili-zakupki-serverov-i-uslug-razmesheniya-dannyh?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Лучшее за неделю (12.10 — 18.10)",
-        "url": "https://habr.com/ru/companies/ruvds/news/1097394/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097394"
+        "title": "«Рег.ру» временно ограничил загрузку файлов через панель управления из-за уязвимостей в PHP",
+        "url": "https://habr.com/ru/news/1098048/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098048"
       },
       {
-        "title": "В Японии удалось раздать связь из стратосферы",
-        "url": "https://habr.com/ru/companies/selectel/news/1097050/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097050"
+        "title": "Apple заблокировала iPhone Duo, активированные до старта продаж: под раздачу попали блогеры из России",
+        "url": "https://habr.com/ru/news/1098028/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098028"
       },
       {
-        "title": "Вебинар «Разбираемся в сети Kubernetes: белые адреса и “чёрные лебеди”»",
-        "url": "https://habr.com/ru/companies/mws/news/1097772/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097772"
+        "title": "McDonald’s переработала игрушки из Хэппи Мила в компьютерную мышку c дизайном пакета картошки фри",
+        "url": "https://habr.com/ru/news/1098022/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098022"
       },
       {
-        "title": "Суд в Австралии обязал Apple разрешить пользователям iPhone устанавливать приложения из сторонних магазинов",
-        "url": "https://habr.com/ru/news/1097870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097870"
+        "title": "Последние скидки на A&amp;PM EVENT 2026: до 80% до конца октября",
+        "url": "https://habr.com/ru/companies/infostart/news/1098002/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098002"
       },
       {
-        "title": "EA закрыла культовую студию BioWare",
-        "url": "https://habr.com/ru/companies/ggsel/news/1097864/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097864"
+        "title": "Atari закроет магазин игр для Atari VCS в феврале 2027 года, но откроет платформу для любительских проектов",
+        "url": "https://habr.com/ru/news/1097998/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097998"
       }
     ],
     "tproger": [
+      {
+        "title": "Изучение нейросетей для детей: рейтинг 5 школ и курсов в 2026 году",
+        "url": "https://tproger.ru/articles/izuchenie-nejrosetej-dlya-detej-rejting-5-wkol-i-kursov-v-2026-go"
+      },
       {
         "title": "Почему релизы приходится спасать по ночам и что с этим делать",
         "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
@@ -69,12 +73,8 @@
       {
         "title": "ИИ для детей дошкольного возраста: рейтинг 5 программ и занятий в 2026 году",
         "url": "https://tproger.ru/articles/ii-dlya-detej-dowkolnogo-vozrasta-rejting-5-programm-i-zanyatij"
-      },
-      {
-        "title": "Обновил, но не работает: как устроен кэш и почему его нельзя просто выключить",
-        "url": "https://tproger.ru/articles/obnovil-no-ne-rabotaet-kak-ustroen-kew-i-pochemu-ego-nelzya-pro"
       }
     ]
   },
-  "summary": "Сводка digest-20261022-1106: Самара 12.9°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261022-1634: Самара 8.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

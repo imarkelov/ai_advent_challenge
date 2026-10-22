@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20260925-1103",
-    "generated_at": "2026-09-25T11:03:38Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 25.1,
-      "feels_like_c": 23.8,
-      "description": "Ясно",
-      "wind_ms": 11.4
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "В App Store появилось приложение Spotluma с функциями «Т-Банка»",
-          "url": "https://vc.ru/services/3158891-prilozhenie-spotluma-v-app-store-s-funkciyami-t-banka?from=rss"
-        },
-        {
-          "title": "Центр безопасности Мax опроверг исследование InterSecLab о функциях отслеживания",
-          "url": "https://vc.ru/services/3157052-issledovanie-max-peredacha-dannyh-v-vk?from=rss"
-        },
-        {
-          "title": "Минфин поменял условия семейной ипотеки — ставка и максимальная сумма кредита будут зависеть от количества детей и региона проживания",
-          "url": "https://vc.ru/money/3157187-izmeneniya-v-semejnoy-ipoteke?from=rss"
-        },
-        {
-          "title": "Студия Bleecker Street выпустила трейлер четырёхчасового «разоблачительного» документального фильма об Илоне Маске",
-          "url": "https://vc.ru/media/3158292-dokumentalnyj-film-o-maske-ot-bleecker-street?from=rss"
-        },
-        {
-          "title": "День 1674: правительство утвердило проект бюджета на 2027-2029 годы — с плановым дефицитом 2% ВВП, оптимизацией расходов на 2 трлн рублей и точечным увеличением налогов",
-          "url": "https://vc.ru/money/3158146-proekty-byudzheta-s-defitsitom-i-optimizatsiey-raskhodov?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "ПСБ занял первое место в рейтинге Markswebb интернет-банков для бизнеса",
-          "url": "https://habr.com/ru/companies/psb/news/1086548/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086548"
-        },
-        {
-          "title": "Пираты массово призывают покупать Control Resonant и спасать Remedy",
-          "url": "https://habr.com/ru/companies/ggsel/news/1086640/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086640"
-        },
-        {
-          "title": "Microsoft Excel начал поддерживать несколько значений в одной ячейке",
-          "url": "https://habr.com/ru/news/1086632/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086632"
-        },
-        {
-          "title": "В ChatGPT хотят добавить подписку Pro Max за $500 в месяц",
-          "url": "https://habr.com/ru/companies/bothub/news/1086622/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086622"
-        },
-        {
-          "title": "Система Tesla FSD превышает скорость в 55% зон с ограничением 30 км/ч в Брюсселе",
-          "url": "https://habr.com/ru/news/1086620/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086620"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Как выбрать лучший хостинг для Telegram-бота в 2026–2027 году",
-          "url": "https://tproger.ru/articles/kak-vybrat-luchwij-hosting-dlya-telegram-bota-v-2026-2027-godu"
-        },
-        {
-          "title": "GitHub Security Lab открыла автономный ИИ-конвейер для фаззинга C/C++",
-          "url": "https://tproger.ru/news/github-security-lab-otkryla-avtonomnyj-ii-konvejer-dlya-fazzinga"
-        },
-        {
-          "title": "GitHub выпустил Spec Kit 1.0.11 с идемпотентным добавлением каталогов",
-          "url": "https://tproger.ru/news/github-vypustil-spec-kit-1-0-11-s-idempotentnym-dobavleniem-kata"
-        },
-        {
-          "title": "В PostgreSQL 19 Beta 4 исключили SQL/PGQ и онлайн-переключение checksums",
-          "url": "https://tproger.ru/news/v-postgresql-19-beta-4-isklyuchili-sql-pgq-i-onlajn-pereklyuchenie-c"
-        },
-        {
-          "title": "Hermes Agent 0.21.5 получил SDK для десктопных плагинов и обновлённые коннекторы",
-          "url": "https://tproger.ru/news/hermes-agent-0-21-5-poluchil-sdk-dlya-desktopnyh-plaginov-i-obnovl"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20260925-1103: Самара 25.1°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20260925-1626",
     "generated_at": "2026-09-25T16:26:30Z",
     "weather": {
@@ -7636,5 +7556,85 @@
       ]
     },
     "summary": "Сводка digest-20261022-1106: Самара 12.9°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261022-1634",
+    "generated_at": "2026-10-22T16:34:19Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 8.2,
+      "feels_like_c": 5.7,
+      "description": "Ясно",
+      "wind_ms": 5.5
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Cloudflare зафиксировала «миллионы» атак на сайты по всему миру из-за уязвимости в языке PHP",
+          "url": "https://vc.ru/services/3209892-cloudflare-zafiksirovala-ataki-na-sayty-iz-za-uiazvimosti-php?from=rss"
+        },
+        {
+          "title": "Госдума поддержала в первом чтении законопроект об отнесении семейных микропредприятий к социальным — они смогут рассчитывать на господдержку",
+          "url": "https://vc.ru/legal/3210108-gosduma-zakonoproekt-o-podderzhke-semejnyh-mikropredpriyatiy?from=rss"
+        },
+        {
+          "title": "«Яндекс Пэй» рассказал, что восстановил оформление карт, оплату по QR-коду, накопление кешбэка и обмен баллов «Плюса»",
+          "url": "https://vc.ru/money/3209610-yandeks-pey-vosstanovlenie-oformleniya-kart?from=rss"
+        },
+        {
+          "title": "«Авито» протестирует на платформе чаты для личного общения с отдельным от основного профилем",
+          "url": "https://vc.ru/services/3210229-avito-testiruet-lichnye-chaty-dlya-obshcheniya?from=rss"
+        },
+        {
+          "title": "Тимлид рассказал на Reddit, как откликнулся на вакансию в своей компании и получил отказ — не прошёл автоматический фильтр",
+          "url": "https://vc.ru/hr/3207206-timlid-na-reddit-rasskazal-ob-otkaze-pri-otklyke-na-vakansiyu?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "«Рег.ру» временно ограничил загрузку файлов через панель управления из-за уязвимостей в PHP",
+          "url": "https://habr.com/ru/news/1098048/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098048"
+        },
+        {
+          "title": "Apple заблокировала iPhone Duo, активированные до старта продаж: под раздачу попали блогеры из России",
+          "url": "https://habr.com/ru/news/1098028/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098028"
+        },
+        {
+          "title": "McDonald’s переработала игрушки из Хэппи Мила в компьютерную мышку c дизайном пакета картошки фри",
+          "url": "https://habr.com/ru/news/1098022/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098022"
+        },
+        {
+          "title": "Последние скидки на A&amp;PM EVENT 2026: до 80% до конца октября",
+          "url": "https://habr.com/ru/companies/infostart/news/1098002/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098002"
+        },
+        {
+          "title": "Atari закроет магазин игр для Atari VCS в феврале 2027 года, но откроет платформу для любительских проектов",
+          "url": "https://habr.com/ru/news/1097998/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097998"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Изучение нейросетей для детей: рейтинг 5 школ и курсов в 2026 году",
+          "url": "https://tproger.ru/articles/izuchenie-nejrosetej-dlya-detej-rejting-5-wkol-i-kursov-v-2026-go"
+        },
+        {
+          "title": "Почему релизы приходится спасать по ночам и что с этим делать",
+          "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
+        },
+        {
+          "title": "Как я перестал относиться к ИИ как к человеку: опыт соло-разработки двух пет-проектов",
+          "url": "https://tproger.ru/blogs/kak-ya-perestal-otnositsya-k-ii-kak-k-cheloveku-opyt-solo-razrabo"
+        },
+        {
+          "title": "Как написать сопроводительное письмо с помощью ИИ",
+          "url": "https://tproger.ru/articles/kak-napisat-soprovoditelnoe-pismo-s-pomoshhyu-ii"
+        },
+        {
+          "title": "ИИ для детей дошкольного возраста: рейтинг 5 программ и занятий в 2026 году",
+          "url": "https://tproger.ru/articles/ii-dlya-detej-dowkolnogo-vozrasta-rejting-5-programm-i-zanyatij"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261022-1634: Самара 8.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
