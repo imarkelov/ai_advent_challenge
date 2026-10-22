@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261021-2112",
-  "generated_at": "2026-10-21T21:12:37Z",
+  "id": "digest-20261022-0308",
+  "generated_at": "2026-10-22T03:08:51Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.2,
-    "feels_like_c": -0.6,
-    "description": "Ясно",
-    "wind_ms": 4.0
+    "temp_c": 0.5,
+    "feels_like_c": -2.5,
+    "description": "Преимущественно ясно",
+    "wind_ms": 4.4
   },
   "news": {
     "vc.ru": [
@@ -33,7 +33,15 @@
     ],
     "habr": [
       {
-        "title": "Anthropic представила своего агента Claude Duet",
+        "title": "Представлен открытый нео-гротескный шрифт Nordwand-Mono, разработанный для программирования",
+        "url": "https://habr.com/ru/news/1097280/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097280"
+      },
+      {
+        "title": "Выпуск qBittorrent 5.3.0",
+        "url": "https://habr.com/ru/news/1097102/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097102"
+      },
+      {
+        "title": "Anthropic представила агента Claude Duet: сам вам пишет и следит за задачами",
         "url": "https://habr.com/ru/companies/bothub/news/1097562/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097562"
       },
       {
@@ -43,14 +51,6 @@
       {
         "title": "Таблетка от облысения стала ближе к выходу на рынок после успешных испытаний поздней стадии",
         "url": "https://habr.com/ru/news/1097522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097522"
-      },
-      {
-        "title": "Разработчик выпустил утилиту для управления подвесом камеры DJI Osmo Pocket 3 из строки меню macOS",
-        "url": "https://habr.com/ru/news/1097504/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097504"
-      },
-      {
-        "title": "Toyota показала Land Cruiser 250, которым можно управлять только руками",
-        "url": "https://habr.com/ru/news/1097488/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097488"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261021-2112: Самара 2.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261022-0308: Самара 0.5°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
