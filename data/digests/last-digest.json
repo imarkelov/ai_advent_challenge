@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261022-0308",
-  "generated_at": "2026-10-22T03:08:51Z",
+  "id": "digest-20261022-1106",
+  "generated_at": "2026-10-22T11:06:01Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 0.5,
-    "feels_like_c": -2.5,
+    "temp_c": 12.9,
+    "feels_like_c": 9.5,
     "description": "Преимущественно ясно",
-    "wind_ms": 4.4
+    "wind_ms": 9.2
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Unitree представила человекоподобного «робота-телохранителя» H2-X — в рекламном ролике он разбивает дверь автомобиля ногой и «защищает» человека",
-        "url": "https://vc.ru/tech/3207799-unitree-h2-x-robot-telohranitel?from=rss"
-      },
-      {
         "title": "Тимлид рассказал на Reddit, как откликнулся на вакансию в своей компании и получил отказ — не прошёл автоматический фильтр",
         "url": "https://vc.ru/hr/3207206-timlid-na-reddit-rasskazal-ob-otkaze-pri-otklyke-na-vakansiyu?from=rss"
+      },
+      {
+        "title": "Unitree представила человекоподобного «робота-телохранителя» H2-X — в рекламном ролике он разбивает дверь автомобиля ногой и «защищает» человека",
+        "url": "https://vc.ru/tech/3207799-unitree-h2-x-robot-telohranitel?from=rss"
       },
       {
         "title": "Дептранс Москвы начал тестировать ровера-заправщика для электромобилей",
         "url": "https://vc.ru/transport/3207552-depttrans-moskvy-testiruet-mobilnuyu-zaryadnuyu-stantsiyu?from=rss"
       },
       {
-        "title": "«Созданный из звука»: Apple официально объявила о редизайне логотипа Apple Music",
+        "title": "«Созданный из звука»: Apple официально объявила о редизайне Apple Music",
         "url": "https://vc.ru/design/3208324-redizayn-logotipa-apple-music?from=rss"
       },
       {
-        "title": "WSJ: Anthropic за первую половину 2026 года получила чистый убыток в $80,7 млрд и $16,3 млрд выручки",
-        "url": "https://vc.ru/money/3206919-anthropic-ubytki-i-riski-ot-ii?from=rss"
+        "title": "День 1702: госзаказчики в январе-августе 2026 года увеличили закупки серверов и услуг по размещению данных",
+        "url": "https://vc.ru/money/3208990-goszakazchiki-uvelichili-zakupki-serverov-i-uslug-razmesheniya-dannyh?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Представлен открытый нео-гротескный шрифт Nordwand-Mono, разработанный для программирования",
-        "url": "https://habr.com/ru/news/1097280/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097280"
+        "title": "Лучшее за неделю (12.10 — 18.10)",
+        "url": "https://habr.com/ru/companies/ruvds/news/1097394/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097394"
       },
       {
-        "title": "Выпуск qBittorrent 5.3.0",
-        "url": "https://habr.com/ru/news/1097102/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097102"
+        "title": "В Японии удалось раздать связь из стратосферы",
+        "url": "https://habr.com/ru/companies/selectel/news/1097050/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097050"
       },
       {
-        "title": "Anthropic представила агента Claude Duet: сам вам пишет и следит за задачами",
-        "url": "https://habr.com/ru/companies/bothub/news/1097562/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097562"
+        "title": "Вебинар «Разбираемся в сети Kubernetes: белые адреса и “чёрные лебеди”»",
+        "url": "https://habr.com/ru/companies/mws/news/1097772/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097772"
       },
       {
-        "title": "Anthropic представили персонального AI-агента Claude Duet на базе Opus 5.5",
-        "url": "https://habr.com/ru/news/1097546/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097546"
+        "title": "Суд в Австралии обязал Apple разрешить пользователям iPhone устанавливать приложения из сторонних магазинов",
+        "url": "https://habr.com/ru/news/1097870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097870"
       },
       {
-        "title": "Таблетка от облысения стала ближе к выходу на рынок после успешных испытаний поздней стадии",
-        "url": "https://habr.com/ru/news/1097522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097522"
+        "title": "EA закрыла культовую студию BioWare",
+        "url": "https://habr.com/ru/companies/ggsel/news/1097864/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097864"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261022-0308: Самара 0.5°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261022-1106: Самара 12.9°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
