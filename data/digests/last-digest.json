@@ -1,15 +1,27 @@
 {
-  "id": "digest-20261023-0314",
-  "generated_at": "2026-10-23T03:14:05Z",
+  "id": "digest-20261023-1057",
+  "generated_at": "2026-10-23T10:57:31Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 4.4,
-    "feels_like_c": 1.5,
-    "description": "Ясно",
-    "wind_ms": 6.2
+    "temp_c": 12.0,
+    "feels_like_c": 8.8,
+    "description": "Преимущественно ясно",
+    "wind_ms": 8.0
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Правительство начало обсуждать досрочное завершение в 2026 году программы льготной ипотеки для ИТ-специалистов — РБК",
+        "url": "https://vc.ru/money/3211674-obsuzhdenie-zaversheniya-programmy-lgotnoy-ipoteki-dlya-it-spetsialistov?from=rss"
+      },
+      {
+        "title": "Такси-сервис inDrive и китайская Pony.ai начнут тестировать роботакси в Казахстане в 2027 году",
+        "url": "https://vc.ru/transport/3211386-zapusk-robotaksi-indrive-i-ponyai-v-kazahstane?from=rss"
+      },
+      {
+        "title": "Правительство внесло в Госдуму законопроект о повышении штрафов за езду без прав — с 5-15 тысяч рублей до 15-30 тысяч рублей",
+        "url": "https://vc.ru/transport/3211319-uzhestochienie-shtrafov-za-ezdu-bez-prav?from=rss"
+      },
       {
         "title": "Cloudflare зафиксировала «миллионы» атак на сайты по всему миру из-за уязвимости в языке PHP",
         "url": "https://vc.ru/services/3209892-cloudflare-zafiksirovala-ataki-na-sayty-iz-za-uiazvimosti-php?from=rss"
@@ -17,43 +29,39 @@
       {
         "title": "Госдума поддержала в первом чтении законопроект об отнесении семейных микропредприятий к социальным — они смогут рассчитывать на господдержку",
         "url": "https://vc.ru/legal/3210108-gosduma-zakonoproekt-o-podderzhke-semejnyh-mikropredpriyatiy?from=rss"
-      },
-      {
-        "title": "The Browser Company закроет браузер Arc",
-        "url": "https://vc.ru/services/3210488-kompaniya-the-browser-company-zakryvaet-brauzer-arc?from=rss"
-      },
-      {
-        "title": "«Авито» протестирует на платформе чаты для личного общения с отдельным от основного профилем",
-        "url": "https://vc.ru/services/3210229-avito-testiruet-lichnye-chaty-dlya-obshcheniya?from=rss"
-      },
-      {
-        "title": "«Яндекс Пэй» рассказал, что восстановил оформление карт, оплату по QR-коду, накопление кешбэка и обмен баллов «Плюса»",
-        "url": "https://vc.ru/money/3209610-yandeks-pey-vosstanovlenie-oformleniya-kart?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Вышло обновление открытого менеджера паролей KeePassXC 2.8.0",
-        "url": "https://habr.com/ru/news/1097960/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097960"
+        "title": "Разработчик Telegram: 99,9% клиентского кода мессенджера пишет AI, а тех кто до сих пор пишет код вручную надо увольнять",
+        "url": "https://habr.com/ru/news/1098400/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098400"
       },
       {
-        "title": "Вышла система виртуализации VirtualBox 7.2.22",
-        "url": "https://habr.com/ru/news/1097648/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097648"
+        "title": "В сети появился слитый трейлер новой Mass Effect: профильные СМИ подтверждают его подлинность",
+        "url": "https://habr.com/ru/companies/ggsel/news/1098396/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098396"
       },
       {
-        "title": "Слушайте выпуск #6 подкаста «про код.ии.прод»",
-        "url": "https://habr.com/ru/companies/banki/news/1098162/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098162"
+        "title": "Oura подала в суд на конкурента Ultrahuman из‑за патентов на технологии для умных колец",
+        "url": "https://habr.com/ru/news/1098374/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098374"
       },
       {
-        "title": "НКЦКИ при ФСБ потребовал срочно обновить PHP. Тем, кто не успевает, предложено отключить сайты",
-        "url": "https://habr.com/ru/news/1098146/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098146"
+        "title": "«Лента» перенесла учёт 200 тысяч активов с OmniTracker на SimpleOne",
+        "url": "https://habr.com/ru/companies/simpleone/news/1098366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098366"
       },
       {
-        "title": "eMudhra добровольно уйдет с глобального рынка SSL/TLS-сертификатов",
-        "url": "https://habr.com/ru/news/1098142/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098142"
+        "title": "СМИ: в РФ обсуждают возможность завершения программы IT-ипотеки в этом году",
+        "url": "https://habr.com/ru/news/1098344/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098344"
       }
     ],
     "tproger": [
+      {
+        "title": "6 инструментов разработчика для ежедневной работы в 2026 году",
+        "url": "https://tproger.ru/digest/6-instrumentov-razrabotchika-dlya-ezhednevnoj-raboty-v-2026-godu"
+      },
+      {
+        "title": "immers.cloud запускает публичные API для open-source нейросетей с оплатой за токены",
+        "url": "https://tproger.ru/news/immers-cloud-zapuskaet-publichnye-api-dlya-open-source-nejrosetej"
+      },
       {
         "title": "Изучение нейросетей для детей: рейтинг 5 школ и курсов в 2026 году",
         "url": "https://tproger.ru/articles/izuchenie-nejrosetej-dlya-detej-rejting-5-wkol-i-kursov-v-2026-go"
@@ -65,16 +73,8 @@
       {
         "title": "Как я перестал относиться к ИИ как к человеку: опыт соло-разработки двух пет-проектов",
         "url": "https://tproger.ru/blogs/kak-ya-perestal-otnositsya-k-ii-kak-k-cheloveku-opyt-solo-razrabo"
-      },
-      {
-        "title": "Как написать сопроводительное письмо с помощью ИИ",
-        "url": "https://tproger.ru/articles/kak-napisat-soprovoditelnoe-pismo-s-pomoshhyu-ii"
-      },
-      {
-        "title": "ИИ для детей дошкольного возраста: рейтинг 5 программ и занятий в 2026 году",
-        "url": "https://tproger.ru/articles/ii-dlya-detej-dowkolnogo-vozrasta-rejting-5-programm-i-zanyatij"
       }
     ]
   },
-  "summary": "Сводка digest-20261023-0314: Самара 4.4°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261023-1057: Самара 12.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
