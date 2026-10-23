@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261023-1057",
-  "generated_at": "2026-10-23T10:57:31Z",
+  "id": "digest-20261023-1624",
+  "generated_at": "2026-10-23T16:24:02Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 12.0,
-    "feels_like_c": 8.8,
+    "temp_c": 8.0,
+    "feels_like_c": 5.4,
     "description": "Преимущественно ясно",
-    "wind_ms": 8.0
+    "wind_ms": 4.7
   },
   "news": {
     "vc.ru": [
@@ -15,45 +15,49 @@
         "url": "https://vc.ru/money/3211674-obsuzhdenie-zaversheniya-programmy-lgotnoy-ipoteki-dlya-it-spetsialistov?from=rss"
       },
       {
+        "title": "Volvo Cars сократит 2500 рабочих мест на фоне падения выручки в Китае почти на 50%",
+        "url": "https://vc.ru/transport/3212447-volvo-cars-sokratit-rabotnye-mesta?from=rss"
+      },
+      {
+        "title": "Apple спрятала на сайте Apple Music интерактивный iPod в честь двадцатипятилетия устройства",
+        "url": "https://vc.ru/marketing/3212208-apple-music-interaktivnyj-ipod-na-sajte?from=rss"
+      },
+      {
         "title": "Такси-сервис inDrive и китайская Pony.ai начнут тестировать роботакси в Казахстане в 2027 году",
         "url": "https://vc.ru/transport/3211386-zapusk-robotaksi-indrive-i-ponyai-v-kazahstane?from=rss"
       },
       {
         "title": "Правительство внесло в Госдуму законопроект о повышении штрафов за езду без прав — с 5-15 тысяч рублей до 15-30 тысяч рублей",
         "url": "https://vc.ru/transport/3211319-uzhestochienie-shtrafov-za-ezdu-bez-prav?from=rss"
-      },
-      {
-        "title": "Cloudflare зафиксировала «миллионы» атак на сайты по всему миру из-за уязвимости в языке PHP",
-        "url": "https://vc.ru/services/3209892-cloudflare-zafiksirovala-ataki-na-sayty-iz-za-uiazvimosti-php?from=rss"
-      },
-      {
-        "title": "Госдума поддержала в первом чтении законопроект об отнесении семейных микропредприятий к социальным — они смогут рассчитывать на господдержку",
-        "url": "https://vc.ru/legal/3210108-gosduma-zakonoproekt-o-podderzhke-semejnyh-mikropredpriyatiy?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Разработчик Telegram: 99,9% клиентского кода мессенджера пишет AI, а тех кто до сих пор пишет код вручную надо увольнять",
-        "url": "https://habr.com/ru/news/1098400/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098400"
+        "title": "Банки США закрывают доступ ИИ‑агентам, которые стали слишком самостоятельными",
+        "url": "https://habr.com/ru/news/1098690/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098690"
       },
       {
-        "title": "В сети появился слитый трейлер новой Mass Effect: профильные СМИ подтверждают его подлинность",
-        "url": "https://habr.com/ru/companies/ggsel/news/1098396/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098396"
+        "title": "Z.ai раздаёт по 500 млн токенов GLM-5.3 и GLM-5.3-Flash в ZCode к Дню программиста",
+        "url": "https://habr.com/ru/news/1098648/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098648"
       },
       {
-        "title": "Oura подала в суд на конкурента Ultrahuman из‑за патентов на технологии для умных колец",
-        "url": "https://habr.com/ru/news/1098374/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098374"
+        "title": "В «Яндексе» восстановили доступ к 90,47% данных клиентов Yandex Cloud",
+        "url": "https://habr.com/ru/news/1098646/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098646"
       },
       {
-        "title": "«Лента» перенесла учёт 200 тысяч активов с OmniTracker на SimpleOne",
-        "url": "https://habr.com/ru/companies/simpleone/news/1098366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098366"
+        "title": "Micron закрывает проект 4F² DRAM после двух десятилетий исследований",
+        "url": "https://habr.com/ru/companies/selectel/news/1098474/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098474"
       },
       {
-        "title": "СМИ: в РФ обсуждают возможность завершения программы IT-ипотеки в этом году",
-        "url": "https://habr.com/ru/news/1098344/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098344"
+        "title": "Выращенные в пробирке мышиные мышцы позволяют крошечным роботам прыгать, плавать и хватать предметы",
+        "url": "https://habr.com/ru/news/1098600/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098600"
       }
     ],
     "tproger": [
+      {
+        "title": "Ловушка масштаба: почему команда растёт, а обновления выходят медленнее",
+        "url": "https://tproger.ru/articles/lovuwka-maswtaba-pochemu-komanda-rastyot-a-obnovleniya-vyhodyat-me"
+      },
       {
         "title": "6 инструментов разработчика для ежедневной работы в 2026 году",
         "url": "https://tproger.ru/digest/6-instrumentov-razrabotchika-dlya-ezhednevnoj-raboty-v-2026-godu"
@@ -69,12 +73,8 @@
       {
         "title": "Почему релизы приходится спасать по ночам и что с этим делать",
         "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
-      },
-      {
-        "title": "Как я перестал относиться к ИИ как к человеку: опыт соло-разработки двух пет-проектов",
-        "url": "https://tproger.ru/blogs/kak-ya-perestal-otnositsya-k-ii-kak-k-cheloveku-opyt-solo-razrabo"
       }
     ]
   },
-  "summary": "Сводка digest-20261023-1057: Самара 12.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261023-1624: Самара 8.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
