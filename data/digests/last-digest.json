@@ -1,10 +1,10 @@
 {
-  "id": "digest-20261022-2109",
-  "generated_at": "2026-10-22T21:09:37Z",
+  "id": "digest-20261023-0314",
+  "generated_at": "2026-10-23T03:14:05Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 7.2,
-    "feels_like_c": 4.4,
+    "temp_c": 4.4,
+    "feels_like_c": 1.5,
     "description": "Ясно",
     "wind_ms": 6.2
   },
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
-        "title": "Браузер Arc закроют в декабре. Его заменит Dia с искусственным интеллектом",
-        "url": "https://habr.com/ru/news/1098140/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098140"
+        "title": "Вышло обновление открытого менеджера паролей KeePassXC 2.8.0",
+        "url": "https://habr.com/ru/news/1097960/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097960"
       },
       {
-        "title": "Китайский математик составил список из 1000 задач, способных бросить вызов ИИ",
-        "url": "https://habr.com/ru/news/1098104/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098104"
+        "title": "Вышла система виртуализации VirtualBox 7.2.22",
+        "url": "https://habr.com/ru/news/1097648/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097648"
       },
       {
-        "title": "В симуляторе Ray‑Ban Display появилась возможность тестировать мобильные приложения без самих очков",
-        "url": "https://habr.com/ru/news/1098106/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098106"
+        "title": "Слушайте выпуск #6 подкаста «про код.ии.прод»",
+        "url": "https://habr.com/ru/companies/banki/news/1098162/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098162"
       },
       {
-        "title": "Учёные утверждают, что ИИ способен внедрять ложные воспоминания и способствовать ухудшению мышления",
-        "url": "https://habr.com/ru/news/1098082/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098082"
+        "title": "НКЦКИ при ФСБ потребовал срочно обновить PHP. Тем, кто не успевает, предложено отключить сайты",
+        "url": "https://habr.com/ru/news/1098146/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098146"
       },
       {
-        "title": "Uber открыла доступ к ChatGPT Work для всех 30 000 своих работников",
-        "url": "https://habr.com/ru/news/1098092/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098092"
+        "title": "eMudhra добровольно уйдет с глобального рынка SSL/TLS-сертификатов",
+        "url": "https://habr.com/ru/news/1098142/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098142"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261022-2109: Самара 7.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261023-0314: Самара 4.4°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
