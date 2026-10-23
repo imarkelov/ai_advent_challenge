@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20260926-1541",
-    "generated_at": "2026-09-26T15:41:48Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 18.2,
-      "feels_like_c": 17.2,
-      "description": "Переменная облачность",
-      "wind_ms": 4.4
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "В App Store появилось приложение Spotluma с функциями «Т-Банка»",
-          "url": "https://vc.ru/services/3158891-prilozhenie-spotluma-v-app-store-s-funkciyami-t-banka?from=rss"
-        },
-        {
-          "title": "Стартап, который продаёт «тупофоны», устал от однотипных сопроводительных ИИ-писем от кандидатов и попросил писать их от руки",
-          "url": "https://vc.ru/hr/3159698-startup-dumbco-rukopisy-soprovoditelnye-pisma?from=rss"
-        },
-        {
-          "title": "День 1675: Минэнерго предложило ввести внешнее управление на сети АЗС «Трасса», Euroclear подал жалобы к ЦБ в российском суде",
-          "url": "https://vc.ru/money/3160736-minenrgo-predlozhilo-vneshnee-upravlenie-na-seti-azs-trassa?from=rss"
-        },
-        {
-          "title": "«АвтоВАЗ» запустил в Тольятти серийное производство кроссовера Lada Azimut",
-          "url": "https://vc.ru/transport/3157539-avtovaz-zapustil-proizvodstvo-krossovera-lada-azimut?from=rss"
-        },
-        {
-          "title": "Nielsen продала активы в России — на фоне закона, который запрещает заказывать исследования у компаний под контролем иностранцев",
-          "url": "https://vc.ru/legal/3158923-nielsen-prodala-aktivy-v-rossii?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Codex CLI превращается в фоновый сервис",
-          "url": "https://habr.com/ru/companies/koda/news/1086932/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086932"
-        },
-        {
-          "title": "Гейтс: развитие ИИ без регулирования может привести к гибели миллиарда человек",
-          "url": "https://habr.com/ru/news/1086928/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086928"
-        },
-        {
-          "title": "ИИ‑агенты OpenAI опубликовали в интернете 53 пользовательских изображения без ведома компании",
-          "url": "https://habr.com/ru/news/1086924/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086924"
-        },
-        {
-          "title": "Microsoft начала удалять устаревшие функции Windows Media Player Legacy",
-          "url": "https://habr.com/ru/news/1086922/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086922"
-        },
-        {
-          "title": "В РКН поручили операторам принять меры по борьбе с уязвимостями в MikroTik на своих сетях и у российских абонентов",
-          "url": "https://habr.com/ru/news/1086912/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1086912"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Cloudflare Workers расширил API трассировки ручными спанами и регистрацией исключений",
-          "url": "https://tproger.ru/news/cloudflare-workers-raswiril-api-trassirovki-ruchnymi-spanami-i-re"
-        },
-        {
-          "title": "Claude Code 2.1.283 получил аудит устаревших промптов и точную фиксацию моделей",
-          "url": "https://tproger.ru/news/claude-code-2-1-283-poluchil-audit-ustarevwih-promptov-i-tochnuyu-f"
-        },
-        {
-          "title": "Claude Code 2.1.282 исправил ошибки разрешений, восстановления сессий и симлинков в macOS",
-          "url": "https://tproger.ru/news/claude-code-2-1-282-ispravil-owibki-razrewenij-vosstanovleniya-s"
-        },
-        {
-          "title": "Курсы по видео с ИИ для детей: рейтинг 9 программ в 2026 году",
-          "url": "https://tproger.ru/articles/kursy-po-video-s-ii-dlya-detej-rejting-10-programm-v-2026-godu"
-        },
-        {
-          "title": "Databricks открыла Genie One MCP Server и закроет прежний бета-эндпоинт",
-          "url": "https://tproger.ru/news/databricks-otkryla-genie-one-mcp-server-i-zakroet-prezhnij-beta-e"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20260926-1541: Самара 18.2°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20260926-2036",
     "generated_at": "2026-09-26T20:36:39Z",
     "weather": {
@@ -7636,5 +7556,85 @@
       ]
     },
     "summary": "Сводка digest-20261023-1624: Самара 8.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261023-2056",
+    "generated_at": "2026-10-23T20:56:11Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 4.9,
+      "feels_like_c": 2.3,
+      "description": "Переменная облачность",
+      "wind_ms": 4.0
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Правительство начало обсуждать досрочное завершение в 2026 году программы льготной ипотеки для ИТ-специалистов — РБК",
+          "url": "https://vc.ru/money/3211674-obsuzhdenie-zaversheniya-programmy-lgotnoy-ipoteki-dlya-it-spetsialistov?from=rss"
+        },
+        {
+          "title": "Volvo Cars сократит 2500 рабочих мест на фоне падения выручки в Китае почти на 50%",
+          "url": "https://vc.ru/transport/3212447-volvo-cars-sokratit-rabotnye-mesta?from=rss"
+        },
+        {
+          "title": "Apple спрятала на сайте Apple Music интерактивный iPod в честь двадцатипятилетия устройства",
+          "url": "https://vc.ru/marketing/3212208-apple-music-interaktivnyj-ipod-na-sajte?from=rss"
+        },
+        {
+          "title": "Такси-сервис inDrive и китайская Pony.ai начнут тестировать роботакси в Казахстане в 2027 году",
+          "url": "https://vc.ru/transport/3211386-zapusk-robotaksi-indrive-i-ponyai-v-kazahstane?from=rss"
+        },
+        {
+          "title": "Госдума поддержала в первом чтении законопроект об отнесении семейных микропредприятий к социальным — они смогут рассчитывать на господдержку",
+          "url": "https://vc.ru/legal/3210108-gosduma-zakonoproekt-o-podderzhke-semejnyh-mikropredpriyatiy?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Perfscale news #16. SDK Report API, оптимизации под задачи и опциональные pro модули",
+          "url": "https://habr.com/ru/news/1098742/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098742"
+        },
+        {
+          "title": "Moonshot выпустили Kimi K3.1 Pro: лучше GPT-6 Astra и почти догнала Opus 5.5",
+          "url": "https://habr.com/ru/news/1098732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098732"
+        },
+        {
+          "title": "На учебники по ИИ и информационной безопасности планируют выделять по 500 млн рублей в год",
+          "url": "https://habr.com/ru/news/1098718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098718"
+        },
+        {
+          "title": "Sigma представила компактную полнокадровую камеру FP2 с записью видео в 6K и встроенным модулем памяти на 70 ГБ",
+          "url": "https://habr.com/ru/news/1098712/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098712"
+        },
+        {
+          "title": "WhatsApp** тестирует отложенные сообщения в iOS",
+          "url": "https://habr.com/ru/news/1098706/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098706"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Ловушка масштаба: почему команда растёт, а обновления выходят медленнее",
+          "url": "https://tproger.ru/articles/lovuwka-maswtaba-pochemu-komanda-rastyot-a-obnovleniya-vyhodyat-me"
+        },
+        {
+          "title": "6 инструментов разработчика для ежедневной работы в 2026 году",
+          "url": "https://tproger.ru/digest/6-instrumentov-razrabotchika-dlya-ezhednevnoj-raboty-v-2026-godu"
+        },
+        {
+          "title": "immers.cloud запускает публичные API для open-source нейросетей с оплатой за токены",
+          "url": "https://tproger.ru/news/immers-cloud-zapuskaet-publichnye-api-dlya-open-source-nejrosetej"
+        },
+        {
+          "title": "Изучение нейросетей для детей: рейтинг 5 школ и курсов в 2026 году",
+          "url": "https://tproger.ru/articles/izuchenie-nejrosetej-dlya-detej-rejting-5-wkol-i-kursov-v-2026-go"
+        },
+        {
+          "title": "Почему релизы приходится спасать по ночам и что с этим делать",
+          "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261023-2056: Самара 4.9°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

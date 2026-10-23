@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261023-1624",
-  "generated_at": "2026-10-23T16:24:02Z",
+  "id": "digest-20261023-2056",
+  "generated_at": "2026-10-23T20:56:11Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 8.0,
-    "feels_like_c": 5.4,
-    "description": "Преимущественно ясно",
-    "wind_ms": 4.7
+    "temp_c": 4.9,
+    "feels_like_c": 2.3,
+    "description": "Переменная облачность",
+    "wind_ms": 4.0
   },
   "news": {
     "vc.ru": [
@@ -27,30 +27,30 @@
         "url": "https://vc.ru/transport/3211386-zapusk-robotaksi-indrive-i-ponyai-v-kazahstane?from=rss"
       },
       {
-        "title": "Правительство внесло в Госдуму законопроект о повышении штрафов за езду без прав — с 5-15 тысяч рублей до 15-30 тысяч рублей",
-        "url": "https://vc.ru/transport/3211319-uzhestochienie-shtrafov-za-ezdu-bez-prav?from=rss"
+        "title": "Госдума поддержала в первом чтении законопроект об отнесении семейных микропредприятий к социальным — они смогут рассчитывать на господдержку",
+        "url": "https://vc.ru/legal/3210108-gosduma-zakonoproekt-o-podderzhke-semejnyh-mikropredpriyatiy?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Банки США закрывают доступ ИИ‑агентам, которые стали слишком самостоятельными",
-        "url": "https://habr.com/ru/news/1098690/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098690"
+        "title": "Perfscale news #16. SDK Report API, оптимизации под задачи и опциональные pro модули",
+        "url": "https://habr.com/ru/news/1098742/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098742"
       },
       {
-        "title": "Z.ai раздаёт по 500 млн токенов GLM-5.3 и GLM-5.3-Flash в ZCode к Дню программиста",
-        "url": "https://habr.com/ru/news/1098648/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098648"
+        "title": "Moonshot выпустили Kimi K3.1 Pro: лучше GPT-6 Astra и почти догнала Opus 5.5",
+        "url": "https://habr.com/ru/news/1098732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098732"
       },
       {
-        "title": "В «Яндексе» восстановили доступ к 90,47% данных клиентов Yandex Cloud",
-        "url": "https://habr.com/ru/news/1098646/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098646"
+        "title": "На учебники по ИИ и информационной безопасности планируют выделять по 500 млн рублей в год",
+        "url": "https://habr.com/ru/news/1098718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098718"
       },
       {
-        "title": "Micron закрывает проект 4F² DRAM после двух десятилетий исследований",
-        "url": "https://habr.com/ru/companies/selectel/news/1098474/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098474"
+        "title": "Sigma представила компактную полнокадровую камеру FP2 с записью видео в 6K и встроенным модулем памяти на 70 ГБ",
+        "url": "https://habr.com/ru/news/1098712/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098712"
       },
       {
-        "title": "Выращенные в пробирке мышиные мышцы позволяют крошечным роботам прыгать, плавать и хватать предметы",
-        "url": "https://habr.com/ru/news/1098600/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098600"
+        "title": "WhatsApp** тестирует отложенные сообщения в iOS",
+        "url": "https://habr.com/ru/news/1098706/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098706"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261023-1624: Самара 8.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261023-2056: Самара 4.9°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
