@@ -1,11 +1,11 @@
 {
-  "id": "digest-20261023-2056",
-  "generated_at": "2026-10-23T20:56:11Z",
+  "id": "digest-20261024-0308",
+  "generated_at": "2026-10-24T03:08:08Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 4.9,
-    "feels_like_c": 2.3,
-    "description": "Переменная облачность",
+    "temp_c": 2.1,
+    "feels_like_c": -0.7,
+    "description": "Ясно",
     "wind_ms": 4.0
   },
   "news": {
@@ -27,11 +27,19 @@
         "url": "https://vc.ru/transport/3211386-zapusk-robotaksi-indrive-i-ponyai-v-kazahstane?from=rss"
       },
       {
-        "title": "Госдума поддержала в первом чтении законопроект об отнесении семейных микропредприятий к социальным — они смогут рассчитывать на господдержку",
-        "url": "https://vc.ru/legal/3210108-gosduma-zakonoproekt-o-podderzhke-semejnyh-mikropredpriyatiy?from=rss"
+        "title": "Правительство внесло в Госдуму законопроект о повышении штрафов за езду без прав — с 5-15 тысяч рублей до 15-30 тысяч рублей",
+        "url": "https://vc.ru/transport/3211319-uzhestochienie-shtrafov-za-ezdu-bez-prav?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "Microsoft опубликовала в Science результаты MAI-DxO — системы для пошаговой медицинской диагностики",
+        "url": "https://habr.com/ru/news/1098786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098786"
+      },
+      {
+        "title": "Kimi K3.1 Pro: почему возможности хакерства и все о релизе",
+        "url": "https://habr.com/ru/companies/bothub/news/1098764/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098764"
+      },
       {
         "title": "Perfscale news #16. SDK Report API, оптимизации под задачи и опциональные pro модули",
         "url": "https://habr.com/ru/news/1098742/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098742"
@@ -43,14 +51,6 @@
       {
         "title": "На учебники по ИИ и информационной безопасности планируют выделять по 500 млн рублей в год",
         "url": "https://habr.com/ru/news/1098718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098718"
-      },
-      {
-        "title": "Sigma представила компактную полнокадровую камеру FP2 с записью видео в 6K и встроенным модулем памяти на 70 ГБ",
-        "url": "https://habr.com/ru/news/1098712/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098712"
-      },
-      {
-        "title": "WhatsApp** тестирует отложенные сообщения в iOS",
-        "url": "https://habr.com/ru/news/1098706/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098706"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261023-2056: Самара 4.9°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261024-0308: Самара 2.1°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
