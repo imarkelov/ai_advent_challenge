@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261024-0308",
-  "generated_at": "2026-10-24T03:08:08Z",
+  "id": "digest-20261024-1013",
+  "generated_at": "2026-10-24T10:13:56Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.1,
-    "feels_like_c": -0.7,
+    "temp_c": 10.7,
+    "feels_like_c": 7.5,
     "description": "Ясно",
-    "wind_ms": 4.0
+    "wind_ms": 6.3
   },
   "news": {
     "vc.ru": [
@@ -27,33 +27,37 @@
         "url": "https://vc.ru/transport/3211386-zapusk-robotaksi-indrive-i-ponyai-v-kazahstane?from=rss"
       },
       {
-        "title": "Правительство внесло в Госдуму законопроект о повышении штрафов за езду без прав — с 5-15 тысяч рублей до 15-30 тысяч рублей",
-        "url": "https://vc.ru/transport/3211319-uzhestochienie-shtrafov-za-ezdu-bez-prav?from=rss"
+        "title": "«Яндекс Такси» сообщило, что возобновило работу во всех городах России: пассажирам доступны все тарифы и оплата, а водителям — вывод денег",
+        "url": "https://vc.ru/transport/3211983-yandeks-taksi-vosstanovilo-rabotu-v-gorodah-rossii?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Microsoft опубликовала в Science результаты MAI-DxO — системы для пошаговой медицинской диагностики",
-        "url": "https://habr.com/ru/news/1098786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098786"
+        "title": "Жителя Сиднея задержали за обсуждение с Claude стрельбы в детском саду",
+        "url": "https://habr.com/ru/news/1098870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098870"
       },
       {
-        "title": "Kimi K3.1 Pro: почему возможности хакерства и все о релизе",
-        "url": "https://habr.com/ru/companies/bothub/news/1098764/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098764"
+        "title": "Выпуск обновления дистрибутива для одноплатных ПК DietPi 10.8",
+        "url": "https://habr.com/ru/news/1098216/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098216"
       },
       {
-        "title": "Perfscale news #16. SDK Report API, оптимизации под задачи и опциональные pro модули",
-        "url": "https://habr.com/ru/news/1098742/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098742"
+        "title": "Банки США блокируют ИИ‑агентов (которым клиенты сами отдали пароли)",
+        "url": "https://habr.com/ru/news/1098872/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098872"
       },
       {
-        "title": "Moonshot выпустили Kimi K3.1 Pro: лучше GPT-6 Astra и почти догнала Opus 5.5",
-        "url": "https://habr.com/ru/news/1098732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098732"
+        "title": "OpenAI не будет обучать ИИ‑модели на данных из «живого» интернета",
+        "url": "https://habr.com/ru/news/1098862/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098862"
       },
       {
-        "title": "На учебники по ИИ и информационной безопасности планируют выделять по 500 млн рублей в год",
-        "url": "https://habr.com/ru/news/1098718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098718"
+        "title": "LibreOffice заявила о манипуляциях Microsoft процессом стандартизации в ISO",
+        "url": "https://habr.com/ru/news/1098854/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098854"
       }
     ],
     "tproger": [
+      {
+        "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
+        "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20-2"
+      },
       {
         "title": "Ловушка масштаба: почему команда растёт, а обновления выходят медленнее",
         "url": "https://tproger.ru/articles/lovuwka-maswtaba-pochemu-komanda-rastyot-a-obnovleniya-vyhodyat-me"
@@ -69,12 +73,8 @@
       {
         "title": "Изучение нейросетей для детей: рейтинг 5 школ и курсов в 2026 году",
         "url": "https://tproger.ru/articles/izuchenie-nejrosetej-dlya-detej-rejting-5-wkol-i-kursov-v-2026-go"
-      },
-      {
-        "title": "Почему релизы приходится спасать по ночам и что с этим делать",
-        "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
       }
     ]
   },
-  "summary": "Сводка digest-20261024-0308: Самара 2.1°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261024-1013: Самара 10.7°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
