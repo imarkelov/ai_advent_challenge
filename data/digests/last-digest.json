@@ -1,15 +1,23 @@
 {
-  "id": "digest-20261024-1519",
-  "generated_at": "2026-10-24T15:19:59Z",
+  "id": "digest-20261024-2009",
+  "generated_at": "2026-10-24T20:09:19Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 7.5,
-    "feels_like_c": 4.8,
+    "temp_c": 3.5,
+    "feels_like_c": 0.9,
     "description": "Ясно",
-    "wind_ms": 4.2
+    "wind_ms": 3.6
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "День 1704: Трамп допустил введение пошлин в 200% для России и Украины",
+        "url": "https://vc.ru/money/3214007-tramp-ponosheniya-dlya-rossii-i-ukrainy?from=rss"
+      },
+      {
+        "title": "Под атаку БПЛА в Омске попал логистический центр Ozon",
+        "url": "https://vc.ru/marketplace/3214031-logisticheskiy-tsentr-ozon-v-omske-podvergsya-atake-bpla?from=rss"
+      },
       {
         "title": "Правительство начало обсуждать досрочное завершение в 2026 году программы льготной ипотеки для ИТ-специалистов — РБК",
         "url": "https://vc.ru/money/3211674-obsuzhdenie-zaversheniya-programmy-lgotnoy-ipoteki-dlya-it-spetsialistov?from=rss"
@@ -21,14 +29,6 @@
       {
         "title": "Apple спрятала на сайте Apple Music интерактивный iPod в честь двадцатипятилетия устройства",
         "url": "https://vc.ru/marketing/3212208-apple-music-interaktivnyj-ipod-na-sajte?from=rss"
-      },
-      {
-        "title": "«Яндекс Такси» сообщило, что возобновило работу во всех городах России: пассажирам доступны все тарифы и оплата, а водителям — вывод денег",
-        "url": "https://vc.ru/transport/3211983-yandeks-taksi-vosstanovilo-rabotu-v-gorodah-rossii?from=rss"
-      },
-      {
-        "title": "Правительство внесло в Госдуму законопроект о повышении штрафов за езду без прав — с 5-15 тысяч рублей до 15-30 тысяч рублей",
-        "url": "https://vc.ru/transport/3211319-uzhestochienie-shtrafov-za-ezdu-bez-prav?from=rss"
       }
     ],
     "habr": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261024-1519: Самара 7.5°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261024-2009: Самара 3.5°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
