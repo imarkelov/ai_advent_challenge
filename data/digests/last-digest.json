@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261024-1013",
-  "generated_at": "2026-10-24T10:13:56Z",
+  "id": "digest-20261024-1519",
+  "generated_at": "2026-10-24T15:19:59Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 10.7,
-    "feels_like_c": 7.5,
+    "temp_c": 7.5,
+    "feels_like_c": 4.8,
     "description": "Ясно",
-    "wind_ms": 6.3
+    "wind_ms": 4.2
   },
   "news": {
     "vc.ru": [
@@ -23,15 +23,27 @@
         "url": "https://vc.ru/marketing/3212208-apple-music-interaktivnyj-ipod-na-sajte?from=rss"
       },
       {
-        "title": "Такси-сервис inDrive и китайская Pony.ai начнут тестировать роботакси в Казахстане в 2027 году",
-        "url": "https://vc.ru/transport/3211386-zapusk-robotaksi-indrive-i-ponyai-v-kazahstane?from=rss"
-      },
-      {
         "title": "«Яндекс Такси» сообщило, что возобновило работу во всех городах России: пассажирам доступны все тарифы и оплата, а водителям — вывод денег",
         "url": "https://vc.ru/transport/3211983-yandeks-taksi-vosstanovilo-rabotu-v-gorodah-rossii?from=rss"
+      },
+      {
+        "title": "Правительство внесло в Госдуму законопроект о повышении штрафов за езду без прав — с 5-15 тысяч рублей до 15-30 тысяч рублей",
+        "url": "https://vc.ru/transport/3211319-uzhestochienie-shtrafov-za-ezdu-bez-prav?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "Выпуск Rayburst 4.1.0 — открытого мультиплатформенного менеджера загрузок",
+        "url": "https://habr.com/ru/news/1098328/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098328"
+      },
+      {
+        "title": "Несколько уязвимостей в ядре Linux по ошибке опубликовали в открытом списке рассылки разработчиков",
+        "url": "https://habr.com/ru/news/1098880/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098880"
+      },
+      {
+        "title": "Microsoft объявила о завершении работы ИИ‑функции в Outlook",
+        "url": "https://habr.com/ru/news/1098874/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098874"
+      },
       {
         "title": "Жителя Сиднея задержали за обсуждение с Claude стрельбы в детском саду",
         "url": "https://habr.com/ru/news/1098870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098870"
@@ -39,18 +51,6 @@
       {
         "title": "Выпуск обновления дистрибутива для одноплатных ПК DietPi 10.8",
         "url": "https://habr.com/ru/news/1098216/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098216"
-      },
-      {
-        "title": "Банки США блокируют ИИ‑агентов (которым клиенты сами отдали пароли)",
-        "url": "https://habr.com/ru/news/1098872/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098872"
-      },
-      {
-        "title": "OpenAI не будет обучать ИИ‑модели на данных из «живого» интернета",
-        "url": "https://habr.com/ru/news/1098862/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098862"
-      },
-      {
-        "title": "LibreOffice заявила о манипуляциях Microsoft процессом стандартизации в ISO",
-        "url": "https://habr.com/ru/news/1098854/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098854"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261024-1013: Самара 10.7°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261024-1519: Самара 7.5°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
