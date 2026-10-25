@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261025-1038",
-  "generated_at": "2026-10-25T10:38:38Z",
+  "id": "digest-20261025-1529",
+  "generated_at": "2026-10-25T15:29:28Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 10.4,
-    "feels_like_c": 7.1,
+    "temp_c": 7.1,
+    "feels_like_c": 4.3,
     "description": "Ясно",
-    "wind_ms": 5.8
+    "wind_ms": 4.0
   },
   "news": {
     "vc.ru": [
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
-        "title": "Вышла открытая криптографическая библиотека OpenSSL 4.1.0 с начальной поддержкой архитектуры «Эльбрус» (e2k)",
-        "url": "https://habr.com/ru/news/1098926/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098926"
+        "title": "Вышел открытый анлокер, который снимает ограничение матричных вычислений на GPU видеокарт Nvidia серий RTX30xx и RTX40xx",
+        "url": "https://habr.com/ru/news/1099000/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099000"
       },
       {
-        "title": "Выпуск обновления открытого проекта для создания и хранения в электронной библиотеке книг разного формата Calibre 9.17",
-        "url": "https://habr.com/ru/news/1098696/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098696"
+        "title": "Физики воспроизвели в лаборатории возможный механизм нагрева солнечной короны",
+        "url": "https://habr.com/ru/news/1099106/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099106"
       },
       {
-        "title": "Релиз системы потокового видеовещания OBS Studio 33.0",
-        "url": "https://habr.com/ru/news/1098878/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098878"
+        "title": "Valve объявила о переносе личного календаря из Steam Labs",
+        "url": "https://habr.com/ru/news/1099068/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099068"
       },
       {
-        "title": "НАСА ускоряет освоение Луны и планирует построить базу и высадить астронавтов в течение двух лет",
-        "url": "https://habr.com/ru/news/1098960/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098960"
+        "title": "ФБР совместно с полицией Санта‑Аны расследует кражу 6451 коллекционных карточек из грузовика FedEx",
+        "url": "https://habr.com/ru/news/1099080/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099080"
       },
       {
-        "title": "Выпуск Rayburst 4.1.0 — открытого мультиплатформенного менеджера загрузок",
-        "url": "https://habr.com/ru/news/1098328/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098328"
+        "title": "Logitech представила мышку с двумя режимами",
+        "url": "https://habr.com/ru/news/1099064/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099064"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261025-1038: Самара 10.4°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261025-1529: Самара 7.1°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
