@@ -1,10 +1,10 @@
 {
-  "id": "digest-20261024-2009",
-  "generated_at": "2026-10-24T20:09:19Z",
+  "id": "digest-20261025-0302",
+  "generated_at": "2026-10-25T03:02:51Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 3.5,
-    "feels_like_c": 0.9,
+    "temp_c": 0.4,
+    "feels_like_c": -2.5,
     "description": "Ясно",
     "wind_ms": 3.6
   },
@@ -33,6 +33,10 @@
     ],
     "habr": [
       {
+        "title": "НАСА ускоряет освоение Луны и планирует построить базу и высадить астронавтов в течение двух лет",
+        "url": "https://habr.com/ru/news/1098960/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098960"
+      },
+      {
         "title": "Выпуск Rayburst 4.1.0 — открытого мультиплатформенного менеджера загрузок",
         "url": "https://habr.com/ru/news/1098328/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098328"
       },
@@ -47,10 +51,6 @@
       {
         "title": "Жителя Сиднея задержали за обсуждение с Claude стрельбы в детском саду",
         "url": "https://habr.com/ru/news/1098870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098870"
-      },
-      {
-        "title": "Выпуск обновления дистрибутива для одноплатных ПК DietPi 10.8",
-        "url": "https://habr.com/ru/news/1098216/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098216"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261024-2009: Самара 3.5°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261025-0302: Самара 0.4°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
