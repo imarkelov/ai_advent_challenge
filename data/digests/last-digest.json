@@ -1,15 +1,19 @@
 {
-  "id": "digest-20261025-0302",
-  "generated_at": "2026-10-25T03:02:51Z",
+  "id": "digest-20261025-1038",
+  "generated_at": "2026-10-25T10:38:38Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 0.4,
-    "feels_like_c": -2.5,
+    "temp_c": 10.4,
+    "feels_like_c": 7.1,
     "description": "Ясно",
-    "wind_ms": 3.6
+    "wind_ms": 5.8
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Audi вложит $4,2 млрд в строительство первого завода в США — на фоне пошлин Трампа",
+        "url": "https://vc.ru/transport/3214698-audi-stroit-zavod-v-ssha?from=rss"
+      },
       {
         "title": "День 1704: Трамп допустил введение пошлин в 200% для России и Украины",
         "url": "https://vc.ru/money/3214007-tramp-ponosheniya-dlya-rossii-i-ukrainy?from=rss"
@@ -25,13 +29,21 @@
       {
         "title": "Volvo Cars сократит 2500 рабочих мест на фоне падения выручки в Китае почти на 50%",
         "url": "https://vc.ru/transport/3212447-volvo-cars-sokratit-rabotnye-mesta?from=rss"
-      },
-      {
-        "title": "Apple спрятала на сайте Apple Music интерактивный iPod в честь двадцатипятилетия устройства",
-        "url": "https://vc.ru/marketing/3212208-apple-music-interaktivnyj-ipod-na-sajte?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "Вышла открытая криптографическая библиотека OpenSSL 4.1.0 с начальной поддержкой архитектуры «Эльбрус» (e2k)",
+        "url": "https://habr.com/ru/news/1098926/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098926"
+      },
+      {
+        "title": "Выпуск обновления открытого проекта для создания и хранения в электронной библиотеке книг разного формата Calibre 9.17",
+        "url": "https://habr.com/ru/news/1098696/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098696"
+      },
+      {
+        "title": "Релиз системы потокового видеовещания OBS Studio 33.0",
+        "url": "https://habr.com/ru/news/1098878/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098878"
+      },
       {
         "title": "НАСА ускоряет освоение Луны и планирует построить базу и высадить астронавтов в течение двух лет",
         "url": "https://habr.com/ru/news/1098960/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098960"
@@ -39,18 +51,6 @@
       {
         "title": "Выпуск Rayburst 4.1.0 — открытого мультиплатформенного менеджера загрузок",
         "url": "https://habr.com/ru/news/1098328/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098328"
-      },
-      {
-        "title": "Несколько уязвимостей в ядре Linux по ошибке опубликовали в открытом списке рассылки разработчиков",
-        "url": "https://habr.com/ru/news/1098880/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098880"
-      },
-      {
-        "title": "Microsoft объявила о завершении работы ИИ‑функции в Outlook",
-        "url": "https://habr.com/ru/news/1098874/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098874"
-      },
-      {
-        "title": "Жителя Сиднея задержали за обсуждение с Claude стрельбы в детском саду",
-        "url": "https://habr.com/ru/news/1098870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098870"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261025-0302: Самара 0.4°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261025-1038: Самара 10.4°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
