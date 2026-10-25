@@ -1,15 +1,19 @@
 {
-  "id": "digest-20261025-1529",
-  "generated_at": "2026-10-25T15:29:28Z",
+  "id": "digest-20261025-2020",
+  "generated_at": "2026-10-25T20:20:29Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 7.1,
-    "feels_like_c": 4.3,
+    "temp_c": 2.7,
+    "feels_like_c": 0.1,
     "description": "Ясно",
-    "wind_ms": 4.0
+    "wind_ms": 3.6
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "День 1705: Минцифры утвердило требования по защите дата-центров от беспилотников",
+        "url": "https://vc.ru/services/3215473-mincifry-utverdilo-trebovaniya-po-zashchite-data-tsentrov-ot-bespilotnikov?from=rss"
+      },
       {
         "title": "Audi вложит $4,2 млрд в строительство первого завода в США — на фоне пошлин Трампа",
         "url": "https://vc.ru/transport/3214698-audi-stroit-zavod-v-ssha?from=rss"
@@ -25,10 +29,6 @@
       {
         "title": "Правительство начало обсуждать досрочное завершение в 2026 году программы льготной ипотеки для ИТ-специалистов — РБК",
         "url": "https://vc.ru/money/3211674-obsuzhdenie-zaversheniya-programmy-lgotnoy-ipoteki-dlya-it-spetsialistov?from=rss"
-      },
-      {
-        "title": "Volvo Cars сократит 2500 рабочих мест на фоне падения выручки в Китае почти на 50%",
-        "url": "https://vc.ru/transport/3212447-volvo-cars-sokratit-rabotnye-mesta?from=rss"
       }
     ],
     "habr": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261025-1529: Самара 7.1°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261025-2020: Самара 2.7°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
