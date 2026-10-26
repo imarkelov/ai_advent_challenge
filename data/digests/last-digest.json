@@ -1,80 +1,80 @@
 {
-  "id": "digest-20261026-1211",
-  "generated_at": "2026-10-26T12:11:40Z",
+  "id": "digest-20261026-2215",
+  "generated_at": "2026-10-26T22:15:11Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 11.3,
-    "feels_like_c": 8.2,
-    "description": "Ясно",
-    "wind_ms": 5.1
+    "temp_c": 0.7,
+    "feels_like_c": -2.0,
+    "description": "Преимущественно ясно",
+    "wind_ms": 3.4
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Минцифры предупредило о возможных ограничениях мобильного интернета в центре Москвы 27-29 октября 2026 года",
+        "url": "https://vc.ru/services/3217615-mintsifry-predupredilo-ob-ogranicheniyakh-mobilnogo-interneta-v-moskve?from=rss"
+      },
       {
         "title": "Идея для бизнеса: брать деньги за возможность поесть и потанцевать на чужой свадьбе",
         "url": "https://vc.ru/money/3216172-ideya-biznesa-prodazha-mest-na-svadbah?from=rss"
       },
       {
+        "title": "«Яндекс» рассказал, что суперкомпьютеры уцелели после атак на дата-центры компании",
+        "url": "https://vc.ru/services/3212724-superkompyutery-yandeksa-uceleli-posle-atak?from=rss"
+      },
+      {
+        "title": "Microsoft запустила программу добровольных увольнений в обмен на компенсации",
+        "url": "https://vc.ru/hr/3217458-microsoft-zapusk-programmu-dobrovolnogo-uvolneniya?from=rss"
+      },
+      {
         "title": "Банки попросили сделать обязательной предустановку сертификатов Минцифры на смартфоны в России",
         "url": "https://vc.ru/services/3215975-obyazatelnaya-predustanovka-sertifikatov-mintsifry-na-smartfony?from=rss"
-      },
-      {
-        "title": "Бренд Umo открыл продажи гибридного кроссовера Umo 8, сборку которого наладили на заводе «Москвич»",
-        "url": "https://vc.ru/transport/3216560-gibridnyj-krossover-umo-8-zavod-moskvich?from=rss"
-      },
-      {
-        "title": "«Самокат» добавил в приложение доставку блюд из ресторанов — заказы привозят партнёры сервиса",
-        "url": "https://vc.ru/food/3216405-samokat-dostavka-blyud-iz-restoranov?from=rss"
-      },
-      {
-        "title": "День 1706: больше четверти заявок ОКВЭД не совпали с фактической деятельностью компаний",
-        "url": "https://vc.ru/money/3215870-okved-bolee-chetverti-kompanii-ne-sootvetstvuyut-zayavlennoy-deyatelnosti?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Block Джека Дорси представила голосовую ИИ-модель Dessa, которая работает с речью напрямую",
-        "url": "https://habr.com/ru/news/1099518/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099518"
+        "title": "OpenAI представила GPT-6.1 Terra: быстрее работает с интерфейсами, реже ошибается и дешевле в API",
+        "url": "https://habr.com/ru/companies/otus/news/1099780/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099780"
       },
       {
-        "title": "«Яндекс»: суперкомпьютеры «Ляпунов», «Галушкин» и «Червоненскис» не пострадали и переезжают на новые площадки",
-        "url": "https://habr.com/ru/news/1099510/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099510"
+        "title": "OWASP выпустил GenAI Red Teaming Manual v1.0",
+        "url": "https://habr.com/ru/news/1099746/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099746"
       },
       {
-        "title": "Слушайте выпуск #7 подкаста «про код.ии.прод»",
-        "url": "https://habr.com/ru/companies/banki/news/1099506/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099506"
+        "title": "OpenAI выпустила GPT-6.1 Terra",
+        "url": "https://habr.com/ru/companies/bothub/news/1099756/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099756"
       },
       {
-        "title": "«Росатом» испытал новый выключатель для мощных АЭС",
-        "url": "https://habr.com/ru/news/1099494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099494"
+        "title": "Дизайнер представил ADHD One — ретротрубку для звонков через iPhone",
+        "url": "https://habr.com/ru/news/1099754/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099754"
       },
       {
-        "title": "Для высадки на Луну может понадобиться до 22 запусков Starship",
-        "url": "https://habr.com/ru/companies/selectel/news/1098588/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098588"
+        "title": "Prusa выпустила NFC‑модуль для распознавания катушек с пластиком",
+        "url": "https://habr.com/ru/news/1099736/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099736"
       }
     ],
     "tproger": [
       {
-        "title": "Инструменты для инди-разработчика: 10 тулов для запуска проекта в 2026 году",
-        "url": "https://tproger.ru/digest/instrumenty-dlya-indi-razrabotchika-10-tulov-dlya-zapuska-proekta"
+        "title": "OpenAI выпустила GPT-6.1 Terra по $1 за миллион входных токенов и открыла Decisions API",
+        "url": "https://tproger.ru/news/openai-vypustila-gpt-6-1-terra-po-1-za-million-vhodnyh-tokenov"
       },
       {
-        "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
-        "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20-2"
+        "title": "Что запускать локально в октябре 2026: 6 открытых моделей от OCR на 76 МБ до серверных MoE",
+        "url": "https://tproger.ru/articles/chto-zapuskat-lokalno-v-oktyabre-2026-6-otkrytyh-modelej-ot-ocr"
       },
       {
-        "title": "Ловушка масштаба: почему команда растёт, а обновления выходят медленнее",
-        "url": "https://tproger.ru/articles/lovuwka-maswtaba-pochemu-komanda-rastyot-a-obnovleniya-vyhodyat-me"
+        "title": "Почему токены флагманских LLM подешевели до 80%, а расходы на ИИ-агентов продолжают расти: экономика API в 2026 году",
+        "url": "https://tproger.ru/articles/pochemu-tokeny-flagmanskih-llm-podeweveli-do-80-a-rashody-na-ii"
       },
       {
-        "title": "6 инструментов разработчика для ежедневной работы в 2026 году",
-        "url": "https://tproger.ru/digest/6-instrumentov-razrabotchika-dlya-ezhednevnoj-raboty-v-2026-godu"
+        "title": "Нейросети для создания песен-поздравлений: ТОП-10 сервисов в 2026 году",
+        "url": "https://tproger.ru/articles/nejroseti-dlya-sozdaniya-pesen-pozdravlenij-top-10-servisov-v-202"
       },
       {
-        "title": "immers.cloud запускает публичные API для open-source нейросетей с оплатой за токены",
-        "url": "https://tproger.ru/news/immers-cloud-zapuskaet-publichnye-api-dlya-open-source-nejrosetej"
+        "title": "Как отравляют данные для ИИ-моделей и как разработчику найти подмену",
+        "url": "https://tproger.ru/articles/kak-otravlyayut-dannye-dlya-ii-modelej-i-kak-razrabotchiku-najti-pod"
       }
     ]
   },
-  "summary": "Сводка digest-20261026-1211: Самара 11.3°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261026-2215: Самара 0.7°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
