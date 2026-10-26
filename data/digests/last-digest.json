@@ -1,11 +1,11 @@
 {
-  "id": "digest-20261025-2020",
-  "generated_at": "2026-10-25T20:20:29Z",
+  "id": "digest-20261026-0302",
+  "generated_at": "2026-10-26T03:02:31Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.7,
-    "feels_like_c": 0.1,
-    "description": "Ясно",
+    "temp_c": -0.4,
+    "feels_like_c": -3.3,
+    "description": "Преимущественно ясно",
     "wind_ms": 3.6
   },
   "news": {
@@ -33,6 +33,10 @@
     ],
     "habr": [
       {
+        "title": "В Steam вышла игра Jono — платформер, в котором все игроки мира управляют одним персонажем по очереди",
+        "url": "https://habr.com/ru/news/1099282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099282"
+      },
+      {
         "title": "Вышел открытый анлокер, который снимает ограничение матричных вычислений на GPU видеокарт Nvidia серий RTX30xx и RTX40xx",
         "url": "https://habr.com/ru/news/1099000/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099000"
       },
@@ -47,10 +51,6 @@
       {
         "title": "ФБР совместно с полицией Санта‑Аны расследует кражу 6451 коллекционных карточек из грузовика FedEx",
         "url": "https://habr.com/ru/news/1099080/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099080"
-      },
-      {
-        "title": "Logitech представила мышку с двумя режимами",
-        "url": "https://habr.com/ru/news/1099064/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099064"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261025-2020: Самара 2.7°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261026-0302: Самара -0.4°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
