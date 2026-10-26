@@ -1,59 +1,63 @@
 {
-  "id": "digest-20261026-0302",
-  "generated_at": "2026-10-26T03:02:31Z",
+  "id": "digest-20261026-1211",
+  "generated_at": "2026-10-26T12:11:40Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -0.4,
-    "feels_like_c": -3.3,
-    "description": "Преимущественно ясно",
-    "wind_ms": 3.6
+    "temp_c": 11.3,
+    "feels_like_c": 8.2,
+    "description": "Ясно",
+    "wind_ms": 5.1
   },
   "news": {
     "vc.ru": [
       {
-        "title": "День 1705: Минцифры утвердило требования по защите дата-центров от беспилотников",
-        "url": "https://vc.ru/services/3215473-mincifry-utverdilo-trebovaniya-po-zashchite-data-tsentrov-ot-bespilotnikov?from=rss"
+        "title": "Идея для бизнеса: брать деньги за возможность поесть и потанцевать на чужой свадьбе",
+        "url": "https://vc.ru/money/3216172-ideya-biznesa-prodazha-mest-na-svadbah?from=rss"
       },
       {
-        "title": "Audi вложит $4,2 млрд в строительство первого завода в США — на фоне пошлин Трампа",
-        "url": "https://vc.ru/transport/3214698-audi-stroit-zavod-v-ssha?from=rss"
+        "title": "Банки попросили сделать обязательной предустановку сертификатов Минцифры на смартфоны в России",
+        "url": "https://vc.ru/services/3215975-obyazatelnaya-predustanovka-sertifikatov-mintsifry-na-smartfony?from=rss"
       },
       {
-        "title": "День 1704: Трамп допустил введение пошлин в 200% для России и Украины",
-        "url": "https://vc.ru/money/3214007-tramp-ponosheniya-dlya-rossii-i-ukrainy?from=rss"
+        "title": "Бренд Umo открыл продажи гибридного кроссовера Umo 8, сборку которого наладили на заводе «Москвич»",
+        "url": "https://vc.ru/transport/3216560-gibridnyj-krossover-umo-8-zavod-moskvich?from=rss"
       },
       {
-        "title": "Под атаку БПЛА в Омске попал логистический центр Ozon",
-        "url": "https://vc.ru/marketplace/3214031-logisticheskiy-tsentr-ozon-v-omske-podvergsya-atake-bpla?from=rss"
+        "title": "«Самокат» добавил в приложение доставку блюд из ресторанов — заказы привозят партнёры сервиса",
+        "url": "https://vc.ru/food/3216405-samokat-dostavka-blyud-iz-restoranov?from=rss"
       },
       {
-        "title": "Правительство начало обсуждать досрочное завершение в 2026 году программы льготной ипотеки для ИТ-специалистов — РБК",
-        "url": "https://vc.ru/money/3211674-obsuzhdenie-zaversheniya-programmy-lgotnoy-ipoteki-dlya-it-spetsialistov?from=rss"
+        "title": "День 1706: больше четверти заявок ОКВЭД не совпали с фактической деятельностью компаний",
+        "url": "https://vc.ru/money/3215870-okved-bolee-chetverti-kompanii-ne-sootvetstvuyut-zayavlennoy-deyatelnosti?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "В Steam вышла игра Jono — платформер, в котором все игроки мира управляют одним персонажем по очереди",
-        "url": "https://habr.com/ru/news/1099282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099282"
+        "title": "Block Джека Дорси представила голосовую ИИ-модель Dessa, которая работает с речью напрямую",
+        "url": "https://habr.com/ru/news/1099518/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099518"
       },
       {
-        "title": "Вышел открытый анлокер, который снимает ограничение матричных вычислений на GPU видеокарт Nvidia серий RTX30xx и RTX40xx",
-        "url": "https://habr.com/ru/news/1099000/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099000"
+        "title": "«Яндекс»: суперкомпьютеры «Ляпунов», «Галушкин» и «Червоненскис» не пострадали и переезжают на новые площадки",
+        "url": "https://habr.com/ru/news/1099510/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099510"
       },
       {
-        "title": "Физики воспроизвели в лаборатории возможный механизм нагрева солнечной короны",
-        "url": "https://habr.com/ru/news/1099106/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099106"
+        "title": "Слушайте выпуск #7 подкаста «про код.ии.прод»",
+        "url": "https://habr.com/ru/companies/banki/news/1099506/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099506"
       },
       {
-        "title": "Valve объявила о переносе личного календаря из Steam Labs",
-        "url": "https://habr.com/ru/news/1099068/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099068"
+        "title": "«Росатом» испытал новый выключатель для мощных АЭС",
+        "url": "https://habr.com/ru/news/1099494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099494"
       },
       {
-        "title": "ФБР совместно с полицией Санта‑Аны расследует кражу 6451 коллекционных карточек из грузовика FedEx",
-        "url": "https://habr.com/ru/news/1099080/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099080"
+        "title": "Для высадки на Луну может понадобиться до 22 запусков Starship",
+        "url": "https://habr.com/ru/companies/selectel/news/1098588/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098588"
       }
     ],
     "tproger": [
+      {
+        "title": "Инструменты для инди-разработчика: 10 тулов для запуска проекта в 2026 году",
+        "url": "https://tproger.ru/digest/instrumenty-dlya-indi-razrabotchika-10-tulov-dlya-zapuska-proekta"
+      },
       {
         "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
         "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20-2"
@@ -69,12 +73,8 @@
       {
         "title": "immers.cloud запускает публичные API для open-source нейросетей с оплатой за токены",
         "url": "https://tproger.ru/news/immers-cloud-zapuskaet-publichnye-api-dlya-open-source-nejrosetej"
-      },
-      {
-        "title": "Изучение нейросетей для детей: рейтинг 5 школ и курсов в 2026 году",
-        "url": "https://tproger.ru/articles/izuchenie-nejrosetej-dlya-detej-rejting-5-wkol-i-kursov-v-2026-go"
       }
     ]
   },
-  "summary": "Сводка digest-20261026-0302: Самара -0.4°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261026-1211: Самара 11.3°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
