@@ -1,30 +1,30 @@
 {
-  "id": "digest-20261026-2215",
-  "generated_at": "2026-10-26T22:15:11Z",
+  "id": "digest-20261027-0334",
+  "generated_at": "2026-10-27T03:34:10Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 0.7,
-    "feels_like_c": -2.0,
+    "temp_c": -1.0,
+    "feels_like_c": -3.9,
     "description": "Преимущественно ясно",
-    "wind_ms": 3.4
+    "wind_ms": 4.1
   },
   "news": {
     "vc.ru": [
-      {
-        "title": "Минцифры предупредило о возможных ограничениях мобильного интернета в центре Москвы 27-29 октября 2026 года",
-        "url": "https://vc.ru/services/3217615-mintsifry-predupredilo-ob-ogranicheniyakh-mobilnogo-interneta-v-moskve?from=rss"
-      },
       {
         "title": "Идея для бизнеса: брать деньги за возможность поесть и потанцевать на чужой свадьбе",
         "url": "https://vc.ru/money/3216172-ideya-biznesa-prodazha-mest-na-svadbah?from=rss"
       },
       {
-        "title": "«Яндекс» рассказал, что суперкомпьютеры уцелели после атак на дата-центры компании",
-        "url": "https://vc.ru/services/3212724-superkompyutery-yandeksa-uceleli-posle-atak?from=rss"
+        "title": "Минцифры предупредило о возможных ограничениях мобильного интернета в центре Москвы 27-29 октября 2026 года",
+        "url": "https://vc.ru/services/3217615-mintsifry-predupredilo-ob-ogranicheniyakh-mobilnogo-interneta-v-moskve?from=rss"
       },
       {
         "title": "Microsoft запустила программу добровольных увольнений в обмен на компенсации",
         "url": "https://vc.ru/hr/3217458-microsoft-zapusk-programmu-dobrovolnogo-uvolneniya?from=rss"
+      },
+      {
+        "title": "«Яндекс» рассказал, что суперкомпьютеры уцелели после атак на дата-центры компании",
+        "url": "https://vc.ru/services/3212724-superkompyutery-yandeksa-uceleli-posle-atak?from=rss"
       },
       {
         "title": "Банки попросили сделать обязательной предустановку сертификатов Минцифры на смартфоны в России",
@@ -32,6 +32,10 @@
       }
     ],
     "habr": [
+      {
+        "title": "Бесплатные воркшопы по миграции с VMware на open source-платформу Cozystack в Европе и США в октябре-декабре",
+        "url": "https://habr.com/ru/companies/aenix/news/1099798/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099798"
+      },
       {
         "title": "OpenAI представила GPT-6.1 Terra: быстрее работает с интерфейсами, реже ошибается и дешевле в API",
         "url": "https://habr.com/ru/companies/otus/news/1099780/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099780"
@@ -47,13 +51,13 @@
       {
         "title": "Дизайнер представил ADHD One — ретротрубку для звонков через iPhone",
         "url": "https://habr.com/ru/news/1099754/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099754"
-      },
-      {
-        "title": "Prusa выпустила NFC‑модуль для распознавания катушек с пластиком",
-        "url": "https://habr.com/ru/news/1099736/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099736"
       }
     ],
     "tproger": [
+      {
+        "title": "Резюме больше, а нанимать сложнее. Где буксует найм в ИТ",
+        "url": "https://tproger.ru/articles/kandidaty-ne-nahodyat-rabotu-kompanii-sotrudnikov-chto-mewaet"
+      },
       {
         "title": "OpenAI выпустила GPT-6.1 Terra по $1 за миллион входных токенов и открыла Decisions API",
         "url": "https://tproger.ru/news/openai-vypustila-gpt-6-1-terra-po-1-za-million-vhodnyh-tokenov"
@@ -69,12 +73,8 @@
       {
         "title": "Нейросети для создания песен-поздравлений: ТОП-10 сервисов в 2026 году",
         "url": "https://tproger.ru/articles/nejroseti-dlya-sozdaniya-pesen-pozdravlenij-top-10-servisov-v-202"
-      },
-      {
-        "title": "Как отравляют данные для ИИ-моделей и как разработчику найти подмену",
-        "url": "https://tproger.ru/articles/kak-otravlyayut-dannye-dlya-ii-modelej-i-kak-razrabotchiku-najti-pod"
       }
     ]
   },
-  "summary": "Сводка digest-20261026-2215: Самара 0.7°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261027-0334: Самара -1.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
