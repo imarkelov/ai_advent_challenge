@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261027-0334",
-  "generated_at": "2026-10-27T03:34:10Z",
+  "id": "digest-20261027-1133",
+  "generated_at": "2026-10-27T11:33:06Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -1.0,
-    "feels_like_c": -3.9,
-    "description": "Преимущественно ясно",
-    "wind_ms": 4.1
+    "temp_c": 11.7,
+    "feels_like_c": 8.8,
+    "description": "Ясно",
+    "wind_ms": 3.7
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Идея для бизнеса: брать деньги за возможность поесть и потанцевать на чужой свадьбе",
-        "url": "https://vc.ru/money/3216172-ideya-biznesa-prodazha-mest-na-svadbah?from=rss"
+        "title": "Whoosh на период межсезонья переведёт сотрудников на четырёхдневку и сократит зарплаты на 20% — это коснётся офисных сотрудников",
+        "url": "https://vc.ru/transport/3218219-whoosh-perevod-sotrudnikov-na-chetirednevku?from=rss"
       },
       {
-        "title": "Минцифры предупредило о возможных ограничениях мобильного интернета в центре Москвы 27-29 октября 2026 года",
-        "url": "https://vc.ru/services/3217615-mintsifry-predupredilo-ob-ogranicheniyakh-mobilnogo-interneta-v-moskve?from=rss"
+        "title": "Apple удалила VPN-клиент Incy из российского App Store",
+        "url": "https://vc.ru/services/3218611-apple-udavila-vpn-incy-iz-rossiiskogo-appstore?from=rss"
       },
       {
-        "title": "Microsoft запустила программу добровольных увольнений в обмен на компенсации",
-        "url": "https://vc.ru/hr/3217458-microsoft-zapusk-programmu-dobrovolnogo-uvolneniya?from=rss"
+        "title": "Минцифры хочет ввести для виртуальных операторов связи минимальный тариф в 250 рублей и запретить им использовать сети больше чем одного оператора — «Ъ»",
+        "url": "https://vc.ru/services/3218792-mincifry-vvodit-minimalnyj-tarif-dlya-virtualnyh-operatorov-svyazi?from=rss"
       },
       {
-        "title": "«Яндекс» рассказал, что суперкомпьютеры уцелели после атак на дата-центры компании",
-        "url": "https://vc.ru/services/3212724-superkompyutery-yandeksa-uceleli-posle-atak?from=rss"
+        "title": "Wildberries открыл приём заявок от собственников складов на долгосрочную сдачу помещений в аренду",
+        "url": "https://vc.ru/marketplace/3218842-wildberries-prinimaet-zayavki-na-arendu-skladov?from=rss"
       },
       {
-        "title": "Банки попросили сделать обязательной предустановку сертификатов Минцифры на смартфоны в России",
-        "url": "https://vc.ru/services/3215975-obyazatelnaya-predustanovka-sertifikatov-mintsifry-na-smartfony?from=rss"
+        "title": "ЦБ Великобритании весной 2026 года начал проверку Revolut из-за опасений по поводу быстрого внедрения продуктов — FT",
+        "url": "https://vc.ru/money/3218569-czb-velikobritanii-proveryaet-revolut?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Бесплатные воркшопы по миграции с VMware на open source-платформу Cozystack в Европе и США в октябре-декабре",
-        "url": "https://habr.com/ru/companies/aenix/news/1099798/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099798"
+        "title": "Роскомнадзор предложил ввести обязательную идентификацию детей в соцсетях",
+        "url": "https://habr.com/ru/news/1100048/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100048"
       },
       {
-        "title": "OpenAI представила GPT-6.1 Terra: быстрее работает с интерфейсами, реже ошибается и дешевле в API",
-        "url": "https://habr.com/ru/companies/otus/news/1099780/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099780"
+        "title": "Виртуальная электростанция для Google: как получить гигаватт мощности для дата‑центров",
+        "url": "https://habr.com/ru/news/1100044/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100044"
       },
       {
-        "title": "OWASP выпустил GenAI Red Teaming Manual v1.0",
-        "url": "https://habr.com/ru/news/1099746/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099746"
+        "title": "«Лаборатория Касперского» помогла Интерполу задержать 1462 подозреваемых в киберпреступлениях в Африке",
+        "url": "https://habr.com/ru/news/1100042/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100042"
       },
       {
-        "title": "OpenAI выпустила GPT-6.1 Terra",
-        "url": "https://habr.com/ru/companies/bothub/news/1099756/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099756"
+        "title": "В Китае видеокарты Nvidia RTX 5090 используют в качестве доноров для AI‑серверов",
+        "url": "https://habr.com/ru/news/1100030/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100030"
       },
       {
-        "title": "Дизайнер представил ADHD One — ретротрубку для звонков через iPhone",
-        "url": "https://habr.com/ru/news/1099754/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1099754"
+        "title": "Microsoft улучшила встроенный тест скорости в Windows 11",
+        "url": "https://habr.com/ru/news/1100026/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100026"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261027-0334: Самара -1.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261027-1133: Самара 11.7°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
