@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261027-1724",
-  "generated_at": "2026-10-27T17:24:29Z",
+  "id": "digest-20261027-2147",
+  "generated_at": "2026-10-27T21:47:09Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 1.6,
-    "feels_like_c": -1.1,
-    "description": "Ясно",
-    "wind_ms": 4.0
+    "temp_c": -0.5,
+    "feels_like_c": -3.2,
+    "description": "Туман",
+    "wind_ms": 3.6
   },
   "news": {
     "vc.ru": [
@@ -15,42 +15,42 @@
         "url": "https://vc.ru/food/3219412-artur-zelenyj-v-rozyske-urovnen-kitchen?from=rss"
       },
       {
+        "title": "Роскомнадзор предложил ввести обязательную идентификацию детей в соцсетях — «Ведомости»",
+        "url": "https://vc.ru/services/3210109-obyazatelnaya-identifikatsiya-detei-v-sotssetyakh?from=rss"
+      },
+      {
         "title": "Whoosh на период межсезонья переведёт сотрудников на четырёхдневку и сократит зарплаты на 20% — это коснётся офисных сотрудников",
         "url": "https://vc.ru/transport/3218219-whoosh-perevod-sotrudnikov-na-chetirednevku?from=rss"
       },
       {
-        "title": "Wildberries открыл приём заявок от собственников складов на долгосрочную сдачу помещений в аренду",
-        "url": "https://vc.ru/marketplace/3218842-wildberries-prinimaet-zayavki-na-arendu-skladov?from=rss"
+        "title": "Apple удалила VPN-клиент Incy из российского App Store",
+        "url": "https://vc.ru/services/3218611-apple-udavila-vpn-incy-iz-rossiiskogo-appstore?from=rss"
       },
       {
         "title": "Минцифры хочет ввести для виртуальных операторов связи минимальный тариф в 250 рублей и запретить им использовать сети больше чем одного оператора — «Ъ»",
         "url": "https://vc.ru/services/3218792-mincifry-vvodit-minimalnyj-tarif-dlya-virtualnyh-operatorov-svyazi?from=rss"
-      },
-      {
-        "title": "Роскомнадзор предложил ввести обязательную идентификацию детей в соцсетях — «Ведомости»",
-        "url": "https://vc.ru/services/3210109-obyazatelnaya-identifikatsiya-detei-v-sotssetyakh?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Новое масштабное и мощное моделирование помогает объяснить реионизацию Вселенной",
-        "url": "https://habr.com/ru/news/1100256/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100256"
+        "title": "Миссия НАСА «Swift» завершилась перед входом в атмосферу",
+        "url": "https://habr.com/ru/news/1100304/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100304"
       },
       {
-        "title": "GPT-6.1 Terra от OpenAI: автоматизация быстрее и дешевле",
-        "url": "https://habr.com/ru/companies/selectel/news/1100076/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100076"
+        "title": "Астрономы зафиксировали рекордно длительную активность гамма‑всплеска",
+        "url": "https://habr.com/ru/news/1100296/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100296"
       },
       {
-        "title": "Apple представила iMac и MacBook Pro на M6",
-        "url": "https://habr.com/ru/news/1100184/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100184"
+        "title": "Google представила Genie 4: генерация мира со звуками и говорящими персонажами",
+        "url": "https://habr.com/ru/companies/bothub/news/1100294/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100294"
       },
       {
-        "title": "Lenovo выпустила клавиатуру Aurora GK1077 Lite с экраном и многофункциональным регулятором",
-        "url": "https://habr.com/ru/news/1100172/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100172"
+        "title": "Разработчик превратил уровни Doom в вычислитель для нейросетей",
+        "url": "https://habr.com/ru/news/1100282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100282"
       },
       {
-        "title": "ИИ‑агенты против антиботов: что в этой битве делать человеку",
-        "url": "https://habr.com/ru/companies/oxygendc/news/1100168/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100168"
+        "title": "Тренировки привели к структурной перестройке нервных узлов, регулирующих сердце у крыс",
+        "url": "https://habr.com/ru/news/1100278/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100278"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261027-1724: Самара 1.6°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261027-2147: Самара -0.5°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
