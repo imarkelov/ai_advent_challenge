@@ -1,80 +1,80 @@
 {
-  "id": "digest-20261028-1203",
-  "generated_at": "2026-10-28T12:03:17Z",
+  "id": "digest-20261028-2208",
+  "generated_at": "2026-10-28T22:08:22Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 11.9,
-    "feels_like_c": 9.8,
-    "description": "Ясно",
-    "wind_ms": 0.8
+    "temp_c": -0.3,
+    "feels_like_c": -3.0,
+    "description": "Туман",
+    "wind_ms": 3.0
   },
   "news": {
     "vc.ru": [
       {
+        "title": "Круизный лайнер Villa Vie Odyssey остановил «непрерывное» кругосветное путешествие и «выселил» постояльцев в Камбодже — из-за роста цен на топливо",
+        "url": "https://vc.ru/offline/3221954-kruiznyj-lajner-villa-vie-odyssey-vyiselil-passazhirov-v-kambodzhe?from=rss"
+      },
+      {
         "title": "Восемь лет труда, почти 5000 сотрудников и $1 млрд ради «чистого удовольствия»: как разрабатывалась GTA VI",
         "url": "https://vc.ru/story/3206511-razrabotka-gta-vi-trudnosti-i-byudzhet?from=rss"
+      },
+      {
+        "title": "Первый китайский ИИ-фильм провалился в прокате — за неделю он собрал $181 тысячу при производстве в $1,5 млн",
+        "url": "https://vc.ru/media/3221028-proval-pervogo-kitayskogo-ii-filma-sansindui-budushchee-i-proshloe?from=rss"
       },
       {
         "title": "Роскомнадзор внёс Apple и Microsoft в реестр ОРИ — обязал хранить данные о пользователях и делиться ими с властями",
         "url": "https://vc.ru/legal/3220542-roskomnadzor-vklyuchil-apple-i-microsoft-v-reestr-ori?from=rss"
       },
       {
-        "title": "Первый китайский ИИ-фильм провалился в прокате — за неделю он собрал $181 тысячу при стоимости производства в $1,5 млн",
-        "url": "https://vc.ru/media/3221028-proval-pervogo-kitayskogo-ii-filma-sansindui-budushchee-i-proshloe?from=rss"
-      },
-      {
         "title": "Wildberries запустил сервис самовывоза товаров из торговых точек партнёров для всех пользователей",
         "url": "https://vc.ru/marketplace/3220893-wildberries-zapustil-click-and-collect-samovyvoz?from=rss"
-      },
-      {
-        "title": "Отчёт Ozon за квартал: чистая прибыль — 3,7 млрд рублей, резервы по убыткам из-за атак на склады — 30,1 млрд рублей",
-        "url": "https://vc.ru/marketplace/3220677-otchet-ozon-chistaya-pribyl-37-mlrd-rubley?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "В Калифорнии на шоссе I-880 сгорел электрогрузовик Tesla Semi",
-        "url": "https://habr.com/ru/news/1100572/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100572"
+        "title": "Arrowmax представила умную отвёртку с камерой и нейросетью для подбора бит",
+        "url": "https://habr.com/ru/news/1100820/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100820"
       },
       {
-        "title": "Роскомнадзор внёс Apple и Microsoft в реестр организаторов распространения информации",
-        "url": "https://habr.com/ru/news/1100560/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100560"
+        "title": "Исследователь нашёл способ взломать Telegram через анимированные стикеры без участия пользователя",
+        "url": "https://habr.com/ru/news/1100814/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100814"
       },
       {
-        "title": "В PowerToys 0.102 для Windows 11 устранили два бага",
-        "url": "https://habr.com/ru/news/1100540/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100540"
+        "title": "Apple представила MacBook Pro с сенсорным OLED‑экраном и динамическим островом вместо «чёлки»",
+        "url": "https://habr.com/ru/news/1100810/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100810"
       },
       {
-        "title": "Сатья Наделла изменил мнение о безопасности повышения мощности ИИ",
-        "url": "https://habr.com/ru/news/1100536/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100536"
+        "title": "Вышла Gemini 4 Carbon: поиск уязвимостей, кодинг и работа несколько дней подряд",
+        "url": "https://habr.com/ru/companies/bothub/news/1100802/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100802"
       },
       {
-        "title": "Cloudflare и VoidZero представили tsrs — порт TypeScript на Rust, сгенерированный ИИ",
-        "url": "https://habr.com/ru/companies/selectel/news/1100148/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100148"
+        "title": "Вышла утилита SimSlim, которая снижает расход памяти симуляторов Xcode с 4 ГБ до 900 МБ",
+        "url": "https://habr.com/ru/news/1100794/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100794"
       }
     ],
     "tproger": [
       {
+        "title": "Artificial Analysis обновила Intelligence Index до v5: новые тесты и лидеры",
+        "url": "https://tproger.ru/news/artificial-analysis-obnovila-intelligence-index-do-v5-novye-tes"
+      },
+      {
+        "title": "Google анонсировала Gemini 4 Carbon с упором на кибербезопасность",
+        "url": "https://tproger.ru/news/google-anonsirovala-gemini-4-carbon-s-uporom-na-kiberbezopasnost"
+      },
+      {
+        "title": "Практика SQL онлайн: 5 сервисов с задачами и подготовкой к собеседованиям в 2026 году",
+        "url": "https://tproger.ru/articles/praktika-sql-onlajn-5-servisov-s-zadachami-i-podgotovkoj-k-sobes"
+      },
+      {
+        "title": "ТОП-10 нейросетей для создания музыки и песен в 2026 году",
+        "url": "https://tproger.ru/articles/top-10-nejrosetej-dlya-sozdaniya-muzyki-i-pesen-v-2026-godu"
+      },
+      {
         "title": "Как проверить зависимости проекта на уязвимости",
         "url": "https://tproger.ru/articles/kak-proverit-zavisimosti-proekta-na-uyazvimosti"
-      },
-      {
-        "title": "Как я за два дня написал 30 open-source библиотек для Python, JS и SkyForge и автоматизировал релизы",
-        "url": "https://tproger.ru/articles/kak-ya-za-dva-dnya-napisal-30-open-source-bibliotek-dlya-python-js"
-      },
-      {
-        "title": "Как проверить, что память ИИ-агента работает, а не просто «есть»: методика за один вечер",
-        "url": "https://tproger.ru/articles/kak-proverit-chto-pamyat-ii-agenta-rabotaet-a-ne-prosto-est"
-      },
-      {
-        "title": "5 способов защитить ИИ-агента от prompt injection",
-        "url": "https://tproger.ru/articles/5-sposobov-zashhitit-ii-agenta-ot-prompt-injection"
-      },
-      {
-        "title": "ИИ для создания каверов: ТОП-10 нейросетей в 2026 году",
-        "url": "https://tproger.ru/articles/ii-dlya-sozdaniya-kaverov-top-10-nejrosetej-v-2026-godu"
       }
     ]
   },
-  "summary": "Сводка digest-20261028-1203: Самара 11.9°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261028-2208: Самара -0.3°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
