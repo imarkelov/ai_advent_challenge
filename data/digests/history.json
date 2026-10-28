@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261001-0357",
-    "generated_at": "2026-10-01T03:57:27Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 11.2,
-      "feels_like_c": 9.3,
-      "description": "Пасмурно",
-      "wind_ms": 12.3
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Запрет на продажу предоплаченных SIM-карт и единая платформа согласий на обработку персональных данных: Минцифры представило третий пакет мер по борьбе с мошенниками",
-          "url": "https://vc.ru/legal/3167525-zapret-na-prodazhu-predoplachennyh-sim-kart?from=rss"
-        },
-        {
-          "title": "Wildberries запустил сервис для поиска частных специалистов «WB Услуги»",
-          "url": "https://vc.ru/marketplace/3167509-wildberries-zapustil-wb-uslugi-dlya-poiska-chastnykh-spetsialistov?from=rss"
-        },
-        {
-          "title": "Dyson объяснила проблемы с «умной» зубной щёткой «сбоем на производстве» — из-за этого вода просачивалась в батарейный отсек, что приводило к поломке",
-          "url": "https://vc.ru/tech/3168223-problemy-s-zubnoj-shhetkoj-dyson?from=rss"
-        },
-        {
-          "title": "Apple 13 октября 2026 года представит дисплей для управления «умным» домом, новую колонку HomePod mini и приставку Apple TV — Bloomberg",
-          "url": "https://vc.ru/tech/3167682-apple-predstavit-displey-dlya-umnogo-doma?from=rss"
-        },
-        {
-          "title": "Samsung представила маячок Galaxy SmartTag 3 — он работает с iOS",
-          "url": "https://vc.ru/tech/3167917-samsung-galaxy-smarttag-3-novyj-treker-s-podderzhkoy-ios?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Microsoft представила WSL 3.0 с поддержкой запуска Linux-контейнеров в Windows",
-          "url": "https://habr.com/ru/news/1088392/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088392"
-        },
-        {
-          "title": "Вышел FreeCAD 1.1.4",
-          "url": "https://habr.com/ru/news/1088728/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088728"
-        },
-        {
-          "title": "Выпуск обновления планетария с открытым кодом Stellarium 26.3",
-          "url": "https://habr.com/ru/news/1088508/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088508"
-        },
-        {
-          "title": "Gemini 4 Argon уже оптимизирует инфраструктуру Google и переписывает код",
-          "url": "https://habr.com/ru/companies/bothub/news/1088822/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088822"
-        },
-        {
-          "title": "Reuters получила доступ к заявке Anthropic на IPO. Что внутри? Убытки",
-          "url": "https://habr.com/ru/news/1088800/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088800"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Почему команда растёт, а фичи выходят медленнее",
-          "url": "https://tproger.ru/articles/pochemu-komanda-rastyot-a-fichi-vyhodyat-medlennee"
-        },
-        {
-          "title": "5 российских облаков для запуска своих ИИ-моделей в 2026 году",
-          "url": "https://tproger.ru/digest/5-rossijskih-oblakov-dlya-zapuska-svoih-ii-modelej-v-2026-godu"
-        },
-        {
-          "title": "OpenAI на DevDay выпустила GPT-6.1 Sol по цене в пять раз ниже Astra",
-          "url": "https://tproger.ru/news/openai-na-devday-vypustila-gpt-6-1-sol-po-cene-v-pyat-raz-nizhe-a"
-        },
-        {
-          "title": "LLM в проде — это не модель: как спроектировать доступы, контроль качества и стоимость AI-сервиса",
-          "url": "https://tproger.ru/articles/llm-v-prode-eto-ne-model-kak-sproektirovat-dostupy-kontrol"
-        },
-        {
-          "title": "В n8n 2.42.0 агентов включили по умолчанию",
-          "url": "https://tproger.ru/news/v-n8n-2-42-0-agentov-vklyuchili-po-umolchaniyu"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261001-0357: Самара 11.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261001-1221",
     "generated_at": "2026-10-01T12:21:54Z",
     "weather": {
@@ -7636,5 +7556,85 @@
       ]
     },
     "summary": "Сводка digest-20261027-2147: Самара -0.5°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261028-0350",
+    "generated_at": "2026-10-28T03:50:07Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": -0.2,
+      "feels_like_c": -2.9,
+      "description": "Туман",
+      "wind_ms": 3.6
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Основателя Level Kitchen Артура Зелёного объявили в розыск по делу об уклонении от налогов — РБК",
+          "url": "https://vc.ru/food/3219412-artur-zelenyj-v-rozyske-urovnen-kitchen?from=rss"
+        },
+        {
+          "title": "Роскомнадзор предложил ввести обязательную идентификацию детей в соцсетях — «Ведомости»",
+          "url": "https://vc.ru/services/3210109-obyazatelnaya-identifikatsiya-detei-v-sotssetyakh?from=rss"
+        },
+        {
+          "title": "Whoosh на период межсезонья переведёт сотрудников на четырёхдневку и сократит зарплаты на 20% — это коснётся офисных сотрудников",
+          "url": "https://vc.ru/transport/3218219-whoosh-perevod-sotrudnikov-na-chetirednevku?from=rss"
+        },
+        {
+          "title": "Apple удалила VPN-клиент Incy из российского App Store",
+          "url": "https://vc.ru/services/3218611-apple-udavila-vpn-incy-iz-rossiiskogo-appstore?from=rss"
+        },
+        {
+          "title": "Минцифры хочет ввести для виртуальных операторов связи минимальный тариф в 250 рублей и запретить им использовать сети больше чем одного оператора — «Ъ»",
+          "url": "https://vc.ru/services/3218792-mincifry-vvodit-minimalnyj-tarif-dlya-virtualnyh-operatorov-svyazi?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "В Южной Корее владельцев Tesla преследуют за незаконную разблокировку законно купленного FSD",
+          "url": "https://habr.com/ru/news/1100340/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100340"
+        },
+        {
+          "title": "Миссия НАСА «Swift» завершилась перед входом в атмосферу",
+          "url": "https://habr.com/ru/news/1100304/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100304"
+        },
+        {
+          "title": "Астрономы зафиксировали рекордно длительную активность гамма‑всплеска",
+          "url": "https://habr.com/ru/news/1100296/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100296"
+        },
+        {
+          "title": "Google представила Genie 4: генерация мира со звуками и говорящими персонажами",
+          "url": "https://habr.com/ru/companies/bothub/news/1100294/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100294"
+        },
+        {
+          "title": "Разработчик превратил уровни Doom в вычислитель для нейросетей",
+          "url": "https://habr.com/ru/news/1100282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100282"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "ИИ для создания каверов: ТОП-10 нейросетей в 2026 году",
+          "url": "https://tproger.ru/articles/ii-dlya-sozdaniya-kaverov-top-10-nejrosetej-v-2026-godu"
+        },
+        {
+          "title": "Гайд для команды технических писателей: как передать создание документации AI-агентам",
+          "url": "https://tproger.ru/articles/gajd-dlya-komandy-tehnicheskih-pisatelej-kak-peredat-sozdanie-do"
+        },
+        {
+          "title": "Сходил на GoCloud Tech 2026 и посмотрел, как Cloud.ru видит работу с ИИ",
+          "url": "https://tproger.ru/articles/shodil-na-gocloud-tech-2026-i-posmotrel-kak-cloud-ru-predlagaet"
+        },
+        {
+          "title": "Резюме больше, а нанимать сложнее. Где буксует найм в ИТ",
+          "url": "https://tproger.ru/articles/kandidaty-ne-nahodyat-rabotu-kompanii-sotrudnikov-chto-mewaet"
+        },
+        {
+          "title": "OpenAI выпустила GPT-6.1 Terra по $1 за миллион входных токенов и открыла Decisions API",
+          "url": "https://tproger.ru/news/openai-vypustila-gpt-6-1-terra-po-1-za-million-vhodnyh-tokenov"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261028-0350: Самара -0.2°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

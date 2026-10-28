@@ -1,10 +1,10 @@
 {
-  "id": "digest-20261027-2147",
-  "generated_at": "2026-10-27T21:47:09Z",
+  "id": "digest-20261028-0350",
+  "generated_at": "2026-10-28T03:50:07Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -0.5,
-    "feels_like_c": -3.2,
+    "temp_c": -0.2,
+    "feels_like_c": -2.9,
     "description": "Туман",
     "wind_ms": 3.6
   },
@@ -33,6 +33,10 @@
     ],
     "habr": [
       {
+        "title": "В Южной Корее владельцев Tesla преследуют за незаконную разблокировку законно купленного FSD",
+        "url": "https://habr.com/ru/news/1100340/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100340"
+      },
+      {
         "title": "Миссия НАСА «Swift» завершилась перед входом в атмосферу",
         "url": "https://habr.com/ru/news/1100304/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100304"
       },
@@ -47,10 +51,6 @@
       {
         "title": "Разработчик превратил уровни Doom в вычислитель для нейросетей",
         "url": "https://habr.com/ru/news/1100282/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100282"
-      },
-      {
-        "title": "Тренировки привели к структурной перестройке нервных узлов, регулирующих сердце у крыс",
-        "url": "https://habr.com/ru/news/1100278/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100278"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261027-2147: Самара -0.5°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261028-0350: Самара -0.2°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
