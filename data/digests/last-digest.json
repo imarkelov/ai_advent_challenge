@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261029-1213",
-  "generated_at": "2026-10-29T12:13:45Z",
+  "id": "digest-20261029-2223",
+  "generated_at": "2026-10-29T22:23:47Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 11.2,
-    "feels_like_c": 9.1,
-    "description": "Преимущественно ясно",
-    "wind_ms": 1.5
+    "temp_c": -0.8,
+    "feels_like_c": -3.6,
+    "description": "Туман",
+    "wind_ms": 3.4
   },
   "news": {
     "vc.ru": [
@@ -15,45 +15,57 @@
         "url": "https://vc.ru/tech/3223517-obyazatelnaya-registratsiya-imei-dlya-serykh-smartfonov-v-rossii?from=rss"
       },
       {
-        "title": "«М.Видео» запустила аренду восстановленной электроники и бытовой техники",
-        "url": "https://vc.ru/tech/3223074-arenda-vosstanovlennoy-elektroniki-v-mvideo?from=rss"
+        "title": "И никакого ИИ: Prada выпустила рекламу с рисунками 75-летнего художника Disney",
+        "url": "https://vc.ru/marketing/3223546-prada-reklama-ruchnaya-animatsiya-disney?from=rss"
+      },
+      {
+        "title": "Логотип красиво светится, при нажатии экран пошатывает: в соцсетях публикуют первые видео с сенсорным MacBook Pro",
+        "url": "https://vc.ru/tech/3224085-sensornyj-macbook-pro-s-logotipom-apple?from=rss"
       },
       {
         "title": "«Авито» анонсировал запуск продаж товаров через аукционы со ставками",
         "url": "https://vc.ru/services/3223099-auktsiony-na-avito-prodazha-tovarov-so-stavkami?from=rss"
       },
       {
-        "title": "Круизный лайнер Villa Vie Odyssey остановил «непрерывное» кругосветное путешествие и «выселил» постояльцев в Камбодже — из-за роста цен на топливо",
-        "url": "https://vc.ru/offline/3221954-kruiznyj-lajner-villa-vie-odyssey-vyiselil-passazhirov-v-kambodzhe?from=rss"
-      },
-      {
-        "title": "Отчёт «Яндекса» за квартал: выручка — 411 млрд рублей, скорректированная прибыль — 46 млрд рублей",
-        "url": "https://vc.ru/money/3222808-otchet-yandeksa-vyruchka-i-pribyl-kompanii?from=rss"
+        "title": "Криптобиржа KuCoin объявила о прекращении обслуживания пользователей в России и Беларуси",
+        "url": "https://vc.ru/crypto/3223988-kriptobirzha-kucoin-prekraschaet-uslugi-v-rossii-i-belarusi?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "В Южной Корее вводят трёхлетний запрет на сдачу экзаменов для учащихся, которые используют очки с ИИ для списывания",
-        "url": "https://habr.com/ru/news/1101214/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101214"
+        "title": "Взломана биржа Binance, хакеры вывели криптовалюты на ~3 миллиарда долларов",
+        "url": "https://habr.com/ru/news/1101444/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101444"
       },
       {
-        "title": "«VK Видео» ускорил запуск роликов в два раза",
-        "url": "https://habr.com/ru/news/1101192/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101192"
+        "title": "Взлом Binance: с биржи вывели криптовалюту почти на $6 млрд",
+        "url": "https://habr.com/ru/news/1101442/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101442"
       },
       {
-        "title": "Claude начал блокировать пользователей за российский паспорт",
-        "url": "https://habr.com/ru/companies/aurorium/news/1101164/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101164"
+        "title": "AI‑поиск снизил выручку Google от поисковых сервисов, но компания будет исправлять ситуацию рекламой в ответах нейросети",
+        "url": "https://habr.com/ru/news/1101426/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101426"
       },
       {
-        "title": "В OpenIDE появилась поддержка Ruby: редактор, отладчик, тесты и Rails",
-        "url": "https://habr.com/ru/companies/haulmont/news/1101160/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101160"
+        "title": "В Android Studio появилась поддержка более 40 AI‑агентов, включая Claude и Codex",
+        "url": "https://habr.com/ru/news/1101424/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101424"
       },
       {
-        "title": "Наконец-то есть кому делегировать: MWS AI выпустила универсального ИИ-агента для офисной рутины",
-        "url": "https://habr.com/ru/companies/ru_mts/news/1101142/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101142"
+        "title": "Xreal представила XR‑очки Aura с Android XR и Gemini",
+        "url": "https://habr.com/ru/news/1101412/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101412"
       }
     ],
     "tproger": [
+      {
+        "title": "OpenAI удвоила квоту Codex на Pro-тарифах и отменила урезание Pro 200",
+        "url": "https://tproger.ru/news/openai-udvoila-kvotu-codex-na-pro-tarifah-i-otmenila-urezanie-pr"
+      },
+      {
+        "title": "Mistral выложила веса Large 4 и закрепила цену API на уровне скидки превью",
+        "url": "https://tproger.ru/news/mistral-vylozhila-vesa-large-4-i-vdvoe-snizila-cenu-api-protiv-pr"
+      },
+      {
+        "title": "Claude Code каждые 30 секунд тратит токены на сводку для строки статуса",
+        "url": "https://tproger.ru/news/claude-code-kazhdye-30-sekund-tratit-tokeny-na-svodku-dlya-stroki"
+      },
       {
         "title": "Рейтинг российских BPM-систем",
         "url": "https://tproger.ru/articles/rejting-rossijskih-bpm-sistem"
@@ -61,20 +73,8 @@
       {
         "title": "Artificial Analysis обновила Intelligence Index до v5: новые тесты и лидеры",
         "url": "https://tproger.ru/news/artificial-analysis-obnovila-intelligence-index-do-v5-novye-tes"
-      },
-      {
-        "title": "Google анонсировала Gemini 4 Carbon с упором на кибербезопасность",
-        "url": "https://tproger.ru/news/google-anonsirovala-gemini-4-carbon-s-uporom-na-kiberbezopasnost"
-      },
-      {
-        "title": "Практика SQL онлайн: 5 сервисов с задачами и подготовкой к собеседованиям в 2026 году",
-        "url": "https://tproger.ru/articles/praktika-sql-onlajn-5-servisov-s-zadachami-i-podgotovkoj-k-sobes"
-      },
-      {
-        "title": "ТОП-10 нейросетей для создания музыки и песен в 2026 году",
-        "url": "https://tproger.ru/articles/top-10-nejrosetej-dlya-sozdaniya-muzyki-i-pesen-v-2026-godu"
       }
     ]
   },
-  "summary": "Сводка digest-20261029-1213: Самара 11.2°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261029-2223: Самара -0.8°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
