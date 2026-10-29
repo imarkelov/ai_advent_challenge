@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261028-2208",
-  "generated_at": "2026-10-28T22:08:22Z",
+  "id": "digest-20261029-0413",
+  "generated_at": "2026-10-29T04:13:05Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -0.3,
-    "feels_like_c": -3.0,
+    "temp_c": -2.2,
+    "feels_like_c": -4.8,
     "description": "Туман",
-    "wind_ms": 3.0
+    "wind_ms": 1.0
   },
   "news": {
     "vc.ru": [
@@ -27,11 +27,15 @@
         "url": "https://vc.ru/legal/3220542-roskomnadzor-vklyuchil-apple-i-microsoft-v-reestr-ori?from=rss"
       },
       {
-        "title": "Wildberries запустил сервис самовывоза товаров из торговых точек партнёров для всех пользователей",
-        "url": "https://vc.ru/marketplace/3220893-wildberries-zapustil-click-and-collect-samovyvoz?from=rss"
+        "title": "Союз продавцов маркетплейсов пожаловался в ФАС на «систематические задержки выплат» пострадавшим из-за атак продавцам Wildberries",
+        "url": "https://vc.ru/marketplace/3221748-zaderzhki-vyplat-prodavtsam-wildberries?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "Вышли стабильная сборка Scribus 1.6.7 и экспериментальная версия Scribus 1.7.4",
+        "url": "https://habr.com/ru/news/1100434/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100434"
+      },
       {
         "title": "Arrowmax представила умную отвёртку с камерой и нейросетью для подбора бит",
         "url": "https://habr.com/ru/news/1100820/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100820"
@@ -47,10 +51,6 @@
       {
         "title": "Вышла Gemini 4 Carbon: поиск уязвимостей, кодинг и работа несколько дней подряд",
         "url": "https://habr.com/ru/companies/bothub/news/1100802/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100802"
-      },
-      {
-        "title": "Вышла утилита SimSlim, которая снижает расход памяти симуляторов Xcode с 4 ГБ до 900 МБ",
-        "url": "https://habr.com/ru/news/1100794/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100794"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261028-2208: Самара -0.3°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261029-0413: Самара -2.2°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
