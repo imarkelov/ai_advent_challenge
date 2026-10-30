@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261029-2223",
-  "generated_at": "2026-10-29T22:23:47Z",
+  "id": "digest-20261030-0413",
+  "generated_at": "2026-10-30T04:13:29Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -0.8,
-    "feels_like_c": -3.6,
+    "temp_c": -2.5,
+    "feels_like_c": -5.2,
     "description": "Туман",
-    "wind_ms": 3.4
+    "wind_ms": 1.1
   },
   "news": {
     "vc.ru": [
@@ -15,26 +15,30 @@
         "url": "https://vc.ru/tech/3223517-obyazatelnaya-registratsiya-imei-dlya-serykh-smartfonov-v-rossii?from=rss"
       },
       {
-        "title": "И никакого ИИ: Prada выпустила рекламу с рисунками 75-летнего художника Disney",
-        "url": "https://vc.ru/marketing/3223546-prada-reklama-ruchnaya-animatsiya-disney?from=rss"
-      },
-      {
         "title": "Логотип красиво светится, при нажатии экран пошатывает: в соцсетях публикуют первые видео с сенсорным MacBook Pro",
         "url": "https://vc.ru/tech/3224085-sensornyj-macbook-pro-s-logotipom-apple?from=rss"
+      },
+      {
+        "title": "И никакого ИИ: Prada выпустила рекламу с рисунками 75-летнего художника Disney",
+        "url": "https://vc.ru/marketing/3223546-prada-reklama-ruchnaya-animatsiya-disney?from=rss"
       },
       {
         "title": "«Авито» анонсировал запуск продаж товаров через аукционы со ставками",
         "url": "https://vc.ru/services/3223099-auktsiony-na-avito-prodazha-tovarov-so-stavkami?from=rss"
       },
       {
-        "title": "Криптобиржа KuCoin объявила о прекращении обслуживания пользователей в России и Беларуси",
-        "url": "https://vc.ru/crypto/3223988-kriptobirzha-kucoin-prekraschaet-uslugi-v-rossii-i-belarusi?from=rss"
+        "title": "Госдума поддержала в первом чтении законопроект о повышении МРОТ с 27 093 рублей до 28 935 рублей в месяц",
+        "url": "https://vc.ru/money/3224364-gosduma-podderzhala-zakonoproekt-o-povyshenii-mrot?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Взломана биржа Binance, хакеры вывели криптовалюты на ~3 миллиарда долларов",
-        "url": "https://habr.com/ru/news/1101444/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101444"
+        "title": "Команда IPFire представила открытый проект fireperf — инструмент для измерения производительности сети",
+        "url": "https://habr.com/ru/news/1101370/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101370"
+      },
+      {
+        "title": "В Claude Code появилась опция, позволяющая ИИ-агенту выполнять все опасные команды терминала без подтверждения человека",
+        "url": "https://habr.com/ru/news/1101046/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101046"
       },
       {
         "title": "Взлом Binance: с биржи вывели криптовалюту почти на $6 млрд",
@@ -47,10 +51,6 @@
       {
         "title": "В Android Studio появилась поддержка более 40 AI‑агентов, включая Claude и Codex",
         "url": "https://habr.com/ru/news/1101424/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101424"
-      },
-      {
-        "title": "Xreal представила XR‑очки Aura с Android XR и Gemini",
-        "url": "https://habr.com/ru/news/1101412/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101412"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261029-2223: Самара -0.8°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261030-0413: Самара -2.5°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
