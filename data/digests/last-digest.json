@@ -1,15 +1,23 @@
 {
-  "id": "digest-20261030-0413",
-  "generated_at": "2026-10-30T04:13:29Z",
+  "id": "digest-20261030-1204",
+  "generated_at": "2026-10-30T12:04:16Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -2.5,
-    "feels_like_c": -5.2,
-    "description": "Туман",
-    "wind_ms": 1.1
+    "temp_c": 10.7,
+    "feels_like_c": 8.2,
+    "description": "Ясно",
+    "wind_ms": 2.3
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Взлом Binance: криптобиржа приостановила вывод средств, предполагаемый ущерб — $6,3 млрд",
+        "url": "https://vc.ru/crypto/3224844-vzlom-binance-priostanovka-vyvoda-sredstv?from=rss"
+      },
+      {
+        "title": "Апелляционный суд США разрешил пока не возобновлять программу розыгрыша грин-карт — решение нижестоящего суда обжаловало правительство",
+        "url": "https://vc.ru/migration/3225604-apellyatsionnyj-sud-priostanovil-programmu-rozygrysha-grin-kart?from=rss"
+      },
       {
         "title": "Минцифры готовит требование об обязательной регистрации IMEI для ввезённых в Россию «серых» смартфонов в течение двух недель — потом их перестанут обслуживать в сетях связи",
         "url": "https://vc.ru/tech/3223517-obyazatelnaya-registratsiya-imei-dlya-serykh-smartfonov-v-rossii?from=rss"
@@ -19,41 +27,45 @@
         "url": "https://vc.ru/tech/3224085-sensornyj-macbook-pro-s-logotipom-apple?from=rss"
       },
       {
-        "title": "И никакого ИИ: Prada выпустила рекламу с рисунками 75-летнего художника Disney",
-        "url": "https://vc.ru/marketing/3223546-prada-reklama-ruchnaya-animatsiya-disney?from=rss"
-      },
-      {
-        "title": "«Авито» анонсировал запуск продаж товаров через аукционы со ставками",
-        "url": "https://vc.ru/services/3223099-auktsiony-na-avito-prodazha-tovarov-so-stavkami?from=rss"
-      },
-      {
         "title": "Госдума поддержала в первом чтении законопроект о повышении МРОТ с 27 093 рублей до 28 935 рублей в месяц",
         "url": "https://vc.ru/money/3224364-gosduma-podderzhala-zakonoproekt-o-povyshenii-mrot?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Команда IPFire представила открытый проект fireperf — инструмент для измерения производительности сети",
-        "url": "https://habr.com/ru/news/1101370/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101370"
+        "title": "Reddit начнёт требовать вход по учётной записи для доступа к контенту",
+        "url": "https://habr.com/ru/news/1101718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101718"
       },
       {
-        "title": "В Claude Code появилась опция, позволяющая ИИ-агенту выполнять все опасные команды терминала без подтверждения человека",
-        "url": "https://habr.com/ru/news/1101046/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101046"
+        "title": "Kojima Productions показала первый трейлер аниме Death Stranding Isolations",
+        "url": "https://habr.com/ru/companies/ggsel/news/1101706/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101706"
       },
       {
-        "title": "Взлом Binance: с биржи вывели криптовалюту почти на $6 млрд",
-        "url": "https://habr.com/ru/news/1101442/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101442"
+        "title": "Антон Логвинов раскритиковал Phantom Blade Zero за копирование игр FromSoftware",
+        "url": "https://habr.com/ru/companies/ggsel/news/1101684/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101684"
       },
       {
-        "title": "AI‑поиск снизил выручку Google от поисковых сервисов, но компания будет исправлять ситуацию рекламой в ответах нейросети",
-        "url": "https://habr.com/ru/news/1101426/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101426"
+        "title": "The Elder Scrolls 6: Sentinel — инсайдеры раскрыли название и место действия TES 6",
+        "url": "https://habr.com/ru/companies/ggsel/news/1101676/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101676"
       },
       {
-        "title": "В Android Studio появилась поддержка более 40 AI‑агентов, включая Claude и Codex",
-        "url": "https://habr.com/ru/news/1101424/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101424"
+        "title": "Pornhub станет конкурентом Twitch и YouTube — платформа объявила о запуске контента по играм, спорту и другим темам",
+        "url": "https://habr.com/ru/news/1101670/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101670"
       }
     ],
     "tproger": [
+      {
+        "title": "Как обновить PostgreSQL с минимальным простоем: pg_upgrade, логическая репликация и план отката",
+        "url": "https://tproger.ru/articles/kak-obnovit-postgresql-s-minimalnym-prostoem-pg-upgrade-logi"
+      },
+      {
+        "title": "Облачные серверы в России: сравниваем провайдеров на одинаковой конфигурации",
+        "url": "https://tproger.ru/articles/oblachnye-servery-v-rossii-sravnivaem-provajderov-na-odinakovoj"
+      },
+      {
+        "title": "Связь без сбоев: как устроена разработка телеком-платформы YADRO",
+        "url": "https://tproger.ru/articles/svyaz-bez-sboev-kak-ustroena-razrabotka-telekom-platformy-yadro"
+      },
       {
         "title": "OpenAI удвоила квоту Codex на Pro-тарифах и отменила урезание Pro 200",
         "url": "https://tproger.ru/news/openai-udvoila-kvotu-codex-na-pro-tarifah-i-otmenila-urezanie-pr"
@@ -61,20 +73,8 @@
       {
         "title": "Mistral выложила веса Large 4 и закрепила цену API на уровне скидки превью",
         "url": "https://tproger.ru/news/mistral-vylozhila-vesa-large-4-i-vdvoe-snizila-cenu-api-protiv-pr"
-      },
-      {
-        "title": "Claude Code каждые 30 секунд тратит токены на сводку для строки статуса",
-        "url": "https://tproger.ru/news/claude-code-kazhdye-30-sekund-tratit-tokeny-na-svodku-dlya-stroki"
-      },
-      {
-        "title": "Рейтинг российских BPM-систем",
-        "url": "https://tproger.ru/articles/rejting-rossijskih-bpm-sistem"
-      },
-      {
-        "title": "Artificial Analysis обновила Intelligence Index до v5: новые тесты и лидеры",
-        "url": "https://tproger.ru/news/artificial-analysis-obnovila-intelligence-index-do-v5-novye-tes"
       }
     ]
   },
-  "summary": "Сводка digest-20261030-0413: Самара -2.5°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261030-1204: Самара 10.7°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
