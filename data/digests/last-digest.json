@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261030-2154",
-  "generated_at": "2026-10-30T21:54:33Z",
+  "id": "digest-20261031-0355",
+  "generated_at": "2026-10-31T03:55:15Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 0.2,
-    "feels_like_c": -2.6,
+    "temp_c": -0.7,
+    "feels_like_c": -3.7,
     "description": "Ясно",
-    "wind_ms": 4.0
+    "wind_ms": 4.5
   },
   "news": {
     "vc.ru": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261030-2154: Самара 0.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261031-0355: Самара -0.7°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
