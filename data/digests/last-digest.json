@@ -1,18 +1,22 @@
 {
-  "id": "digest-20261031-1646",
-  "generated_at": "2026-10-31T16:46:01Z",
+  "id": "digest-20261031-2056",
+  "generated_at": "2026-10-31T20:56:20Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 4.1,
-    "feels_like_c": 1.3,
-    "description": "Преимущественно ясно",
-    "wind_ms": 4.3
+    "temp_c": 2.1,
+    "feels_like_c": -0.5,
+    "description": "Переменная облачность",
+    "wind_ms": 3.2
   },
   "news": {
     "vc.ru": [
       {
         "title": "Samsung запустила рекламу раскладушки Galaxy Z Fold 8, высмеивающую дефект экрана на некоторых iPhone Duo",
         "url": "https://vc.ru/marketing/3227697-samsung-vysmeivaet-defekty-ekrana-iphone-duo?from=rss"
+      },
+      {
+        "title": "Binance сообщила, что смогла возместить 90% украденных в ходе взлома активов за счёт собственных средств",
+        "url": "https://vc.ru/crypto/3227876-binance-vozmetila-90-procent-ukradennih-aktivov?from=rss"
       },
       {
         "title": "Взлом Binance: криптобиржа приостановила вывод средств, предполагаемый ущерб — $6,3 млрд",
@@ -23,15 +27,23 @@
         "url": "https://vc.ru/crypto/3226326-binance-vozobnovit-vyvod-sredstv-posle-vzloma?from=rss"
       },
       {
-        "title": "Апелляционный суд США разрешил пока не возобновлять программу розыгрыша грин-карт — решение нижестоящего суда обжаловало правительство",
-        "url": "https://vc.ru/migration/3225604-apellyatsionnyj-sud-priostanovil-programmu-rozygrysha-grin-kart?from=rss"
-      },
-      {
-        "title": "Хакеры украли свыше $2,5 млн со счетов пользователей сервиса рынков предсказаний Polymarket — СМИ",
-        "url": "https://vc.ru/services/3225747-hakery-ukrali-dengi-u-polzovateley-polymarket?from=rss"
+        "title": "День 1711: с начала 2026 года судебные приставы взыскали с физических и юридических лиц больше 1,1 трлн рублей",
+        "url": "https://vc.ru/money/3227387-sudebnye-pristavy-vzyskali-bolee-1-1-trln-rublej?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "Утекли фотографии новых 3D‑принтеров Bambu Lab с семью и девятью сменными инструментами",
+        "url": "https://habr.com/ru/news/1102158/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102158"
+      },
+      {
+        "title": "Elegoo представила свой первый 3D‑сканер M1 Ultra с экраном и Wi‑Fi",
+        "url": "https://habr.com/ru/news/1102156/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102156"
+      },
+      {
+        "title": "Разработчик выпустил приложение для управления MacBook постукиваниями по экрану",
+        "url": "https://habr.com/ru/news/1102146/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102146"
+      },
       {
         "title": "Cisco предоставила своему инженеру неограниченный доступ к ИИ-токенам для переписывания легаси-кода",
         "url": "https://habr.com/ru/news/1102096/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102096"
@@ -39,18 +51,6 @@
       {
         "title": "Шадаев допустил блокировку всех SIM‑карт владельца аккаунта в MAX, признанного мошенническим",
         "url": "https://habr.com/ru/news/1102074/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102074"
-      },
-      {
-        "title": "Microsoft закрыла проект The Garage",
-        "url": "https://habr.com/ru/news/1102066/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102066"
-      },
-      {
-        "title": "Люди боятся беспилотных такси: 70% американцев им не доверяют",
-        "url": "https://habr.com/ru/news/1102036/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102036"
-      },
-      {
-        "title": "Self-hosted модель «Le Chonk» вышла из превью. Как сравнялись с GLM и почему Альтман недоволен?",
-        "url": "https://habr.com/ru/companies/selectel/news/1101750/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101750"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261031-1646: Самара 4.1°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261031-2056: Самара 2.1°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
