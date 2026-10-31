@@ -1,18 +1,26 @@
 {
-  "id": "digest-20261031-1138",
-  "generated_at": "2026-10-31T11:38:38Z",
+  "id": "digest-20261031-1646",
+  "generated_at": "2026-10-31T16:46:01Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 11.2,
-    "feels_like_c": 8.0,
+    "temp_c": 4.1,
+    "feels_like_c": 1.3,
     "description": "Преимущественно ясно",
-    "wind_ms": 5.4
+    "wind_ms": 4.3
   },
   "news": {
     "vc.ru": [
       {
+        "title": "Samsung запустила рекламу раскладушки Galaxy Z Fold 8, высмеивающую дефект экрана на некоторых iPhone Duo",
+        "url": "https://vc.ru/marketing/3227697-samsung-vysmeivaet-defekty-ekrana-iphone-duo?from=rss"
+      },
+      {
         "title": "Взлом Binance: криптобиржа приостановила вывод средств, предполагаемый ущерб — $6,3 млрд",
         "url": "https://vc.ru/crypto/3224844-vzlom-binance-priostanovka-vyvoda-sredstv?from=rss"
+      },
+      {
+        "title": "Вывод средств рассчитывает возобновить до 1 ноября 2026 года, потери полностью покроет: содиректор Binance — о работе биржи после взлома",
+        "url": "https://vc.ru/crypto/3226326-binance-vozobnovit-vyvod-sredstv-posle-vzloma?from=rss"
       },
       {
         "title": "Апелляционный суд США разрешил пока не возобновлять программу розыгрыша грин-карт — решение нижестоящего суда обжаловало правительство",
@@ -21,17 +29,21 @@
       {
         "title": "Хакеры украли свыше $2,5 млн со счетов пользователей сервиса рынков предсказаний Polymarket — СМИ",
         "url": "https://vc.ru/services/3225747-hakery-ukrali-dengi-u-polzovateley-polymarket?from=rss"
-      },
-      {
-        "title": "Вывод средств рассчитывает возобновить до 1 ноября 2026 года, потери полностью покроет: содиректор Binance — о работе биржи после взлома",
-        "url": "https://vc.ru/crypto/3226326-binance-vozobnovit-vyvod-sredstv-posle-vzloma?from=rss"
-      },
-      {
-        "title": "Операторы связи договорились отложить до 13 ноября 2026 года блокировку звонков от банков без маркировки",
-        "url": "https://vc.ru/services/3226551-blokirovka-zvonkov-ot-bankov-otlozhena?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "Cisco предоставила своему инженеру неограниченный доступ к ИИ-токенам для переписывания легаси-кода",
+        "url": "https://habr.com/ru/news/1102096/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102096"
+      },
+      {
+        "title": "Шадаев допустил блокировку всех SIM‑карт владельца аккаунта в MAX, признанного мошенническим",
+        "url": "https://habr.com/ru/news/1102074/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102074"
+      },
+      {
+        "title": "Microsoft закрыла проект The Garage",
+        "url": "https://habr.com/ru/news/1102066/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102066"
+      },
       {
         "title": "Люди боятся беспилотных такси: 70% американцев им не доверяют",
         "url": "https://habr.com/ru/news/1102036/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102036"
@@ -39,18 +51,6 @@
       {
         "title": "Self-hosted модель «Le Chonk» вышла из превью. Как сравнялись с GLM и почему Альтман недоволен?",
         "url": "https://habr.com/ru/companies/selectel/news/1101750/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101750"
-      },
-      {
-        "title": "Семь чат‑ботов не смогли отличить ИИ от человека в имитации теста Тьюринга",
-        "url": "https://habr.com/ru/news/1101994/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101994"
-      },
-      {
-        "title": "Глава Proton потребовал от разработчиков больше ИИ‑кода",
-        "url": "https://habr.com/ru/news/1101988/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101988"
-      },
-      {
-        "title": "Microsoft заявила об ограничении рисков атак на имена пользователей через доступ к ссылкам OneDrive или SharePoint",
-        "url": "https://habr.com/ru/news/1101982/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101982"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261031-1138: Самара 11.2°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261031-1646: Самара 4.1°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
