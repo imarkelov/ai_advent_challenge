@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261031-0355",
-  "generated_at": "2026-10-31T03:55:15Z",
+  "id": "digest-20261031-1138",
+  "generated_at": "2026-10-31T11:38:38Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -0.7,
-    "feels_like_c": -3.7,
-    "description": "Ясно",
-    "wind_ms": 4.5
+    "temp_c": 11.2,
+    "feels_like_c": 8.0,
+    "description": "Преимущественно ясно",
+    "wind_ms": 5.4
   },
   "news": {
     "vc.ru": [
@@ -27,30 +27,30 @@
         "url": "https://vc.ru/crypto/3226326-binance-vozobnovit-vyvod-sredstv-posle-vzloma?from=rss"
       },
       {
-        "title": "Логотип красиво светится, при нажатии экран пошатывает: в соцсетях публикуют первые видео с сенсорным MacBook Pro",
-        "url": "https://vc.ru/tech/3224085-sensornyj-macbook-pro-s-logotipom-apple?from=rss"
+        "title": "Операторы связи договорились отложить до 13 ноября 2026 года блокировку звонков от банков без маркировки",
+        "url": "https://vc.ru/services/3226551-blokirovka-zvonkov-ot-bankov-otlozhena?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Microsoft прекращает поддержку Copilot на смарт-телевизорах LG",
-        "url": "https://habr.com/ru/news/1100808/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100808"
+        "title": "Люди боятся беспилотных такси: 70% американцев им не доверяют",
+        "url": "https://habr.com/ru/news/1102036/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102036"
       },
       {
-        "title": "Anthropic переименовала подписки и сняла 5-часовые лимиты для некоторых",
-        "url": "https://habr.com/ru/companies/bothub/news/1101934/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101934"
+        "title": "Self-hosted модель «Le Chonk» вышла из превью. Как сравнялись с GLM и почему Альтман недоволен?",
+        "url": "https://habr.com/ru/companies/selectel/news/1101750/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101750"
       },
       {
-        "title": "Xiaomi выпустила открытую модель OCR-0 для распознавания документов",
-        "url": "https://habr.com/ru/news/1101892/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101892"
+        "title": "Семь чат‑ботов не смогли отличить ИИ от человека в имитации теста Тьюринга",
+        "url": "https://habr.com/ru/news/1101994/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101994"
       },
       {
-        "title": "Российских студентов к 2028 году начнут выпускать из вузов вместе с ИИ‑двойниками, прогнозируют в ВШЭ",
-        "url": "https://habr.com/ru/news/1101882/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101882"
+        "title": "Глава Proton потребовал от разработчиков больше ИИ‑кода",
+        "url": "https://habr.com/ru/news/1101988/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101988"
       },
       {
-        "title": "Apple приобрела ИИ‑стартап Ascend.io",
-        "url": "https://habr.com/ru/news/1101868/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101868"
+        "title": "Microsoft заявила об ограничении рисков атак на имена пользователей через доступ к ссылкам OneDrive или SharePoint",
+        "url": "https://habr.com/ru/news/1101982/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101982"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261031-0355: Самара -0.7°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261031-1138: Самара 11.2°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
