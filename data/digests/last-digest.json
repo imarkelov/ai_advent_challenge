@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261031-2056",
-  "generated_at": "2026-10-31T20:56:20Z",
+  "id": "digest-20261101-0408",
+  "generated_at": "2026-11-01T04:08:53Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.1,
-    "feels_like_c": -0.5,
-    "description": "Переменная облачность",
-    "wind_ms": 3.2
+    "temp_c": -0.6,
+    "feels_like_c": -3.3,
+    "description": "Туман",
+    "wind_ms": 3.3
   },
   "news": {
     "vc.ru": [
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
+        "title": "Релиз открытого проекта CompressO 4.0.0 для сжатия видео на базе движка FFmpeg",
+        "url": "https://habr.com/ru/news/1101870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101870"
+      },
+      {
+        "title": "Вышла версия композитного оконного менеджера Hyprland 0.57.0",
+        "url": "https://habr.com/ru/news/1101860/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101860"
+      },
+      {
+        "title": "OpenAI объединит лимиты веб-чата ChatGPT и Codex с декабря",
+        "url": "https://habr.com/ru/news/1102166/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102166"
+      },
+      {
         "title": "Утекли фотографии новых 3D‑принтеров Bambu Lab с семью и девятью сменными инструментами",
         "url": "https://habr.com/ru/news/1102158/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102158"
       },
       {
         "title": "Elegoo представила свой первый 3D‑сканер M1 Ultra с экраном и Wi‑Fi",
         "url": "https://habr.com/ru/news/1102156/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102156"
-      },
-      {
-        "title": "Разработчик выпустил приложение для управления MacBook постукиваниями по экрану",
-        "url": "https://habr.com/ru/news/1102146/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102146"
-      },
-      {
-        "title": "Cisco предоставила своему инженеру неограниченный доступ к ИИ-токенам для переписывания легаси-кода",
-        "url": "https://habr.com/ru/news/1102096/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102096"
-      },
-      {
-        "title": "Шадаев допустил блокировку всех SIM‑карт владельца аккаунта в MAX, признанного мошенническим",
-        "url": "https://habr.com/ru/news/1102074/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102074"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261031-2056: Самара 2.1°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261101-0408: Самара -0.6°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
