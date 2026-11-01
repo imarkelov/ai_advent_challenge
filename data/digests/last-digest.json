@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261101-0408",
-  "generated_at": "2026-11-01T04:08:53Z",
+  "id": "digest-20261101-1237",
+  "generated_at": "2026-11-01T12:37:50Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -0.6,
-    "feels_like_c": -3.3,
-    "description": "Туман",
-    "wind_ms": 3.3
+    "temp_c": 9.1,
+    "feels_like_c": 6.9,
+    "description": "Пасмурно",
+    "wind_ms": 1.3
   },
   "news": {
     "vc.ru": [
-      {
-        "title": "Samsung запустила рекламу раскладушки Galaxy Z Fold 8, высмеивающую дефект экрана на некоторых iPhone Duo",
-        "url": "https://vc.ru/marketing/3227697-samsung-vysmeivaet-defekty-ekrana-iphone-duo?from=rss"
-      },
       {
         "title": "Binance сообщила, что смогла возместить 90% украденных в ходе взлома активов за счёт собственных средств",
         "url": "https://vc.ru/crypto/3227876-binance-vozmetila-90-procent-ukradennih-aktivov?from=rss"
       },
       {
+        "title": "День 1712: Арбитражный суд Москвы запретил Apple продолжать судебное разбирательство против VK на территории США — компании спорят из-за удаления приложений из App Store",
+        "url": "https://vc.ru/money/3228805-arbitrazhnyj-sud-moskvy-zapretil-apple-suditsya-s-vk-v-ssha?from=rss"
+      },
+      {
+        "title": "Meta* совместно с китайским стартапом Fourier за три месяца разработала прототип человекподобного робота — The Information",
+        "url": "https://vc.ru/tech/3228651-meta-i-kitayskiy-startap-fourier-robot?from=rss"
+      },
+      {
+        "title": "Samsung запустила рекламу раскладушки Galaxy Z Fold 8, высмеивающую дефект экрана на некоторых iPhone Duo",
+        "url": "https://vc.ru/marketing/3227697-samsung-vysmeivaet-defekty-ekrana-iphone-duo?from=rss"
+      },
+      {
         "title": "Взлом Binance: криптобиржа приостановила вывод средств, предполагаемый ущерб — $6,3 млрд",
         "url": "https://vc.ru/crypto/3224844-vzlom-binance-priostanovka-vyvoda-sredstv?from=rss"
-      },
-      {
-        "title": "Вывод средств рассчитывает возобновить до 1 ноября 2026 года, потери полностью покроет: содиректор Binance — о работе биржи после взлома",
-        "url": "https://vc.ru/crypto/3226326-binance-vozobnovit-vyvod-sredstv-posle-vzloma?from=rss"
-      },
-      {
-        "title": "День 1711: с начала 2026 года судебные приставы взыскали с физических и юридических лиц больше 1,1 трлн рублей",
-        "url": "https://vc.ru/money/3227387-sudebnye-pristavy-vzyskali-bolee-1-1-trln-rublej?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Релиз открытого проекта CompressO 4.0.0 для сжатия видео на базе движка FFmpeg",
-        "url": "https://habr.com/ru/news/1101870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101870"
+        "title": "Спутник Google проекта космического ЦОД Suncatcher вышел на связь с ЦУП",
+        "url": "https://habr.com/ru/news/1102244/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102244"
       },
       {
-        "title": "Вышла версия композитного оконного менеджера Hyprland 0.57.0",
-        "url": "https://habr.com/ru/news/1101860/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101860"
+        "title": "Адам Моссери: в креативной сфере многие испытывают тревогу и гнев по поводу ИИ",
+        "url": "https://habr.com/ru/news/1102236/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102236"
       },
       {
-        "title": "OpenAI объединит лимиты веб-чата ChatGPT и Codex с декабря",
-        "url": "https://habr.com/ru/news/1102166/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102166"
+        "title": "ФБР обвинила хакеров из КНДР в хищении активов на сумму более $6 млрд с Binance",
+        "url": "https://habr.com/ru/news/1102228/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102228"
       },
       {
-        "title": "Утекли фотографии новых 3D‑принтеров Bambu Lab с семью и девятью сменными инструментами",
-        "url": "https://habr.com/ru/news/1102158/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102158"
+        "title": "Обновление проекта KillerPDF 1.9.0 — редактора PDF с открытым исходным кодом для Windows 10/11",
+        "url": "https://habr.com/ru/news/1101878/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101878"
       },
       {
-        "title": "Elegoo представила свой первый 3D‑сканер M1 Ultra с экраном и Wi‑Fi",
-        "url": "https://habr.com/ru/news/1102156/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102156"
+        "title": "Вредоносное ПО стало использовать LLM для ранжирования жертв по степени их ценности",
+        "url": "https://habr.com/ru/news/1102226/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102226"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261101-0408: Самара -0.6°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261101-1237: Самара 9.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
