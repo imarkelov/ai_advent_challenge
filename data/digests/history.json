@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261005-0353",
-    "generated_at": "2026-10-05T03:53:23Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 3.0,
-      "feels_like_c": -0.7,
-      "description": "Преимущественно ясно",
-      "wind_ms": 11.9
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "VK избавилась от доли в сервисе Intickets — он продавал билеты на концерты Канье Уэста в Санкт-Петербурге, которые в итоге отменили",
-          "url": "https://vc.ru/money/3175371-vk-prodala-dolyu-v-intickets-kontserty-kanye-uesta?from=rss"
-        },
-        {
-          "title": "UX-задача для разработчиков роботакси — не дать пассажирам превратить салон в спальню",
-          "url": "https://vc.ru/transport/3175260-ux-zadacha-dlya-robotaksi-kak-ne-dopustit-seks-v-salone?from=rss"
-        },
-        {
-          "title": "День 1684: десятка худших акций на Мосбирже по итогам трёх кварталов подешевела в среднем на 66,77%",
-          "url": "https://vc.ru/money/3174574-khudshie-aktsii-na-mosbirzhe-padenie-tsen?from=rss"
-        },
-        {
-          "title": "Покупатели дорогих моделей не испугаются: что будет с ценами на автомобили после индексации утильсбора — подсчёт Autonews",
-          "url": "https://vc.ru/transport/3173559-tseny-na-avtomobili-posle-indeksatsii-utilsbora?from=rss"
-        },
-        {
-          "title": "В поисках того, кто пашет и может оказаться умнее нанимающего менеджера: каких сотрудников ищет SpaceX",
-          "url": "https://vc.ru/hr/3173801-spacex-i-trebovaniya-k-sotrudnikam?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Представлено обновление открытого проекта RedNotebook 2.4.3",
-          "url": "https://habr.com/ru/news/1090108/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090108"
-        },
-        {
-          "title": "Вышел открытый проект vokoscreenNG 4.11.0 для записи экрана в Windows и Linux",
-          "url": "https://habr.com/ru/news/1090150/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090150"
-        },
-        {
-          "title": "Выпуск обновления HopToDesk 1.46.55 — безопасного открытого решения для удалённого рабочего стола",
-          "url": "https://habr.com/ru/news/1089862/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1089862"
-        },
-        {
-          "title": "Представлен открытый минималистичный браузер Northstar, написанный полностью с нуля на языке C",
-          "url": "https://habr.com/ru/news/1090182/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090182"
-        },
-        {
-          "title": "Nintendo закрыла мобильную игру Mario Kart Tour",
-          "url": "https://habr.com/ru/news/1090142/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1090142"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Почему команда растёт, а фичи выходят медленнее",
-          "url": "https://tproger.ru/articles/pochemu-komanda-rastyot-a-fichi-vyhodyat-medlennee"
-        },
-        {
-          "title": "5 российских облаков для запуска своих ИИ-моделей в 2026 году",
-          "url": "https://tproger.ru/digest/5-rossijskih-oblakov-dlya-zapuska-svoih-ii-modelej-v-2026-godu"
-        },
-        {
-          "title": "OpenAI на DevDay выпустила GPT-6.1 Sol по цене в пять раз ниже Astra",
-          "url": "https://tproger.ru/news/openai-na-devday-vypustila-gpt-6-1-sol-po-cene-v-pyat-raz-nizhe-a"
-        },
-        {
-          "title": "LLM в проде — это не модель: как спроектировать доступы, контроль качества и стоимость AI-сервиса",
-          "url": "https://tproger.ru/articles/llm-v-prode-eto-ne-model-kak-sproektirovat-dostupy-kontrol"
-        },
-        {
-          "title": "В n8n 2.42.0 агентов включили по умолчанию",
-          "url": "https://tproger.ru/news/v-n8n-2-42-0-agentov-vklyuchili-po-umolchaniyu"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261005-0353: Самара 3.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261005-1330",
     "generated_at": "2026-10-05T13:30:23Z",
     "weather": {
@@ -7636,5 +7556,85 @@
       ]
     },
     "summary": "Сводка digest-20261101-1237: Самара 9.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261101-2138",
+    "generated_at": "2026-11-01T21:38:52Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 3.0,
+      "feels_like_c": 0.5,
+      "description": "Переменная облачность",
+      "wind_ms": 4.0
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "День 1712: Арбитражный суд Москвы запретил Apple продолжать судебное разбирательство против VK на территории США — компании спорят из-за удаления приложений из App Store",
+          "url": "https://vc.ru/money/3228805-arbitrazhnyj-sud-moskvy-zapretil-apple-suditsya-s-vk-v-ssha?from=rss"
+        },
+        {
+          "title": "Binance сообщила, что смогла возместить 90% украденных в ходе взлома активов за счёт собственных средств",
+          "url": "https://vc.ru/crypto/3227876-binance-vozmetila-90-procent-ukradennih-aktivov?from=rss"
+        },
+        {
+          "title": "Meta* совместно с китайским стартапом Fourier за три месяца разработала прототип человекподобного робота — The Information",
+          "url": "https://vc.ru/tech/3228651-meta-i-kitayskiy-startap-fourier-robot?from=rss"
+        },
+        {
+          "title": "Samsung запустила рекламу раскладушки Galaxy Z Fold 8, высмеивающую дефект экрана на некоторых iPhone Duo",
+          "url": "https://vc.ru/marketing/3227697-samsung-vysmeivaet-defekty-ekrana-iphone-duo?from=rss"
+        },
+        {
+          "title": "Binance возобновила вывод биткоина, Ethereum, BNB, SOL, DOGE, USDT и USDC",
+          "url": "https://vc.ru/crypto/3229196-binance-vozobnovila-vyvod-bitkoina-ethereum-bnb-doge-i-usdt?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Доброта Qwen3.5-4B держится на двух нейронах",
+          "url": "https://habr.com/ru/companies/bothub/news/1102394/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102394"
+        },
+        {
+          "title": "Cozystack набрал необходимое количество голосов на голосовании по переходу в CNCF Incubation",
+          "url": "https://habr.com/ru/companies/aenix/news/1102384/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102384"
+        },
+        {
+          "title": "Андрей Карпаты представил ИИ‑проект HackerTube — клон витрины YouTube только с видео с рекомендациями из Hacker News",
+          "url": "https://habr.com/ru/news/1102292/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102292"
+        },
+        {
+          "title": "Арбитражный суд Москвы запретил Apple продолжать судебное разбирательство против VK на территории США",
+          "url": "https://habr.com/ru/news/1102274/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102274"
+        },
+        {
+          "title": "Спутник Google проекта космического ЦОД Suncatcher вышел на связь с ЦУП",
+          "url": "https://habr.com/ru/news/1102244/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102244"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Как управлять Claude Code и Codex с телефона: разбираем T3 Code",
+          "url": "https://tproger.ru/articles/kak-upravlyat-claude-code-i-codex-s-telefona-razbiraem-t3-code"
+        },
+        {
+          "title": "Андрей Карпатый собрал 6454 видео, которые 20 лет советуют на Hacker News",
+          "url": "https://tproger.ru/news/karpati-sobral-6454-video-kotorye-20-let-sovetuyut-na-hacker-new"
+        },
+        {
+          "title": "Ошибка в ядре Linux позволяет захватить сервер по сети без пароля",
+          "url": "https://tproger.ru/news/owibka-v-yadre-linux-pozvolyaet-zahvatit-server-po-seti-bez-parol"
+        },
+        {
+          "title": "ТОП-6 систем для работы с договорами в 2026 году",
+          "url": "https://tproger.ru/articles/top-6-sistem-dlya-raboty-s-dogovorami-v-2026-godu"
+        },
+        {
+          "title": "Как обновить PostgreSQL с минимальным простоем: pg_upgrade, логическая репликация и план отката",
+          "url": "https://tproger.ru/articles/kak-obnovit-postgresql-s-minimalnym-prostoem-pg-upgrade-logi"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261101-2138: Самара 3.0°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

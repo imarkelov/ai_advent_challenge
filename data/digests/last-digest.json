@@ -1,22 +1,22 @@
 {
-  "id": "digest-20261101-1237",
-  "generated_at": "2026-11-01T12:37:50Z",
+  "id": "digest-20261101-2138",
+  "generated_at": "2026-11-01T21:38:52Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 9.1,
-    "feels_like_c": 6.9,
-    "description": "Пасмурно",
-    "wind_ms": 1.3
+    "temp_c": 3.0,
+    "feels_like_c": 0.5,
+    "description": "Переменная облачность",
+    "wind_ms": 4.0
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Binance сообщила, что смогла возместить 90% украденных в ходе взлома активов за счёт собственных средств",
-        "url": "https://vc.ru/crypto/3227876-binance-vozmetila-90-procent-ukradennih-aktivov?from=rss"
-      },
-      {
         "title": "День 1712: Арбитражный суд Москвы запретил Apple продолжать судебное разбирательство против VK на территории США — компании спорят из-за удаления приложений из App Store",
         "url": "https://vc.ru/money/3228805-arbitrazhnyj-sud-moskvy-zapretil-apple-suditsya-s-vk-v-ssha?from=rss"
+      },
+      {
+        "title": "Binance сообщила, что смогла возместить 90% украденных в ходе взлома активов за счёт собственных средств",
+        "url": "https://vc.ru/crypto/3227876-binance-vozmetila-90-procent-ukradennih-aktivov?from=rss"
       },
       {
         "title": "Meta* совместно с китайским стартапом Fourier за три месяца разработала прототип человекподобного робота — The Information",
@@ -27,33 +27,45 @@
         "url": "https://vc.ru/marketing/3227697-samsung-vysmeivaet-defekty-ekrana-iphone-duo?from=rss"
       },
       {
-        "title": "Взлом Binance: криптобиржа приостановила вывод средств, предполагаемый ущерб — $6,3 млрд",
-        "url": "https://vc.ru/crypto/3224844-vzlom-binance-priostanovka-vyvoda-sredstv?from=rss"
+        "title": "Binance возобновила вывод биткоина, Ethereum, BNB, SOL, DOGE, USDT и USDC",
+        "url": "https://vc.ru/crypto/3229196-binance-vozobnovila-vyvod-bitkoina-ethereum-bnb-doge-i-usdt?from=rss"
       }
     ],
     "habr": [
       {
+        "title": "Доброта Qwen3.5-4B держится на двух нейронах",
+        "url": "https://habr.com/ru/companies/bothub/news/1102394/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102394"
+      },
+      {
+        "title": "Cozystack набрал необходимое количество голосов на голосовании по переходу в CNCF Incubation",
+        "url": "https://habr.com/ru/companies/aenix/news/1102384/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102384"
+      },
+      {
+        "title": "Андрей Карпаты представил ИИ‑проект HackerTube — клон витрины YouTube только с видео с рекомендациями из Hacker News",
+        "url": "https://habr.com/ru/news/1102292/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102292"
+      },
+      {
+        "title": "Арбитражный суд Москвы запретил Apple продолжать судебное разбирательство против VK на территории США",
+        "url": "https://habr.com/ru/news/1102274/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102274"
+      },
+      {
         "title": "Спутник Google проекта космического ЦОД Suncatcher вышел на связь с ЦУП",
         "url": "https://habr.com/ru/news/1102244/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102244"
-      },
-      {
-        "title": "Адам Моссери: в креативной сфере многие испытывают тревогу и гнев по поводу ИИ",
-        "url": "https://habr.com/ru/news/1102236/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102236"
-      },
-      {
-        "title": "ФБР обвинила хакеров из КНДР в хищении активов на сумму более $6 млрд с Binance",
-        "url": "https://habr.com/ru/news/1102228/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102228"
-      },
-      {
-        "title": "Обновление проекта KillerPDF 1.9.0 — редактора PDF с открытым исходным кодом для Windows 10/11",
-        "url": "https://habr.com/ru/news/1101878/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101878"
-      },
-      {
-        "title": "Вредоносное ПО стало использовать LLM для ранжирования жертв по степени их ценности",
-        "url": "https://habr.com/ru/news/1102226/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102226"
       }
     ],
     "tproger": [
+      {
+        "title": "Как управлять Claude Code и Codex с телефона: разбираем T3 Code",
+        "url": "https://tproger.ru/articles/kak-upravlyat-claude-code-i-codex-s-telefona-razbiraem-t3-code"
+      },
+      {
+        "title": "Андрей Карпатый собрал 6454 видео, которые 20 лет советуют на Hacker News",
+        "url": "https://tproger.ru/news/karpati-sobral-6454-video-kotorye-20-let-sovetuyut-na-hacker-new"
+      },
+      {
+        "title": "Ошибка в ядре Linux позволяет захватить сервер по сети без пароля",
+        "url": "https://tproger.ru/news/owibka-v-yadre-linux-pozvolyaet-zahvatit-server-po-seti-bez-parol"
+      },
       {
         "title": "ТОП-6 систем для работы с договорами в 2026 году",
         "url": "https://tproger.ru/articles/top-6-sistem-dlya-raboty-s-dogovorami-v-2026-godu"
@@ -61,20 +73,8 @@
       {
         "title": "Как обновить PostgreSQL с минимальным простоем: pg_upgrade, логическая репликация и план отката",
         "url": "https://tproger.ru/articles/kak-obnovit-postgresql-s-minimalnym-prostoem-pg-upgrade-logi"
-      },
-      {
-        "title": "Облачные серверы в России: сравниваем провайдеров на одинаковой конфигурации",
-        "url": "https://tproger.ru/articles/oblachnye-servery-v-rossii-sravnivaem-provajderov-na-odinakovoj"
-      },
-      {
-        "title": "Связь без сбоев: как устроена разработка телеком-платформы YADRO",
-        "url": "https://tproger.ru/articles/svyaz-bez-sboev-kak-ustroena-razrabotka-telekom-platformy-yadro"
-      },
-      {
-        "title": "OpenAI удвоила квоту Codex на Pro-тарифах и отменила урезание Pro 200",
-        "url": "https://tproger.ru/news/openai-udvoila-kvotu-codex-na-pro-tarifah-i-otmenila-urezanie-pr"
       }
     ]
   },
-  "summary": "Сводка digest-20261101-1237: Самара 9.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261101-2138: Самара 3.0°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
