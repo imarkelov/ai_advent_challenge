@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261101-2138",
-  "generated_at": "2026-11-01T21:38:52Z",
+  "id": "digest-20261102-0412",
+  "generated_at": "2026-11-02T04:12:26Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 3.0,
-    "feels_like_c": 0.5,
-    "description": "Переменная облачность",
-    "wind_ms": 4.0
+    "temp_c": -0.9,
+    "feels_like_c": -3.9,
+    "description": "Туман",
+    "wind_ms": 4.6
   },
   "news": {
     "vc.ru": [
@@ -15,23 +15,35 @@
         "url": "https://vc.ru/money/3228805-arbitrazhnyj-sud-moskvy-zapretil-apple-suditsya-s-vk-v-ssha?from=rss"
       },
       {
-        "title": "Binance сообщила, что смогла возместить 90% украденных в ходе взлома активов за счёт собственных средств",
-        "url": "https://vc.ru/crypto/3227876-binance-vozmetila-90-procent-ukradennih-aktivov?from=rss"
-      },
-      {
         "title": "Meta* совместно с китайским стартапом Fourier за три месяца разработала прототип человекподобного робота — The Information",
         "url": "https://vc.ru/tech/3228651-meta-i-kitayskiy-startap-fourier-robot?from=rss"
+      },
+      {
+        "title": "Binance сообщила, что смогла возместить 90% украденных в ходе взлома активов за счёт собственных средств",
+        "url": "https://vc.ru/crypto/3227876-binance-vozmetila-90-procent-ukradennih-aktivov?from=rss"
       },
       {
         "title": "Samsung запустила рекламу раскладушки Galaxy Z Fold 8, высмеивающую дефект экрана на некоторых iPhone Duo",
         "url": "https://vc.ru/marketing/3227697-samsung-vysmeivaet-defekty-ekrana-iphone-duo?from=rss"
       },
       {
-        "title": "Binance возобновила вывод биткоина, Ethereum, BNB, SOL, DOGE, USDT и USDC",
-        "url": "https://vc.ru/crypto/3229196-binance-vozobnovila-vyvod-bitkoina-ethereum-bnb-doge-i-usdt?from=rss"
+        "title": "Взлом Binance: криптобиржа приостановила вывод средств, предполагаемый ущерб — $6,3 млрд",
+        "url": "https://vc.ru/crypto/3224844-vzlom-binance-priostanovka-vyvoda-sredstv?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "Релиз кроссплатформенного видеоредактора OpenShot 4.1.0",
+        "url": "https://habr.com/ru/news/1102354/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102354"
+      },
+      {
+        "title": "Вышел дистрибутив Linux Lite 8.2, основанный на ядре Linux 7.3, Ubuntu 26.04 LTS и среде рабочего стола Xfce",
+        "url": "https://habr.com/ru/news/1102360/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102360"
+      },
+      {
+        "title": "Выпуск Wine 11.21",
+        "url": "https://habr.com/ru/news/1102100/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102100"
+      },
       {
         "title": "Доброта Qwen3.5-4B держится на двух нейронах",
         "url": "https://habr.com/ru/companies/bothub/news/1102394/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102394"
@@ -39,18 +51,6 @@
       {
         "title": "Cozystack набрал необходимое количество голосов на голосовании по переходу в CNCF Incubation",
         "url": "https://habr.com/ru/companies/aenix/news/1102384/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102384"
-      },
-      {
-        "title": "Андрей Карпаты представил ИИ‑проект HackerTube — клон витрины YouTube только с видео с рекомендациями из Hacker News",
-        "url": "https://habr.com/ru/news/1102292/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102292"
-      },
-      {
-        "title": "Арбитражный суд Москвы запретил Apple продолжать судебное разбирательство против VK на территории США",
-        "url": "https://habr.com/ru/news/1102274/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102274"
-      },
-      {
-        "title": "Спутник Google проекта космического ЦОД Suncatcher вышел на связь с ЦУП",
-        "url": "https://habr.com/ru/news/1102244/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102244"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261101-2138: Самара 3.0°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261102-0412: Самара -0.9°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
