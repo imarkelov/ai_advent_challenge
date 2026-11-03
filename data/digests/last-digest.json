@@ -1,15 +1,27 @@
 {
-  "id": "digest-20261103-0027",
-  "generated_at": "2026-11-03T00:27:47Z",
+  "id": "digest-20261103-1333",
+  "generated_at": "2026-11-03T13:33:53Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -0.8,
-    "feels_like_c": -3.5,
-    "description": "Туман",
-    "wind_ms": 2.9
+    "temp_c": 6.4,
+    "feels_like_c": 4.4,
+    "description": "Небольшой дождь",
+    "wind_ms": 1.9
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Мощные электросамокаты и электровелосипеды приравняют к мопедам, а «курьерам запретят выезжать на тротуары»: Минтранс разработал проект изменений в ПДД",
+        "url": "https://vc.ru/transport/3232529-izmeneniya-v-pdd-dlya-elektrosamokatov-i-elektrovelosipedov?from=rss"
+      },
+      {
+        "title": "«Яндекс» в партнёрстве с Bork выпустил «Станцию Bork» за 78 тысяч рублей",
+        "url": "https://vc.ru/tech/3232754-yandeks-i-bork-stantsiya-bork?from=rss"
+      },
+      {
+        "title": "«Это займёт существенное время»: российский хостинг-провайдер Beget рассказал о промежуточных итогах восстановления работы после кибератаки",
+        "url": "https://vc.ru/services/3233359-beget-o-vosstanovlenii-posle-kiberataki?from=rss"
+      },
       {
         "title": "Путин разрешил временно использовать мощности зарубежных дата-центров и обязал владельцев российских ЦОДов резервировать 10% мощностей",
         "url": "https://vc.ru/services/3231508-putin-razreshil-ispolzovanie-zarubezhnyh-data-tsentrov?from=rss"
@@ -17,43 +29,35 @@
       {
         "title": "Владельцы автомобилей Li Auto в России столкнулись с новой волной краж мастер-аккаунтов, некоторые кроссоверы не запускаются",
         "url": "https://vc.ru/transport/3231665-krazha-master-akkauntov-li-auto-v-rossii?from=rss"
-      },
-      {
-        "title": "Canva выпустила приложение Affinity для iPad — основные функции редактирования фотографий и создания графики доступны бесплатно",
-        "url": "https://vc.ru/design/3231396-canva-affinity-dlya-ipad-besplatnye-funktsii?from=rss"
-      },
-      {
-        "title": "«Open source — это эксплуатация»: программист, стоящий за распространением PHP-исправлений, — о своём вкладе и проблемах открытого кода",
-        "url": "https://vc.ru/dev/3225970-otkrytyy-kod-i-ego-problemy?from=rss"
-      },
-      {
-        "title": "Сбой у российского хостинг-провайдера Beget — он признал «проблемы с инфраструктурой», которые инженеры вручную исправляют в дата-центрах",
-        "url": "https://vc.ru/services/3230287-sboy-u-hosting-provaidiera-beget?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Временно разрешено использовать зарубежные ЦОД (но есть нюанс)",
-        "url": "https://habr.com/ru/news/1102910/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102910"
+        "title": "На «Госуслугах» появилась возможность сменить оператора связи с сохранением номера",
+        "url": "https://habr.com/ru/news/1103224/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103224"
       },
       {
-        "title": "AI Backend Meetup 11 ноября онлайн",
-        "url": "https://habr.com/ru/companies/docdoc/news/1102830/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102830"
+        "title": "Экстремальная жара в 40 °C теперь может прийти и в страны Северной Европы",
+        "url": "https://habr.com/ru/news/1103214/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103214"
       },
       {
-        "title": "В европейских продуктовых магазинах из‑за кибератаки резко поднялась температура в морозильных камерах",
-        "url": "https://habr.com/ru/news/1102824/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102824"
+        "title": "Sony выпустила обновление для PS5 перед релизом GTA VI",
+        "url": "https://habr.com/ru/news/1103210/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103210"
       },
       {
-        "title": "Фотосток Getty Images подал заявление о банкротстве",
-        "url": "https://habr.com/ru/news/1102808/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102808"
+        "title": "Создаем DMS на Java: RAG для корпоративных документов",
+        "url": "https://habr.com/ru/companies/haulmont/news/1103194/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103194"
       },
       {
-        "title": "Пользователь показал, что ИИ-учитель может сорваться и накричать на ученика",
-        "url": "https://habr.com/ru/news/1102718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102718"
+        "title": "Beget: была кибератака с доступом к управляющему контуру всей архитектуры и последующим запуском обнуляющих скриптов",
+        "url": "https://habr.com/ru/news/1103190/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103190"
       }
     ],
     "tproger": [
+      {
+        "title": "Собрал ПК, разобрался в BMW, выучил основы Python — всё с помощью ИИ",
+        "url": "https://tproger.ru/articles/osobogo-momenta-ne-bylo"
+      },
       {
         "title": "Как сделать презентацию с помощью нейросети: пошаговая инструкция",
         "url": "https://tproger.ru/articles/kak-sdelat-prezentaciyu-s-pomoshhyu-nejroseti-powagovaya-instrukci"
@@ -69,12 +73,8 @@
       {
         "title": "Как управлять Claude Code и Codex с телефона: разбираем T3 Code",
         "url": "https://tproger.ru/articles/kak-upravlyat-claude-code-i-codex-s-telefona-razbiraem-t3-code"
-      },
-      {
-        "title": "Андрей Карпатый собрал 6454 видео, которые 20 лет советуют на Hacker News",
-        "url": "https://tproger.ru/news/karpati-sobral-6454-video-kotorye-20-let-sovetuyut-na-hacker-new"
       }
     ]
   },
-  "summary": "Сводка digest-20261103-0027: Самара -0.8°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261103-1333: Самара 6.4°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
