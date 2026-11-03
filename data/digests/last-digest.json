@@ -1,37 +1,49 @@
 {
-  "id": "digest-20261102-1440",
-  "generated_at": "2026-11-02T14:40:54Z",
+  "id": "digest-20261103-0027",
+  "generated_at": "2026-11-03T00:27:47Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 4.2,
-    "feels_like_c": 1.6,
-    "description": "Ясно",
-    "wind_ms": 4.7
+    "temp_c": -0.8,
+    "feels_like_c": -3.5,
+    "description": "Туман",
+    "wind_ms": 2.9
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Сбой у российского хостинг-провайдера Beget — он признал «проблемы с инфраструктурой», которые инженеры вручную исправляют в дата-центрах",
-        "url": "https://vc.ru/services/3230287-sboy-u-hosting-provaidiera-beget?from=rss"
+        "title": "Путин разрешил временно использовать мощности зарубежных дата-центров и обязал владельцев российских ЦОДов резервировать 10% мощностей",
+        "url": "https://vc.ru/services/3231508-putin-razreshil-ispolzovanie-zarubezhnyh-data-tsentrov?from=rss"
+      },
+      {
+        "title": "Владельцы автомобилей Li Auto в России столкнулись с новой волной краж мастер-аккаунтов, некоторые кроссоверы не запускаются",
+        "url": "https://vc.ru/transport/3231665-krazha-master-akkauntov-li-auto-v-rossii?from=rss"
+      },
+      {
+        "title": "Canva выпустила приложение Affinity для iPad — основные функции редактирования фотографий и создания графики доступны бесплатно",
+        "url": "https://vc.ru/design/3231396-canva-affinity-dlya-ipad-besplatnye-funktsii?from=rss"
       },
       {
         "title": "«Open source — это эксплуатация»: программист, стоящий за распространением PHP-исправлений, — о своём вкладе и проблемах открытого кода",
         "url": "https://vc.ru/dev/3225970-otkrytyy-kod-i-ego-problemy?from=rss"
       },
       {
-        "title": "Российский хостинг-провайдер Beget рассказал о кибератаке на инфраструктуру — работу сервисов продолжают восстанавливать",
-        "url": "https://vc.ru/services/3231240-kiberataki-na-hosting-beget-vosstanovlenie-servisov-prodolzhaetsya?from=rss"
-      },
-      {
-        "title": "Пользователи «Яндекс Пэй» пожаловались на проблемы с переводами и отображением баланса",
-        "url": "https://vc.ru/money/3231027-problemy-s-yandeks-pej?from=rss"
-      },
-      {
-        "title": "«Авито» начал тестировать личные переписки — для них нужно завести внутри чатов отдельный профиль без объявлений",
-        "url": "https://vc.ru/services/3230230-avito-testiruet-lichnye-chaty?from=rss"
+        "title": "Сбой у российского хостинг-провайдера Beget — он признал «проблемы с инфраструктурой», которые инженеры вручную исправляют в дата-центрах",
+        "url": "https://vc.ru/services/3230287-sboy-u-hosting-provaidiera-beget?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "Временно разрешено использовать зарубежные ЦОД (но есть нюанс)",
+        "url": "https://habr.com/ru/news/1102910/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102910"
+      },
+      {
+        "title": "AI Backend Meetup 11 ноября онлайн",
+        "url": "https://habr.com/ru/companies/docdoc/news/1102830/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102830"
+      },
+      {
+        "title": "В европейских продуктовых магазинах из‑за кибератаки резко поднялась температура в морозильных камерах",
+        "url": "https://habr.com/ru/news/1102824/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102824"
+      },
       {
         "title": "Фотосток Getty Images подал заявление о банкротстве",
         "url": "https://habr.com/ru/news/1102808/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102808"
@@ -39,21 +51,13 @@
       {
         "title": "Пользователь показал, что ИИ-учитель может сорваться и накричать на ученика",
         "url": "https://habr.com/ru/news/1102718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102718"
-      },
-      {
-        "title": "ТОП-5 ИБ‑событий недели по версии Jet CSIRT",
-        "url": "https://habr.com/ru/companies/jetinfosystems/news/1102786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102786"
-      },
-      {
-        "title": "OpenAI может переименовать свои дата‑центры в «кампусы для ИИ‑вычислений»",
-        "url": "https://habr.com/ru/news/1102780/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102780"
-      },
-      {
-        "title": "Сбой в работе хостинг-провайдера Beget назвали кибератакой и обстоятельством непреодолимой силы (форс-мажором)",
-        "url": "https://habr.com/ru/news/1102774/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102774"
       }
     ],
     "tproger": [
+      {
+        "title": "Как сделать презентацию с помощью нейросети: пошаговая инструкция",
+        "url": "https://tproger.ru/articles/kak-sdelat-prezentaciyu-s-pomoshhyu-nejroseti-powagovaya-instrukci"
+      },
       {
         "title": "Open-source LLM против юридических документов: эксперимент Рег.облака и Raft",
         "url": "https://tproger.ru/articles/open-source-llm-protiv-yuridicheskih-dokumentov-eksperiment-reg-o"
@@ -69,12 +73,8 @@
       {
         "title": "Андрей Карпатый собрал 6454 видео, которые 20 лет советуют на Hacker News",
         "url": "https://tproger.ru/news/karpati-sobral-6454-video-kotorye-20-let-sovetuyut-na-hacker-new"
-      },
-      {
-        "title": "Ошибка в ядре Linux позволяет захватить сервер по сети без пароля",
-        "url": "https://tproger.ru/news/owibka-v-yadre-linux-pozvolyaet-zahvatit-server-po-seti-bez-parol"
       }
     ]
   },
-  "summary": "Сводка digest-20261102-1440: Самара 4.2°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261103-0027: Самара -0.8°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
