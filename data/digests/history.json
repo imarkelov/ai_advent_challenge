@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261007-2237",
-    "generated_at": "2026-10-07T22:37:59Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 6.8,
-      "feels_like_c": 4.8,
-      "description": "Преимущественно ясно",
-      "wind_ms": 4.9
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "«Нет друзей» и «плоская попа»: в соцсетях делятся тегами, которые Amazon добавляет к профилям на основе истории покупок пользователя",
-          "url": "https://vc.ru/marketplace/3181523-tegi-amazon-na-osnove-pokupok?from=rss"
-        },
-        {
-          "title": "YouTube снова тестирует дизайн страницы с плеером, в котором комментарии располагаются справа от видео",
-          "url": "https://vc.ru/services/3181824-youtube-testiruet-novyj-dizajn-stranitsy-s-kommentariyami-sprava-ot-video?from=rss"
-        },
-        {
-          "title": "SpaceX пожаловалась, что чужие спутники пролетают вблизи её группировки Starlink, и призвала делиться данными о манёврах",
-          "url": "https://vc.ru/future/3180978-spacex-prizyv-delitsya-dannymi-o-sputnikakh?from=rss"
-        },
-        {
-          "title": "Jaguar представил Type 01 — свой первый серийный электромобиль стоимостью от $172 тысяч",
-          "url": "https://vc.ru/transport/3181251-jaguar-predstavil-type-01-elektromobil?from=rss"
-        },
-        {
-          "title": "ЦБ выдал «Сберу», ВТБ и «Т-Технологиям» лицензии цифровых депозитариев для работы с криптовалютами",
-          "url": "https://vc.ru/crypto/3179432-cb-vydal-litsenzii-vtb-sberu-i-t-tekhnologiyam?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Apple обновила логотип Apple Music",
-          "url": "https://habr.com/ru/news/1091810/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091810"
-        },
-        {
-          "title": "EmbeddingGemma 2 спустя сутки: что осталось от обещаний Google",
-          "url": "https://habr.com/ru/companies/bothub/news/1091786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091786"
-        },
-        {
-          "title": "Anthropic выпустила Claude Haiku 5.5: цена вопроса — $0,10",
-          "url": "https://habr.com/ru/companies/bothub/news/1091768/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091768"
-        },
-        {
-          "title": "«Солар» представил новую версию «ЗАСТАВА 9» для организаций любого масштаба – от небольшого офиса до ЦОД",
-          "url": "https://habr.com/ru/companies/solarsecurity/news/1091770/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091770"
-        },
-        {
-          "title": "Тренды в DevRel, границы применимости ИИ, внутренние конфы и инструменты фасилитации — DevRel-секция на IT Gorky",
-          "url": "https://habr.com/ru/news/1091766/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1091766"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
-          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
-        },
-        {
-          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
-          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
-        },
-        {
-          "title": "Функциональные флаги в CI/CD: что, зачем и как",
-          "url": "https://tproger.ru/articles/funkcionalnye-flagi-v-ci-cd-chto-zachem-i-kak"
-        },
-        {
-          "title": "Kilo выпустила Desktop для разработки и анализа данных с ИИ",
-          "url": "https://tproger.ru/news/kilo-vypustila-desktop-dlya-razrabotki-i-analiza-dannyh-s-ii"
-        },
-        {
-          "title": "IBM и Red Hat исправили более 400 неизвестных уязвимостей в Java-библиотеках",
-          "url": "https://tproger.ru/news/ibm-i-red-hat-ispravili-bolee-400-neizvestnyh-uyazvimostej-v-java"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261007-2237: Самара 6.8°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261008-0419",
     "generated_at": "2026-10-08T04:19:51Z",
     "weather": {
@@ -7636,5 +7556,85 @@
       ]
     },
     "summary": "Сводка digest-20261104-1343: Самара 8.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261104-2309",
+    "generated_at": "2026-11-04T23:09:55Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 2.3,
+      "feels_like_c": -1.4,
+      "description": "Небольшой дождь",
+      "wind_ms": 12.0
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Клиенты аргентинского банка Galicia из России и Беларуси, которым без предупреждения закрыли счета, собираются подать коллективный иск",
+          "url": "https://vc.ru/money/3235046-klienty-banka-galicia-isk?from=rss"
+        },
+        {
+          "title": "Россияне в Сербии столкнулись с заморозкой личных и бизнес-счетов из-за отзыва лицензии Alta Banka",
+          "url": "https://vc.ru/migration/3233612-rossiyane-v-serbii-poteryali-dostup-k-schetam-v-alta-banka?from=rss"
+        },
+        {
+          "title": "«Технологии меняют представление о том, что и как люди могут создавать и чего ждут от продуктов»: Canva объявила о сокращении штата, не упомянув ИИ напрямую",
+          "url": "https://vc.ru/money/3235619-canva-sokrashchaet-shtat-i-menyayet-organizatsionnuyu-strukturu?from=rss"
+        },
+        {
+          "title": "День 1715: Superjob назвал Java-программистов самыми высокооплачиваемыми специалистами в Москве по итогам октября",
+          "url": "https://vc.ru/money/3234940-java-programmisty-samye-vysokooplachivaemye-spetsialisty-v-moskve?from=rss"
+        },
+        {
+          "title": "Несколько месяцев подготовки и фиктивные собеседования: Binance рассказала детали «многоэтапной» кибератаки на $6,34 млрд",
+          "url": "https://vc.ru/crypto/3233813-kiberataka-na-binance-podrobnosti-vzloma?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Claude помог получить первую 3D-структуру загадочной белковой частицы",
+          "url": "https://habr.com/ru/companies/bothub/news/1103658/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103658"
+        },
+        {
+          "title": "Компания Canonical сообщила об исправлении уязвимости с максимальным рейтингом опасности в двух своих продуктах",
+          "url": "https://habr.com/ru/companies/codescoring/news/1103608/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103608"
+        },
+        {
+          "title": "Beget: виртуальный хостинг запущен у 35% серверов, выделенные серверы частью доступны, домены работают, бэкапы в работе",
+          "url": "https://habr.com/ru/news/1103590/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103590"
+        },
+        {
+          "title": "Контрактное программирование и C++26 все :-(",
+          "url": "https://habr.com/ru/news/1103576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103576"
+        },
+        {
+          "title": "Reddit начал тестировать рекламу в результатах поиска на фоне снижения трафика и опасений по поводу темпов роста",
+          "url": "https://habr.com/ru/news/1103548/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103548"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "OpenAI ускорила push в монорепо почти в 5 раз, не отказавшись от Git",
+          "url": "https://tproger.ru/news/openai-uskorila-push-v-monorepo-pochti-v-5-raz-ne-otkazavwis-ot"
+        },
+        {
+          "title": "Обзор ITSM-систем 2026-27",
+          "url": "https://tproger.ru/articles/obzor-itsm-sistem-2026-27"
+        },
+        {
+          "title": "Собрал ПК, разобрался в BMW, выучил основы Python — всё с помощью ИИ",
+          "url": "https://tproger.ru/articles/osobogo-momenta-ne-bylo"
+        },
+        {
+          "title": "Как сделать презентацию с помощью нейросети: пошаговая инструкция",
+          "url": "https://tproger.ru/articles/kak-sdelat-prezentaciyu-s-pomoshhyu-nejroseti-powagovaya-instrukci"
+        },
+        {
+          "title": "Open-source LLM против юридических документов: эксперимент Рег.облака и Raft",
+          "url": "https://tproger.ru/articles/open-source-llm-protiv-yuridicheskih-dokumentov-eksperiment-reg-o"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261104-2309: Самара 2.3°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261104-1343",
-  "generated_at": "2026-11-04T13:43:24Z",
+  "id": "digest-20261104-2309",
+  "generated_at": "2026-11-04T23:09:55Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 8.2,
-    "feels_like_c": 5.7,
-    "description": "Пасмурно",
-    "wind_ms": 7.6
+    "temp_c": 2.3,
+    "feels_like_c": -1.4,
+    "description": "Небольшой дождь",
+    "wind_ms": 12.0
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Клиенты аргентинского банка Galicia из России и Беларуси, которым без предупреждения закрыли счета, собираются подать коллективный иск",
+        "url": "https://vc.ru/money/3235046-klienty-banka-galicia-isk?from=rss"
+      },
       {
         "title": "Россияне в Сербии столкнулись с заморозкой личных и бизнес-счетов из-за отзыва лицензии Alta Banka",
         "url": "https://vc.ru/migration/3233612-rossiyane-v-serbii-poteryali-dostup-k-schetam-v-alta-banka?from=rss"
       },
       {
-        "title": "Несколько месяцев подготовки и фиктивные собеседования: Binance рассказала детали «многоэтапной» кибератаки на $6,34 млрд",
-        "url": "https://vc.ru/crypto/3233813-kiberataka-na-binance-podrobnosti-vzloma?from=rss"
-      },
-      {
-        "title": "«Это займёт существенное время»: российский хостинг-провайдер Beget рассказал о промежуточных итогах восстановления работы после кибератаки",
-        "url": "https://vc.ru/services/3233359-beget-o-vosstanovlenii-posle-kiberataki?from=rss"
+        "title": "«Технологии меняют представление о том, что и как люди могут создавать и чего ждут от продуктов»: Canva объявила о сокращении штата, не упомянув ИИ напрямую",
+        "url": "https://vc.ru/money/3235619-canva-sokrashchaet-shtat-i-menyayet-organizatsionnuyu-strukturu?from=rss"
       },
       {
         "title": "День 1715: Superjob назвал Java-программистов самыми высокооплачиваемыми специалистами в Москве по итогам октября",
         "url": "https://vc.ru/money/3234940-java-programmisty-samye-vysokooplachivaemye-spetsialisty-v-moskve?from=rss"
       },
       {
-        "title": "Клиенты аргентинского банка Galicia из России и Беларуси, которым без предупреждения закрыли счета, собираются подать коллективный иск",
-        "url": "https://vc.ru/money/3235046-klienty-banka-galicia-isk?from=rss"
+        "title": "Несколько месяцев подготовки и фиктивные собеседования: Binance рассказала детали «многоэтапной» кибератаки на $6,34 млрд",
+        "url": "https://vc.ru/crypto/3233813-kiberataka-na-binance-podrobnosti-vzloma?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Дата‑центры в США начали использовать старые авиационные двигатели на фоне растущих задержек с подключением к энергосети",
-        "url": "https://habr.com/ru/news/1103532/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103532"
+        "title": "Claude помог получить первую 3D-структуру загадочной белковой частицы",
+        "url": "https://habr.com/ru/companies/bothub/news/1103658/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103658"
       },
       {
-        "title": "Valve увеличила сроки одобрения игр для публикации в Steam до 12 рабочих дней",
-        "url": "https://habr.com/ru/news/1103500/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103500"
+        "title": "Компания Canonical сообщила об исправлении уязвимости с максимальным рейтингом опасности в двух своих продуктах",
+        "url": "https://habr.com/ru/companies/codescoring/news/1103608/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103608"
       },
       {
-        "title": "По прогнозам, телескоп Swift от НАСА упадёт на Землю в ближайшие часы",
-        "url": "https://habr.com/ru/news/1103486/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103486"
+        "title": "Beget: виртуальный хостинг запущен у 35% серверов, выделенные серверы частью доступны, домены работают, бэкапы в работе",
+        "url": "https://habr.com/ru/news/1103590/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103590"
       },
       {
-        "title": "Sega сообщила о хакерской атаке на свои серверы",
-        "url": "https://habr.com/ru/news/1103476/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103476"
+        "title": "Контрактное программирование и C++26 все :-(",
+        "url": "https://habr.com/ru/news/1103576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103576"
       },
       {
-        "title": "OpenAI представила Pando — бэкенд на основе Git для разработки с ИИ",
-        "url": "https://habr.com/ru/companies/selectel/news/1103348/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103348"
+        "title": "Reddit начал тестировать рекламу в результатах поиска на фоне снижения трафика и опасений по поводу темпов роста",
+        "url": "https://habr.com/ru/news/1103548/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103548"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261104-1343: Самара 8.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261104-2309: Самара 2.3°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
