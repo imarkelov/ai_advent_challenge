@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261103-2251",
-  "generated_at": "2026-11-03T22:51:13Z",
+  "id": "digest-20261104-0442",
+  "generated_at": "2026-11-04T04:42:01Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 6.5,
-    "feels_like_c": 4.3,
+    "temp_c": 6.4,
+    "feels_like_c": 4.1,
     "description": "Небольшой дождь",
-    "wind_ms": 6.9
+    "wind_ms": 7.3
   },
   "news": {
     "vc.ru": [
@@ -33,6 +33,10 @@
     ],
     "habr": [
       {
+        "title": "Выпуск обновления открытого проекта RustDesk 1.5.1",
+        "url": "https://habr.com/ru/news/1103010/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103010"
+      },
+      {
         "title": "Anthropic использует Claude для разработки собственных ИИ-чипов",
         "url": "https://habr.com/ru/companies/bothub/news/1103366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103366"
       },
@@ -47,10 +51,6 @@
       {
         "title": "AI AppSec Night: встреча экспертов безопасной разработки",
         "url": "https://habr.com/ru/companies/alfa/news/1103306/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103306"
-      },
-      {
-        "title": "Состоялся релиз Fedora Linux 45",
-        "url": "https://habr.com/ru/news/1103296/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103296"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261103-2251: Самара 6.5°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261104-0442: Самара 6.4°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
