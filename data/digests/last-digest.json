@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261104-0442",
-  "generated_at": "2026-11-04T04:42:01Z",
+  "id": "digest-20261104-1343",
+  "generated_at": "2026-11-04T13:43:24Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 6.4,
-    "feels_like_c": 4.1,
-    "description": "Небольшой дождь",
-    "wind_ms": 7.3
+    "temp_c": 8.2,
+    "feels_like_c": 5.7,
+    "description": "Пасмурно",
+    "wind_ms": 7.6
   },
   "news": {
     "vc.ru": [
@@ -15,42 +15,42 @@
         "url": "https://vc.ru/migration/3233612-rossiyane-v-serbii-poteryali-dostup-k-schetam-v-alta-banka?from=rss"
       },
       {
+        "title": "Несколько месяцев подготовки и фиктивные собеседования: Binance рассказала детали «многоэтапной» кибератаки на $6,34 млрд",
+        "url": "https://vc.ru/crypto/3233813-kiberataka-na-binance-podrobnosti-vzloma?from=rss"
+      },
+      {
         "title": "«Это займёт существенное время»: российский хостинг-провайдер Beget рассказал о промежуточных итогах восстановления работы после кибератаки",
         "url": "https://vc.ru/services/3233359-beget-o-vosstanovlenii-posle-kiberataki?from=rss"
       },
       {
-        "title": "Минцифры рассказало о появлении на Госуслугах функции смены мобильного оператора с сохранением номера",
-        "url": "https://vc.ru/services/3233582-smena-mobilnogo-operatora-na-gosuslugakh?from=rss"
+        "title": "День 1715: Superjob назвал Java-программистов самыми высокооплачиваемыми специалистами в Москве по итогам октября",
+        "url": "https://vc.ru/money/3234940-java-programmisty-samye-vysokooplachivaemye-spetsialisty-v-moskve?from=rss"
       },
       {
-        "title": "Мощные электросамокаты и электровелосипеды приравняют к мопедам, а «курьерам запретят выезжать на тротуары»: Минтранс разработал проект изменений в ПДД",
-        "url": "https://vc.ru/transport/3232529-izmeneniya-v-pdd-dlya-elektrosamokatov-i-elektrovelosipedov?from=rss"
-      },
-      {
-        "title": "Несколько месяцев подготовки и фиктивные собеседования: Binance рассказала детали «многоэтапной» кибератаки на $6,34 млрд",
-        "url": "https://vc.ru/crypto/3233813-kiberataka-na-binance-podrobnosti-vzloma?from=rss"
+        "title": "Клиенты аргентинского банка Galicia из России и Беларуси, которым без предупреждения закрыли счета, собираются подать коллективный иск",
+        "url": "https://vc.ru/money/3235046-klienty-banka-galicia-isk?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Выпуск обновления открытого проекта RustDesk 1.5.1",
-        "url": "https://habr.com/ru/news/1103010/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103010"
+        "title": "Дата‑центры в США начали использовать старые авиационные двигатели на фоне растущих задержек с подключением к энергосети",
+        "url": "https://habr.com/ru/news/1103532/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103532"
       },
       {
-        "title": "Anthropic использует Claude для разработки собственных ИИ-чипов",
-        "url": "https://habr.com/ru/companies/bothub/news/1103366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103366"
+        "title": "Valve увеличила сроки одобрения игр для публикации в Steam до 12 рабочих дней",
+        "url": "https://habr.com/ru/news/1103500/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103500"
       },
       {
-        "title": "Телескоп «Рубин» нашёл две новые тусклые карликовые галактики‑спутники Млечного Пути",
-        "url": "https://habr.com/ru/news/1103354/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103354"
+        "title": "По прогнозам, телескоп Swift от НАСА упадёт на Землю в ближайшие часы",
+        "url": "https://habr.com/ru/news/1103486/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103486"
       },
       {
-        "title": "Власти США запретили гражданским ведомствам использовать программное обеспечение компании Acronis с января 2027 года",
-        "url": "https://habr.com/ru/news/1103308/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103308"
+        "title": "Sega сообщила о хакерской атаке на свои серверы",
+        "url": "https://habr.com/ru/news/1103476/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103476"
       },
       {
-        "title": "AI AppSec Night: встреча экспертов безопасной разработки",
-        "url": "https://habr.com/ru/companies/alfa/news/1103306/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103306"
+        "title": "OpenAI представила Pando — бэкенд на основе Git для разработки с ИИ",
+        "url": "https://habr.com/ru/companies/selectel/news/1103348/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103348"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261104-0442: Самара 6.4°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261104-1343: Самара 8.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
