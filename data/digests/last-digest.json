@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261104-2309",
-  "generated_at": "2026-11-04T23:09:55Z",
+  "id": "digest-20261105-0457",
+  "generated_at": "2026-11-05T04:57:01Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.3,
-    "feels_like_c": -1.4,
+    "temp_c": 1.2,
+    "feels_like_c": -2.9,
     "description": "Небольшой дождь",
-    "wind_ms": 12.0
+    "wind_ms": 14.1
   },
   "news": {
     "vc.ru": [
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
+        "title": "«Сбер» открыл код и веса модели Kandinsky Avatar 1.0 для генерации анимированных аватаров",
+        "url": "https://habr.com/ru/news/1103678/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103678"
+      },
+      {
+        "title": "Выпуск Qmmp 2.4.3 — открытого мультимедийного проигрывателя на базе Qt для Windows и Linux",
+        "url": "https://habr.com/ru/news/1103600/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103600"
+      },
+      {
+        "title": "Релиз NWinfo 1.6.7 — открытого портативного инструмента для быстрого просмотра ключевых характеристик ПК на Windows",
+        "url": "https://habr.com/ru/news/1103444/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103444"
+      },
+      {
+        "title": "Вышел GIMP 3.2.8",
+        "url": "https://habr.com/ru/news/1103314/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103314"
+      },
+      {
         "title": "Claude помог получить первую 3D-структуру загадочной белковой частицы",
         "url": "https://habr.com/ru/companies/bothub/news/1103658/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103658"
-      },
-      {
-        "title": "Компания Canonical сообщила об исправлении уязвимости с максимальным рейтингом опасности в двух своих продуктах",
-        "url": "https://habr.com/ru/companies/codescoring/news/1103608/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103608"
-      },
-      {
-        "title": "Beget: виртуальный хостинг запущен у 35% серверов, выделенные серверы частью доступны, домены работают, бэкапы в работе",
-        "url": "https://habr.com/ru/news/1103590/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103590"
-      },
-      {
-        "title": "Контрактное программирование и C++26 все :-(",
-        "url": "https://habr.com/ru/news/1103576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103576"
-      },
-      {
-        "title": "Reddit начал тестировать рекламу в результатах поиска на фоне снижения трафика и опасений по поводу темпов роста",
-        "url": "https://habr.com/ru/news/1103548/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103548"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261104-2309: Самара 2.3°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261105-0457: Самара 1.2°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
