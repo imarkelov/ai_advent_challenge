@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261008-2249",
-    "generated_at": "2026-10-08T22:49:46Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 5.9,
-      "feels_like_c": 4.4,
-      "description": "Пасмурно",
-      "wind_ms": 1.8
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "«Масштаб ущерба ещё оценивается»: «Яндекс» пока не подтвердил возможность восстановления дата-центра после атаки",
-          "url": "https://vc.ru/services/3183669-yandeks-pozharnyj-incident-v-data-tsentre?from=rss"
-        },
-        {
-          "title": "Данные могут перенести, а «Яндекс» извлечёт урок: что говорят эксперты об атаке беспилотников на дата-центр компании и были ли похожие случаи",
-          "url": "https://vc.ru/services/3182963-ataka-bespilotnikov-na-data-tsentr-yandeksa?from=rss"
-        },
-        {
-          "title": "«Яндекс» сообщил о пожаре в дата-центре под Рязанью из-за атаки беспилотника",
-          "url": "https://vc.ru/services/3182416-pozharnaya-ataka-bespilotnika-yandeks?from=rss"
-        },
-        {
-          "title": "«Сбер» начал тестировать операции с криптовалютой в мобильном приложении",
-          "url": "https://vc.ru/crypto/3182846-sber-testiruet-operatsii-s-kriptovalyutoy?from=rss"
-        },
-        {
-          "title": "Пользователи пожаловались на сбои в работе «Яндекс Поиска», «Почты», «Циана», «Авито», «Т-Банка», Twinby и других после атаки на дата-центр в Сасово",
-          "url": "https://vc.ru/services/3182777-sboi-v-rabote-yandeks-poiska-i-pochty-posle-ataki-na-data-tsentr?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "CrowdStrike по истории Claude Code вычислили хакера, который атаковал банки Южной Кореи",
-          "url": "https://habr.com/ru/news/1092204/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092204"
-        },
-        {
-          "title": "Google открыл новый канал быстрой передачи свежего UGC в Поиск",
-          "url": "https://habr.com/ru/news/1092202/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092202"
-        },
-        {
-          "title": "На камере Hasselblad X2D запустили Doom: для этого пришлось связать игровой движок со штатным интерфейсом",
-          "url": "https://habr.com/ru/news/1092182/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092182"
-        },
-        {
-          "title": "В Telegram для macOS тестируют интерактивные HTML‑сообщения в чатах",
-          "url": "https://habr.com/ru/news/1092168/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092168"
-        },
-        {
-          "title": "Halo: Combat Evolved с кампанией и мультиплеером запустили в браузере",
-          "url": "https://habr.com/ru/news/1092164/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092164"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
-          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
-        },
-        {
-          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
-          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
-        },
-        {
-          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
-          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
-        },
-        {
-          "title": "Функциональные флаги в CI/CD: что, зачем и как",
-          "url": "https://tproger.ru/articles/funkcionalnye-flagi-v-ci-cd-chto-zachem-i-kak"
-        },
-        {
-          "title": "Kilo выпустила Desktop для разработки и анализа данных с ИИ",
-          "url": "https://tproger.ru/news/kilo-vypustila-desktop-dlya-razrabotki-i-analiza-dannyh-s-ii"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261008-2249: Самара 5.9°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261009-0424",
     "generated_at": "2026-10-09T04:24:37Z",
     "weather": {
@@ -7674,5 +7594,85 @@
       ]
     },
     "summary": "Сводка digest-20261105-1356: Самара 0.5°C, Небольшой снег; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261105-2314",
+    "generated_at": "2026-11-05T23:14:41Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": -1.2,
+      "feels_like_c": -5.6,
+      "description": "Пасмурно",
+      "wind_ms": 12.8
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "TikTok начал тестировать отдельное приложение TikTok Shop с покупками для конкуренции с Amazon и Temu",
+          "url": "https://vc.ru/services/3237854-tiktok-shop-novoe-prilozhenie-dlya-pokupok?from=rss"
+        },
+        {
+          "title": "Участники рынка микромобильности и доставки попросили Минтранс смягчить поправки к ПДД, которые приравняют мощные электровелосипеды и самокаты к мопедам и запретят курьерам выезжать на тротуары",
+          "url": "https://vc.ru/transport/3236346-mintrans-i-popravki-k-pdd-dlya-elektrosamokatov-i-kuryerov?from=rss"
+        },
+        {
+          "title": "Echo: ЦБ России потребовал изъять документы из штаб-квартиры Euroclear из-за «сговора» депозитария с ЕС — якобы они хотят помешать иску регулятора на €200 млрд",
+          "url": "https://vc.ru/money/3237632-cb-rossii-trebuet-dokumenty-euroclear?from=rss"
+        },
+        {
+          "title": "«Технологии меняют представление о том, что и как люди могут создавать и чего ждут от продуктов»: Canva объявила о сокращении штата, не упомянув ИИ напрямую",
+          "url": "https://vc.ru/money/3235619-canva-sokrashchaet-shtat-i-menyayet-organizatsionnuyu-strukturu?from=rss"
+        },
+        {
+          "title": "Mercedes вместе со стартапом Liquid AI начала добавлять в некоторые из своих автомобилей локальные ИИ-модели — они могут работать без доступа к интернету",
+          "url": "https://vc.ru/transport/3237708-mercedes-vnedryaet-lokalnye-ii-modeli-ot-liquid-ai?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Бесплатный видеоредактор Edits от Instagram* стал доступен для macOS",
+          "url": "https://habr.com/ru/news/1104214/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104214"
+        },
+        {
+          "title": "После 42 лет поисков на БАК увидели признаки редчайшего распада в точном соответствии со Стандартной моделью",
+          "url": "https://habr.com/ru/news/1104182/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104182"
+        },
+        {
+          "title": "В Китае представили зубную щётку, которая убивает бактерии электрическими микрозарядами",
+          "url": "https://habr.com/ru/news/1104180/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104180"
+        },
+        {
+          "title": "OpenAI показала GPT-6 Cyber",
+          "url": "https://habr.com/ru/companies/bothub/news/1104174/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104174"
+        },
+        {
+          "title": "Canva сокращает 22% штата: все сокращённые получат шесть окладов, страховку на год, MacBook и грант на открытие бизнеса",
+          "url": "https://habr.com/ru/news/1104154/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104154"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Gemini Omni 1.2 Flash: Google удлинила клипы до 15 секунд и снизила цену на 30%",
+          "url": "https://tproger.ru/news/gemini-omni-1-2-flash-google-udlinila-klipy-do-15-sekund-i-sniz"
+        },
+        {
+          "title": "OpenAI выпустила GPT-6 Cyber: 48,5% на ExploitGym и класс Critical",
+          "url": "https://tproger.ru/news/openai-vypustila-gpt-6-cyber-48-5-na-exploitgym-i-klass-critic"
+        },
+        {
+          "title": "Сводки фоновых субагентов Claude Code стали на 99% дешевле",
+          "url": "https://tproger.ru/news/svodki-fonovyh-subagentov-claude-code-stali-na-99-dewevle"
+        },
+        {
+          "title": "Mistral рассказала, как агент Large 4 сбежал из песочницы и получил root",
+          "url": "https://tproger.ru/news/mistral-rasskazala-kak-agent-large-4-sbezhal-iz-pesochnicy-i-polu"
+        },
+        {
+          "title": "Moonshot выложила веса Kimi K3.1 Pro: 1,56 ТБ и восемь B300 для запуска",
+          "url": "https://tproger.ru/news/moonshot-vylozhila-vesa-kimi-k3-1-pro-1-56-tb-i-vosem-b300-dlya"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261105-2314: Самара -1.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

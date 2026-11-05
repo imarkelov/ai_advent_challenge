@@ -1,80 +1,80 @@
 {
-  "id": "digest-20261105-1356",
-  "generated_at": "2026-11-05T13:56:11Z",
+  "id": "digest-20261105-2314",
+  "generated_at": "2026-11-05T23:14:41Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 0.5,
-    "feels_like_c": -3.7,
-    "description": "Небольшой снег",
-    "wind_ms": 13.3
+    "temp_c": -1.2,
+    "feels_like_c": -5.6,
+    "description": "Пасмурно",
+    "wind_ms": 12.8
   },
   "news": {
     "vc.ru": [
       {
+        "title": "TikTok начал тестировать отдельное приложение TikTok Shop с покупками для конкуренции с Amazon и Temu",
+        "url": "https://vc.ru/services/3237854-tiktok-shop-novoe-prilozhenie-dlya-pokupok?from=rss"
+      },
+      {
         "title": "Участники рынка микромобильности и доставки попросили Минтранс смягчить поправки к ПДД, которые приравняют мощные электровелосипеды и самокаты к мопедам и запретят курьерам выезжать на тротуары",
         "url": "https://vc.ru/transport/3236346-mintrans-i-popravki-k-pdd-dlya-elektrosamokatov-i-kuryerov?from=rss"
+      },
+      {
+        "title": "Echo: ЦБ России потребовал изъять документы из штаб-квартиры Euroclear из-за «сговора» депозитария с ЕС — якобы они хотят помешать иску регулятора на €200 млрд",
+        "url": "https://vc.ru/money/3237632-cb-rossii-trebuet-dokumenty-euroclear?from=rss"
       },
       {
         "title": "«Технологии меняют представление о том, что и как люди могут создавать и чего ждут от продуктов»: Canva объявила о сокращении штата, не упомянув ИИ напрямую",
         "url": "https://vc.ru/money/3235619-canva-sokrashchaet-shtat-i-menyayet-organizatsionnuyu-strukturu?from=rss"
       },
       {
-        "title": "Клиенты аргентинского банка Galicia из России и Беларуси, которым без предупреждения закрыли счета, собираются подать коллективный иск",
-        "url": "https://vc.ru/money/3235046-klienty-banka-galicia-isk?from=rss"
-      },
-      {
-        "title": "День 1716: продажи новых легковых машин в октябре 2026 года выросли на 8,2% по сравнению с сентябрём, но год к году сократились почти на 20%",
-        "url": "https://vc.ru/money/3236294-prodazhi-novykh-legkovykh-mashin-v-rossii-v-oktyabre-uvelichilis?from=rss"
-      },
-      {
-        "title": "Акции Toyota выросли на 16% после публикации квартальной отчётности — это крупнейший внутридневной рост бумаг компании с 1987 года",
-        "url": "https://vc.ru/transport/3237347-aktsii-toyota-vyrosli-posle-silnoj-kvartalnoj-otchetnosti?from=rss"
+        "title": "Mercedes вместе со стартапом Liquid AI начала добавлять в некоторые из своих автомобилей локальные ИИ-модели — они могут работать без доступа к интернету",
+        "url": "https://vc.ru/transport/3237708-mercedes-vnedryaet-lokalnye-ii-modeli-ot-liquid-ai?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Axion 1.0 — новый открытый агент на 35B с тремя миллиардами активных параметров",
-        "url": "https://habr.com/ru/companies/selectel/news/1103984/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103984"
+        "title": "Бесплатный видеоредактор Edits от Instagram* стал доступен для macOS",
+        "url": "https://habr.com/ru/news/1104214/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104214"
       },
       {
-        "title": "Агенты OpenAI нашли 948 уязвимостей повышения привилегий в Linux",
-        "url": "https://habr.com/ru/companies/bothub/news/1104034/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104034"
+        "title": "После 42 лет поисков на БАК увидели признаки редчайшего распада в точном соответствии со Стандартной моделью",
+        "url": "https://habr.com/ru/news/1104182/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104182"
       },
       {
-        "title": "Раскрыта уязвимость sshhole в OpenSSH на базе musl Linux — доступ к учётным записям, не защищённым паролем",
-        "url": "https://habr.com/ru/news/1104006/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104006"
+        "title": "В Китае представили зубную щётку, которая убивает бактерии электрическими микрозарядами",
+        "url": "https://habr.com/ru/news/1104180/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104180"
       },
       {
-        "title": "Глагол mogging стал словом 2026 года по версии словаря Collins English Dictionary",
-        "url": "https://habr.com/ru/news/1104002/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104002"
+        "title": "OpenAI показала GPT-6 Cyber",
+        "url": "https://habr.com/ru/companies/bothub/news/1104174/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104174"
       },
       {
-        "title": "В 2027 год без старых ошибок: пять мероприятий click.ru",
-        "url": "https://habr.com/ru/companies/click/news/1103962/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103962"
+        "title": "Canva сокращает 22% штата: все сокращённые получат шесть окладов, страховку на год, MacBook и грант на открытие бизнеса",
+        "url": "https://habr.com/ru/news/1104154/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104154"
       }
     ],
     "tproger": [
       {
-        "title": "Как упростить GitLab CI: семь приёмов для настройки пайплайна",
-        "url": "https://tproger.ru/articles/kak-uprostit-gitlab-ci-sem-priyomov-dlya-nastrojki-pajplajna-2"
+        "title": "Gemini Omni 1.2 Flash: Google удлинила клипы до 15 секунд и снизила цену на 30%",
+        "url": "https://tproger.ru/news/gemini-omni-1-2-flash-google-udlinila-klipy-do-15-sekund-i-sniz"
       },
       {
-        "title": "OpenAI ускорила push в монорепо почти в 5 раз, не отказавшись от Git",
-        "url": "https://tproger.ru/news/openai-uskorila-push-v-monorepo-pochti-v-5-raz-ne-otkazavwis-ot"
+        "title": "OpenAI выпустила GPT-6 Cyber: 48,5% на ExploitGym и класс Critical",
+        "url": "https://tproger.ru/news/openai-vypustila-gpt-6-cyber-48-5-na-exploitgym-i-klass-critic"
       },
       {
-        "title": "Обзор ITSM-систем 2026-27",
-        "url": "https://tproger.ru/articles/obzor-itsm-sistem-2026-27"
+        "title": "Сводки фоновых субагентов Claude Code стали на 99% дешевле",
+        "url": "https://tproger.ru/news/svodki-fonovyh-subagentov-claude-code-stali-na-99-dewevle"
       },
       {
-        "title": "Собрал ПК, разобрался в BMW, выучил основы Python — всё с помощью ИИ",
-        "url": "https://tproger.ru/articles/osobogo-momenta-ne-bylo"
+        "title": "Mistral рассказала, как агент Large 4 сбежал из песочницы и получил root",
+        "url": "https://tproger.ru/news/mistral-rasskazala-kak-agent-large-4-sbezhal-iz-pesochnicy-i-polu"
       },
       {
-        "title": "Как сделать презентацию с помощью нейросети: пошаговая инструкция",
-        "url": "https://tproger.ru/articles/kak-sdelat-prezentaciyu-s-pomoshhyu-nejroseti-powagovaya-instrukci"
+        "title": "Moonshot выложила веса Kimi K3.1 Pro: 1,56 ТБ и восемь B300 для запуска",
+        "url": "https://tproger.ru/news/moonshot-vylozhila-vesa-kimi-k3-1-pro-1-56-tb-i-vosem-b300-dlya"
       }
     ]
   },
-  "summary": "Сводка digest-20261105-1356: Самара 0.5°C, Небольшой снег; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261105-2314: Самара -1.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
