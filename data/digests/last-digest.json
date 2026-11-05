@@ -1,59 +1,63 @@
 {
-  "id": "digest-20261105-0457",
-  "generated_at": "2026-11-05T04:57:01Z",
+  "id": "digest-20261105-1356",
+  "generated_at": "2026-11-05T13:56:11Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 1.2,
-    "feels_like_c": -2.9,
-    "description": "Небольшой дождь",
-    "wind_ms": 14.1
+    "temp_c": 0.5,
+    "feels_like_c": -3.7,
+    "description": "Небольшой снег",
+    "wind_ms": 13.3
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Клиенты аргентинского банка Galicia из России и Беларуси, которым без предупреждения закрыли счета, собираются подать коллективный иск",
-        "url": "https://vc.ru/money/3235046-klienty-banka-galicia-isk?from=rss"
-      },
-      {
-        "title": "Россияне в Сербии столкнулись с заморозкой личных и бизнес-счетов из-за отзыва лицензии Alta Banka",
-        "url": "https://vc.ru/migration/3233612-rossiyane-v-serbii-poteryali-dostup-k-schetam-v-alta-banka?from=rss"
+        "title": "Участники рынка микромобильности и доставки попросили Минтранс смягчить поправки к ПДД, которые приравняют мощные электровелосипеды и самокаты к мопедам и запретят курьерам выезжать на тротуары",
+        "url": "https://vc.ru/transport/3236346-mintrans-i-popravki-k-pdd-dlya-elektrosamokatov-i-kuryerov?from=rss"
       },
       {
         "title": "«Технологии меняют представление о том, что и как люди могут создавать и чего ждут от продуктов»: Canva объявила о сокращении штата, не упомянув ИИ напрямую",
         "url": "https://vc.ru/money/3235619-canva-sokrashchaet-shtat-i-menyayet-organizatsionnuyu-strukturu?from=rss"
       },
       {
-        "title": "День 1715: Superjob назвал Java-программистов самыми высокооплачиваемыми специалистами в Москве по итогам октября",
-        "url": "https://vc.ru/money/3234940-java-programmisty-samye-vysokooplachivaemye-spetsialisty-v-moskve?from=rss"
+        "title": "Клиенты аргентинского банка Galicia из России и Беларуси, которым без предупреждения закрыли счета, собираются подать коллективный иск",
+        "url": "https://vc.ru/money/3235046-klienty-banka-galicia-isk?from=rss"
       },
       {
-        "title": "Несколько месяцев подготовки и фиктивные собеседования: Binance рассказала детали «многоэтапной» кибератаки на $6,34 млрд",
-        "url": "https://vc.ru/crypto/3233813-kiberataka-na-binance-podrobnosti-vzloma?from=rss"
+        "title": "День 1716: продажи новых легковых машин в октябре 2026 года выросли на 8,2% по сравнению с сентябрём, но год к году сократились почти на 20%",
+        "url": "https://vc.ru/money/3236294-prodazhi-novykh-legkovykh-mashin-v-rossii-v-oktyabre-uvelichilis?from=rss"
+      },
+      {
+        "title": "Акции Toyota выросли на 16% после публикации квартальной отчётности — это крупнейший внутридневной рост бумаг компании с 1987 года",
+        "url": "https://vc.ru/transport/3237347-aktsii-toyota-vyrosli-posle-silnoj-kvartalnoj-otchetnosti?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "«Сбер» открыл код и веса модели Kandinsky Avatar 1.0 для генерации анимированных аватаров",
-        "url": "https://habr.com/ru/news/1103678/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103678"
+        "title": "Axion 1.0 — новый открытый агент на 35B с тремя миллиардами активных параметров",
+        "url": "https://habr.com/ru/companies/selectel/news/1103984/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103984"
       },
       {
-        "title": "Выпуск Qmmp 2.4.3 — открытого мультимедийного проигрывателя на базе Qt для Windows и Linux",
-        "url": "https://habr.com/ru/news/1103600/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103600"
+        "title": "Агенты OpenAI нашли 948 уязвимостей повышения привилегий в Linux",
+        "url": "https://habr.com/ru/companies/bothub/news/1104034/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104034"
       },
       {
-        "title": "Релиз NWinfo 1.6.7 — открытого портативного инструмента для быстрого просмотра ключевых характеристик ПК на Windows",
-        "url": "https://habr.com/ru/news/1103444/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103444"
+        "title": "Раскрыта уязвимость sshhole в OpenSSH на базе musl Linux — доступ к учётным записям, не защищённым паролем",
+        "url": "https://habr.com/ru/news/1104006/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104006"
       },
       {
-        "title": "Вышел GIMP 3.2.8",
-        "url": "https://habr.com/ru/news/1103314/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103314"
+        "title": "Глагол mogging стал словом 2026 года по версии словаря Collins English Dictionary",
+        "url": "https://habr.com/ru/news/1104002/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104002"
       },
       {
-        "title": "Claude помог получить первую 3D-структуру загадочной белковой частицы",
-        "url": "https://habr.com/ru/companies/bothub/news/1103658/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103658"
+        "title": "В 2027 год без старых ошибок: пять мероприятий click.ru",
+        "url": "https://habr.com/ru/companies/click/news/1103962/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103962"
       }
     ],
     "tproger": [
+      {
+        "title": "Как упростить GitLab CI: семь приёмов для настройки пайплайна",
+        "url": "https://tproger.ru/articles/kak-uprostit-gitlab-ci-sem-priyomov-dlya-nastrojki-pajplajna-2"
+      },
       {
         "title": "OpenAI ускорила push в монорепо почти в 5 раз, не отказавшись от Git",
         "url": "https://tproger.ru/news/openai-uskorila-push-v-monorepo-pochti-v-5-raz-ne-otkazavwis-ot"
@@ -69,12 +73,8 @@
       {
         "title": "Как сделать презентацию с помощью нейросети: пошаговая инструкция",
         "url": "https://tproger.ru/articles/kak-sdelat-prezentaciyu-s-pomoshhyu-nejroseti-powagovaya-instrukci"
-      },
-      {
-        "title": "Open-source LLM против юридических документов: эксперимент Рег.облака и Raft",
-        "url": "https://tproger.ru/articles/open-source-llm-protiv-yuridicheskih-dokumentov-eksperiment-reg-o"
       }
     ]
   },
-  "summary": "Сводка digest-20261105-0457: Самара 1.2°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261105-1356: Самара 0.5°C, Небольшой снег; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

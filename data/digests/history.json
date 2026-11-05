@@ -1,47 +1,5 @@
 [
   {
-    "id": "digest-20261008-1245",
-    "generated_at": "2026-10-08T12:45:13Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 15.3,
-      "feels_like_c": 12.5,
-      "description": "Преимущественно ясно",
-      "wind_ms": 9.7
-    },
-    "news": {
-      "vc.ru": {
-        "error": "<urlopen error timed out>"
-      },
-      "habr": {
-        "error": "<urlopen error timed out>"
-      },
-      "tproger": [
-        {
-          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
-          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
-        },
-        {
-          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
-          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
-        },
-        {
-          "title": "Функциональные флаги в CI/CD: что, зачем и как",
-          "url": "https://tproger.ru/articles/funkcionalnye-flagi-v-ci-cd-chto-zachem-i-kak"
-        },
-        {
-          "title": "Kilo выпустила Desktop для разработки и анализа данных с ИИ",
-          "url": "https://tproger.ru/news/kilo-vypustila-desktop-dlya-razrabotki-i-analiza-dannyh-s-ii"
-        },
-        {
-          "title": "IBM и Red Hat исправили более 400 неизвестных уязвимостей в Java-библиотеках",
-          "url": "https://tproger.ru/news/ibm-i-red-hat-ispravili-bolee-400-neizvestnyh-uyazvimostej-v-java"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261008-1245: Самара 15.3°C, Преимущественно ясно; новостей: 5 (vc.ru error, habr error, tproger 5)."
-  },
-  {
     "id": "digest-20261008-2249",
     "generated_at": "2026-10-08T22:49:46Z",
     "weather": {
@@ -7636,5 +7594,85 @@
       ]
     },
     "summary": "Сводка digest-20261105-0457: Самара 1.2°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261105-1356",
+    "generated_at": "2026-11-05T13:56:11Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 0.5,
+      "feels_like_c": -3.7,
+      "description": "Небольшой снег",
+      "wind_ms": 13.3
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Участники рынка микромобильности и доставки попросили Минтранс смягчить поправки к ПДД, которые приравняют мощные электровелосипеды и самокаты к мопедам и запретят курьерам выезжать на тротуары",
+          "url": "https://vc.ru/transport/3236346-mintrans-i-popravki-k-pdd-dlya-elektrosamokatov-i-kuryerov?from=rss"
+        },
+        {
+          "title": "«Технологии меняют представление о том, что и как люди могут создавать и чего ждут от продуктов»: Canva объявила о сокращении штата, не упомянув ИИ напрямую",
+          "url": "https://vc.ru/money/3235619-canva-sokrashchaet-shtat-i-menyayet-organizatsionnuyu-strukturu?from=rss"
+        },
+        {
+          "title": "Клиенты аргентинского банка Galicia из России и Беларуси, которым без предупреждения закрыли счета, собираются подать коллективный иск",
+          "url": "https://vc.ru/money/3235046-klienty-banka-galicia-isk?from=rss"
+        },
+        {
+          "title": "День 1716: продажи новых легковых машин в октябре 2026 года выросли на 8,2% по сравнению с сентябрём, но год к году сократились почти на 20%",
+          "url": "https://vc.ru/money/3236294-prodazhi-novykh-legkovykh-mashin-v-rossii-v-oktyabre-uvelichilis?from=rss"
+        },
+        {
+          "title": "Акции Toyota выросли на 16% после публикации квартальной отчётности — это крупнейший внутридневной рост бумаг компании с 1987 года",
+          "url": "https://vc.ru/transport/3237347-aktsii-toyota-vyrosli-posle-silnoj-kvartalnoj-otchetnosti?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Axion 1.0 — новый открытый агент на 35B с тремя миллиардами активных параметров",
+          "url": "https://habr.com/ru/companies/selectel/news/1103984/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103984"
+        },
+        {
+          "title": "Агенты OpenAI нашли 948 уязвимостей повышения привилегий в Linux",
+          "url": "https://habr.com/ru/companies/bothub/news/1104034/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104034"
+        },
+        {
+          "title": "Раскрыта уязвимость sshhole в OpenSSH на базе musl Linux — доступ к учётным записям, не защищённым паролем",
+          "url": "https://habr.com/ru/news/1104006/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104006"
+        },
+        {
+          "title": "Глагол mogging стал словом 2026 года по версии словаря Collins English Dictionary",
+          "url": "https://habr.com/ru/news/1104002/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104002"
+        },
+        {
+          "title": "В 2027 год без старых ошибок: пять мероприятий click.ru",
+          "url": "https://habr.com/ru/companies/click/news/1103962/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103962"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Как упростить GitLab CI: семь приёмов для настройки пайплайна",
+          "url": "https://tproger.ru/articles/kak-uprostit-gitlab-ci-sem-priyomov-dlya-nastrojki-pajplajna-2"
+        },
+        {
+          "title": "OpenAI ускорила push в монорепо почти в 5 раз, не отказавшись от Git",
+          "url": "https://tproger.ru/news/openai-uskorila-push-v-monorepo-pochti-v-5-raz-ne-otkazavwis-ot"
+        },
+        {
+          "title": "Обзор ITSM-систем 2026-27",
+          "url": "https://tproger.ru/articles/obzor-itsm-sistem-2026-27"
+        },
+        {
+          "title": "Собрал ПК, разобрался в BMW, выучил основы Python — всё с помощью ИИ",
+          "url": "https://tproger.ru/articles/osobogo-momenta-ne-bylo"
+        },
+        {
+          "title": "Как сделать презентацию с помощью нейросети: пошаговая инструкция",
+          "url": "https://tproger.ru/articles/kak-sdelat-prezentaciyu-s-pomoshhyu-nejroseti-powagovaya-instrukci"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261105-1356: Самара 0.5°C, Небольшой снег; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
