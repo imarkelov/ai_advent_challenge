@@ -1,40 +1,67 @@
 {
-  "id": "digest-20261106-1341",
-  "generated_at": "2026-11-06T13:41:29Z",
+  "id": "digest-20261106-2240",
+  "generated_at": "2026-11-06T22:40:25Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.0,
-    "feels_like_c": -1.1,
+    "temp_c": 1.9,
+    "feels_like_c": -0.9,
     "description": "Пасмурно",
-    "wind_ms": 6.9
+    "wind_ms": 6.1
   },
   "news": {
-    "vc.ru": {
-      "error": "The read operation timed out"
-    },
+    "vc.ru": [
+      {
+        "title": "«К сожалению, облачная инфраструктура уничтожена, строим заново»: хостинг-провайдер Beget рассказал о восстановлении работы после кибератаки",
+        "url": "https://vc.ru/services/3240059-vosstanovlenie-hostinga-beget-posle-kiberataki?from=rss"
+      },
+      {
+        "title": "WP: после победы на промежуточных выборах в Конгресс США демократы готовят волну расследований против ИТ-компаний — первыми под удар попадут Apple, Meta* и SpaceXAI",
+        "url": "https://vc.ru/legal/3239709-demokraty-ssha-rassledovaniya-protiv-apple-meta-i-spacexai?from=rss"
+      },
+      {
+        "title": "ЦБ разрешит российским биржам торговать биткоином, Ethereum и USDT с 17 ноября 2026 года",
+        "url": "https://vc.ru/crypto/3239814-cb-razreshit-torgovlyu-bitkoinom-ethereum-i-usdt?from=rss"
+      },
+      {
+        "title": "Sony выпустила проводные ретронаушники MDR-3R за $60",
+        "url": "https://vc.ru/tech/3239028-sony-vypustila-retro-naushniki-mdr-3r?from=rss"
+      },
+      {
+        "title": "В соцсетях раскритиковали рекламу Dior за «ИИ-артефакты» в мультфильме, «нарисованном от руки» французскими художниками",
+        "url": "https://vc.ru/marketing/3238963-reklama-dior-podverglas-kritike-za-ii-artefakty-v-multfilme?from=rss"
+      }
+    ],
     "habr": [
       {
-        "title": "Perfscale news #18. CLI Агенты, thresholds с остановкой и OTEL метрики",
-        "url": "https://habr.com/ru/news/1104124/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104124"
+        "title": "OpenAI сбрасывает режим «размышлений» ChatGPT с High на Medium",
+        "url": "https://habr.com/ru/news/1104738/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104738"
       },
       {
-        "title": "Le GPT Fat, 10 000 агентов и задача Навье — Стокса",
-        "url": "https://habr.com/ru/companies/cloud4y/news/1104610/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104610"
+        "title": "Beget: восстановили всё, что можно было вернуть быстро, запущено более 60% хостинга, облачная инфраструктура уничтожена",
+        "url": "https://habr.com/ru/news/1104698/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104698"
       },
       {
-        "title": "Кибербезопасность как стратегия: строим киберустойчивость с топ-экспертами",
-        "url": "https://habr.com/ru/companies/infowatch/news/1104608/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104608"
+        "title": "METR: ИИ ускорил разработку моделей Anthropic почти вдвое",
+        "url": "https://habr.com/ru/companies/bothub/news/1104694/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104694"
       },
       {
-        "title": "Tencent выпустила Hy4 — модель научили управлять компьютером через GUI и CLI",
-        "url": "https://habr.com/ru/companies/selectel/news/1104466/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104466"
+        "title": "Максимальная скидка года на курсы Яндекс Практикума",
+        "url": "https://habr.com/ru/companies/yandex_praktikum/news/1104680/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104680"
       },
       {
-        "title": "[45.2026] Обзор новых правил безопасности в пакетных индексах и менеджерах",
-        "url": "https://habr.com/ru/companies/codescoring/news/1104596/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104596"
+        "title": "Обновление FurMark 2.11 расширило базу графических чипов и улучшило мониторинг температур",
+        "url": "https://habr.com/ru/companies/selectel/news/1104530/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104530"
       }
     ],
     "tproger": [
+      {
+        "title": "Кодинг-агенты научились переносить сессии и работать в фоне",
+        "url": "https://tproger.ru/news/koding-agenty-nauchilis-perenosit-sessii-i-rabotat-v-fone"
+      },
+      {
+        "title": "Cursor научил агента публиковать веб-приложения с базой и входом",
+        "url": "https://tproger.ru/news/cursor-nauchil-agenta-publikovat-veb-prilozheniya-s-bazoj-i-vhodom"
+      },
       {
         "title": "Как я, незрячий разработчик, организовал работу с ИИ-агентом: от задачи до проверенного результата",
         "url": "https://tproger.ru/articles/kak-ya-nezryachij-razrabotchik-organizoval-rabotu-s-ii-agentom-ot"
@@ -46,16 +73,8 @@
       {
         "title": "Как научить HAProxy снижать на проблемный backend",
         "url": "https://tproger.ru/articles/kak-nauchit-haproxy-snizhat-na-problemnyj-backend"
-      },
-      {
-        "title": "OSINT на минималках, или Как подружить ClickHouse, Neo4j, Qdrant и локальную LLM без штата дата-сайентистов",
-        "url": "https://tproger.ru/articles/osint-na-minimalkah-ili-kak-podruzhit-clickhouse-neo4j-qdrant"
-      },
-      {
-        "title": "Gemini Omni 1.2 Flash: Google удлинила клипы до 15 секунд и снизила цену на 30%",
-        "url": "https://tproger.ru/news/gemini-omni-1-2-flash-google-udlinila-klipy-do-15-sekund-i-sniz"
       }
     ]
   },
-  "summary": "Сводка digest-20261106-1341: Самара 2.0°C, Пасмурно; новостей: 10 (vc.ru error, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261106-2240: Самара 1.9°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
