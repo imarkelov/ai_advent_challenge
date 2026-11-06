@@ -1,80 +1,61 @@
 {
-  "id": "digest-20261106-0456",
-  "generated_at": "2026-11-06T04:56:42Z",
+  "id": "digest-20261106-1341",
+  "generated_at": "2026-11-06T13:41:29Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 0.2,
-    "feels_like_c": -3.8,
-    "description": "Снежная крупа",
-    "wind_ms": 12.5
+    "temp_c": 2.0,
+    "feels_like_c": -1.1,
+    "description": "Пасмурно",
+    "wind_ms": 6.9
   },
   "news": {
-    "vc.ru": [
-      {
-        "title": "TikTok начал тестировать отдельное приложение TikTok Shop с покупками для конкуренции с Amazon и Temu",
-        "url": "https://vc.ru/services/3237854-tiktok-shop-novoe-prilozhenie-dlya-pokupok?from=rss"
-      },
-      {
-        "title": "Участники рынка микромобильности и доставки попросили Минтранс смягчить поправки к ПДД, которые приравняют мощные электровелосипеды и самокаты к мопедам и запретят курьерам выезжать на тротуары",
-        "url": "https://vc.ru/transport/3236346-mintrans-i-popravki-k-pdd-dlya-elektrosamokatov-i-kuryerov?from=rss"
-      },
-      {
-        "title": "Echo: ЦБ России потребовал изъять документы из штаб-квартиры Euroclear из-за «сговора» депозитария с ЕС — якобы они хотят помешать иску регулятора на €200 млрд",
-        "url": "https://vc.ru/money/3237632-cb-rossii-trebuet-dokumenty-euroclear?from=rss"
-      },
-      {
-        "title": "«Технологии меняют представление о том, что и как люди могут создавать и чего ждут от продуктов»: Canva объявила о сокращении штата, не упомянув ИИ напрямую",
-        "url": "https://vc.ru/money/3235619-canva-sokrashchaet-shtat-i-menyayet-organizatsionnuyu-strukturu?from=rss"
-      },
-      {
-        "title": "Mercedes вместе со стартапом Liquid AI начала добавлять в некоторые из своих автомобилей локальные ИИ-модели — они могут работать без доступа к интернету",
-        "url": "https://vc.ru/transport/3237708-mercedes-vnedryaet-lokalnye-ii-modeli-ot-liquid-ai?from=rss"
-      }
-    ],
+    "vc.ru": {
+      "error": "The read operation timed out"
+    },
     "habr": [
       {
-        "title": "Вышло обновление диагностической утилиты CPU‑Z 3.02",
-        "url": "https://habr.com/ru/news/1103702/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103702"
+        "title": "Perfscale news #18. CLI Агенты, thresholds с остановкой и OTEL метрики",
+        "url": "https://habr.com/ru/news/1104124/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104124"
       },
       {
-        "title": "Представлен дистрибутив Bazitte 45 на базе Fedora Linux 45 с рабочими столами KDE и GNOME для любителей компьютерных игр",
-        "url": "https://habr.com/ru/news/1103732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103732"
+        "title": "Le GPT Fat, 10 000 агентов и задача Навье — Стокса",
+        "url": "https://habr.com/ru/companies/cloud4y/news/1104610/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104610"
       },
       {
-        "title": "Релиз открытого проекта видеоплеера MPV 0.42",
-        "url": "https://habr.com/ru/news/1103708/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103708"
+        "title": "Кибербезопасность как стратегия: строим киберустойчивость с топ-экспертами",
+        "url": "https://habr.com/ru/companies/infowatch/news/1104608/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104608"
       },
       {
-        "title": "Бесплатный видеоредактор Edits от Instagram* стал доступен для macOS",
-        "url": "https://habr.com/ru/news/1104214/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104214"
+        "title": "Tencent выпустила Hy4 — модель научили управлять компьютером через GUI и CLI",
+        "url": "https://habr.com/ru/companies/selectel/news/1104466/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104466"
       },
       {
-        "title": "После 42 лет поисков на БАК увидели признаки редчайшего распада в точном соответствии со Стандартной моделью",
-        "url": "https://habr.com/ru/news/1104182/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104182"
+        "title": "[45.2026] Обзор новых правил безопасности в пакетных индексах и менеджерах",
+        "url": "https://habr.com/ru/companies/codescoring/news/1104596/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104596"
       }
     ],
     "tproger": [
       {
+        "title": "Как я, незрячий разработчик, организовал работу с ИИ-агентом: от задачи до проверенного результата",
+        "url": "https://tproger.ru/articles/kak-ya-nezryachij-razrabotchik-organizoval-rabotu-s-ii-agentom-ot"
+      },
+      {
+        "title": "Продукт в prod за 16 дней без строчки своего кода: как я вёл AI-агента в связке OpenSpec + Superpowers",
+        "url": "https://tproger.ru/articles/produkt-v-prod-za-16-dnej-bez-strochki-svoego-koda-kak-ya-vyol-ai"
+      },
+      {
+        "title": "Как научить HAProxy снижать на проблемный backend",
+        "url": "https://tproger.ru/articles/kak-nauchit-haproxy-snizhat-na-problemnyj-backend"
+      },
+      {
+        "title": "OSINT на минималках, или Как подружить ClickHouse, Neo4j, Qdrant и локальную LLM без штата дата-сайентистов",
+        "url": "https://tproger.ru/articles/osint-na-minimalkah-ili-kak-podruzhit-clickhouse-neo4j-qdrant"
+      },
+      {
         "title": "Gemini Omni 1.2 Flash: Google удлинила клипы до 15 секунд и снизила цену на 30%",
         "url": "https://tproger.ru/news/gemini-omni-1-2-flash-google-udlinila-klipy-do-15-sekund-i-sniz"
-      },
-      {
-        "title": "OpenAI выпустила GPT-6 Cyber: 48,5% на ExploitGym и класс Critical",
-        "url": "https://tproger.ru/news/openai-vypustila-gpt-6-cyber-48-5-na-exploitgym-i-klass-critic"
-      },
-      {
-        "title": "Сводки фоновых субагентов Claude Code стали на 99% дешевле",
-        "url": "https://tproger.ru/news/svodki-fonovyh-subagentov-claude-code-stali-na-99-dewevle"
-      },
-      {
-        "title": "Mistral рассказала, как агент Large 4 сбежал из песочницы и получил root",
-        "url": "https://tproger.ru/news/mistral-rasskazala-kak-agent-large-4-sbezhal-iz-pesochnicy-i-polu"
-      },
-      {
-        "title": "Moonshot выложила веса Kimi K3.1 Pro: 1,56 ТБ и восемь B300 для запуска",
-        "url": "https://tproger.ru/news/moonshot-vylozhila-vesa-kimi-k3-1-pro-1-56-tb-i-vosem-b300-dlya"
       }
     ]
   },
-  "summary": "Сводка digest-20261106-0456: Самара 0.2°C, Снежная крупа; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261106-1341: Самара 2.0°C, Пасмурно; новостей: 10 (vc.ru error, habr 5, tproger 5)."
 }

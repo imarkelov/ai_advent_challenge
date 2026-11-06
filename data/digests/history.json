@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261009-1231",
-    "generated_at": "2026-10-09T12:31:09Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 16.0,
-      "feels_like_c": 13.7,
-      "description": "Преимущественно ясно",
-      "wind_ms": 9.0
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "«Яндекс» рассказал, что после атаки беспилотников пострадала часть инфраструктуры его дата-центра в Калуге",
-          "url": "https://vc.ru/services/3184679-yandeks-data-tsentr-kaluga-ataka-bespilotnikov?from=rss"
-        },
-        {
-          "title": "Минцифры запланировало ввести для провайдеров требование по минимальной скорости домашнего интернета в 1 Гбит/с — на его исполнение дадут десять лет",
-          "url": "https://vc.ru/services/3184496-mincifry-vvodit-trebovanie-po-minimalnoj-skorosti-interneta?from=rss"
-        },
-        {
-          "title": "Netflix показал трейлер сериала «Альтруисты» о взлёте и крахе криптобиржи FTX",
-          "url": "https://vc.ru/media/3184895-netflix-altruisty-krakh-ftx?from=rss"
-        },
-        {
-          "title": "День 1689: больше трети российских компаний отказались от выплаты годовой премии сотрудникам в 2026 году",
-          "url": "https://vc.ru/money/3184426-rossijskie-kompanii-otkazyvayutsya-ot-godovyh-premij?from=rss"
-        },
-        {
-          "title": "VK подала иск в суд ЕС, чтобы оспорить наложенные на неё санкции",
-          "url": "https://vc.ru/legal/3185086-vk-osparivaet-sanktsii-es-v-sude?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "VK через суд потребовала отменить санкции Евросюза",
-          "url": "https://habr.com/ru/news/1092470/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092470"
-        },
-        {
-          "title": "Sony представила микрофон для смартфонов с записью объёмного звука и поддержкой Eclipsa Audio",
-          "url": "https://habr.com/ru/news/1092452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092452"
-        },
-        {
-          "title": "Американца приговорили к 1,5 годам тюрьмы за накрутку прослушиваний ИИ‑песням в стриминговых сервисах",
-          "url": "https://habr.com/ru/news/1092448/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092448"
-        },
-        {
-          "title": "Пользователи недовольны действиями Microsoft: объём общего хранилища OneDrive в тарифах M365 сокращён с 6 до 2 ТБ",
-          "url": "https://habr.com/ru/news/1092442/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092442"
-        },
-        {
-          "title": "«Известия»: ассортимент ноутбуков ушедших из РФ брендов начал сокращаться",
-          "url": "https://habr.com/ru/news/1092438/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092438"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
-          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
-        },
-        {
-          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
-          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
-        },
-        {
-          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
-          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
-        },
-        {
-          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
-          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
-        },
-        {
-          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
-          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261009-1231: Самара 16.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261009-2211",
     "generated_at": "2026-10-09T22:11:50Z",
     "weather": {
@@ -7674,5 +7594,66 @@
       ]
     },
     "summary": "Сводка digest-20261106-0456: Самара 0.2°C, Снежная крупа; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261106-1341",
+    "generated_at": "2026-11-06T13:41:29Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 2.0,
+      "feels_like_c": -1.1,
+      "description": "Пасмурно",
+      "wind_ms": 6.9
+    },
+    "news": {
+      "vc.ru": {
+        "error": "The read operation timed out"
+      },
+      "habr": [
+        {
+          "title": "Perfscale news #18. CLI Агенты, thresholds с остановкой и OTEL метрики",
+          "url": "https://habr.com/ru/news/1104124/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104124"
+        },
+        {
+          "title": "Le GPT Fat, 10 000 агентов и задача Навье — Стокса",
+          "url": "https://habr.com/ru/companies/cloud4y/news/1104610/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104610"
+        },
+        {
+          "title": "Кибербезопасность как стратегия: строим киберустойчивость с топ-экспертами",
+          "url": "https://habr.com/ru/companies/infowatch/news/1104608/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104608"
+        },
+        {
+          "title": "Tencent выпустила Hy4 — модель научили управлять компьютером через GUI и CLI",
+          "url": "https://habr.com/ru/companies/selectel/news/1104466/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104466"
+        },
+        {
+          "title": "[45.2026] Обзор новых правил безопасности в пакетных индексах и менеджерах",
+          "url": "https://habr.com/ru/companies/codescoring/news/1104596/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104596"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Как я, незрячий разработчик, организовал работу с ИИ-агентом: от задачи до проверенного результата",
+          "url": "https://tproger.ru/articles/kak-ya-nezryachij-razrabotchik-organizoval-rabotu-s-ii-agentom-ot"
+        },
+        {
+          "title": "Продукт в prod за 16 дней без строчки своего кода: как я вёл AI-агента в связке OpenSpec + Superpowers",
+          "url": "https://tproger.ru/articles/produkt-v-prod-za-16-dnej-bez-strochki-svoego-koda-kak-ya-vyol-ai"
+        },
+        {
+          "title": "Как научить HAProxy снижать на проблемный backend",
+          "url": "https://tproger.ru/articles/kak-nauchit-haproxy-snizhat-na-problemnyj-backend"
+        },
+        {
+          "title": "OSINT на минималках, или Как подружить ClickHouse, Neo4j, Qdrant и локальную LLM без штата дата-сайентистов",
+          "url": "https://tproger.ru/articles/osint-na-minimalkah-ili-kak-podruzhit-clickhouse-neo4j-qdrant"
+        },
+        {
+          "title": "Gemini Omni 1.2 Flash: Google удлинила клипы до 15 секунд и снизила цену на 30%",
+          "url": "https://tproger.ru/news/gemini-omni-1-2-flash-google-udlinila-klipy-do-15-sekund-i-sniz"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261106-1341: Самара 2.0°C, Пасмурно; новостей: 10 (vc.ru error, habr 5, tproger 5)."
   }
 ]
