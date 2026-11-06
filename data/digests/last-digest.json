@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261105-2314",
-  "generated_at": "2026-11-05T23:14:41Z",
+  "id": "digest-20261106-0456",
+  "generated_at": "2026-11-06T04:56:42Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -1.2,
-    "feels_like_c": -5.6,
-    "description": "Пасмурно",
-    "wind_ms": 12.8
+    "temp_c": 0.2,
+    "feels_like_c": -3.8,
+    "description": "Снежная крупа",
+    "wind_ms": 12.5
   },
   "news": {
     "vc.ru": [
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
+        "title": "Вышло обновление диагностической утилиты CPU‑Z 3.02",
+        "url": "https://habr.com/ru/news/1103702/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103702"
+      },
+      {
+        "title": "Представлен дистрибутив Bazitte 45 на базе Fedora Linux 45 с рабочими столами KDE и GNOME для любителей компьютерных игр",
+        "url": "https://habr.com/ru/news/1103732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103732"
+      },
+      {
+        "title": "Релиз открытого проекта видеоплеера MPV 0.42",
+        "url": "https://habr.com/ru/news/1103708/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103708"
+      },
+      {
         "title": "Бесплатный видеоредактор Edits от Instagram* стал доступен для macOS",
         "url": "https://habr.com/ru/news/1104214/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104214"
       },
       {
         "title": "После 42 лет поисков на БАК увидели признаки редчайшего распада в точном соответствии со Стандартной моделью",
         "url": "https://habr.com/ru/news/1104182/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104182"
-      },
-      {
-        "title": "В Китае представили зубную щётку, которая убивает бактерии электрическими микрозарядами",
-        "url": "https://habr.com/ru/news/1104180/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104180"
-      },
-      {
-        "title": "OpenAI показала GPT-6 Cyber",
-        "url": "https://habr.com/ru/companies/bothub/news/1104174/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104174"
-      },
-      {
-        "title": "Canva сокращает 22% штата: все сокращённые получат шесть окладов, страховку на год, MacBook и грант на открытие бизнеса",
-        "url": "https://habr.com/ru/news/1104154/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104154"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261105-2314: Самара -1.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261106-0456: Самара 0.2°C, Снежная крупа; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
