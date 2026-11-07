@@ -1,15 +1,19 @@
 {
-  "id": "digest-20261107-1223",
-  "generated_at": "2026-11-07T12:23:14Z",
+  "id": "digest-20261107-2124",
+  "generated_at": "2026-11-07T21:24:20Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.3,
-    "feels_like_c": -0.9,
+    "temp_c": -0.1,
+    "feels_like_c": -2.8,
     "description": "Преимущественно ясно",
-    "wind_ms": 6.2
+    "wind_ms": 3.2
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Медиахолдинг Fox закрыл сделку по покупке за $22 млрд производителя ТВ-приставок Roku",
+        "url": "https://vc.ru/media/3241222-fox-zavershil-pokupku-roku?from=rss"
+      },
       {
         "title": "«К сожалению, облачная инфраструктура уничтожена, строим заново»: хостинг-провайдер Beget рассказал о восстановлении работы после кибератаки",
         "url": "https://vc.ru/services/3240059-vosstanovlenie-hostinga-beget-posle-kiberataki?from=rss"
@@ -25,13 +29,17 @@
       {
         "title": "ЦБ разрешит российским биржам торговать биткоином, Ethereum и USDT с 17 ноября 2026 года",
         "url": "https://vc.ru/crypto/3239814-cb-razreshit-torgovlyu-bitkoinom-ethereum-i-usdt?from=rss"
-      },
-      {
-        "title": "Сбой у «Ozon Банка»: не работает приложение, пользователи жалуются на проблемы с оплатой покупок",
-        "url": "https://vc.ru/money/3239046-sboj-ozon-banka-problemy-s-prilozheniem?from=rss"
       }
     ],
     "habr": [
+      {
+        "title": "Вышла новая версия ShareX. Юзерам она не понравилась",
+        "url": "https://habr.com/ru/news/1104906/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104906"
+      },
+      {
+        "title": "Выпуск Sigil 2.8.5 — открытого мультиплатформенного редактора электронных книг в формате ePub",
+        "url": "https://habr.com/ru/news/1104246/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104246"
+      },
       {
         "title": "Исследование: компании массово запускают процесс «ИИ‑рикошета»",
         "url": "https://habr.com/ru/news/1104866/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104866"
@@ -43,38 +51,30 @@
       {
         "title": "В приложении Nvidia App появилась настройка приоритета GPU",
         "url": "https://habr.com/ru/news/1104856/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104856"
-      },
-      {
-        "title": "Проблему Microsoft с изменением часовых поясов в Канаде можно решить только вручную",
-        "url": "https://habr.com/ru/news/1104850/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104850"
-      },
-      {
-        "title": "Разработчик отозвал лицензию на заставку с аквариумом для Roku OS после её продажи Fox",
-        "url": "https://habr.com/ru/news/1104842/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104842"
       }
     ],
     "tproger": [
       {
-        "title": "Кодинг-агенты научились переносить сессии и работать в фоне",
-        "url": "https://tproger.ru/news/koding-agenty-nauchilis-perenosit-sessii-i-rabotat-v-fone"
+        "title": "Claude Code в облаке научился сам настраивать окружение репозитория",
+        "url": "https://tproger.ru/news/claude-code-v-oblake-nauchilsya-sam-nastraivat-okruzhenie-repozito"
       },
       {
-        "title": "Cursor научил агента публиковать веб-приложения с базой и входом",
-        "url": "https://tproger.ru/news/cursor-nauchil-agenta-publikovat-veb-prilozheniya-s-bazoj-i-vhodom"
+        "title": "Memorilla заменяет документы в контексте LLM 16 векторами памяти",
+        "url": "https://tproger.ru/news/memorilla-zamenyaet-dokumenty-v-kontekste-llm-16-vektorami-pamyati"
       },
       {
-        "title": "Как я, незрячий разработчик, организовал работу с ИИ-агентом: от задачи до проверенного результата",
-        "url": "https://tproger.ru/articles/kak-ya-nezryachij-razrabotchik-organizoval-rabotu-s-ii-agentom-ot"
+        "title": "Anthropic объяснила, из чего собрать память агента и зачем ему «сны»",
+        "url": "https://tproger.ru/news/anthropic-obyasnila-iz-chego-sobrat-pamyat-agenta-i-zachem-emu"
       },
       {
-        "title": "Продукт в prod за 16 дней без строчки своего кода: как я вёл AI-агента в связке OpenSpec + Superpowers",
-        "url": "https://tproger.ru/articles/produkt-v-prod-za-16-dnej-bez-strochki-svoego-koda-kak-ya-vyol-ai"
+        "title": "Cursor научил агентов разговаривать голосом: звонки на Grok Voice",
+        "url": "https://tproger.ru/news/cursor-nauchil-agentov-razgovarivat-golosom-zvonki-na-grok-voic"
       },
       {
-        "title": "Как научить HAProxy снижать на проблемный backend",
-        "url": "https://tproger.ru/articles/kak-nauchit-haproxy-snizhat-na-problemnyj-backend"
+        "title": "Thinking Machines показала Inkling 2 Small и обещает открыть веса 594B",
+        "url": "https://tproger.ru/news/thinking-machines-pokazala-inkling-2-small-i-obeshhaet-otkryt-ves"
       }
     ]
   },
-  "summary": "Сводка digest-20261107-1223: Самара 2.3°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261107-2124: Самара -0.1°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
