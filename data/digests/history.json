@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261010-0409",
-    "generated_at": "2026-10-10T04:09:57Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 9.2,
-      "feels_like_c": 7.8,
-      "description": "Переменная облачность",
-      "wind_ms": 4.3
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "«Яндекс»: часть функций чат-бота «Алиса AI» временно недоступна, «Станции» могут отвечать с задержкой",
-          "url": "https://vc.ru/services/3185537-sboj-v-rabote-alisy-ai-i-yandeks-eda?from=rss"
-        },
-        {
-          "title": "Пользователи столкнулись с проблемами при вызове такси в «Яндекс Go» на фоне повреждений дата-центров компании",
-          "url": "https://vc.ru/transport/3185887-problemy-s-taksi-v-yandeks-go?from=rss"
-        },
-        {
-          "title": "Минцифры запланировало ввести для провайдеров требование по минимальной скорости домашнего интернета в 1 Гбит/с — на его исполнение дадут десять лет",
-          "url": "https://vc.ru/services/3184496-mincifry-vvodit-trebovanie-po-minimalnoj-skorosti-interneta?from=rss"
-        },
-        {
-          "title": "«Яндекс» рассказал, что после атаки беспилотников пострадала часть инфраструктуры его дата-центра в Калуге",
-          "url": "https://vc.ru/services/3184679-yandeks-data-tsentr-kaluga-ataka-bespilotnikov?from=rss"
-        },
-        {
-          "title": "Ozon рассказал о прекращении страховой программы от атак беспилотников для продавцов",
-          "url": "https://vc.ru/marketplace/3186201-ozon-prekratil-strahovuyu-programmu-ot-atak-bespilotnikov?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Представлен открытый нативный графический отладчик The RAD Debugger для приложений user-mode с поддержкой multi-process",
-          "url": "https://habr.com/ru/news/1092550/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092550"
-        },
-        {
-          "title": "Вышло обновление Media Player Classic — Home Cinema 2.8.3",
-          "url": "https://habr.com/ru/news/1092242/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092242"
-        },
-        {
-          "title": "В Москве прошла конференция СисАдмин 2026: Linux, мониторинг, ИИ и немного Стива Возняка",
-          "url": "https://habr.com/ru/news/1092618/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092618"
-        },
-        {
-          "title": "Google завершил самый долгий спам-апдейт года через 13 дней и 16 часов",
-          "url": "https://habr.com/ru/news/1092584/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092584"
-        },
-        {
-          "title": "Релиз Python 3.15",
-          "url": "https://habr.com/ru/news/1092576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092576"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
-          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
-        },
-        {
-          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
-          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
-        },
-        {
-          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
-          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
-        },
-        {
-          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
-          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
-        },
-        {
-          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
-          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261010-0409: Самара 9.2°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261010-1150",
     "generated_at": "2026-10-10T11:50:48Z",
     "weather": {
@@ -7655,5 +7575,85 @@
       ]
     },
     "summary": "Сводка digest-20261106-2240: Самара 1.9°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261107-0429",
+    "generated_at": "2026-11-07T04:29:02Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 1.9,
+      "feels_like_c": -0.7,
+      "description": "Небольшой дождь",
+      "wind_ms": 4.7
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«К сожалению, облачная инфраструктура уничтожена, строим заново»: хостинг-провайдер Beget рассказал о восстановлении работы после кибератаки",
+          "url": "https://vc.ru/services/3240059-vosstanovlenie-hostinga-beget-posle-kiberataki?from=rss"
+        },
+        {
+          "title": "WP: после победы на промежуточных выборах в Конгресс США демократы готовят волну расследований против ИТ-компаний — первыми под удар попадут Apple, Meta* и SpaceXAI",
+          "url": "https://vc.ru/legal/3239709-demokraty-ssha-rassledovaniya-protiv-apple-meta-i-spacexai?from=rss"
+        },
+        {
+          "title": "ЦБ разрешит российским биржам торговать биткоином, Ethereum и USDT с 17 ноября 2026 года",
+          "url": "https://vc.ru/crypto/3239814-cb-razreshit-torgovlyu-bitkoinom-ethereum-i-usdt?from=rss"
+        },
+        {
+          "title": "Sony выпустила проводные ретронаушники MDR-3R за $60",
+          "url": "https://vc.ru/tech/3239028-sony-vypustila-retro-naushniki-mdr-3r?from=rss"
+        },
+        {
+          "title": "В соцсетях раскритиковали рекламу Dior за «ИИ-артефакты» в мультфильме, «нарисованном от руки» французскими художниками",
+          "url": "https://vc.ru/marketing/3238963-reklama-dior-podverglas-kritike-za-ii-artefakty-v-multfilme?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "OpenAI сбрасывает режим «размышлений» ChatGPT с High на Medium",
+          "url": "https://habr.com/ru/news/1104738/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104738"
+        },
+        {
+          "title": "Beget: восстановили всё, что можно было вернуть быстро, запущено более 60% хостинга, облачная инфраструктура уничтожена",
+          "url": "https://habr.com/ru/news/1104698/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104698"
+        },
+        {
+          "title": "METR: ИИ ускорил разработку моделей Anthropic почти вдвое",
+          "url": "https://habr.com/ru/companies/bothub/news/1104694/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104694"
+        },
+        {
+          "title": "Максимальная скидка года на курсы Яндекс Практикума",
+          "url": "https://habr.com/ru/companies/yandex_praktikum/news/1104680/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104680"
+        },
+        {
+          "title": "Обновление FurMark 2.11 расширило базу графических чипов и улучшило мониторинг температур",
+          "url": "https://habr.com/ru/companies/selectel/news/1104530/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104530"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Кодинг-агенты научились переносить сессии и работать в фоне",
+          "url": "https://tproger.ru/news/koding-agenty-nauchilis-perenosit-sessii-i-rabotat-v-fone"
+        },
+        {
+          "title": "Cursor научил агента публиковать веб-приложения с базой и входом",
+          "url": "https://tproger.ru/news/cursor-nauchil-agenta-publikovat-veb-prilozheniya-s-bazoj-i-vhodom"
+        },
+        {
+          "title": "Как я, незрячий разработчик, организовал работу с ИИ-агентом: от задачи до проверенного результата",
+          "url": "https://tproger.ru/articles/kak-ya-nezryachij-razrabotchik-organizoval-rabotu-s-ii-agentom-ot"
+        },
+        {
+          "title": "Продукт в prod за 16 дней без строчки своего кода: как я вёл AI-агента в связке OpenSpec + Superpowers",
+          "url": "https://tproger.ru/articles/produkt-v-prod-za-16-dnej-bez-strochki-svoego-koda-kak-ya-vyol-ai"
+        },
+        {
+          "title": "Как научить HAProxy снижать на проблемный backend",
+          "url": "https://tproger.ru/articles/kak-nauchit-haproxy-snizhat-na-problemnyj-backend"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261107-0429: Самара 1.9°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
