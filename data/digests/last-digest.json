@@ -1,18 +1,22 @@
 {
-  "id": "digest-20261107-0429",
-  "generated_at": "2026-11-07T04:29:02Z",
+  "id": "digest-20261107-1223",
+  "generated_at": "2026-11-07T12:23:14Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 1.9,
-    "feels_like_c": -0.7,
-    "description": "Небольшой дождь",
-    "wind_ms": 4.7
+    "temp_c": 2.3,
+    "feels_like_c": -0.9,
+    "description": "Преимущественно ясно",
+    "wind_ms": 6.2
   },
   "news": {
     "vc.ru": [
       {
         "title": "«К сожалению, облачная инфраструктура уничтожена, строим заново»: хостинг-провайдер Beget рассказал о восстановлении работы после кибератаки",
         "url": "https://vc.ru/services/3240059-vosstanovlenie-hostinga-beget-posle-kiberataki?from=rss"
+      },
+      {
+        "title": "День 1718: на бывшем заводе Huyndai начали сборку автомобилей российского бренда Votour, Путин передал во временное управление ещё три компании японской JTI",
+        "url": "https://vc.ru/money/3240901-sborka-avtomobiley-votour-na-zavode-hyundai?from=rss"
       },
       {
         "title": "WP: после победы на промежуточных выборах в Конгресс США демократы готовят волну расследований против ИТ-компаний — первыми под удар попадут Apple, Meta* и SpaceXAI",
@@ -23,34 +27,30 @@
         "url": "https://vc.ru/crypto/3239814-cb-razreshit-torgovlyu-bitkoinom-ethereum-i-usdt?from=rss"
       },
       {
-        "title": "Sony выпустила проводные ретронаушники MDR-3R за $60",
-        "url": "https://vc.ru/tech/3239028-sony-vypustila-retro-naushniki-mdr-3r?from=rss"
-      },
-      {
-        "title": "В соцсетях раскритиковали рекламу Dior за «ИИ-артефакты» в мультфильме, «нарисованном от руки» французскими художниками",
-        "url": "https://vc.ru/marketing/3238963-reklama-dior-podverglas-kritike-za-ii-artefakty-v-multfilme?from=rss"
+        "title": "Сбой у «Ozon Банка»: не работает приложение, пользователи жалуются на проблемы с оплатой покупок",
+        "url": "https://vc.ru/money/3239046-sboj-ozon-banka-problemy-s-prilozheniem?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "OpenAI сбрасывает режим «размышлений» ChatGPT с High на Medium",
-        "url": "https://habr.com/ru/news/1104738/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104738"
+        "title": "Исследование: компании массово запускают процесс «ИИ‑рикошета»",
+        "url": "https://habr.com/ru/news/1104866/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104866"
       },
       {
-        "title": "Beget: восстановили всё, что можно было вернуть быстро, запущено более 60% хостинга, облачная инфраструктура уничтожена",
-        "url": "https://habr.com/ru/news/1104698/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104698"
+        "title": "Альтман опроверг свои слова о необходимости отбирания оперативной памяти у пользователей",
+        "url": "https://habr.com/ru/news/1104860/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104860"
       },
       {
-        "title": "METR: ИИ ускорил разработку моделей Anthropic почти вдвое",
-        "url": "https://habr.com/ru/companies/bothub/news/1104694/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104694"
+        "title": "В приложении Nvidia App появилась настройка приоритета GPU",
+        "url": "https://habr.com/ru/news/1104856/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104856"
       },
       {
-        "title": "Максимальная скидка года на курсы Яндекс Практикума",
-        "url": "https://habr.com/ru/companies/yandex_praktikum/news/1104680/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104680"
+        "title": "Проблему Microsoft с изменением часовых поясов в Канаде можно решить только вручную",
+        "url": "https://habr.com/ru/news/1104850/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104850"
       },
       {
-        "title": "Обновление FurMark 2.11 расширило базу графических чипов и улучшило мониторинг температур",
-        "url": "https://habr.com/ru/companies/selectel/news/1104530/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104530"
+        "title": "Разработчик отозвал лицензию на заставку с аквариумом для Roku OS после её продажи Fox",
+        "url": "https://habr.com/ru/news/1104842/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1104842"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261107-0429: Самара 1.9°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261107-1223: Самара 2.3°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
