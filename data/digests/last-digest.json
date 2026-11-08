@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261107-2124",
-  "generated_at": "2026-11-07T21:24:20Z",
+  "id": "digest-20261108-0414",
+  "generated_at": "2026-11-08T04:14:14Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -0.1,
-    "feels_like_c": -2.8,
-    "description": "Преимущественно ясно",
-    "wind_ms": 3.2
+    "temp_c": -1.1,
+    "feels_like_c": -4.1,
+    "description": "Ясно",
+    "wind_ms": 3.1
   },
   "news": {
     "vc.ru": [
@@ -15,12 +15,12 @@
         "url": "https://vc.ru/media/3241222-fox-zavershil-pokupku-roku?from=rss"
       },
       {
-        "title": "«К сожалению, облачная инфраструктура уничтожена, строим заново»: хостинг-провайдер Beget рассказал о восстановлении работы после кибератаки",
-        "url": "https://vc.ru/services/3240059-vosstanovlenie-hostinga-beget-posle-kiberataki?from=rss"
-      },
-      {
         "title": "День 1718: на бывшем заводе Huyndai начали сборку автомобилей российского бренда Votour, Путин передал во временное управление ещё три компании японской JTI",
         "url": "https://vc.ru/money/3240901-sborka-avtomobiley-votour-na-zavode-hyundai?from=rss"
+      },
+      {
+        "title": "«К сожалению, облачная инфраструктура уничтожена, строим заново»: хостинг-провайдер Beget рассказал о восстановлении работы после кибератаки",
+        "url": "https://vc.ru/services/3240059-vosstanovlenie-hostinga-beget-posle-kiberataki?from=rss"
       },
       {
         "title": "WP: после победы на промежуточных выборах в Конгресс США демократы готовят волну расследований против ИТ-компаний — первыми под удар попадут Apple, Meta* и SpaceXAI",
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261107-2124: Самара -0.1°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261108-0414: Самара -1.1°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
