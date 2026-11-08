@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261108-1241",
-  "generated_at": "2026-11-08T12:41:54Z",
+  "id": "digest-20261108-2138",
+  "generated_at": "2026-11-08T21:38:37Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 1.5,
-    "feels_like_c": -2.4,
-    "description": "Преимущественно ясно",
-    "wind_ms": 7.9
+    "temp_c": -0.8,
+    "feels_like_c": -4.6,
+    "description": "Пасмурно",
+    "wind_ms": 8.1
   },
   "news": {
     "vc.ru": [
@@ -19,38 +19,38 @@
         "url": "https://vc.ru/transport/3241343-problemy-cybertruck?from=rss"
       },
       {
+        "title": "«Брак или возврат»: SCMP рассказала о китайском стартапе, который берёт 2000 юаней за подписку, сводит пару с помощью ИИ и обещает вернуть деньги, если она не поженится",
+        "url": "https://vc.ru/services/3242817-startup-liangpei-ii-dlya-znakomstv-s-garantiej-braka?from=rss"
+      },
+      {
+        "title": "Принадлежащий китайскому BYD бренд Yangwang представил люксовый автомобиль Altior, который умеет удерживаться на поверхности воды",
+        "url": "https://vc.ru/transport/3242732-lyuksovyy-avtomobil-yangwang-altior-ot-byd?from=rss"
+      },
+      {
         "title": "Медиахолдинг Fox закрыл сделку по покупке за $22 млрд производителя ТВ-приставок Roku",
         "url": "https://vc.ru/media/3241222-fox-zavershil-pokupku-roku?from=rss"
-      },
-      {
-        "title": "День 1718: на бывшем заводе Huyndai начали сборку автомобилей российского бренда Votour, Путин передал во временное управление ещё три компании японской JTI",
-        "url": "https://vc.ru/money/3240901-sborka-avtomobiley-votour-na-zavode-hyundai?from=rss"
-      },
-      {
-        "title": "«К сожалению, облачная инфраструктура уничтожена, строим заново»: хостинг-провайдер Beget рассказал о восстановлении работы после кибератаки",
-        "url": "https://vc.ru/services/3240059-vosstanovlenie-hostinga-beget-posle-kiberataki?from=rss"
       }
     ],
     "habr": [
       {
+        "title": "Астрономы пытаются объяснить необычную орбиту загадочного астероида",
+        "url": "https://habr.com/ru/news/1105140/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105140"
+      },
+      {
+        "title": "В проекте DosZone попросили у сообщества помощи в сохранении коллекции игр проекта из кэша браузеров",
+        "url": "https://habr.com/ru/news/1105136/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105136"
+      },
+      {
+        "title": "Вышел открытый проект Ram Altman — скрипт, который отправляет главе OpenAI инфу, сколько памяти простаивает на ПК",
+        "url": "https://habr.com/ru/news/1105096/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105096"
+      },
+      {
+        "title": "GPD готовит Win Mini Ultra — карманный игровой ПК с Intel Arc G3 Extreme",
+        "url": "https://habr.com/ru/companies/selectel/news/1105100/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105100"
+      },
+      {
         "title": "Энтузиаст собрал карманную печатную машинку на Raspberry Pi Zero 2 W",
         "url": "https://habr.com/ru/companies/selectel/news/1105092/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105092"
-      },
-      {
-        "title": "Обновление мессенджера bog_gram и bog_music",
-        "url": "https://habr.com/ru/news/1105080/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105080"
-      },
-      {
-        "title": "В США похитили грузовик с чипами Nvidia на $11,4 млн — воры замаскировали машину под перевозку еды",
-        "url": "https://habr.com/ru/news/1105058/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105058"
-      },
-      {
-        "title": "В EA рассказали о сохранении игрового наследия, включая видеокассеты, киноплёнки и CD‑ROM",
-        "url": "https://habr.com/ru/news/1105046/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105046"
-      },
-      {
-        "title": "Telegram готовит экспериментальную сборку с ИИ-ассистентом",
-        "url": "https://habr.com/ru/news/1105042/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105042"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261108-1241: Самара 1.5°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261108-2138: Самара -0.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
