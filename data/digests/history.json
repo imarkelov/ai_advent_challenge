@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261012-0409",
-    "generated_at": "2026-10-12T04:09:26Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 4.4,
-      "feels_like_c": 2.4,
-      "description": "Туман",
-      "wind_ms": 4.4
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Дата-центр «Яндекса» во Владимире остановил работу после атаки беспилотников",
-          "url": "https://vc.ru/services/3188072-ataka-bespilotnikov-na-data-tsentr-yandeksa?from=rss"
-        },
-        {
-          "title": "10 млн активных пользователей и стремительный рост популярности в Азии: это соцсеть Setlog, в которой можно снимать двухсекундные ролики без фильтров для создания «закрытых» видеоблогов с друзьями",
-          "url": "https://vc.ru/social/3188416-sotsset-setlog-rost-populyarnosti-v-azii?from=rss"
-        },
-        {
-          "title": "«Яндекс» ограничил часть функций «Диска» для снижения нагрузки — в том числе скачивание папок",
-          "url": "https://vc.ru/services/3188990-yandeks-ogranichil-funktsii-diska?from=rss"
-        },
-        {
-          "title": "FT рассказала об обсуждении в Starbucks покупки сети ресторанов мексиканской кухни Chipotle: что компании могли бы получить от возможной сделки, кроме ошибок",
-          "url": "https://vc.ru/food/3188796-starbucks-rassmatrivaet-pokupku-chipotle?from=rss"
-        },
-        {
-          "title": "«Яндекс» сообщил о постепенном восстановлении доступа к «Алисе», «Поиску», «Картам» и другим своим сервисам",
-          "url": "https://vc.ru/services/3188673-yandeks-vosstanavlivaet-dostup-k-alise-poisku-i-drugim-servisam?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Директор по стратегическому маркетингу «Яндекса»: в компании регулярно отрабатывали на учениях потерю одного дата‑центра",
-          "url": "https://habr.com/ru/news/1093056/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093056"
-        },
-        {
-          "title": "Релиз Brython 3.15 (Browser Python)",
-          "url": "https://habr.com/ru/news/1092978/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092978"
-        },
-        {
-          "title": "Вышла СУБД SQLite 3.54",
-          "url": "https://habr.com/ru/news/1092976/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1092976"
-        },
-        {
-          "title": "Яндекс Пэй продолжает восстанавливать работу после повреждения дата-центра",
-          "url": "https://habr.com/ru/news/1093020/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093020"
-        },
-        {
-          "title": "«Тантор Лабс» предложила альтернативу публичным облакам: собственный DBaaS на Tantor XData с развёртыванием от трёх дней",
-          "url": "https://habr.com/ru/news/1093006/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1093006"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
-          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
-        },
-        {
-          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
-          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
-        },
-        {
-          "title": "Как перестраивать продукт, которым ежедневно пользуются 65 миллионов человек",
-          "url": "https://tproger.ru/articles/kak-perestraivat-produkt-kotorym-ezhednevno-polzuyutsya-65-milli"
-        },
-        {
-          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
-          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20"
-        },
-        {
-          "title": "Вышла VS Code 1.141 с песочницами для ИИ-агентов на Windows, macOS и Linux",
-          "url": "https://tproger.ru/news/vywla-vs-code-1-141-s-pesochnicami-dlya-ii-agentov-na-windows-mac"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261012-0409: Самара 4.4°C, Туман; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261012-1419",
     "generated_at": "2026-10-12T14:19:57Z",
     "weather": {
@@ -7655,5 +7575,85 @@
       ]
     },
     "summary": "Сводка digest-20261109-0429: Самара -1.0°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261109-1503",
+    "generated_at": "2026-11-09T15:03:45Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 1.5,
+      "feels_like_c": -1.8,
+      "description": "Пасмурно",
+      "wind_ms": 9.2
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Российский хостинг-провайдер ESTT сообщил о «серьёзном техническом сбое»",
+          "url": "https://vc.ru/services/3243720-hosting-provoditel-estt-sboi?from=rss"
+        },
+        {
+          "title": "Совет директоров Nvidia начал расследование после того, как гендиректор Дженсен Хуанг признался в романе с китаянкой, которую подозревают в шпионаже",
+          "url": "https://vc.ru/hr/3243421-rassledovanie-nvidia-iz-za-romana-dzhensena-khuanga?from=rss"
+        },
+        {
+          "title": "«Яндекс» разрешил тратить баллы «Плюса» вне своих сервисов",
+          "url": "https://vc.ru/money/3243903-yandeks-plyus-trat-bally-partnerov-yandeks-pay?from=rss"
+        },
+        {
+          "title": "Хостинг-провайдер Beget назвал приостановку аккредитации по доменам .ru, .su и .рф «технической мерой»",
+          "url": "https://vc.ru/services/3244180-priostanovka-akkreditacii-beget?from=rss"
+        },
+        {
+          "title": "FT: Сингапур стал крупнейшей «налоговой гаванью» для Apple — в 2026 году компания провела через страну примерно $50 млрд прибыли и сэкономила $2,7 млрд",
+          "url": "https://vc.ru/money/3243961-singapur-nalogovaya-gavanyu-dlya-apple?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Инфраструктура завтрашнего дня и K8s для нее: без нод и контейнеров, но с планировщиком электричества",
+          "url": "https://habr.com/ru/companies/aenix/articles/1105586/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105586"
+        },
+        {
+          "title": "От бизнес-задач к работающей IBP-системе: как спроектировать процессы планирования и воплотить их в IT-решении",
+          "url": "https://habr.com/ru/companies/korus_consulting/articles/1105584/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105584"
+        },
+        {
+          "title": "Не клади все данные в одно облако",
+          "url": "https://habr.com/ru/companies/mind_software/articles/1105582/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105582"
+        },
+        {
+          "title": "HTML‑виджеты Telegram до выхода Bot API 10.4: отправляем через MTProto из Telethon и разбираем грабли слоя 233",
+          "url": "https://habr.com/ru/articles/1105576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105576"
+        },
+        {
+          "title": "Мы отдали документацию Claude, и он начал писать нам автотесты",
+          "url": "https://habr.com/ru/articles/1105574/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105574"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Claude Code в облаке научился сам настраивать окружение репозитория",
+          "url": "https://tproger.ru/news/claude-code-v-oblake-nauchilsya-sam-nastraivat-okruzhenie-repozito"
+        },
+        {
+          "title": "Memorilla заменяет документы в контексте LLM 16 векторами памяти",
+          "url": "https://tproger.ru/news/memorilla-zamenyaet-dokumenty-v-kontekste-llm-16-vektorami-pamyati"
+        },
+        {
+          "title": "Anthropic объяснила, из чего собрать память агента и зачем ему «сны»",
+          "url": "https://tproger.ru/news/anthropic-obyasnila-iz-chego-sobrat-pamyat-agenta-i-zachem-emu"
+        },
+        {
+          "title": "Cursor научил агентов разговаривать голосом: звонки на Grok Voice",
+          "url": "https://tproger.ru/news/cursor-nauchil-agentov-razgovarivat-golosom-zvonki-na-grok-voic"
+        },
+        {
+          "title": "Thinking Machines показала Inkling 2 Small и обещает открыть веса 594B",
+          "url": "https://tproger.ru/news/thinking-machines-pokazala-inkling-2-small-i-obeshhaet-otkryt-ves"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261109-1503: Самара 1.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

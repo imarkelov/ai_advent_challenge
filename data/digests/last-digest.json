@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261109-0429",
-  "generated_at": "2026-11-09T04:29:00Z",
+  "id": "digest-20261109-1503",
+  "generated_at": "2026-11-09T15:03:45Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -1.0,
-    "feels_like_c": -5.0,
+    "temp_c": 1.5,
+    "feels_like_c": -1.8,
     "description": "Пасмурно",
-    "wind_ms": 10.0
+    "wind_ms": 9.2
   },
   "news": {
     "vc.ru": [
       {
-        "title": "«Брак или возврат»: SCMP рассказала о китайском стартапе, который берёт 2000 юаней за подписку, сводит пару с помощью ИИ и обещает вернуть деньги, если она не поженится",
-        "url": "https://vc.ru/services/3242817-startup-liangpei-ii-dlya-znakomstv-s-garantiej-braka?from=rss"
+        "title": "Российский хостинг-провайдер ESTT сообщил о «серьёзном техническом сбое»",
+        "url": "https://vc.ru/services/3243720-hosting-provoditel-estt-sboi?from=rss"
       },
       {
-        "title": "Стартап Panthalassa запустил свою первую фабрику — он собирается наладить серийное производство плавучих дата-центров, которые будут обходиться дешевле ЦОДов на суше",
-        "url": "https://vc.ru/future/3242172-startup-panthalassa-fabrika-plavuchikh-data-tsentrov?from=rss"
+        "title": "Совет директоров Nvidia начал расследование после того, как гендиректор Дженсен Хуанг признался в романе с китаянкой, которую подозревают в шпионаже",
+        "url": "https://vc.ru/hr/3243421-rassledovanie-nvidia-iz-za-romana-dzhensena-khuanga?from=rss"
       },
       {
-        "title": "От «мусорного бака» до «космического корабля»: в соцсетях и СМИ «хоронят» Cybertruck, производство которого прекратят в середине 2027 года",
-        "url": "https://vc.ru/transport/3241343-problemy-cybertruck?from=rss"
+        "title": "«Яндекс» разрешил тратить баллы «Плюса» вне своих сервисов",
+        "url": "https://vc.ru/money/3243903-yandeks-plyus-trat-bally-partnerov-yandeks-pay?from=rss"
       },
       {
-        "title": "Принадлежащий китайскому BYD бренд Yangwang представил люксовый автомобиль Altior, который умеет удерживаться на поверхности воды",
-        "url": "https://vc.ru/transport/3242732-lyuksovyy-avtomobil-yangwang-altior-ot-byd?from=rss"
+        "title": "Хостинг-провайдер Beget назвал приостановку аккредитации по доменам .ru, .su и .рф «технической мерой»",
+        "url": "https://vc.ru/services/3244180-priostanovka-akkreditacii-beget?from=rss"
       },
       {
-        "title": "Медиахолдинг Fox закрыл сделку по покупке за $22 млрд производителя ТВ-приставок Roku",
-        "url": "https://vc.ru/media/3241222-fox-zavershil-pokupku-roku?from=rss"
+        "title": "FT: Сингапур стал крупнейшей «налоговой гаванью» для Apple — в 2026 году компания провела через страну примерно $50 млрд прибыли и сэкономила $2,7 млрд",
+        "url": "https://vc.ru/money/3243961-singapur-nalogovaya-gavanyu-dlya-apple?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Вышло обновление 7-Zip 26.06",
-        "url": "https://habr.com/ru/news/1105062/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105062"
+        "title": "Инфраструктура завтрашнего дня и K8s для нее: без нод и контейнеров, но с планировщиком электричества",
+        "url": "https://habr.com/ru/companies/aenix/articles/1105586/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105586"
       },
       {
-        "title": "Релиз системы мониторинга Zabbix 8.0 LTS",
-        "url": "https://habr.com/ru/news/1105052/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105052"
+        "title": "От бизнес-задач к работающей IBP-системе: как спроектировать процессы планирования и воплотить их в IT-решении",
+        "url": "https://habr.com/ru/companies/korus_consulting/articles/1105584/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105584"
       },
       {
-        "title": "Астрономы пытаются объяснить необычную орбиту загадочного астероида",
-        "url": "https://habr.com/ru/news/1105140/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105140"
+        "title": "Не клади все данные в одно облако",
+        "url": "https://habr.com/ru/companies/mind_software/articles/1105582/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105582"
       },
       {
-        "title": "В проекте DosZone попросили у сообщества помощи в сохранении коллекции игр проекта из кэша браузеров",
-        "url": "https://habr.com/ru/news/1105136/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105136"
+        "title": "HTML‑виджеты Telegram до выхода Bot API 10.4: отправляем через MTProto из Telethon и разбираем грабли слоя 233",
+        "url": "https://habr.com/ru/articles/1105576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105576"
       },
       {
-        "title": "Вышел открытый проект Ram Altman — скрипт, который отправляет главе OpenAI инфу, сколько памяти простаивает на ПК",
-        "url": "https://habr.com/ru/news/1105096/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105096"
+        "title": "Мы отдали документацию Claude, и он начал писать нам автотесты",
+        "url": "https://habr.com/ru/articles/1105574/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105574"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261109-0429: Самара -1.0°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261109-1503: Самара 1.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
