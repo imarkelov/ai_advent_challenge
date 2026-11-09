@@ -1,15 +1,19 @@
 {
-  "id": "digest-20261108-2138",
-  "generated_at": "2026-11-08T21:38:37Z",
+  "id": "digest-20261109-0429",
+  "generated_at": "2026-11-09T04:29:00Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -0.8,
-    "feels_like_c": -4.6,
+    "temp_c": -1.0,
+    "feels_like_c": -5.0,
     "description": "Пасмурно",
-    "wind_ms": 8.1
+    "wind_ms": 10.0
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "«Брак или возврат»: SCMP рассказала о китайском стартапе, который берёт 2000 юаней за подписку, сводит пару с помощью ИИ и обещает вернуть деньги, если она не поженится",
+        "url": "https://vc.ru/services/3242817-startup-liangpei-ii-dlya-znakomstv-s-garantiej-braka?from=rss"
+      },
       {
         "title": "Стартап Panthalassa запустил свою первую фабрику — он собирается наладить серийное производство плавучих дата-центров, которые будут обходиться дешевле ЦОДов на суше",
         "url": "https://vc.ru/future/3242172-startup-panthalassa-fabrika-plavuchikh-data-tsentrov?from=rss"
@@ -17,10 +21,6 @@
       {
         "title": "От «мусорного бака» до «космического корабля»: в соцсетях и СМИ «хоронят» Cybertruck, производство которого прекратят в середине 2027 года",
         "url": "https://vc.ru/transport/3241343-problemy-cybertruck?from=rss"
-      },
-      {
-        "title": "«Брак или возврат»: SCMP рассказала о китайском стартапе, который берёт 2000 юаней за подписку, сводит пару с помощью ИИ и обещает вернуть деньги, если она не поженится",
-        "url": "https://vc.ru/services/3242817-startup-liangpei-ii-dlya-znakomstv-s-garantiej-braka?from=rss"
       },
       {
         "title": "Принадлежащий китайскому BYD бренд Yangwang представил люксовый автомобиль Altior, который умеет удерживаться на поверхности воды",
@@ -33,6 +33,14 @@
     ],
     "habr": [
       {
+        "title": "Вышло обновление 7-Zip 26.06",
+        "url": "https://habr.com/ru/news/1105062/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105062"
+      },
+      {
+        "title": "Релиз системы мониторинга Zabbix 8.0 LTS",
+        "url": "https://habr.com/ru/news/1105052/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105052"
+      },
+      {
         "title": "Астрономы пытаются объяснить необычную орбиту загадочного астероида",
         "url": "https://habr.com/ru/news/1105140/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105140"
       },
@@ -43,14 +51,6 @@
       {
         "title": "Вышел открытый проект Ram Altman — скрипт, который отправляет главе OpenAI инфу, сколько памяти простаивает на ПК",
         "url": "https://habr.com/ru/news/1105096/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105096"
-      },
-      {
-        "title": "GPD готовит Win Mini Ultra — карманный игровой ПК с Intel Arc G3 Extreme",
-        "url": "https://habr.com/ru/companies/selectel/news/1105100/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105100"
-      },
-      {
-        "title": "Энтузиаст собрал карманную печатную машинку на Raspberry Pi Zero 2 W",
-        "url": "https://habr.com/ru/companies/selectel/news/1105092/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105092"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261108-2138: Самара -0.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261109-0429: Самара -1.0°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
