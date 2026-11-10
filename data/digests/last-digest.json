@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261110-1416",
-  "generated_at": "2026-11-10T14:16:08Z",
+  "id": "digest-20261110-2246",
+  "generated_at": "2026-11-10T22:46:58Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 3.5,
-    "feels_like_c": 0.6,
+    "temp_c": 2.6,
+    "feels_like_c": -0.3,
     "description": "Пасмурно",
-    "wind_ms": 7.9
+    "wind_ms": 6.7
   },
   "news": {
     "vc.ru": [
-      {
-        "title": "Хостинг-провайдер Beget запустил первые сайты виртуального хостинга из бэкапов и восстановил продление международных доменов",
-        "url": "https://vc.ru/services/3246839-hosting-beget-vosstanovlenie-saytov-iz-bekapov?from=rss"
-      },
       {
         "title": "«Яндекс» восстановил доступ к 97% данных в Yandex Cloud — остальное вернуть не получилось",
         "url": "https://vc.ru/services/3246787-yandeks-vosstanovil-dostup-k-dannym-v-yandex-cloud?from=rss"
       },
       {
-        "title": "Требование по резерву 10% мощностей будет распространяться на коммерческие дата-центры, а его неисполнение может стать основанием для введения временного управления — РБК",
-        "url": "https://vc.ru/services/3245311-trebovanie-o-rezervirovanii-moschnostei-dlya-kommercheskikh-data-tsentrov?from=rss"
+        "title": "Предлагавший «непрерывный» круиз лайнер Villa Vie Odyssey арестовали в Сингапуре по решению суда",
+        "url": "https://vc.ru/offline/3247215-lainer-villa-vie-odyssey-arestovan-v-singapure?from=rss"
+      },
+      {
+        "title": "Amazon представила дрон для видеонаблюдения и «патрулирования» дома за $250 и робота-охранника на колёсах за $1000",
+        "url": "https://vc.ru/tech/3247168-amazon-predstavila-dron-dlya-ohrany-doma-i-robota-ohrannika?from=rss"
       },
       {
         "title": "«Т-Банк» обновил корпоративный мессенджер Time — запустил ИИ-помощника и MCP-сервер для ИИ-агентов",
         "url": "https://vc.ru/services/3246523-t-bank-obnovil-messendzher-time-s-ii-pomoshchnikom-i-mcp-serverom?from=rss"
       },
       {
-        "title": "Binance предупредила об уязвимости в iOS, которая может раскрыть seed-фразы и данные для входа в аккаунты",
-        "url": "https://vc.ru/crypto/3246683-binance-predupredila-ob-uyazvimosti-ios?from=rss"
+        "title": "Требование по резерву 10% мощностей будет распространяться на коммерческие дата-центры, а его неисполнение может стать основанием для введения временного управления — РБК",
+        "url": "https://vc.ru/services/3245311-trebovanie-o-rezervirovanii-moschnostei-dlya-kommercheskikh-data-tsentrov?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Google представила Gemini Omni 1.2 Flash: видео до 15 секунд и снижение цены на 30%",
-        "url": "https://habr.com/ru/companies/speshu_ai/articles/1106176/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106176"
+        "title": "Как агент улучшил себя, не тронув ни одного веса: разбираем The Trinity",
+        "url": "https://habr.com/ru/articles/1106306/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106306"
       },
       {
-        "title": "«Запретить копирование» в Telegram: что на самом деле защищает новая кнопка",
-        "url": "https://habr.com/ru/articles/1106170/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106170"
+        "title": "Поймай меня, если с прокси",
+        "url": "https://habr.com/ru/articles/1106198/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106198"
       },
       {
-        "title": "Франция обвинила Иран в атаках на холодильники супермаркетов и службы крови",
-        "url": "https://habr.com/ru/articles/1106168/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106168"
+        "title": "Атаки на ИИ-агентов: разбираем проект таксономии NIST",
+        "url": "https://habr.com/ru/articles/1106012/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106012"
       },
       {
-        "title": "История становления современной экономики Вьетнама: реформы, бренды и компании",
-        "url": "https://habr.com/ru/companies/onlinepatent/articles/1106166/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106166"
+        "title": "Я написала промпт по-русски. Два агента перестали искать решение в интернете",
+        "url": "https://habr.com/ru/articles/1106298/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106298"
       },
       {
-        "title": "«Лествица» в Steam: Disco-like RPG о внутренней борьбе и тайнах Русского Севера",
-        "url": "https://habr.com/ru/articles/1106164/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106164"
+        "title": "[Перевод] Что каждый программист должен знать о переполнении стекового буфера",
+        "url": "https://habr.com/ru/articles/1106296/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106296"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261110-1416: Самара 3.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261110-2246: Самара 2.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
