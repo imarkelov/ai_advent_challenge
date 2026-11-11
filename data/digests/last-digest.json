@@ -1,15 +1,27 @@
 {
-  "id": "digest-20261111-0432",
-  "generated_at": "2026-11-11T04:32:50Z",
+  "id": "digest-20261111-1329",
+  "generated_at": "2026-11-11T13:29:27Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.4,
-    "feels_like_c": -0.5,
+    "temp_c": 2.6,
+    "feels_like_c": -0.6,
     "description": "Пасмурно",
-    "wind_ms": 6.6
+    "wind_ms": 8.4
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Бывшая сотрудница Ethereum Foundation подала на компанию в суд — её уволили после отказа подписать документ с пунктом, который требовал от работников «совершить сэппуку» в случае нарушения обязательств",
+        "url": "https://vc.ru/hr/3248928-sud-ethereum-foundation-seppuku?from=rss"
+      },
+      {
+        "title": "Инвестор Александр Чачава, в 2022 году выкупивший у VK её игровое подразделение My.Games за $642 млн, продаст студию менеджменту",
+        "url": "https://vc.ru/services/3249253-prodazha-my-games-menedzhmentu?from=rss"
+      },
+      {
+        "title": "Выручка OpenAI за квартал выросла почти на 50% и достигла $10 млрд, но операционный убыток составил $10,9 млрд — Bloomberg",
+        "url": "https://vc.ru/money/3248637-vyruchka-openai-vyrosla-na-50-operatsionnyy-ubytok?from=rss"
+      },
       {
         "title": "Предлагавший «непрерывный» круиз лайнер Villa Vie Odyssey арестовали в Сингапуре по решению суда",
         "url": "https://vc.ru/offline/3247215-lainer-villa-vie-odyssey-arestovan-v-singapure?from=rss"
@@ -17,40 +29,28 @@
       {
         "title": "«Яндекс» восстановил доступ к 97% данных в Yandex Cloud — остальное вернуть не получилось",
         "url": "https://vc.ru/services/3246787-yandeks-vosstanovil-dostup-k-dannym-v-yandex-cloud?from=rss"
-      },
-      {
-        "title": "Amazon представила дрон для видеонаблюдения и «патрулирования» дома за $250 и робота-охранника на колёсах за $1000",
-        "url": "https://vc.ru/tech/3247168-amazon-predstavila-dron-dlya-ohrany-doma-i-robota-ohrannika?from=rss"
-      },
-      {
-        "title": "«Т-Банк» обновил корпоративный мессенджер Time — запустил ИИ-помощника и MCP-сервер для ИИ-агентов",
-        "url": "https://vc.ru/services/3246523-t-bank-obnovil-messendzher-time-s-ii-pomoshchnikom-i-mcp-serverom?from=rss"
-      },
-      {
-        "title": "Требование по резерву 10% мощностей будет распространяться на коммерческие дата-центры, а его неисполнение может стать основанием для введения временного управления — РБК",
-        "url": "https://vc.ru/services/3245311-trebovanie-o-rezervirovanii-moschnostei-dlya-kommercheskikh-data-tsentrov?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Stackette: экспериментальная процессорная архитектура",
-        "url": "https://habr.com/ru/articles/1106328/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106328"
+        "title": "Чего действительно стоит бояться в ИИ: пять экспертов о безопасности и будущем технологий",
+        "url": "https://habr.com/ru/companies/speshu_ai/articles/1106674/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106674"
       },
       {
-        "title": "[Перевод] Почему клоны USB Blaster под Linux зависают на 30 секунд: две находки в jtagd из Quartus",
-        "url": "https://habr.com/ru/articles/1106326/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106326"
+        "title": "В России сохранят проводное радиовещание и продолжат его развивать",
+        "url": "https://habr.com/ru/articles/1106668/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106668"
       },
       {
-        "title": "Релиз Sigil 2.8.6 — открытого мультиплатформенного редактора электронных книг в формате ePub",
-        "url": "https://habr.com/ru/articles/1106222/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106222"
+        "title": "OpenAI откажется от режимов Advanced Voice и Standard Voice в ChatGPT",
+        "url": "https://habr.com/ru/articles/1106660/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106660"
       },
       {
-        "title": "Обновление открытого музыкального плеера fooyin 0.15.0 под Windows и Linux",
-        "url": "https://habr.com/ru/articles/1106234/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106234"
+        "title": "Как мы перешагнули через Раймона Кено: создание поэтической гипер‑матрицы на 1,28 квинтиллиона сонетов",
+        "url": "https://habr.com/ru/articles/1106666/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106666"
       },
       {
-        "title": "Выпуск обновления Mesa 26.3",
-        "url": "https://habr.com/ru/articles/1105980/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105980"
+        "title": "AI, СХД, open source: разбираемся, как устроен аппаратный QA",
+        "url": "https://habr.com/ru/companies/yadro/articles/1105872/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105872"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261111-0432: Самара 2.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261111-1329: Самара 2.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
