@@ -1,59 +1,71 @@
 {
-  "id": "digest-20261111-1329",
-  "generated_at": "2026-11-11T13:29:27Z",
+  "id": "digest-20261111-2359",
+  "generated_at": "2026-11-11T23:59:31Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.6,
-    "feels_like_c": -0.6,
+    "temp_c": 2.2,
+    "feels_like_c": -1.5,
     "description": "Пасмурно",
-    "wind_ms": 8.4
+    "wind_ms": 10.5
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "Власти предложили обязать банки ограничивать переводы и пополнение счетов физлиц, подозреваемых в сомнительных операциях, суммой 30 тысяч рублей в месяц",
+        "url": "https://vc.ru/money/3249928-ogranicheniya-na-perevody-i-popolnenie-schetov?from=rss"
+      },
       {
         "title": "Бывшая сотрудница Ethereum Foundation подала на компанию в суд — её уволили после отказа подписать документ с пунктом, который требовал от работников «совершить сэппуку» в случае нарушения обязательств",
         "url": "https://vc.ru/hr/3248928-sud-ethereum-foundation-seppuku?from=rss"
       },
       {
-        "title": "Инвестор Александр Чачава, в 2022 году выкупивший у VK её игровое подразделение My.Games за $642 млн, продаст студию менеджменту",
-        "url": "https://vc.ru/services/3249253-prodazha-my-games-menedzhmentu?from=rss"
+        "title": "«Самая дорогая интрижка в истории»: как глава Nvidia Дженсен Хуанг оказался в центре шпионского скандала",
+        "url": "https://vc.ru/story/3246767-dzhensen-khuang-i-shpionskiy-skandal?from=rss"
       },
       {
-        "title": "Выручка OpenAI за квартал выросла почти на 50% и достигла $10 млрд, но операционный убыток составил $10,9 млрд — Bloomberg",
-        "url": "https://vc.ru/money/3248637-vyruchka-openai-vyrosla-na-50-operatsionnyy-ubytok?from=rss"
+        "title": "Хостинг-провайдер SpaceWeb сообщил о «повышенной нагрузке» на нескольких серверах — из-за этого могут быть проблемы с доступностью сайтов",
+        "url": "https://vc.ru/services/3249766-problemy-s-dostupnostyu-saitov-u-spaceweb?from=rss"
       },
       {
-        "title": "Предлагавший «непрерывный» круиз лайнер Villa Vie Odyssey арестовали в Сингапуре по решению суда",
-        "url": "https://vc.ru/offline/3247215-lainer-villa-vie-odyssey-arestovan-v-singapure?from=rss"
-      },
-      {
-        "title": "«Яндекс» восстановил доступ к 97% данных в Yandex Cloud — остальное вернуть не получилось",
-        "url": "https://vc.ru/services/3246787-yandeks-vosstanovil-dostup-k-dannym-v-yandex-cloud?from=rss"
+        "title": "Светящееся «яблоко» — самая бесполезная функция, а экран придётся менять вместе с крышкой ноутбука: iFixit — о пригодности сенсорного MacBook к ремонту",
+        "url": "https://vc.ru/tech/3249186-remontoprigodnost-macbook-pro-s-sensornym-ekranom?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Чего действительно стоит бояться в ИИ: пять экспертов о безопасности и будущем технологий",
-        "url": "https://habr.com/ru/companies/speshu_ai/articles/1106674/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106674"
+        "title": "Конец легенды… или как лучшие гаджеты уходят на покой от старости",
+        "url": "https://habr.com/ru/articles/1106880/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106880"
       },
       {
-        "title": "В России сохранят проводное радиовещание и продолжат его развивать",
-        "url": "https://habr.com/ru/articles/1106668/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106668"
+        "title": "Нейрослоп и нейромаркеры (в текстах)",
+        "url": "https://habr.com/ru/articles/1106876/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106876"
       },
       {
-        "title": "OpenAI откажется от режимов Advanced Voice и Standard Voice в ChatGPT",
-        "url": "https://habr.com/ru/articles/1106660/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106660"
+        "title": "Как я сделал игру в браузере с 0 опыта в геймдеве",
+        "url": "https://habr.com/ru/articles/1106870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106870"
       },
       {
-        "title": "Как мы перешагнули через Раймона Кено: создание поэтической гипер‑матрицы на 1,28 квинтиллиона сонетов",
-        "url": "https://habr.com/ru/articles/1106666/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106666"
+        "title": "Деплой на VPS по push без SSH-ключей в CI: архитектура cd, механика OIDC и границы применимости",
+        "url": "https://habr.com/ru/articles/1106874/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106874"
       },
       {
-        "title": "AI, СХД, open source: разбираемся, как устроен аппаратный QA",
-        "url": "https://habr.com/ru/companies/yadro/articles/1105872/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105872"
+        "title": "Где еще можно обманывать игрока",
+        "url": "https://habr.com/ru/articles/1106312/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106312"
       }
     ],
     "tproger": [
+      {
+        "title": "Google выпустила модель решений Gemini Decision 1 с бесплатным уровнем API",
+        "url": "https://tproger.ru/news/google-vypustila-model-rewenij-gemini-decision-1-s-besplatnym-u"
+      },
+      {
+        "title": "WikiTrace учит ИИ-агента сверять уроки памяти с исходными прогонами",
+        "url": "https://tproger.ru/news/wikitrace-uchit-ii-agenta-sveryat-uroki-pamyati-s-ishodnymi-progon"
+      },
+      {
+        "title": "Сходил на ТехноДень Selectel: что анонсировали и как прошёл день",
+        "url": "https://tproger.ru/articles/ai-produkty-infrastrukturnyj-poker-i-chyornye-dyry-kak-prowyol-se"
+      },
       {
         "title": "Продуктовая премия Тпрогер 2026: успейте подать заявку до 30 декабря",
         "url": "https://tproger.ru/articles/produktovaya-premiya-tproger-2026-uspejte-podat-zayavku-do-30-dek-2"
@@ -61,20 +73,8 @@
       {
         "title": "Код из спецификации, а не из чата: инженерный разбор ИИ-конвейера AI-driven Digital Q",
         "url": "https://tproger.ru/articles/kod-iz-specifikacii-a-ne-iz-chata-inzhenernyj-razbor-ii-konvejer"
-      },
-      {
-        "title": "Anthropic объяснила, какую модель Claude и какой effort ставить на задачу",
-        "url": "https://tproger.ru/articles/anthropic-obyasnila-kakuyu-model-claude-i-kakoj-effort-stavit"
-      },
-      {
-        "title": "Claude Code сохраняет пароли из команд в файл — на GitHub таких 1 122",
-        "url": "https://tproger.ru/news/claude-code-sohranyaet-paroli-iz-komand-v-fajl-na-github-takih"
-      },
-      {
-        "title": "Открытые нейросети ноября 2026 запускаются на видеокарте от 8 ГБ",
-        "url": "https://tproger.ru/articles/otkrytye-nejroseti-noyabrya-2026-zapuskayutsya-na-videokarte-ot-8-gb"
       }
     ]
   },
-  "summary": "Сводка digest-20261111-1329: Самара 2.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261111-2359: Самара 2.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
