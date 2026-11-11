@@ -1,22 +1,22 @@
 {
-  "id": "digest-20261110-2246",
-  "generated_at": "2026-11-10T22:46:58Z",
+  "id": "digest-20261111-0432",
+  "generated_at": "2026-11-11T04:32:50Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.6,
-    "feels_like_c": -0.3,
+    "temp_c": 2.4,
+    "feels_like_c": -0.5,
     "description": "Пасмурно",
-    "wind_ms": 6.7
+    "wind_ms": 6.6
   },
   "news": {
     "vc.ru": [
       {
-        "title": "«Яндекс» восстановил доступ к 97% данных в Yandex Cloud — остальное вернуть не получилось",
-        "url": "https://vc.ru/services/3246787-yandeks-vosstanovil-dostup-k-dannym-v-yandex-cloud?from=rss"
-      },
-      {
         "title": "Предлагавший «непрерывный» круиз лайнер Villa Vie Odyssey арестовали в Сингапуре по решению суда",
         "url": "https://vc.ru/offline/3247215-lainer-villa-vie-odyssey-arestovan-v-singapure?from=rss"
+      },
+      {
+        "title": "«Яндекс» восстановил доступ к 97% данных в Yandex Cloud — остальное вернуть не получилось",
+        "url": "https://vc.ru/services/3246787-yandeks-vosstanovil-dostup-k-dannym-v-yandex-cloud?from=rss"
       },
       {
         "title": "Amazon представила дрон для видеонаблюдения и «патрулирования» дома за $250 и робота-охранника на колёсах за $1000",
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
-        "title": "Как агент улучшил себя, не тронув ни одного веса: разбираем The Trinity",
-        "url": "https://habr.com/ru/articles/1106306/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106306"
+        "title": "Stackette: экспериментальная процессорная архитектура",
+        "url": "https://habr.com/ru/articles/1106328/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106328"
       },
       {
-        "title": "Поймай меня, если с прокси",
-        "url": "https://habr.com/ru/articles/1106198/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106198"
+        "title": "[Перевод] Почему клоны USB Blaster под Linux зависают на 30 секунд: две находки в jtagd из Quartus",
+        "url": "https://habr.com/ru/articles/1106326/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106326"
       },
       {
-        "title": "Атаки на ИИ-агентов: разбираем проект таксономии NIST",
-        "url": "https://habr.com/ru/articles/1106012/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106012"
+        "title": "Релиз Sigil 2.8.6 — открытого мультиплатформенного редактора электронных книг в формате ePub",
+        "url": "https://habr.com/ru/articles/1106222/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106222"
       },
       {
-        "title": "Я написала промпт по-русски. Два агента перестали искать решение в интернете",
-        "url": "https://habr.com/ru/articles/1106298/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106298"
+        "title": "Обновление открытого музыкального плеера fooyin 0.15.0 под Windows и Linux",
+        "url": "https://habr.com/ru/articles/1106234/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106234"
       },
       {
-        "title": "[Перевод] Что каждый программист должен знать о переполнении стекового буфера",
-        "url": "https://habr.com/ru/articles/1106296/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106296"
+        "title": "Выпуск обновления Mesa 26.3",
+        "url": "https://habr.com/ru/articles/1105980/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105980"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261110-2246: Самара 2.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261111-0432: Самара 2.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
