@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261014-1626",
-    "generated_at": "2026-10-14T16:26:51Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 16.2,
-      "feels_like_c": 14.9,
-      "description": "Пасмурно",
-      "wind_ms": 6.4
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "«Сбер» сообщил об атаке беспилотников на дата-центр в Саратовской области",
-          "url": "https://vc.ru/money/3193997-sber-ataka-bespilotnikov-data-tsentr-saratovskaya-oblast?from=rss"
-        },
-        {
-          "title": "OpenAI нашла прослушку в переговорной для руководства — в установке «жучка» обвинили одного из инженеров",
-          "url": "https://vc.ru/legal/3193875-openai-obnaruzhila-proslushku-v-peregovornoy?from=rss"
-        },
-        {
-          "title": "Хакер получил доступ к данным 8,8 млн человек из государственного реестра Дании — он утверждает, что использовал пароль «123456»",
-          "url": "https://vc.ru/services/3194953-vzlom-gosudarstvennogo-reestra-danii?from=rss"
-        },
-        {
-          "title": "Минцифры попросило операторов связи до начала ноября 2026 года не блокировать звонки от банков, которые не заключили с ними соглашения о маркировке вызовов",
-          "url": "https://vc.ru/services/3194403-mintsifry-prizvalo-operatorov-ne-blokirovat-bankovskie-zvonki?from=rss"
-        },
-        {
-          "title": "Мягкая (и пушистая) сила: магазины «нанимают» котов, чтобы те помогали бизнесу",
-          "url": "https://vc.ru/marketing/3192538-koty-v-magazinakh-pomogayut-biznesu?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "166 страниц доказательства и месяц споров: как OpenAI запутала математиков решением Навье–Стокса",
-          "url": "https://habr.com/ru/news/1094452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094452"
-        },
-        {
-          "title": "«Яндекс»: большая часть функций умных устройств и чата с «Алисой AI» снова доступна",
-          "url": "https://habr.com/ru/news/1094460/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094460"
-        },
-        {
-          "title": "Минцифры: «Яндекс» после атак на ЦОДы оперативно перевёл ключевые системы на заранее подготовленные резервные площадки",
-          "url": "https://habr.com/ru/news/1094422/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094422"
-        },
-        {
-          "title": "Дайджест: 8 свежих CVE, которые уже активно используют злоумышленники",
-          "url": "https://habr.com/ru/companies/garda/news/1094384/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094384"
-        },
-        {
-          "title": "Установлен новый мировой рекорд по дальности поездки на электромотоцикле — 436,5 км вместо предыдущего в 310,7 км",
-          "url": "https://habr.com/ru/news/1094410/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094410"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Если вы ищете работу, но не можете найти",
-          "url": "https://tproger.ru/articles/esli-vy-ishhete-rabotu-no-ne-mozhete-najti"
-        },
-        {
-          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
-          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
-        },
-        {
-          "title": "Чем заменить Oracle и Microsoft SQL Server в 2026 году: 4 российских СУБД",
-          "url": "https://tproger.ru/articles/chem-zamenit-oracle-i-microsoft-sql-server-v-2026-godu-4-rossij"
-        },
-        {
-          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
-          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
-        },
-        {
-          "title": "Anthropic запустила OSS Scanner для бесплатного поиска уязвимостей в open source",
-          "url": "https://tproger.ru/news/anthropic-zapustila-oss-scanner-dlya-besplatnogo-poiska-uyazvimost"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261014-1626: Самара 16.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261014-2115",
     "generated_at": "2026-10-14T21:15:30Z",
     "weather": {
@@ -7655,5 +7575,85 @@
       ]
     },
     "summary": "Сводка digest-20261111-2359: Самара 2.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261112-0658",
+    "generated_at": "2026-11-12T06:58:01Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 2.3,
+      "feels_like_c": -2.1,
+      "description": "Пасмурно",
+      "wind_ms": 13.7
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "WSJ: совет директоров Nvidia готовится отправить Дженсена Хуанга в отставку после сообщений об ещё одном романе — с вице-президентом компании Кимберли Пауэлл",
+          "url": "https://vc.ru/hr/3250514-sovet-direktorov-nvidia-otstavka-dzhensena-khuanga?from=rss"
+        },
+        {
+          "title": "Власти предложили обязать банки ограничивать переводы и пополнение счетов физлиц, подозреваемых в сомнительных операциях, суммой 30 тысяч рублей в месяц",
+          "url": "https://vc.ru/money/3249928-ogranicheniya-na-perevody-i-popolnenie-schetov?from=rss"
+        },
+        {
+          "title": "«Самая дорогая интрижка в истории»: как глава Nvidia Дженсен Хуанг оказался в центре шпионского скандала",
+          "url": "https://vc.ru/story/3246767-dzhensen-khuang-i-shpionskiy-skandal?from=rss"
+        },
+        {
+          "title": "Бывшая сотрудница Ethereum Foundation подала на компанию в суд — её уволили после отказа подписать документ с пунктом, который требовал от работников «совершить сэппуку» в случае нарушения обязательств",
+          "url": "https://vc.ru/hr/3248928-sud-ethereum-foundation-seppuku?from=rss"
+        },
+        {
+          "title": "Структуры инвестора Александра Чачавы перестали контролировать крупнейшего акционера Ozon",
+          "url": "https://vc.ru/marketplace/3250030-kontrol-aleksandra-chachavy-nad-ozon-zavershen?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Написали для себя, а покупают другие: четыре российские промышленные разработки и что о них известно",
+          "url": "https://habr.com/ru/articles/1106904/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106904"
+        },
+        {
+          "title": "Корпоративная архитектура и AI‑агенты: шесть ошибок, которые не видны в репозитории",
+          "url": "https://habr.com/ru/companies/otus/articles/1088908/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088908"
+        },
+        {
+          "title": "В Петербурге стартует INFOSTART A&amp;PM EVENT 2026: три дня практики для аналитиков и руководителей проектов",
+          "url": "https://habr.com/ru/companies/infostart/articles/1106890/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106890"
+        },
+        {
+          "title": "Покажите, пожалуйста, этот пост ТП Хабра",
+          "url": "https://habr.com/ru/articles/1106900/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106900"
+        },
+        {
+          "title": "90% медучреждений закупили российскую медтехнику",
+          "url": "https://habr.com/ru/companies/okdesk/articles/1106422/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106422"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Google выпустила модель решений Gemini Decision 1 с бесплатным уровнем API",
+          "url": "https://tproger.ru/news/google-vypustila-model-rewenij-gemini-decision-1-s-besplatnym-u"
+        },
+        {
+          "title": "WikiTrace учит ИИ-агента сверять уроки памяти с исходными прогонами",
+          "url": "https://tproger.ru/news/wikitrace-uchit-ii-agenta-sveryat-uroki-pamyati-s-ishodnymi-progon"
+        },
+        {
+          "title": "Сходил на ТехноДень Selectel: что анонсировали и как прошёл день",
+          "url": "https://tproger.ru/articles/ai-produkty-infrastrukturnyj-poker-i-chyornye-dyry-kak-prowyol-se"
+        },
+        {
+          "title": "Продуктовая премия Тпрогер 2026: успейте подать заявку до 30 декабря",
+          "url": "https://tproger.ru/articles/produktovaya-premiya-tproger-2026-uspejte-podat-zayavku-do-30-dek-2"
+        },
+        {
+          "title": "Код из спецификации, а не из чата: инженерный разбор ИИ-конвейера AI-driven Digital Q",
+          "url": "https://tproger.ru/articles/kod-iz-specifikacii-a-ne-iz-chata-inzhenernyj-razbor-ii-konvejer"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261112-0658: Самара 2.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

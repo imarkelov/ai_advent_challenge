@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261111-2359",
-  "generated_at": "2026-11-11T23:59:31Z",
+  "id": "digest-20261112-0658",
+  "generated_at": "2026-11-12T06:58:01Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.2,
-    "feels_like_c": -1.5,
+    "temp_c": 2.3,
+    "feels_like_c": -2.1,
     "description": "Пасмурно",
-    "wind_ms": 10.5
+    "wind_ms": 13.7
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Власти предложили обязать банки ограничивать переводы и пополнение счетов физлиц, подозреваемых в сомнительных операциях, суммой 30 тысяч рублей в месяц",
-        "url": "https://vc.ru/money/3249928-ogranicheniya-na-perevody-i-popolnenie-schetov?from=rss"
+        "title": "WSJ: совет директоров Nvidia готовится отправить Дженсена Хуанга в отставку после сообщений об ещё одном романе — с вице-президентом компании Кимберли Пауэлл",
+        "url": "https://vc.ru/hr/3250514-sovet-direktorov-nvidia-otstavka-dzhensena-khuanga?from=rss"
       },
       {
-        "title": "Бывшая сотрудница Ethereum Foundation подала на компанию в суд — её уволили после отказа подписать документ с пунктом, который требовал от работников «совершить сэппуку» в случае нарушения обязательств",
-        "url": "https://vc.ru/hr/3248928-sud-ethereum-foundation-seppuku?from=rss"
+        "title": "Власти предложили обязать банки ограничивать переводы и пополнение счетов физлиц, подозреваемых в сомнительных операциях, суммой 30 тысяч рублей в месяц",
+        "url": "https://vc.ru/money/3249928-ogranicheniya-na-perevody-i-popolnenie-schetov?from=rss"
       },
       {
         "title": "«Самая дорогая интрижка в истории»: как глава Nvidia Дженсен Хуанг оказался в центре шпионского скандала",
         "url": "https://vc.ru/story/3246767-dzhensen-khuang-i-shpionskiy-skandal?from=rss"
       },
       {
-        "title": "Хостинг-провайдер SpaceWeb сообщил о «повышенной нагрузке» на нескольких серверах — из-за этого могут быть проблемы с доступностью сайтов",
-        "url": "https://vc.ru/services/3249766-problemy-s-dostupnostyu-saitov-u-spaceweb?from=rss"
+        "title": "Бывшая сотрудница Ethereum Foundation подала на компанию в суд — её уволили после отказа подписать документ с пунктом, который требовал от работников «совершить сэппуку» в случае нарушения обязательств",
+        "url": "https://vc.ru/hr/3248928-sud-ethereum-foundation-seppuku?from=rss"
       },
       {
-        "title": "Светящееся «яблоко» — самая бесполезная функция, а экран придётся менять вместе с крышкой ноутбука: iFixit — о пригодности сенсорного MacBook к ремонту",
-        "url": "https://vc.ru/tech/3249186-remontoprigodnost-macbook-pro-s-sensornym-ekranom?from=rss"
+        "title": "Структуры инвестора Александра Чачавы перестали контролировать крупнейшего акционера Ozon",
+        "url": "https://vc.ru/marketplace/3250030-kontrol-aleksandra-chachavy-nad-ozon-zavershen?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Конец легенды… или как лучшие гаджеты уходят на покой от старости",
-        "url": "https://habr.com/ru/articles/1106880/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106880"
+        "title": "Написали для себя, а покупают другие: четыре российские промышленные разработки и что о них известно",
+        "url": "https://habr.com/ru/articles/1106904/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106904"
       },
       {
-        "title": "Нейрослоп и нейромаркеры (в текстах)",
-        "url": "https://habr.com/ru/articles/1106876/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106876"
+        "title": "Корпоративная архитектура и AI‑агенты: шесть ошибок, которые не видны в репозитории",
+        "url": "https://habr.com/ru/companies/otus/articles/1088908/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088908"
       },
       {
-        "title": "Как я сделал игру в браузере с 0 опыта в геймдеве",
-        "url": "https://habr.com/ru/articles/1106870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106870"
+        "title": "В Петербурге стартует INFOSTART A&amp;PM EVENT 2026: три дня практики для аналитиков и руководителей проектов",
+        "url": "https://habr.com/ru/companies/infostart/articles/1106890/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106890"
       },
       {
-        "title": "Деплой на VPS по push без SSH-ключей в CI: архитектура cd, механика OIDC и границы применимости",
-        "url": "https://habr.com/ru/articles/1106874/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106874"
+        "title": "Покажите, пожалуйста, этот пост ТП Хабра",
+        "url": "https://habr.com/ru/articles/1106900/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106900"
       },
       {
-        "title": "Где еще можно обманывать игрока",
-        "url": "https://habr.com/ru/articles/1106312/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106312"
+        "title": "90% медучреждений закупили российскую медтехнику",
+        "url": "https://habr.com/ru/companies/okdesk/articles/1106422/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106422"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261111-2359: Самара 2.2°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261112-0658: Самара 2.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
