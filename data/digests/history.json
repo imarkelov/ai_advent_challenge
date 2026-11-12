@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261014-2115",
-    "generated_at": "2026-10-14T21:15:30Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 14.1,
-      "feels_like_c": 12.9,
-      "description": "Пасмурно",
-      "wind_ms": 5.1
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "«Сбер» сообщил об атаке беспилотников на дата-центр в Саратовской области",
-          "url": "https://vc.ru/money/3193997-sber-ataka-bespilotnikov-data-tsentr-saratovskaya-oblast?from=rss"
-        },
-        {
-          "title": "OpenAI нашла прослушку в переговорной для руководства — в установке «жучка» обвинили одного из инженеров",
-          "url": "https://vc.ru/legal/3193875-openai-obnaruzhila-proslushku-v-peregovornoy?from=rss"
-        },
-        {
-          "title": "Хакер получил доступ к данным 8,8 млн человек из государственного реестра Дании — он утверждает, что использовал пароль «123456»",
-          "url": "https://vc.ru/services/3194953-vzlom-gosudarstvennogo-reestra-danii?from=rss"
-        },
-        {
-          "title": "Минцифры попросило операторов связи до начала ноября 2026 года не блокировать звонки от банков, которые не заключили с ними соглашения о маркировке вызовов",
-          "url": "https://vc.ru/services/3194403-mintsifry-prizvalo-operatorov-ne-blokirovat-bankovskie-zvonki?from=rss"
-        },
-        {
-          "title": "Суд отправил под домашний арест фигуранта дела о кибератаке на «Додо Пиццу»",
-          "url": "https://vc.ru/legal/3195175-domashnij-arest-figurant-dela-o-kiberatake-na-dodo-piccu?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Сделал CEO AI: помощника для обсуждения задач и работы с ИИ-агентами",
-          "url": "https://habr.com/ru/news/1094526/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094526"
-        },
-        {
-          "title": "Игры для PS5 теперь можно запускать на Xbox: разработчик портировал эмулятор KytyPS5",
-          "url": "https://habr.com/ru/news/1094522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094522"
-        },
-        {
-          "title": "RoboParty опубликовала исходники открытого человекоподобного робота RP1",
-          "url": "https://habr.com/ru/news/1094508/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094508"
-        },
-        {
-          "title": "На взломанной PlayStation 5 запустили Qwen с 27 млрд параметров и 2-битным квантованием",
-          "url": "https://habr.com/ru/news/1094494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094494"
-        },
-        {
-          "title": "Онлайн сервисы стали подвергать цензуре песни",
-          "url": "https://habr.com/ru/news/1094490/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094490"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
-          "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
-        },
-        {
-          "title": "Если вы ищете работу, но не можете найти",
-          "url": "https://tproger.ru/articles/esli-vy-ishhete-rabotu-no-ne-mozhete-najti"
-        },
-        {
-          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
-          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
-        },
-        {
-          "title": "Чем заменить Oracle и Microsoft SQL Server в 2026 году: 4 российских СУБД",
-          "url": "https://tproger.ru/articles/chem-zamenit-oracle-i-microsoft-sql-server-v-2026-godu-4-rossij"
-        },
-        {
-          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
-          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261014-2115: Самара 14.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261015-0302",
     "generated_at": "2026-10-15T03:02:00Z",
     "weather": {
@@ -7655,5 +7575,85 @@
       ]
     },
     "summary": "Сводка digest-20261112-0658: Самара 2.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261112-1929",
+    "generated_at": "2026-11-12T19:29:22Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 1.8,
+      "feels_like_c": -2.9,
+      "description": "Небольшой дождь",
+      "wind_ms": 18.5
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Дженсен Хуанг покинул пост гендиректора Nvidia и вышел из совета директоров",
+          "url": "https://vc.ru/hr/3251770-nvidia-naznachila-kolett-kress-vremennym-gendirektorom?from=rss"
+        },
+        {
+          "title": "«Ветеран» Nvidia и любимица инвесторов: кто такая Колетт Кресс, которая временно возглавила компанию после ухода Дженсена Хуанга",
+          "url": "https://vc.ru/hr/3252071-kolet-kress-novaya-rukovoditelnitsa-nvidia?from=rss"
+        },
+        {
+          "title": "«Т-Банк» и «Т—Ж» запустили сервис для проверки скидок на технику в период распродаж — чтобы понять, действительно ли цена снизилась",
+          "url": "https://vc.ru/money/3251907-servis-chestnaya-pyatnitsa?from=rss"
+        },
+        {
+          "title": "Еврокомиссия разработала законопроект об ограничении манипулятивных и навязчивых механик в приложениях — он может затронуть Duolingo, Strava и Ticketmaster",
+          "url": "https://vc.ru/services/3251441-evrokomissiya-zapretit-manipulativnye-mehaniki?from=rss"
+        },
+        {
+          "title": "Google открыла предзаказ на «умные» очки с Gemini, созданные в коллаборации с Samsung, Gentle Monster и Warby Parker",
+          "url": "https://vc.ru/tech/3252297-google-zapustila-predzakaz-na-umnye-ochki-s-gemini?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Как работать с кодинг агентами (Claude Code, Codex, Gemini CLI, Antigravitu CLI) через Telegram",
+          "url": "https://habr.com/ru/articles/1107278/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107278"
+        },
+        {
+          "title": "Skills + Code Mode MCP: как я научил ИИ-агента пользоваться сотнями инструментов и не раздувать контекст",
+          "url": "https://habr.com/ru/articles/1107276/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107276"
+        },
+        {
+          "title": "Универсальный ридер кодов libscanner-unir против zxing-cpp, ZBar и OpenCV на 6900 снимках из открытых наборов",
+          "url": "https://habr.com/ru/articles/1107274/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107274"
+        },
+        {
+          "title": "Вышел Cozystack v1.7.0: поддержка ARM, Proxmox как альтернатива KubeVirt, автоматическая миграция с VMware и другое",
+          "url": "https://habr.com/ru/companies/aenix/articles/1106842/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106842"
+        },
+        {
+          "title": "Неделю гонял 14 локальных LLM на мини-ПК с Ryzen AI Max+ 395. Цифры, грабли и что я оставил себе",
+          "url": "https://habr.com/ru/articles/1107260/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107260"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Google выпустила Gemini 4 Hydrogen с бесплатным доступом в API",
+          "url": "https://tproger.ru/news/google-vypustila-gemini-4-hydrogen-s-besplatnym-dostupom-v-api"
+        },
+        {
+          "title": "Anthropic выходит на Nasdaq: торги акциями ANT ожидаются 19 ноября",
+          "url": "https://tproger.ru/news/anthropic-vyhodit-na-nasdaq-torgi-akciyami-ant-ozhidayutsya-19-noyab"
+        },
+        {
+          "title": "5 провайдеров GPU-инфраструктуры в 2026 году: решения для LLM, HPC и Data Science",
+          "url": "https://tproger.ru/articles/5-provajderov-gpu-infrastruktury-v-2026-godu-reweniya-dlya-llm-h"
+        },
+        {
+          "title": "Google выпустила модель решений Gemini Decision 1 с бесплатным уровнем API",
+          "url": "https://tproger.ru/news/google-vypustila-model-rewenij-gemini-decision-1-s-besplatnym-u"
+        },
+        {
+          "title": "WikiTrace учит ИИ-агента сверять уроки памяти с исходными прогонами",
+          "url": "https://tproger.ru/news/wikitrace-uchit-ii-agenta-sveryat-uroki-pamyati-s-ishodnymi-progon"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261112-1929: Самара 1.8°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

@@ -1,59 +1,71 @@
 {
-  "id": "digest-20261112-0658",
-  "generated_at": "2026-11-12T06:58:01Z",
+  "id": "digest-20261112-1929",
+  "generated_at": "2026-11-12T19:29:22Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 2.3,
-    "feels_like_c": -2.1,
-    "description": "Пасмурно",
-    "wind_ms": 13.7
+    "temp_c": 1.8,
+    "feels_like_c": -2.9,
+    "description": "Небольшой дождь",
+    "wind_ms": 18.5
   },
   "news": {
     "vc.ru": [
       {
-        "title": "WSJ: совет директоров Nvidia готовится отправить Дженсена Хуанга в отставку после сообщений об ещё одном романе — с вице-президентом компании Кимберли Пауэлл",
-        "url": "https://vc.ru/hr/3250514-sovet-direktorov-nvidia-otstavka-dzhensena-khuanga?from=rss"
+        "title": "Дженсен Хуанг покинул пост гендиректора Nvidia и вышел из совета директоров",
+        "url": "https://vc.ru/hr/3251770-nvidia-naznachila-kolett-kress-vremennym-gendirektorom?from=rss"
       },
       {
-        "title": "Власти предложили обязать банки ограничивать переводы и пополнение счетов физлиц, подозреваемых в сомнительных операциях, суммой 30 тысяч рублей в месяц",
-        "url": "https://vc.ru/money/3249928-ogranicheniya-na-perevody-i-popolnenie-schetov?from=rss"
+        "title": "«Ветеран» Nvidia и любимица инвесторов: кто такая Колетт Кресс, которая временно возглавила компанию после ухода Дженсена Хуанга",
+        "url": "https://vc.ru/hr/3252071-kolet-kress-novaya-rukovoditelnitsa-nvidia?from=rss"
       },
       {
-        "title": "«Самая дорогая интрижка в истории»: как глава Nvidia Дженсен Хуанг оказался в центре шпионского скандала",
-        "url": "https://vc.ru/story/3246767-dzhensen-khuang-i-shpionskiy-skandal?from=rss"
+        "title": "«Т-Банк» и «Т—Ж» запустили сервис для проверки скидок на технику в период распродаж — чтобы понять, действительно ли цена снизилась",
+        "url": "https://vc.ru/money/3251907-servis-chestnaya-pyatnitsa?from=rss"
       },
       {
-        "title": "Бывшая сотрудница Ethereum Foundation подала на компанию в суд — её уволили после отказа подписать документ с пунктом, который требовал от работников «совершить сэппуку» в случае нарушения обязательств",
-        "url": "https://vc.ru/hr/3248928-sud-ethereum-foundation-seppuku?from=rss"
+        "title": "Еврокомиссия разработала законопроект об ограничении манипулятивных и навязчивых механик в приложениях — он может затронуть Duolingo, Strava и Ticketmaster",
+        "url": "https://vc.ru/services/3251441-evrokomissiya-zapretit-manipulativnye-mehaniki?from=rss"
       },
       {
-        "title": "Структуры инвестора Александра Чачавы перестали контролировать крупнейшего акционера Ozon",
-        "url": "https://vc.ru/marketplace/3250030-kontrol-aleksandra-chachavy-nad-ozon-zavershen?from=rss"
+        "title": "Google открыла предзаказ на «умные» очки с Gemini, созданные в коллаборации с Samsung, Gentle Monster и Warby Parker",
+        "url": "https://vc.ru/tech/3252297-google-zapustila-predzakaz-na-umnye-ochki-s-gemini?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Написали для себя, а покупают другие: четыре российские промышленные разработки и что о них известно",
-        "url": "https://habr.com/ru/articles/1106904/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106904"
+        "title": "Как работать с кодинг агентами (Claude Code, Codex, Gemini CLI, Antigravitu CLI) через Telegram",
+        "url": "https://habr.com/ru/articles/1107278/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107278"
       },
       {
-        "title": "Корпоративная архитектура и AI‑агенты: шесть ошибок, которые не видны в репозитории",
-        "url": "https://habr.com/ru/companies/otus/articles/1088908/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1088908"
+        "title": "Skills + Code Mode MCP: как я научил ИИ-агента пользоваться сотнями инструментов и не раздувать контекст",
+        "url": "https://habr.com/ru/articles/1107276/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107276"
       },
       {
-        "title": "В Петербурге стартует INFOSTART A&amp;PM EVENT 2026: три дня практики для аналитиков и руководителей проектов",
-        "url": "https://habr.com/ru/companies/infostart/articles/1106890/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106890"
+        "title": "Универсальный ридер кодов libscanner-unir против zxing-cpp, ZBar и OpenCV на 6900 снимках из открытых наборов",
+        "url": "https://habr.com/ru/articles/1107274/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107274"
       },
       {
-        "title": "Покажите, пожалуйста, этот пост ТП Хабра",
-        "url": "https://habr.com/ru/articles/1106900/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106900"
+        "title": "Вышел Cozystack v1.7.0: поддержка ARM, Proxmox как альтернатива KubeVirt, автоматическая миграция с VMware и другое",
+        "url": "https://habr.com/ru/companies/aenix/articles/1106842/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106842"
       },
       {
-        "title": "90% медучреждений закупили российскую медтехнику",
-        "url": "https://habr.com/ru/companies/okdesk/articles/1106422/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106422"
+        "title": "Неделю гонял 14 локальных LLM на мини-ПК с Ryzen AI Max+ 395. Цифры, грабли и что я оставил себе",
+        "url": "https://habr.com/ru/articles/1107260/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107260"
       }
     ],
     "tproger": [
+      {
+        "title": "Google выпустила Gemini 4 Hydrogen с бесплатным доступом в API",
+        "url": "https://tproger.ru/news/google-vypustila-gemini-4-hydrogen-s-besplatnym-dostupom-v-api"
+      },
+      {
+        "title": "Anthropic выходит на Nasdaq: торги акциями ANT ожидаются 19 ноября",
+        "url": "https://tproger.ru/news/anthropic-vyhodit-na-nasdaq-torgi-akciyami-ant-ozhidayutsya-19-noyab"
+      },
+      {
+        "title": "5 провайдеров GPU-инфраструктуры в 2026 году: решения для LLM, HPC и Data Science",
+        "url": "https://tproger.ru/articles/5-provajderov-gpu-infrastruktury-v-2026-godu-reweniya-dlya-llm-h"
+      },
       {
         "title": "Google выпустила модель решений Gemini Decision 1 с бесплатным уровнем API",
         "url": "https://tproger.ru/news/google-vypustila-model-rewenij-gemini-decision-1-s-besplatnym-u"
@@ -61,20 +73,8 @@
       {
         "title": "WikiTrace учит ИИ-агента сверять уроки памяти с исходными прогонами",
         "url": "https://tproger.ru/news/wikitrace-uchit-ii-agenta-sveryat-uroki-pamyati-s-ishodnymi-progon"
-      },
-      {
-        "title": "Сходил на ТехноДень Selectel: что анонсировали и как прошёл день",
-        "url": "https://tproger.ru/articles/ai-produkty-infrastrukturnyj-poker-i-chyornye-dyry-kak-prowyol-se"
-      },
-      {
-        "title": "Продуктовая премия Тпрогер 2026: успейте подать заявку до 30 декабря",
-        "url": "https://tproger.ru/articles/produktovaya-premiya-tproger-2026-uspejte-podat-zayavku-do-30-dek-2"
-      },
-      {
-        "title": "Код из спецификации, а не из чата: инженерный разбор ИИ-конвейера AI-driven Digital Q",
-        "url": "https://tproger.ru/articles/kod-iz-specifikacii-a-ne-iz-chata-inzhenernyj-razbor-ii-konvejer"
       }
     ]
   },
-  "summary": "Сводка digest-20261112-0658: Самара 2.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261112-1929: Самара 1.8°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
