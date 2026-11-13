@@ -1,12 +1,8 @@
 {
-  "id": "digest-20261113-1352",
-  "generated_at": "2026-11-13T13:52:03Z",
+  "id": "digest-20261113-2312",
+  "generated_at": "2026-11-13T23:12:00Z",
   "weather": {
-    "city": "Самара",
-    "temp_c": 3.7,
-    "feels_like_c": 1.2,
-    "description": "Переменная облачность",
-    "wind_ms": 3.1
+    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
   },
   "news": {
     "vc.ru": [
@@ -23,8 +19,8 @@
         "url": "https://vc.ru/money/3252722-roskomnadzor-filtraciya-internet-trafika-ii?from=rss"
       },
       {
-        "title": "У Microsoft произошёл сбой — пользователи столкнулись с проблемами с доступом к Outlook, Teams, Copilot и другим сервисам",
-        "url": "https://vc.ru/services/3252959-sboy-v-rabote-microsoft-outlook-teams?from=rss"
+        "title": "«2ГИС» обновил навигатор для общественного транспорта: приложение и виджет показывают прогресс на маршруте и заранее предупреждают о нужной остановке",
+        "url": "https://vc.ru/services/3253038-navigatory-2gis-dlya-obshchestvennogo-transporta-obnovlen?from=rss"
       },
       {
         "title": "Reuters узнало о третьем романе Дженсена Хуанга, американские спецслужбы усомнились, что Элис Хуанг была шпионкой, а Трамп назвал Тима Кука самым подходящим кандидатом на должность главы Nvidia: что происходит вокруг компании после отставки гендиректора",
@@ -33,24 +29,24 @@
     ],
     "habr": [
       {
-        "title": "Microsoft добавила в программу обратной совместимости ещё 21 игру с оригинальной Xbox",
-        "url": "https://habr.com/ru/articles/1107590/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107590"
+        "title": "Жизнь не должна оправдывать своё существование полезностью",
+        "url": "https://habr.com/ru/articles/1107732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107732"
       },
       {
-        "title": "В новых HTML‑виджетах Telegram обнаружили RCE‑уязвимость",
-        "url": "https://habr.com/ru/articles/1107586/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107586"
+        "title": "Vibe‑hacking Wi‑Fi камеры с помощью Claude",
+        "url": "https://habr.com/ru/articles/1107726/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107726"
       },
       {
-        "title": "Знаменитая головоломка возвращается домой: производство кубика Рубика возобновляется в Венгрии",
-        "url": "https://habr.com/ru/articles/1107584/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107584"
+        "title": "3 базы данных в Docker за один вечер: PostgreSQL 18 + ClickHouse 26.8 + Qdrant 1.19",
+        "url": "https://habr.com/ru/articles/1107724/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107724"
       },
       {
-        "title": "Эволюция API в эпоху AI: REST vs MCP на примере платёжного сервиса",
-        "url": "https://habr.com/ru/companies/yoomoney/articles/1107580/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107580"
+        "title": "Мы проверили 500 сайтов малого бизнеса Перми и Екатеринбурга: что ломают зарубежные сервисы",
+        "url": "https://habr.com/ru/articles/1107718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107718"
       },
       {
-        "title": "История выполнения @Scheduled задач в Axelix",
-        "url": "https://habr.com/ru/companies/spring_aio/articles/1107562/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107562"
+        "title": "Клодизмы. Часть 1. Классификация ошибок, которые языковая модель допускает в связном тексте",
+        "url": "https://habr.com/ru/articles/1107710/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107710"
       }
     ],
     "tproger": [
@@ -76,5 +72,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261113-1352: Самара 3.7°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261113-2312: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
