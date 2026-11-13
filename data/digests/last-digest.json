@@ -1,18 +1,18 @@
 {
-  "id": "digest-20261112-1929",
-  "generated_at": "2026-11-12T19:29:22Z",
+  "id": "digest-20261113-0454",
+  "generated_at": "2026-11-13T04:54:35Z",
   "weather": {
-    "city": "Самара",
-    "temp_c": 1.8,
-    "feels_like_c": -2.9,
-    "description": "Небольшой дождь",
-    "wind_ms": 18.5
+    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
   },
   "news": {
     "vc.ru": [
       {
         "title": "Дженсен Хуанг покинул пост гендиректора Nvidia и вышел из совета директоров",
         "url": "https://vc.ru/hr/3251770-nvidia-naznachila-kolett-kress-vremennym-gendirektorom?from=rss"
+      },
+      {
+        "title": "Google открыла предзаказ на «умные» очки с Gemini, созданные в коллаборации с Samsung, Gentle Monster и Warby Parker",
+        "url": "https://vc.ru/tech/3252297-google-zapustila-predzakaz-na-umnye-ochki-s-gemini?from=rss"
       },
       {
         "title": "«Ветеран» Nvidia и любимица инвесторов: кто такая Колетт Кресс, которая временно возглавила компанию после ухода Дженсена Хуанга",
@@ -25,56 +25,52 @@
       {
         "title": "Еврокомиссия разработала законопроект об ограничении манипулятивных и навязчивых механик в приложениях — он может затронуть Duolingo, Strava и Ticketmaster",
         "url": "https://vc.ru/services/3251441-evrokomissiya-zapretit-manipulativnye-mehaniki?from=rss"
-      },
-      {
-        "title": "Google открыла предзаказ на «умные» очки с Gemini, созданные в коллаборации с Samsung, Gentle Monster и Warby Parker",
-        "url": "https://vc.ru/tech/3252297-google-zapustila-predzakaz-na-umnye-ochki-s-gemini?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Как работать с кодинг агентами (Claude Code, Codex, Gemini CLI, Antigravitu CLI) через Telegram",
-        "url": "https://habr.com/ru/articles/1107278/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107278"
+        "title": "Выпуск обновления PicView 5.2 — открытого просмотрщика изображений для ПК на Windows 10/11 и macOS",
+        "url": "https://habr.com/ru/articles/1106914/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106914"
       },
       {
-        "title": "Skills + Code Mode MCP: как я научил ИИ-агента пользоваться сотнями инструментов и не раздувать контекст",
-        "url": "https://habr.com/ru/articles/1107276/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107276"
+        "title": "Где публиковать статьи, чтобы нейросети вас цитировали: Алисы, ChatGPT, Perplexity и DeepSeek",
+        "url": "https://habr.com/ru/articles/1107326/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107326"
       },
       {
-        "title": "Универсальный ридер кодов libscanner-unir против zxing-cpp, ZBar и OpenCV на 6900 снимках из открытых наборов",
-        "url": "https://habr.com/ru/articles/1107274/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107274"
+        "title": "LLM после работы: интерактивная книга на ESP32-P4. Часть 3: сценарий, графика и сюжетный движок",
+        "url": "https://habr.com/ru/articles/1107324/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107324"
       },
       {
-        "title": "Вышел Cozystack v1.7.0: поддержка ARM, Proxmox как альтернатива KubeVirt, автоматическая миграция с VMware и другое",
-        "url": "https://habr.com/ru/companies/aenix/articles/1106842/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106842"
+        "title": "Выпуск обновления открытого проекта RustDesk 1.5.3",
+        "url": "https://habr.com/ru/articles/1107078/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107078"
       },
       {
-        "title": "Неделю гонял 14 локальных LLM на мини-ПК с Ryzen AI Max+ 395. Цифры, грабли и что я оставил себе",
-        "url": "https://habr.com/ru/articles/1107260/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107260"
+        "title": "Рисуем шестерни и не только, в программе OpenSCAD",
+        "url": "https://habr.com/ru/articles/1107322/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107322"
       }
     ],
     "tproger": [
       {
+        "title": "Anthropic выпустила плагин Claude for Manufacturing для производства",
+        "url": "https://tproger.ru/news/anthropic-vypustila-plagin-claude-for-manufacturing-dlya-proizvod"
+      },
+      {
+        "title": "Anthropic разрешила запускать Claude Managed Agents на своих серверах",
+        "url": "https://tproger.ru/news/anthropic-razrewila-zapuskat-claude-managed-agents-na-svoih-ser"
+      },
+      {
+        "title": "Независимый тест Gemini 4 Hydrogen: мало галлюцинаций, слабый терминал",
+        "url": "https://tproger.ru/news/nezavisimyj-test-gemini-4-hydrogen-malo-gallyucinacij-slabyj-te"
+      },
+      {
+        "title": "Anthropic пустила Claude в Google Meet: заметки и документы прямо в звонке",
+        "url": "https://tproger.ru/news/anthropic-pustila-claude-v-google-meet-zametki-i-dokumenty-pryam"
+      },
+      {
         "title": "Google выпустила Gemini 4 Hydrogen с бесплатным доступом в API",
         "url": "https://tproger.ru/news/google-vypustila-gemini-4-hydrogen-s-besplatnym-dostupom-v-api"
-      },
-      {
-        "title": "Anthropic выходит на Nasdaq: торги акциями ANT ожидаются 19 ноября",
-        "url": "https://tproger.ru/news/anthropic-vyhodit-na-nasdaq-torgi-akciyami-ant-ozhidayutsya-19-noyab"
-      },
-      {
-        "title": "5 провайдеров GPU-инфраструктуры в 2026 году: решения для LLM, HPC и Data Science",
-        "url": "https://tproger.ru/articles/5-provajderov-gpu-infrastruktury-v-2026-godu-reweniya-dlya-llm-h"
-      },
-      {
-        "title": "Google выпустила модель решений Gemini Decision 1 с бесплатным уровнем API",
-        "url": "https://tproger.ru/news/google-vypustila-model-rewenij-gemini-decision-1-s-besplatnym-u"
-      },
-      {
-        "title": "WikiTrace учит ИИ-агента сверять уроки памяти с исходными прогонами",
-        "url": "https://tproger.ru/news/wikitrace-uchit-ii-agenta-sveryat-uroki-pamyati-s-ishodnymi-progon"
       }
     ]
   },
-  "summary": "Сводка digest-20261112-1929: Самара 1.8°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261113-0454: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

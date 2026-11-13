@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261015-0302",
-    "generated_at": "2026-10-15T03:02:00Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 12.3,
-      "feels_like_c": 10.9,
-      "description": "Пасмурно",
-      "wind_ms": 6.6
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "«Сбер» сообщил об атаке беспилотников на дата-центр в Саратовской области",
-          "url": "https://vc.ru/money/3193997-sber-ataka-bespilotnikov-data-tsentr-saratovskaya-oblast?from=rss"
-        },
-        {
-          "title": "Хакер получил доступ к данным 8,8 млн человек из государственного реестра Дании — он утверждает, что использовал пароль «123456»",
-          "url": "https://vc.ru/services/3194953-vzlom-gosudarstvennogo-reestra-danii?from=rss"
-        },
-        {
-          "title": "OpenAI нашла прослушку в переговорной для руководства — в установке «жучка» обвинили одного из инженеров",
-          "url": "https://vc.ru/legal/3193875-openai-obnaruzhila-proslushku-v-peregovornoy?from=rss"
-        },
-        {
-          "title": "Минцифры попросило операторов связи до начала ноября 2026 года не блокировать звонки от банков, которые не заключили с ними соглашения о маркировке вызовов",
-          "url": "https://vc.ru/services/3194403-mintsifry-prizvalo-operatorov-ne-blokirovat-bankovskie-zvonki?from=rss"
-        },
-        {
-          "title": "Суд отправил под домашний арест фигуранта дела о кибератаке на «Додо Пиццу»",
-          "url": "https://vc.ru/legal/3195175-domashnij-arest-figurant-dela-o-kiberatake-na-dodo-piccu?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Представлен открытый проект NetWatch для диагностики сетевой активности",
-          "url": "https://habr.com/ru/news/1094358/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094358"
-        },
-        {
-          "title": "Выпуск BATorrent 4.9 — BitTorrent-клиента, созданного на C++, Qt 6 и libtorrent-rasterbar",
-          "url": "https://habr.com/ru/news/1094242/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094242"
-        },
-        {
-          "title": "Агенты Claude Code превратили список научных статей в настоящую лабораторию, которую можно запустить прямо в браузере",
-          "url": "https://habr.com/ru/news/1094538/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094538"
-        },
-        {
-          "title": "Сделал CEO AI: помощника для обсуждения задач и работы с ИИ-агентами",
-          "url": "https://habr.com/ru/news/1094526/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094526"
-        },
-        {
-          "title": "Игры для PS5 теперь можно запускать на Xbox: разработчик портировал эмулятор KytyPS5",
-          "url": "https://habr.com/ru/news/1094522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094522"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
-          "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
-        },
-        {
-          "title": "Если вы ищете работу, но не можете найти",
-          "url": "https://tproger.ru/articles/esli-vy-ishhete-rabotu-no-ne-mozhete-najti"
-        },
-        {
-          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
-          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
-        },
-        {
-          "title": "Чем заменить Oracle и Microsoft SQL Server в 2026 году: 4 российских СУБД",
-          "url": "https://tproger.ru/articles/chem-zamenit-oracle-i-microsoft-sql-server-v-2026-godu-4-rossij"
-        },
-        {
-          "title": "Вышел Bevy 0.20: новые шейдеры и улучшенный рендеринг на Rust",
-          "url": "https://tproger.ru/news/vywel-bevy-0-20-novye-wejdery-i-uluchwennyj-rendering-na-rust"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261015-0302: Самара 12.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261015-1048",
     "generated_at": "2026-10-15T10:48:32Z",
     "weather": {
@@ -7655,5 +7575,81 @@
       ]
     },
     "summary": "Сводка digest-20261112-1929: Самара 1.8°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261113-0454",
+    "generated_at": "2026-11-13T04:54:35Z",
+    "weather": {
+      "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Дженсен Хуанг покинул пост гендиректора Nvidia и вышел из совета директоров",
+          "url": "https://vc.ru/hr/3251770-nvidia-naznachila-kolett-kress-vremennym-gendirektorom?from=rss"
+        },
+        {
+          "title": "Google открыла предзаказ на «умные» очки с Gemini, созданные в коллаборации с Samsung, Gentle Monster и Warby Parker",
+          "url": "https://vc.ru/tech/3252297-google-zapustila-predzakaz-na-umnye-ochki-s-gemini?from=rss"
+        },
+        {
+          "title": "«Ветеран» Nvidia и любимица инвесторов: кто такая Колетт Кресс, которая временно возглавила компанию после ухода Дженсена Хуанга",
+          "url": "https://vc.ru/hr/3252071-kolet-kress-novaya-rukovoditelnitsa-nvidia?from=rss"
+        },
+        {
+          "title": "«Т-Банк» и «Т—Ж» запустили сервис для проверки скидок на технику в период распродаж — чтобы понять, действительно ли цена снизилась",
+          "url": "https://vc.ru/money/3251907-servis-chestnaya-pyatnitsa?from=rss"
+        },
+        {
+          "title": "Еврокомиссия разработала законопроект об ограничении манипулятивных и навязчивых механик в приложениях — он может затронуть Duolingo, Strava и Ticketmaster",
+          "url": "https://vc.ru/services/3251441-evrokomissiya-zapretit-manipulativnye-mehaniki?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Выпуск обновления PicView 5.2 — открытого просмотрщика изображений для ПК на Windows 10/11 и macOS",
+          "url": "https://habr.com/ru/articles/1106914/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106914"
+        },
+        {
+          "title": "Где публиковать статьи, чтобы нейросети вас цитировали: Алисы, ChatGPT, Perplexity и DeepSeek",
+          "url": "https://habr.com/ru/articles/1107326/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107326"
+        },
+        {
+          "title": "LLM после работы: интерактивная книга на ESP32-P4. Часть 3: сценарий, графика и сюжетный движок",
+          "url": "https://habr.com/ru/articles/1107324/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107324"
+        },
+        {
+          "title": "Выпуск обновления открытого проекта RustDesk 1.5.3",
+          "url": "https://habr.com/ru/articles/1107078/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107078"
+        },
+        {
+          "title": "Рисуем шестерни и не только, в программе OpenSCAD",
+          "url": "https://habr.com/ru/articles/1107322/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107322"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Anthropic выпустила плагин Claude for Manufacturing для производства",
+          "url": "https://tproger.ru/news/anthropic-vypustila-plagin-claude-for-manufacturing-dlya-proizvod"
+        },
+        {
+          "title": "Anthropic разрешила запускать Claude Managed Agents на своих серверах",
+          "url": "https://tproger.ru/news/anthropic-razrewila-zapuskat-claude-managed-agents-na-svoih-ser"
+        },
+        {
+          "title": "Независимый тест Gemini 4 Hydrogen: мало галлюцинаций, слабый терминал",
+          "url": "https://tproger.ru/news/nezavisimyj-test-gemini-4-hydrogen-malo-gallyucinacij-slabyj-te"
+        },
+        {
+          "title": "Anthropic пустила Claude в Google Meet: заметки и документы прямо в звонке",
+          "url": "https://tproger.ru/news/anthropic-pustila-claude-v-google-meet-zametki-i-dokumenty-pryam"
+        },
+        {
+          "title": "Google выпустила Gemini 4 Hydrogen с бесплатным доступом в API",
+          "url": "https://tproger.ru/news/google-vypustila-gemini-4-hydrogen-s-besplatnym-dostupom-v-api"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261113-0454: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
