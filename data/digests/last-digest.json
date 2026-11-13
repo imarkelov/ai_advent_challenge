@@ -1,76 +1,80 @@
 {
-  "id": "digest-20261113-0454",
-  "generated_at": "2026-11-13T04:54:35Z",
+  "id": "digest-20261113-1352",
+  "generated_at": "2026-11-13T13:52:03Z",
   "weather": {
-    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
+    "city": "Самара",
+    "temp_c": 3.7,
+    "feels_like_c": 1.2,
+    "description": "Переменная облачность",
+    "wind_ms": 3.1
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Дженсен Хуанг покинул пост гендиректора Nvidia и вышел из совета директоров",
-        "url": "https://vc.ru/hr/3251770-nvidia-naznachila-kolett-kress-vremennym-gendirektorom?from=rss"
+        "title": "Mercedes решила прекратить «все дальнейшие инвестиции» в Германии и рассматривает возможность закрытия заводов — FT",
+        "url": "https://vc.ru/transport/3253532-mercedes-prekrashchaet-investitsii-v-germanii?from=rss"
       },
       {
-        "title": "Google открыла предзаказ на «умные» очки с Gemini, созданные в коллаборации с Samsung, Gentle Monster и Warby Parker",
-        "url": "https://vc.ru/tech/3252297-google-zapustila-predzakaz-na-umnye-ochki-s-gemini?from=rss"
+        "title": "В Москве задержали проректора частного университета «Синергия» Михаила Ерофеева по делу о хищении около 20 млн рублей — СМИ",
+        "url": "https://vc.ru/legal/3253482-zaderzhanie-prorektora-universiteta-sinergiya-mikhaila-erofeeva?from=rss"
       },
       {
-        "title": "«Ветеран» Nvidia и любимица инвесторов: кто такая Колетт Кресс, которая временно возглавила компанию после ухода Дженсена Хуанга",
-        "url": "https://vc.ru/hr/3252071-kolet-kress-novaya-rukovoditelnitsa-nvidia?from=rss"
+        "title": "День 1724: Роскомнадзор выделил 2,27 млрд рублей на внедрение механизма фильтрации интернет-трафика с помощью машинного обучения в 2026-2028 годах",
+        "url": "https://vc.ru/money/3252722-roskomnadzor-filtraciya-internet-trafika-ii?from=rss"
       },
       {
-        "title": "«Т-Банк» и «Т—Ж» запустили сервис для проверки скидок на технику в период распродаж — чтобы понять, действительно ли цена снизилась",
-        "url": "https://vc.ru/money/3251907-servis-chestnaya-pyatnitsa?from=rss"
+        "title": "У Microsoft произошёл сбой — пользователи столкнулись с проблемами с доступом к Outlook, Teams, Copilot и другим сервисам",
+        "url": "https://vc.ru/services/3252959-sboy-v-rabote-microsoft-outlook-teams?from=rss"
       },
       {
-        "title": "Еврокомиссия разработала законопроект об ограничении манипулятивных и навязчивых механик в приложениях — он может затронуть Duolingo, Strava и Ticketmaster",
-        "url": "https://vc.ru/services/3251441-evrokomissiya-zapretit-manipulativnye-mehaniki?from=rss"
+        "title": "Reuters узнало о третьем романе Дженсена Хуанга, американские спецслужбы усомнились, что Элис Хуанг была шпионкой, а Трамп назвал Тима Кука самым подходящим кандидатом на должность главы Nvidia: что происходит вокруг компании после отставки гендиректора",
+        "url": "https://vc.ru/hr/3252757-sobytiya-vokrug-nvidia-posle-otstavki-dzhensena-huanga?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Выпуск обновления PicView 5.2 — открытого просмотрщика изображений для ПК на Windows 10/11 и macOS",
-        "url": "https://habr.com/ru/articles/1106914/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106914"
+        "title": "Microsoft добавила в программу обратной совместимости ещё 21 игру с оригинальной Xbox",
+        "url": "https://habr.com/ru/articles/1107590/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107590"
       },
       {
-        "title": "Где публиковать статьи, чтобы нейросети вас цитировали: Алисы, ChatGPT, Perplexity и DeepSeek",
-        "url": "https://habr.com/ru/articles/1107326/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107326"
+        "title": "В новых HTML‑виджетах Telegram обнаружили RCE‑уязвимость",
+        "url": "https://habr.com/ru/articles/1107586/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107586"
       },
       {
-        "title": "LLM после работы: интерактивная книга на ESP32-P4. Часть 3: сценарий, графика и сюжетный движок",
-        "url": "https://habr.com/ru/articles/1107324/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107324"
+        "title": "Знаменитая головоломка возвращается домой: производство кубика Рубика возобновляется в Венгрии",
+        "url": "https://habr.com/ru/articles/1107584/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107584"
       },
       {
-        "title": "Выпуск обновления открытого проекта RustDesk 1.5.3",
-        "url": "https://habr.com/ru/articles/1107078/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107078"
+        "title": "Эволюция API в эпоху AI: REST vs MCP на примере платёжного сервиса",
+        "url": "https://habr.com/ru/companies/yoomoney/articles/1107580/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107580"
       },
       {
-        "title": "Рисуем шестерни и не только, в программе OpenSCAD",
-        "url": "https://habr.com/ru/articles/1107322/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107322"
+        "title": "История выполнения @Scheduled задач в Axelix",
+        "url": "https://habr.com/ru/companies/spring_aio/articles/1107562/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107562"
       }
     ],
     "tproger": [
       {
-        "title": "Anthropic выпустила плагин Claude for Manufacturing для производства",
-        "url": "https://tproger.ru/news/anthropic-vypustila-plagin-claude-for-manufacturing-dlya-proizvod"
+        "title": "Как отравляют данные для ИИ-моделей и как разработчику найти подмену",
+        "url": "https://tproger.ru/articles/kak-otravlyayut-dannye-dlya-ii-modelej-i-kak-razrabotchiku-najti-pod-2"
       },
       {
-        "title": "Anthropic разрешила запускать Claude Managed Agents на своих серверах",
-        "url": "https://tproger.ru/news/anthropic-razrewila-zapuskat-claude-managed-agents-na-svoih-ser"
+        "title": "OpenRouter за неделю добавил 20 моделей: что брать для агентов и голоса",
+        "url": "https://tproger.ru/news/openrouter-za-nedelyu-dobavil-20-modelej-chto-brat-dlya-agentov-i"
       },
       {
-        "title": "Независимый тест Gemini 4 Hydrogen: мало галлюцинаций, слабый терминал",
-        "url": "https://tproger.ru/news/nezavisimyj-test-gemini-4-hydrogen-malo-gallyucinacij-slabyj-te"
+        "title": "Alibaba открыла превью Qwen4-Max: в API только через подписку Token Plan",
+        "url": "https://tproger.ru/news/alibaba-otkryla-prevyu-qwen4-max-v-api-tolko-cherez-podpisku-to"
       },
       {
-        "title": "Anthropic пустила Claude в Google Meet: заметки и документы прямо в звонке",
-        "url": "https://tproger.ru/news/anthropic-pustila-claude-v-google-meet-zametki-i-dokumenty-pryam"
+        "title": "Суд в США не стал закрывать иск о лимитах Claude Max к Anthropic",
+        "url": "https://tproger.ru/news/sud-v-swa-ne-stal-zakryvat-isk-o-limitah-claude-max-k-anthropic"
       },
       {
-        "title": "Google выпустила Gemini 4 Hydrogen с бесплатным доступом в API",
-        "url": "https://tproger.ru/news/google-vypustila-gemini-4-hydrogen-s-besplatnym-dostupom-v-api"
+        "title": "Атакующие охотятся за токенами Claude Code и MCP: что проверить",
+        "url": "https://tproger.ru/news/atakuyushhie-ohotyatsya-za-tokenami-claude-code-i-mcp-chto-proverit"
       }
     ]
   },
-  "summary": "Сводка digest-20261113-0454: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261113-1352: Самара 3.7°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
