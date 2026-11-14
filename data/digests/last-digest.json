@@ -1,8 +1,12 @@
 {
-  "id": "digest-20261113-2312",
-  "generated_at": "2026-11-13T23:12:00Z",
+  "id": "digest-20261114-0447",
+  "generated_at": "2026-11-14T04:47:48Z",
   "weather": {
-    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
+    "city": "Самара",
+    "temp_c": 4.4,
+    "feels_like_c": 0.1,
+    "description": "Пасмурно",
+    "wind_ms": 18.1
   },
   "news": {
     "vc.ru": [
@@ -29,24 +33,24 @@
     ],
     "habr": [
       {
+        "title": "[Перевод] Исходники Borland C++ 2.0 восстановили из бинарника: BCC.EXE пересобирается байт в байт",
+        "url": "https://habr.com/ru/articles/1107738/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107738"
+      },
+      {
+        "title": "От чата до тёмной фабрики: шесть уровней ИИ в разработке и почему мы остановились на L4",
+        "url": "https://habr.com/ru/articles/1106718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106718"
+      },
+      {
+        "title": "[Перевод] The history of Kubernetes",
+        "url": "https://habr.com/ru/articles/1107734/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107734"
+      },
+      {
         "title": "Жизнь не должна оправдывать своё существование полезностью",
         "url": "https://habr.com/ru/articles/1107732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107732"
       },
       {
         "title": "Vibe‑hacking Wi‑Fi камеры с помощью Claude",
         "url": "https://habr.com/ru/articles/1107726/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107726"
-      },
-      {
-        "title": "3 базы данных в Docker за один вечер: PostgreSQL 18 + ClickHouse 26.8 + Qdrant 1.19",
-        "url": "https://habr.com/ru/articles/1107724/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107724"
-      },
-      {
-        "title": "Мы проверили 500 сайтов малого бизнеса Перми и Екатеринбурга: что ломают зарубежные сервисы",
-        "url": "https://habr.com/ru/articles/1107718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107718"
-      },
-      {
-        "title": "Клодизмы. Часть 1. Классификация ошибок, которые языковая модель допускает в связном тексте",
-        "url": "https://habr.com/ru/articles/1107710/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107710"
       }
     ],
     "tproger": [
@@ -72,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261113-2312: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261114-0447: Самара 4.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

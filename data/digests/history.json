@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261015-2053",
-    "generated_at": "2026-10-15T20:53:54Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 12.7,
-      "feels_like_c": 11.2,
-      "description": "Переменная облачность",
-      "wind_ms": 5.9
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Американский сервис для совместной работы Miro с основателями из Перми заблокировал доступ по IP для россиян",
-          "url": "https://vc.ru/services/3197185-miro-zablokiroval-dostup-dlya-rossiyan?from=rss"
-        },
-        {
-          "title": "«Яндекс» восстановил доступ к «Директу» — можно пополнить баланс, запустить созданные ранее кампании или остановить активные",
-          "url": "https://vc.ru/marketing/3197091-yandeks-vosstanovil-dostup-k-direktu?from=rss"
-        },
-        {
-          "title": "Ledger приостановил продажи в семи странах и запретил авторизованным продавцам размещать товары на витринах после атаки — хакеры устанавливали в аппаратные криптокошельки жучки для кражи seed-фраз",
-          "url": "https://vc.ru/crypto/3196605-ledger-priostanovil-prodazhi-v-semi-stranakh-posle-ataki-hakerov?from=rss"
-        },
-        {
-          "title": "ЦБ: проводить p2p-сделки с криптовалютой можно будет до 1 июля 2027 года",
-          "url": "https://vc.ru/crypto/3195921-cb-razreshayet-p2p-sdelki-s-kriptovalyutoy?from=rss"
-        },
-        {
-          "title": "Федеральный суд США обязал возобновить программу розыгрыша грин-карт — о её приостановке рассказали в 2025 году",
-          "url": "https://vc.ru/migration/3196287-federalnyj-sud-ssha-vosstanovil-programmu-loterei-grin-kart?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Разработчик напечатал защиту для носа своей собаки — теперь её носит более 500 питомцев",
-          "url": "https://habr.com/ru/news/1094990/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094990"
-        },
-        {
-          "title": "Учебный проект MIT превратился в одобренное устройство для уменьшения тремора",
-          "url": "https://habr.com/ru/news/1094988/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094988"
-        },
-        {
-          "title": "Браузерный игровой движок LittleJS получил поддержку 3D‑рендера и редактор уровней",
-          "url": "https://habr.com/ru/news/1094972/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094972"
-        },
-        {
-          "title": "Meta* выпустила Muse Spark Open: запуск на 2 Mac Studio и не только",
-          "url": "https://habr.com/ru/companies/bothub/news/1094968/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094968"
-        },
-        {
-          "title": "Miro блокирует доступ из России и Беларуси — и, кажется, всем всё равно",
-          "url": "https://habr.com/ru/news/1094948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094948"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
-          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
-        },
-        {
-          "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
-          "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
-        },
-        {
-          "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
-          "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
-        },
-        {
-          "title": "Если вы ищете работу, но не можете найти",
-          "url": "https://tproger.ru/articles/esli-vy-ishhete-rabotu-no-ne-mozhete-najti"
-        },
-        {
-          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
-          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261015-2053: Самара 12.7°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261016-0259",
     "generated_at": "2026-10-16T02:59:12Z",
     "weather": {
@@ -7647,5 +7567,85 @@
       ]
     },
     "summary": "Сводка digest-20261113-2312: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261114-0447",
+    "generated_at": "2026-11-14T04:47:48Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 4.4,
+      "feels_like_c": 0.1,
+      "description": "Пасмурно",
+      "wind_ms": 18.1
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Mercedes решила прекратить «все дальнейшие инвестиции» в Германии и рассматривает возможность закрытия заводов — FT",
+          "url": "https://vc.ru/transport/3253532-mercedes-prekrashchaet-investitsii-v-germanii?from=rss"
+        },
+        {
+          "title": "В Москве задержали проректора частного университета «Синергия» Михаила Ерофеева по делу о хищении около 20 млн рублей — СМИ",
+          "url": "https://vc.ru/legal/3253482-zaderzhanie-prorektora-universiteta-sinergiya-mikhaila-erofeeva?from=rss"
+        },
+        {
+          "title": "День 1724: Роскомнадзор выделил 2,27 млрд рублей на внедрение механизма фильтрации интернет-трафика с помощью машинного обучения в 2026-2028 годах",
+          "url": "https://vc.ru/money/3252722-roskomnadzor-filtraciya-internet-trafika-ii?from=rss"
+        },
+        {
+          "title": "«2ГИС» обновил навигатор для общественного транспорта: приложение и виджет показывают прогресс на маршруте и заранее предупреждают о нужной остановке",
+          "url": "https://vc.ru/services/3253038-navigatory-2gis-dlya-obshchestvennogo-transporta-obnovlen?from=rss"
+        },
+        {
+          "title": "Reuters узнало о третьем романе Дженсена Хуанга, американские спецслужбы усомнились, что Элис Хуанг была шпионкой, а Трамп назвал Тима Кука самым подходящим кандидатом на должность главы Nvidia: что происходит вокруг компании после отставки гендиректора",
+          "url": "https://vc.ru/hr/3252757-sobytiya-vokrug-nvidia-posle-otstavki-dzhensena-huanga?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "[Перевод] Исходники Borland C++ 2.0 восстановили из бинарника: BCC.EXE пересобирается байт в байт",
+          "url": "https://habr.com/ru/articles/1107738/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107738"
+        },
+        {
+          "title": "От чата до тёмной фабрики: шесть уровней ИИ в разработке и почему мы остановились на L4",
+          "url": "https://habr.com/ru/articles/1106718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106718"
+        },
+        {
+          "title": "[Перевод] The history of Kubernetes",
+          "url": "https://habr.com/ru/articles/1107734/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107734"
+        },
+        {
+          "title": "Жизнь не должна оправдывать своё существование полезностью",
+          "url": "https://habr.com/ru/articles/1107732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107732"
+        },
+        {
+          "title": "Vibe‑hacking Wi‑Fi камеры с помощью Claude",
+          "url": "https://habr.com/ru/articles/1107726/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107726"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Как отравляют данные для ИИ-моделей и как разработчику найти подмену",
+          "url": "https://tproger.ru/articles/kak-otravlyayut-dannye-dlya-ii-modelej-i-kak-razrabotchiku-najti-pod-2"
+        },
+        {
+          "title": "OpenRouter за неделю добавил 20 моделей: что брать для агентов и голоса",
+          "url": "https://tproger.ru/news/openrouter-za-nedelyu-dobavil-20-modelej-chto-brat-dlya-agentov-i"
+        },
+        {
+          "title": "Alibaba открыла превью Qwen4-Max: в API только через подписку Token Plan",
+          "url": "https://tproger.ru/news/alibaba-otkryla-prevyu-qwen4-max-v-api-tolko-cherez-podpisku-to"
+        },
+        {
+          "title": "Суд в США не стал закрывать иск о лимитах Claude Max к Anthropic",
+          "url": "https://tproger.ru/news/sud-v-swa-ne-stal-zakryvat-isk-o-limitah-claude-max-k-anthropic"
+        },
+        {
+          "title": "Атакующие охотятся за токенами Claude Code и MCP: что проверить",
+          "url": "https://tproger.ru/news/atakuyushhie-ohotyatsya-za-tokenami-claude-code-i-mcp-chto-proverit"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261114-0447: Самара 4.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
