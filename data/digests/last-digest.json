@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261114-0447",
-  "generated_at": "2026-11-14T04:47:48Z",
+  "id": "digest-20261114-1255",
+  "generated_at": "2026-11-14T12:55:01Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 4.4,
-    "feels_like_c": 0.1,
-    "description": "Пасмурно",
-    "wind_ms": 18.1
+    "temp_c": 5.9,
+    "feels_like_c": 2.7,
+    "description": "Небольшой дождь",
+    "wind_ms": 13.4
   },
   "news": {
     "vc.ru": [
@@ -15,42 +15,42 @@
         "url": "https://vc.ru/transport/3253532-mercedes-prekrashchaet-investitsii-v-germanii?from=rss"
       },
       {
+        "title": "Операторы «большой четвёрки» и крупнейшие банки договорились об условиях маркировки звонков",
+        "url": "https://vc.ru/services/3255087-markirovka-zvonkov-ot-bankov?from=rss"
+      },
+      {
+        "title": "Пятнадцатый полёт Starship: SpaceX отменила попытку поймать ускоритель, но ещё может вернуть корабль на космодром",
+        "url": "https://vc.ru/future/3254838-polet-starship-ot-spacex-zahvat-uskoritelya?from=rss"
+      },
+      {
         "title": "В Москве задержали проректора частного университета «Синергия» Михаила Ерофеева по делу о хищении около 20 млн рублей — СМИ",
         "url": "https://vc.ru/legal/3253482-zaderzhanie-prorektora-universiteta-sinergiya-mikhaila-erofeeva?from=rss"
       },
       {
-        "title": "День 1724: Роскомнадзор выделил 2,27 млрд рублей на внедрение механизма фильтрации интернет-трафика с помощью машинного обучения в 2026-2028 годах",
-        "url": "https://vc.ru/money/3252722-roskomnadzor-filtraciya-internet-trafika-ii?from=rss"
-      },
-      {
-        "title": "«2ГИС» обновил навигатор для общественного транспорта: приложение и виджет показывают прогресс на маршруте и заранее предупреждают о нужной остановке",
-        "url": "https://vc.ru/services/3253038-navigatory-2gis-dlya-obshchestvennogo-transporta-obnovlen?from=rss"
-      },
-      {
-        "title": "Reuters узнало о третьем романе Дженсена Хуанга, американские спецслужбы усомнились, что Элис Хуанг была шпионкой, а Трамп назвал Тима Кука самым подходящим кандидатом на должность главы Nvidia: что происходит вокруг компании после отставки гендиректора",
-        "url": "https://vc.ru/hr/3252757-sobytiya-vokrug-nvidia-posle-otstavki-dzhensena-huanga?from=rss"
+        "title": "Microsoft восстановила работу Outlook, Teams, Copilot и других сервисов — глобальный сбой длился больше суток",
+        "url": "https://vc.ru/services/3254969-sboy-v-rabote-microsoft-outlook-teams?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "[Перевод] Исходники Borland C++ 2.0 восстановили из бинарника: BCC.EXE пересобирается байт в байт",
-        "url": "https://habr.com/ru/articles/1107738/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107738"
+        "title": "Bluetooth станет в четыре раза быстрее: что происходит и почему?",
+        "url": "https://habr.com/ru/companies/ru_mts/articles/1107186/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107186"
       },
       {
-        "title": "От чата до тёмной фабрики: шесть уровней ИИ в разработке и почему мы остановились на L4",
-        "url": "https://habr.com/ru/articles/1106718/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106718"
+        "title": "Посильная помощь в бэклог приложения «Моя школа»",
+        "url": "https://habr.com/ru/articles/1107854/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107854"
       },
       {
-        "title": "[Перевод] The history of Kubernetes",
-        "url": "https://habr.com/ru/articles/1107734/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107734"
+        "title": "Потоковая выгрузка из Postgres в CSV часть 2",
+        "url": "https://habr.com/ru/articles/1107852/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107852"
       },
       {
-        "title": "Жизнь не должна оправдывать своё существование полезностью",
-        "url": "https://habr.com/ru/articles/1107732/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107732"
+        "title": "Осколки остаются, физика заканчивается: жизненный цикл обломков в Chaos Destruction",
+        "url": "https://habr.com/ru/articles/1107850/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107850"
       },
       {
-        "title": "Vibe‑hacking Wi‑Fi камеры с помощью Claude",
-        "url": "https://habr.com/ru/articles/1107726/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107726"
+        "title": "[Перевод] Как ускорить локальную LLM на 50% без покупки новой видеокарты",
+        "url": "https://habr.com/ru/articles/1107848/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107848"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261114-0447: Самара 4.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261114-1255: Самара 5.9°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
