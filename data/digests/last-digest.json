@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261114-1255",
-  "generated_at": "2026-11-14T12:55:01Z",
+  "id": "digest-20261114-2156",
+  "generated_at": "2026-11-14T21:56:18Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 5.9,
-    "feels_like_c": 2.7,
+    "temp_c": 10.4,
+    "feels_like_c": 8.9,
     "description": "Небольшой дождь",
-    "wind_ms": 13.4
+    "wind_ms": 9.7
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Mercedes решила прекратить «все дальнейшие инвестиции» в Германии и рассматривает возможность закрытия заводов — FT",
-        "url": "https://vc.ru/transport/3253532-mercedes-prekrashchaet-investitsii-v-germanii?from=rss"
-      },
-      {
-        "title": "Операторы «большой четвёрки» и крупнейшие банки договорились об условиях маркировки звонков",
-        "url": "https://vc.ru/services/3255087-markirovka-zvonkov-ot-bankov?from=rss"
+        "title": "Tesla начала предлагать «избранным» клиентам купить Cybercab без руля и педалей для личного пользования — для поездок нужна подписка за $300 в месяц",
+        "url": "https://vc.ru/transport/3255207-tesla-predlagaet-cybercab-bez-rulya-i-pedaley?from=rss"
       },
       {
         "title": "Пятнадцатый полёт Starship: SpaceX отменила попытку поймать ускоритель, но ещё может вернуть корабль на космодром",
         "url": "https://vc.ru/future/3254838-polet-starship-ot-spacex-zahvat-uskoritelya?from=rss"
       },
       {
-        "title": "В Москве задержали проректора частного университета «Синергия» Михаила Ерофеева по делу о хищении около 20 млн рублей — СМИ",
-        "url": "https://vc.ru/legal/3253482-zaderzhanie-prorektora-universiteta-sinergiya-mikhaila-erofeeva?from=rss"
+        "title": "Операторы «большой четвёрки» и крупнейшие банки договорились об условиях маркировки звонков",
+        "url": "https://vc.ru/services/3255087-markirovka-zvonkov-ot-bankov?from=rss"
       },
       {
-        "title": "Microsoft восстановила работу Outlook, Teams, Copilot и других сервисов — глобальный сбой длился больше суток",
-        "url": "https://vc.ru/services/3254969-sboy-v-rabote-microsoft-outlook-teams?from=rss"
+        "title": "Генпрокуратура Казахстана потребовала проверить работу Yandex Qazaqstan из-за недавних сбоев в работе сервисов",
+        "url": "https://vc.ru/legal/3255334-genprokuratura-kazahstana-proverit-yandex-qazaqstan?from=rss"
+      },
+      {
+        "title": "Mercedes решила прекратить «все дальнейшие инвестиции» в Германии и рассматривает возможность закрытия заводов — FT",
+        "url": "https://vc.ru/transport/3253532-mercedes-prekrashchaet-investitsii-v-germanii?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Bluetooth станет в четыре раза быстрее: что происходит и почему?",
-        "url": "https://habr.com/ru/companies/ru_mts/articles/1107186/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107186"
+        "title": "[Перевод] Проблема торга",
+        "url": "https://habr.com/ru/articles/1100308/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100308"
       },
       {
-        "title": "Посильная помощь в бэклог приложения «Моя школа»",
-        "url": "https://habr.com/ru/articles/1107854/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107854"
+        "title": "Блокировка Claude, потому что ты русский",
+        "url": "https://habr.com/ru/articles/1107934/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107934"
       },
       {
-        "title": "Потоковая выгрузка из Postgres в CSV часть 2",
-        "url": "https://habr.com/ru/articles/1107852/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107852"
+        "title": "Роман как сложная система: применяем стиль разработки ПО к написанию художественного произведения",
+        "url": "https://habr.com/ru/articles/1107932/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107932"
       },
       {
-        "title": "Осколки остаются, физика заканчивается: жизненный цикл обломков в Chaos Destruction",
-        "url": "https://habr.com/ru/articles/1107850/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107850"
+        "title": "НАУЧИТЬ AI ПОНИМАТЬ СТРОИТЕЛЬНЫЙ ОБЪЕКТ",
+        "url": "https://habr.com/ru/articles/1107928/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107928"
       },
       {
-        "title": "[Перевод] Как ускорить локальную LLM на 50% без покупки новой видеокарты",
-        "url": "https://habr.com/ru/articles/1107848/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107848"
+        "title": "Семь способов обмануть себя метриками: как я измерял точность ИИ-проверки ЕГЭ",
+        "url": "https://habr.com/ru/articles/1107926/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107926"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261114-1255: Самара 5.9°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261114-2156: Самара 10.4°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261016-1037",
-    "generated_at": "2026-10-16T10:37:36Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 19.1,
-      "feels_like_c": 16.9,
-      "description": "Ясно",
-      "wind_ms": 9.9
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Tesla представила новый Roadster — во время презентации машина разогналась до 100 км/ч за 0,81 с и без трамплина пролетела над другими моделями компании",
-          "url": "https://vc.ru/transport/3197814-tesla-predstavila-obnovlennyj-roadster?from=rss"
-        },
-        {
-          "title": "«Самокат» начал предлагать пользователям доплатить за оформление заказа ниже минимальной суммы",
-          "url": "https://vc.ru/services/3198317-samakot-predlagaet-dostavku-pri-zakaze-nizhe-minimalnoy-summyi?from=rss"
-        },
-        {
-          "title": "Американский сервис для совместной работы Miro с основателями из Перми заблокировал доступ по IP для россиян",
-          "url": "https://vc.ru/services/3197185-miro-zablokiroval-dostup-dlya-rossiyan?from=rss"
-        },
-        {
-          "title": "Ledger приостановил продажи в семи странах и запретил авторизованным продавцам размещать товары на витринах после атаки — хакеры устанавливали в аппаратные криптокошельки жучки для кражи seed-фраз",
-          "url": "https://vc.ru/crypto/3196605-ledger-priostanovil-prodazhi-v-semi-stranakh-posle-ataki-hakerov?from=rss"
-        },
-        {
-          "title": "Ledger представил смартфон со встроенным криптокошельком за $849 — с него нельзя звонить и отправлять сообщения",
-          "url": "https://vc.ru/tech/3197945-ledger-atom-smartfon-s-kriptokoshelkom?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "GLM 5.3 Flash и DeepSeek V4.1 Flash стали бесплатными в OpenCode",
-          "url": "https://habr.com/ru/companies/haulmont/news/1095202/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095202"
-        },
-        {
-          "title": "Tesla представила новый Roadster в трёх версиях: Performance, Thrust и Rocket",
-          "url": "https://habr.com/ru/news/1095194/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095194"
-        },
-        {
-          "title": "Вышло обновление для GitHub Apps: что изменилось в управлении репозиториями",
-          "url": "https://habr.com/ru/companies/selectel/news/1094962/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1094962"
-        },
-        {
-          "title": "Владельцы предзаказов Call of Duty: Modern Warfare 4 получили доступ к сюжетной кампании",
-          "url": "https://habr.com/ru/companies/ggsel/news/1095174/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095174"
-        },
-        {
-          "title": "Check Point прокомментировала информацию о возможном уходе из России",
-          "url": "https://habr.com/ru/news/1095160/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095160"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
-          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
-        },
-        {
-          "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
-          "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
-        },
-        {
-          "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
-          "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
-        },
-        {
-          "title": "Если вы ищете работу, но не можете найти",
-          "url": "https://tproger.ru/articles/esli-vy-ishhete-rabotu-no-ne-mozhete-najti"
-        },
-        {
-          "title": "Рейтинги облачных хранилищ для бизнеса в России в 2026 году",
-          "url": "https://tproger.ru/articles/rejtingi-oblachnyh-hranilishh-dlya-biznesa-v-rossii-v-2026-godu"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261016-1037: Самара 19.1°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261016-1600",
     "generated_at": "2026-10-16T16:00:53Z",
     "weather": {
@@ -7647,5 +7567,85 @@
       ]
     },
     "summary": "Сводка digest-20261114-1255: Самара 5.9°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261114-2156",
+    "generated_at": "2026-11-14T21:56:18Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 10.4,
+      "feels_like_c": 8.9,
+      "description": "Небольшой дождь",
+      "wind_ms": 9.7
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Tesla начала предлагать «избранным» клиентам купить Cybercab без руля и педалей для личного пользования — для поездок нужна подписка за $300 в месяц",
+          "url": "https://vc.ru/transport/3255207-tesla-predlagaet-cybercab-bez-rulya-i-pedaley?from=rss"
+        },
+        {
+          "title": "Пятнадцатый полёт Starship: SpaceX отменила попытку поймать ускоритель, но ещё может вернуть корабль на космодром",
+          "url": "https://vc.ru/future/3254838-polet-starship-ot-spacex-zahvat-uskoritelya?from=rss"
+        },
+        {
+          "title": "Операторы «большой четвёрки» и крупнейшие банки договорились об условиях маркировки звонков",
+          "url": "https://vc.ru/services/3255087-markirovka-zvonkov-ot-bankov?from=rss"
+        },
+        {
+          "title": "Генпрокуратура Казахстана потребовала проверить работу Yandex Qazaqstan из-за недавних сбоев в работе сервисов",
+          "url": "https://vc.ru/legal/3255334-genprokuratura-kazahstana-proverit-yandex-qazaqstan?from=rss"
+        },
+        {
+          "title": "Mercedes решила прекратить «все дальнейшие инвестиции» в Германии и рассматривает возможность закрытия заводов — FT",
+          "url": "https://vc.ru/transport/3253532-mercedes-prekrashchaet-investitsii-v-germanii?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "[Перевод] Проблема торга",
+          "url": "https://habr.com/ru/articles/1100308/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100308"
+        },
+        {
+          "title": "Блокировка Claude, потому что ты русский",
+          "url": "https://habr.com/ru/articles/1107934/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107934"
+        },
+        {
+          "title": "Роман как сложная система: применяем стиль разработки ПО к написанию художественного произведения",
+          "url": "https://habr.com/ru/articles/1107932/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107932"
+        },
+        {
+          "title": "НАУЧИТЬ AI ПОНИМАТЬ СТРОИТЕЛЬНЫЙ ОБЪЕКТ",
+          "url": "https://habr.com/ru/articles/1107928/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107928"
+        },
+        {
+          "title": "Семь способов обмануть себя метриками: как я измерял точность ИИ-проверки ЕГЭ",
+          "url": "https://habr.com/ru/articles/1107926/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107926"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Как отравляют данные для ИИ-моделей и как разработчику найти подмену",
+          "url": "https://tproger.ru/articles/kak-otravlyayut-dannye-dlya-ii-modelej-i-kak-razrabotchiku-najti-pod-2"
+        },
+        {
+          "title": "OpenRouter за неделю добавил 20 моделей: что брать для агентов и голоса",
+          "url": "https://tproger.ru/news/openrouter-za-nedelyu-dobavil-20-modelej-chto-brat-dlya-agentov-i"
+        },
+        {
+          "title": "Alibaba открыла превью Qwen4-Max: в API только через подписку Token Plan",
+          "url": "https://tproger.ru/news/alibaba-otkryla-prevyu-qwen4-max-v-api-tolko-cherez-podpisku-to"
+        },
+        {
+          "title": "Суд в США не стал закрывать иск о лимитах Claude Max к Anthropic",
+          "url": "https://tproger.ru/news/sud-v-swa-ne-stal-zakryvat-isk-o-limitah-claude-max-k-anthropic"
+        },
+        {
+          "title": "Атакующие охотятся за токенами Claude Code и MCP: что проверить",
+          "url": "https://tproger.ru/news/atakuyushhie-ohotyatsya-za-tokenami-claude-code-i-mcp-chto-proverit"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261114-2156: Самара 10.4°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
