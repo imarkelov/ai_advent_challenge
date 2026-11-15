@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261017-0251",
-    "generated_at": "2026-10-17T02:51:20Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 9.5,
-      "feels_like_c": 7.8,
-      "description": "Пасмурно",
-      "wind_ms": 4.7
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "«Раз средствами не пользуются»: GPT-5.6 Sol подобрала ключ к чужому криптокошельку и потратила с него ETH в тестовой сети",
-          "url": "https://vc.ru/crypto/3198251-incident-s-gpt-5-6-sol-ispolzovanie-chuzhogo-kryptokoshelka?from=rss"
-        },
-        {
-          "title": "Tesla представила новый Roadster — во время презентации машина разогналась до 100 км/ч за 0,81 с и без трамплина пролетела над другими моделями компании",
-          "url": "https://vc.ru/transport/3197814-tesla-predstavila-obnovlennyj-roadster?from=rss"
-        },
-        {
-          "title": "«Яндекс» восстановил доступ к кабинету «Бизнеса», просмотр отчётов в «Метрике» и работу основных инструментов в «Вебмастере»",
-          "url": "https://vc.ru/marketing/3199382-yandeks-vosstanovil-dostup-k-biznes-kabinetu?from=rss"
-        },
-        {
-          "title": "«Вкусно — и точка» начала тестировать выдачу заказов через постаматы внутри ресторанов",
-          "url": "https://vc.ru/food/3198689-vkusno-i-tochka-testiruet-vydachu-zakazov-cherez-postamaty?from=rss"
-        },
-        {
-          "title": "«Самокат» начал предлагать пользователям доплатить за оформление заказа ниже минимальной суммы",
-          "url": "https://vc.ru/services/3198317-samakot-predlagaet-dostavku-pri-zakaze-nizhe-minimalnoy-summyi?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "NVIDIA выпустила Nemotron 3.5 Super VL",
-          "url": "https://habr.com/ru/companies/bothub/news/1095494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095494"
-        },
-        {
-          "title": "LinkedIn запустила новые инструменты для заработка прямо на платформе: платные консультации и монетизацию видео",
-          "url": "https://habr.com/ru/news/1095464/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095464"
-        },
-        {
-          "title": "Неизменяемые операционные системы, ИИ и победители конкурса: итоги ХXII конференции разработчиков свободных программ",
-          "url": "https://habr.com/ru/companies/basealtspo/news/1095414/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095414"
-        },
-        {
-          "title": "Meta* выпустила SDK для разработки браузерных VR‑приложений",
-          "url": "https://habr.com/ru/news/1095402/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095402"
-        },
-        {
-          "title": "Представлен открытый плеер CloudMus для «Яндекс Музыки» и YouTube Music для ПК на Linux и Windows",
-          "url": "https://habr.com/ru/news/1095396/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095396"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Искусственный интеллект для дошкольников: рейтинг 5 курсов и развивающих программ",
-          "url": "https://tproger.ru/articles/iskusstvennyj-intellekt-dlya-dowkolnikov-rejting-5-kursov-i-raz"
-        },
-        {
-          "title": "ИИ-платформы для бизнеса: сравнение решений 2026 года",
-          "url": "https://tproger.ru/articles/ii-platformy-dlya-biznesa-sravnenie-rewenij-2026-goda"
-        },
-        {
-          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
-          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
-        },
-        {
-          "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
-          "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
-        },
-        {
-          "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
-          "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261017-0251: Самара 9.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261017-1006",
     "generated_at": "2026-10-17T10:06:02Z",
     "weather": {
@@ -7647,5 +7567,85 @@
       ]
     },
     "summary": "Сводка digest-20261115-1323: Самара 3.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261115-2226",
+    "generated_at": "2026-11-15T22:26:33Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 0.6,
+      "feels_like_c": -2.3,
+      "description": "Преимущественно ясно",
+      "wind_ms": 3.6
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Беспрецедентно»: SpaceX впервые поймала корабль Starship с помощью «рук»-манипуляторов на стартовой площадке",
+          "url": "https://vc.ru/future/3256278-spacex-vpervye-pojala-starship-s-pomoshyu-manipulyatorov-na-starte?from=rss"
+        },
+        {
+          "title": "Хостинг-провайдер Beget сообщил о масштабной DDoS-атаке на свою инфраструктуру",
+          "url": "https://vc.ru/services/3256706-ddos-ataka-na-hosting-beget?from=rss"
+        },
+        {
+          "title": "«Падение биткоина испытывает на прочность даже самых преданных сторонников крипторынка»",
+          "url": "https://vc.ru/crypto/3256503-padenie-bitkoina-i-ego-vliyanie-na-kriptorynok?from=rss"
+        },
+        {
+          "title": "Министр иностранных дел Эстонии заявил о закрытии всех погранпереходов с Россией с 1 декабря 2026 года",
+          "url": "https://vc.ru/migration/3256921-estoniya-zakryvaet-pogranperekhody-s-rossiey?from=rss"
+        },
+        {
+          "title": "День 1726: из налоговых поправок исключили условие, которое могло лишить ИТ-компанию льготной ставки за несдачу бухотчётности",
+          "url": "https://vc.ru/money/3257027-minfin-isklyuchil-uslovie-dlya-it-kompaniy-po-nalogu-na-pribyl?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Тихая делегация: карта рисков агентного ИИ на реальных примерах",
+          "url": "https://habr.com/ru/articles/1108122/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108122"
+        },
+        {
+          "title": "Наблюдаем, как Windows XP разговаривает с железом: эмулятор x86 в одном HTML-файле",
+          "url": "https://habr.com/ru/articles/1108150/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108150"
+        },
+        {
+          "title": "AI Resist List: список тех, кто бросает вызов ИИ",
+          "url": "https://habr.com/ru/articles/1108152/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108152"
+        },
+        {
+          "title": "Изъяны маркетолога — Какие они бывают и что с ними делать",
+          "url": "https://habr.com/ru/articles/1108148/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108148"
+        },
+        {
+          "title": "Счётчик Гейгера и космические лучи: 46 суток наблюдений за редким эффектом",
+          "url": "https://habr.com/ru/articles/1108140/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108140"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Claude Code перестал молча запускать команды в песочнице: что ещё вышло",
+          "url": "https://tproger.ru/news/claude-code-perestal-molcha-zapuskat-komandy-v-pesochnice-chto-eshh"
+        },
+        {
+          "title": "Claude Fable 5.2 и Opus 5.5 возглавили рейтинг ИИ-агентов для кода",
+          "url": "https://tproger.ru/news/claude-fable-5-2-i-opus-5-5-vozglavili-rejting-ii-agentov-dlya-ko"
+        },
+        {
+          "title": "Как отравляют данные для ИИ-моделей и как разработчику найти подмену",
+          "url": "https://tproger.ru/articles/kak-otravlyayut-dannye-dlya-ii-modelej-i-kak-razrabotchiku-najti-pod-2"
+        },
+        {
+          "title": "OpenRouter за неделю добавил 20 моделей: что брать для агентов и голоса",
+          "url": "https://tproger.ru/news/openrouter-za-nedelyu-dobavil-20-modelej-chto-brat-dlya-agentov-i"
+        },
+        {
+          "title": "Alibaba открыла превью Qwen4-Max: в API только через подписку Token Plan",
+          "url": "https://tproger.ru/news/alibaba-otkryla-prevyu-qwen4-max-v-api-tolko-cherez-podpisku-to"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261115-2226: Самара 0.6°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
