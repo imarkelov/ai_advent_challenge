@@ -1,15 +1,23 @@
 {
-  "id": "digest-20261115-0439",
-  "generated_at": "2026-11-15T04:39:44Z",
+  "id": "digest-20261115-1323",
+  "generated_at": "2026-11-15T13:23:40Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 3.4,
-    "feels_like_c": 0.2,
+    "temp_c": 3.3,
+    "feels_like_c": -0.3,
     "description": "Пасмурно",
-    "wind_ms": 7.4
+    "wind_ms": 9.5
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "«Беспрецедентно»: SpaceX впервые поймала корабль Starship с помощью «рук»-манипуляторов на стартовой площадке",
+        "url": "https://vc.ru/future/3256278-spacex-vpervye-pojala-starship-s-pomoshyu-manipulyatorov-na-starte?from=rss"
+      },
+      {
+        "title": "«Падение биткоина испытывает на прочность даже самых преданных сторонников крипторынка»",
+        "url": "https://vc.ru/crypto/3256503-padenie-bitkoina-i-ego-vliyanie-na-kriptorynok?from=rss"
+      },
       {
         "title": "Tesla начала предлагать «избранным» клиентам купить Cybercab без руля и педалей для личного пользования — для поездок нужна подписка за $300 в месяц",
         "url": "https://vc.ru/transport/3255207-tesla-predlagaet-cybercab-bez-rulya-i-pedaley?from=rss"
@@ -19,38 +27,30 @@
         "url": "https://vc.ru/future/3254838-polet-starship-ot-spacex-zahvat-uskoritelya?from=rss"
       },
       {
-        "title": "Операторы «большой четвёрки» и крупнейшие банки договорились об условиях маркировки звонков",
-        "url": "https://vc.ru/services/3255087-markirovka-zvonkov-ot-bankov?from=rss"
-      },
-      {
         "title": "Генпрокуратура Казахстана потребовала проверить работу Yandex Qazaqstan из-за недавних сбоев в работе сервисов",
         "url": "https://vc.ru/legal/3255334-genprokuratura-kazahstana-proverit-yandex-qazaqstan?from=rss"
-      },
-      {
-        "title": "Mercedes решила прекратить «все дальнейшие инвестиции» в Германии и рассматривает возможность закрытия заводов — FT",
-        "url": "https://vc.ru/transport/3253532-mercedes-prekrashchaet-investitsii-v-germanii?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Выпуск Wine 11.22",
-        "url": "https://habr.com/ru/articles/1107800/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107800"
+        "title": "Разоблачаем магию deb-пакетов",
+        "url": "https://habr.com/ru/articles/1108038/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108038"
       },
       {
-        "title": "[Перевод] Терминал с обложки Kraftwerk: ремонт без схемы и замена ПЗУ, которые давно не выпускают",
-        "url": "https://habr.com/ru/articles/1107956/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107956"
+        "title": "Уран и сковородки: история тефлона",
+        "url": "https://habr.com/ru/companies/ruvds/articles/1105466/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105466"
       },
       {
-        "title": "Аудит MIT-p50c для Qwen3.5-0.8B и редактирование весов с сохранением норм (SGNE-CC) при лимите 32 768 токенов",
-        "url": "https://habr.com/ru/articles/1107950/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107950"
+        "title": "Месть за голосовые: генерирую видео с печатающими руками прямо в браузере",
+        "url": "https://habr.com/ru/articles/1108048/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108048"
       },
       {
-        "title": "Сборка AOSP на MacBook, или Приключения Android-разработчика",
-        "url": "https://habr.com/ru/articles/1107948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107948"
+        "title": "Справка llama.cpp: основные команды и параметры",
+        "url": "https://habr.com/ru/articles/1108044/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108044"
       },
       {
-        "title": "Почему с ИИ мы всё ещё пишем плохой софт",
-        "url": "https://habr.com/ru/articles/1107946/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107946"
+        "title": "ИИ в команде: что мы ожидаем друг от друга",
+        "url": "https://habr.com/ru/articles/1108042/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108042"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261115-0439: Самара 3.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261115-1323: Самара 3.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
