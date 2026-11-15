@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261114-2156",
-  "generated_at": "2026-11-14T21:56:18Z",
+  "id": "digest-20261115-0439",
+  "generated_at": "2026-11-15T04:39:44Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 10.4,
-    "feels_like_c": 8.9,
-    "description": "Небольшой дождь",
-    "wind_ms": 9.7
+    "temp_c": 3.4,
+    "feels_like_c": 0.2,
+    "description": "Пасмурно",
+    "wind_ms": 7.4
   },
   "news": {
     "vc.ru": [
@@ -33,27 +33,35 @@
     ],
     "habr": [
       {
-        "title": "[Перевод] Проблема торга",
-        "url": "https://habr.com/ru/articles/1100308/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1100308"
+        "title": "Выпуск Wine 11.22",
+        "url": "https://habr.com/ru/articles/1107800/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107800"
       },
       {
-        "title": "Блокировка Claude, потому что ты русский",
-        "url": "https://habr.com/ru/articles/1107934/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107934"
+        "title": "[Перевод] Терминал с обложки Kraftwerk: ремонт без схемы и замена ПЗУ, которые давно не выпускают",
+        "url": "https://habr.com/ru/articles/1107956/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107956"
       },
       {
-        "title": "Роман как сложная система: применяем стиль разработки ПО к написанию художественного произведения",
-        "url": "https://habr.com/ru/articles/1107932/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107932"
+        "title": "Аудит MIT-p50c для Qwen3.5-0.8B и редактирование весов с сохранением норм (SGNE-CC) при лимите 32 768 токенов",
+        "url": "https://habr.com/ru/articles/1107950/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107950"
       },
       {
-        "title": "НАУЧИТЬ AI ПОНИМАТЬ СТРОИТЕЛЬНЫЙ ОБЪЕКТ",
-        "url": "https://habr.com/ru/articles/1107928/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107928"
+        "title": "Сборка AOSP на MacBook, или Приключения Android-разработчика",
+        "url": "https://habr.com/ru/articles/1107948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107948"
       },
       {
-        "title": "Семь способов обмануть себя метриками: как я измерял точность ИИ-проверки ЕГЭ",
-        "url": "https://habr.com/ru/articles/1107926/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107926"
+        "title": "Почему с ИИ мы всё ещё пишем плохой софт",
+        "url": "https://habr.com/ru/articles/1107946/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107946"
       }
     ],
     "tproger": [
+      {
+        "title": "Claude Code перестал молча запускать команды в песочнице: что ещё вышло",
+        "url": "https://tproger.ru/news/claude-code-perestal-molcha-zapuskat-komandy-v-pesochnice-chto-eshh"
+      },
+      {
+        "title": "Claude Fable 5.2 и Opus 5.5 возглавили рейтинг ИИ-агентов для кода",
+        "url": "https://tproger.ru/news/claude-fable-5-2-i-opus-5-5-vozglavili-rejting-ii-agentov-dlya-ko"
+      },
       {
         "title": "Как отравляют данные для ИИ-моделей и как разработчику найти подмену",
         "url": "https://tproger.ru/articles/kak-otravlyayut-dannye-dlya-ii-modelej-i-kak-razrabotchiku-najti-pod-2"
@@ -65,16 +73,8 @@
       {
         "title": "Alibaba открыла превью Qwen4-Max: в API только через подписку Token Plan",
         "url": "https://tproger.ru/news/alibaba-otkryla-prevyu-qwen4-max-v-api-tolko-cherez-podpisku-to"
-      },
-      {
-        "title": "Суд в США не стал закрывать иск о лимитах Claude Max к Anthropic",
-        "url": "https://tproger.ru/news/sud-v-swa-ne-stal-zakryvat-isk-o-limitah-claude-max-k-anthropic"
-      },
-      {
-        "title": "Атакующие охотятся за токенами Claude Code и MCP: что проверить",
-        "url": "https://tproger.ru/news/atakuyushhie-ohotyatsya-za-tokenami-claude-code-i-mcp-chto-proverit"
       }
     ]
   },
-  "summary": "Сводка digest-20261114-2156: Самара 10.4°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261115-0439: Самара 3.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
