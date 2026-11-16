@@ -1,76 +1,80 @@
 {
-  "id": "digest-20261116-0436",
-  "generated_at": "2026-11-16T04:36:18Z",
+  "id": "digest-20261116-1440",
+  "generated_at": "2026-11-16T14:40:13Z",
   "weather": {
-    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
+    "city": "Самара",
+    "temp_c": 2.3,
+    "feels_like_c": -1.3,
+    "description": "Пасмурно",
+    "wind_ms": 6.4
   },
   "news": {
     "vc.ru": [
       {
-        "title": "«Беспрецедентно»: SpaceX впервые поймала корабль Starship с помощью «рук»-манипуляторов на стартовой площадке",
-        "url": "https://vc.ru/future/3256278-spacex-vpervye-pojala-starship-s-pomoshyu-manipulyatorov-na-starte?from=rss"
+        "title": "Власти предложили обязать банки узнавать ИНН у клиентов-физлиц — если данные не предоставят, они смогут ограничивать доступ к счетам и снятие наличных",
+        "url": "https://vc.ru/money/3258658-obyazannost-bankov-uznavat-inn-u-klientov-fizlic?from=rss"
       },
       {
-        "title": "Хостинг-провайдер Beget сообщил о масштабной DDoS-атаке на свою инфраструктуру",
-        "url": "https://vc.ru/services/3256706-ddos-ataka-na-hosting-beget?from=rss"
+        "title": "ЕС ввёл санкции против Татьяны Ким, инвестора Александра Чачавы и денежных сервисов «ЮMoney» и «Юнистрим»",
+        "url": "https://vc.ru/money/3258463-sanktsii-es-protiv-tatyany-kim-i-aleksandra-chachavy?from=rss"
       },
       {
-        "title": "Министр иностранных дел Эстонии заявил о закрытии всех погранпереходов с Россией с 1 декабря 2026 года",
-        "url": "https://vc.ru/migration/3256921-estoniya-zakryvaet-pogranperekhody-s-rossiey?from=rss"
+        "title": "ЕС согласовал санкции против главы Wildberries Татьяны Ким",
+        "url": "https://vc.ru/legal/3258292-sanktsii-es-protiv-tatyany-kim-i-wildberries?from=rss"
       },
       {
-        "title": "«Падение биткоина испытывает на прочность даже самых преданных сторонников крипторынка»",
-        "url": "https://vc.ru/crypto/3256503-padenie-bitkoina-i-ego-vliyanie-na-kriptorynok?from=rss"
+        "title": "Акционеры Intel подали коллективный иск против компании после обвала акций на 28,6% за один день",
+        "url": "https://vc.ru/legal/3257810-aktsionery-intel-podali-isk?from=rss"
       },
       {
-        "title": "День 1726: из налоговых поправок исключили условие, которое могло лишить ИТ-компанию льготной ставки за несдачу бухотчётности",
-        "url": "https://vc.ru/money/3257027-minfin-isklyuchil-uslovie-dlya-it-kompaniy-po-nalogu-na-pribyl?from=rss"
+        "title": "День 1727: треть российских компаний не собирается выплачивать сотрудникам тринадцатую зарплату по итогам 2026 года",
+        "url": "https://vc.ru/money/3257586-trety-rossiyskih-kompaniy-ne-vyplatit-trinadtsatuyu-zarplatu?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "В «Дзен» сообщили о штатной работе сервиса после того, как пользователи зафиксировали сбой",
-        "url": "https://habr.com/ru/articles/1108168/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108168"
+        "title": "Harness² — новое поколение ИИ-агентов от Google Research",
+        "url": "https://habr.com/ru/companies/bothub/articles/1108490/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108490"
       },
       {
-        "title": "[Перевод] Дешевле $10 000 VNA выше 10 ГГц не найти. Я собрал свой до 15 ГГц за $475",
-        "url": "https://habr.com/ru/articles/1108166/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108166"
+        "title": "Запускаем языковую модель на ESP32 со скоростью 400 токенов/с — как это возможно?",
+        "url": "https://habr.com/ru/companies/timeweb/articles/1103622/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1103622"
       },
       {
-        "title": "Рейтинг языков программирования TIOBE в ноябре 2026 года: Rust уступал место Go в топ-10, а Dart вытеснил Julia в топ-20",
-        "url": "https://habr.com/ru/articles/1108092/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108092"
+        "title": "«Не воспроизводится»: как склеить rage click, JS-исключение и упавший запрос в один инцидент",
+        "url": "https://habr.com/ru/articles/1108474/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108474"
       },
       {
-        "title": "Представлена утилита Roomy для поиска на ПК с Windows наиболее потребляемых ресурсы хранилища компонентов",
-        "url": "https://habr.com/ru/articles/1108012/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108012"
+        "title": "Качество при использовании: как измерить «удобство», не опрашивая полстраны",
+        "url": "https://habr.com/ru/articles/1108472/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108472"
       },
       {
-        "title": "Вышло обновление Phiola 2.15 — открытого портативного мультиплатформенного аудиоплеера с поддержкой скриптов",
-        "url": "https://habr.com/ru/articles/1108006/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108006"
+        "title": "Как оптимизировать корутины C++ в компиляторах",
+        "url": "https://habr.com/ru/companies/yadro/articles/1108338/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108338"
       }
     ],
     "tproger": [
       {
+        "title": "Что почитать про ИИ: 5 российских романов о будущем с искусственным интеллектом",
+        "url": "https://tproger.ru/articles/chto-pochitat-pro-ii-5-rossijskih-romanov-o-budushhem-s-iskusstven"
+      },
+      {
+        "title": "Семь новинок попали в топ Hugging Face, пять запускаются на своём ПК",
+        "url": "https://tproger.ru/news/sem-novinok-popali-v-top-hugging-face-pyat-zapuskayutsya-na-svoyo"
+      },
+      {
+        "title": "Alibaba выпустила Qwen4-Max в API по токенам: на 25% дешевле Qwen3.8-Max",
+        "url": "https://tproger.ru/news/alibaba-vypustila-qwen4-max-v-api-po-tokenam-na-25-dewevle-qwe"
+      },
+      {
+        "title": "Как проверить код, который написал ИИ",
+        "url": "https://tproger.ru/articles/kak-proverit-kod-kotoryj-napisal-ii"
+      },
+      {
         "title": "Claude Code перестал молча запускать команды в песочнице: что ещё вышло",
         "url": "https://tproger.ru/news/claude-code-perestal-molcha-zapuskat-komandy-v-pesochnice-chto-eshh"
-      },
-      {
-        "title": "Claude Fable 5.2 и Opus 5.5 возглавили рейтинг ИИ-агентов для кода",
-        "url": "https://tproger.ru/news/claude-fable-5-2-i-opus-5-5-vozglavili-rejting-ii-agentov-dlya-ko"
-      },
-      {
-        "title": "Как отравляют данные для ИИ-моделей и как разработчику найти подмену",
-        "url": "https://tproger.ru/articles/kak-otravlyayut-dannye-dlya-ii-modelej-i-kak-razrabotchiku-najti-pod-2"
-      },
-      {
-        "title": "OpenRouter за неделю добавил 20 моделей: что брать для агентов и голоса",
-        "url": "https://tproger.ru/news/openrouter-za-nedelyu-dobavil-20-modelej-chto-brat-dlya-agentov-i"
-      },
-      {
-        "title": "Alibaba открыла превью Qwen4-Max: в API только через подписку Token Plan",
-        "url": "https://tproger.ru/news/alibaba-otkryla-prevyu-qwen4-max-v-api-tolko-cherez-podpisku-to"
       }
     ]
   },
-  "summary": "Сводка digest-20261116-0436: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261116-1440: Самара 2.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
