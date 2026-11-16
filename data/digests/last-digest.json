@@ -1,12 +1,8 @@
 {
-  "id": "digest-20261115-2226",
-  "generated_at": "2026-11-15T22:26:33Z",
+  "id": "digest-20261116-0436",
+  "generated_at": "2026-11-16T04:36:18Z",
   "weather": {
-    "city": "Самара",
-    "temp_c": 0.6,
-    "feels_like_c": -2.3,
-    "description": "Преимущественно ясно",
-    "wind_ms": 3.6
+    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
   },
   "news": {
     "vc.ru": [
@@ -19,12 +15,12 @@
         "url": "https://vc.ru/services/3256706-ddos-ataka-na-hosting-beget?from=rss"
       },
       {
-        "title": "«Падение биткоина испытывает на прочность даже самых преданных сторонников крипторынка»",
-        "url": "https://vc.ru/crypto/3256503-padenie-bitkoina-i-ego-vliyanie-na-kriptorynok?from=rss"
-      },
-      {
         "title": "Министр иностранных дел Эстонии заявил о закрытии всех погранпереходов с Россией с 1 декабря 2026 года",
         "url": "https://vc.ru/migration/3256921-estoniya-zakryvaet-pogranperekhody-s-rossiey?from=rss"
+      },
+      {
+        "title": "«Падение биткоина испытывает на прочность даже самых преданных сторонников крипторынка»",
+        "url": "https://vc.ru/crypto/3256503-padenie-bitkoina-i-ego-vliyanie-na-kriptorynok?from=rss"
       },
       {
         "title": "День 1726: из налоговых поправок исключили условие, которое могло лишить ИТ-компанию льготной ставки за несдачу бухотчётности",
@@ -33,24 +29,24 @@
     ],
     "habr": [
       {
-        "title": "Тихая делегация: карта рисков агентного ИИ на реальных примерах",
-        "url": "https://habr.com/ru/articles/1108122/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108122"
+        "title": "В «Дзен» сообщили о штатной работе сервиса после того, как пользователи зафиксировали сбой",
+        "url": "https://habr.com/ru/articles/1108168/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108168"
       },
       {
-        "title": "Наблюдаем, как Windows XP разговаривает с железом: эмулятор x86 в одном HTML-файле",
-        "url": "https://habr.com/ru/articles/1108150/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108150"
+        "title": "[Перевод] Дешевле $10 000 VNA выше 10 ГГц не найти. Я собрал свой до 15 ГГц за $475",
+        "url": "https://habr.com/ru/articles/1108166/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108166"
       },
       {
-        "title": "AI Resist List: список тех, кто бросает вызов ИИ",
-        "url": "https://habr.com/ru/articles/1108152/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108152"
+        "title": "Рейтинг языков программирования TIOBE в ноябре 2026 года: Rust уступал место Go в топ-10, а Dart вытеснил Julia в топ-20",
+        "url": "https://habr.com/ru/articles/1108092/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108092"
       },
       {
-        "title": "Изъяны маркетолога — Какие они бывают и что с ними делать",
-        "url": "https://habr.com/ru/articles/1108148/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108148"
+        "title": "Представлена утилита Roomy для поиска на ПК с Windows наиболее потребляемых ресурсы хранилища компонентов",
+        "url": "https://habr.com/ru/articles/1108012/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108012"
       },
       {
-        "title": "Счётчик Гейгера и космические лучи: 46 суток наблюдений за редким эффектом",
-        "url": "https://habr.com/ru/articles/1108140/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108140"
+        "title": "Вышло обновление Phiola 2.15 — открытого портативного мультиплатформенного аудиоплеера с поддержкой скриптов",
+        "url": "https://habr.com/ru/articles/1108006/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108006"
       }
     ],
     "tproger": [
@@ -76,5 +72,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261115-2226: Самара 0.6°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261116-0436: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
