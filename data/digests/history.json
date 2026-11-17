@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261018-0252",
-    "generated_at": "2026-10-18T02:52:52Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 10.5,
-      "feels_like_c": 8.1,
-      "description": "Пасмурно",
-      "wind_ms": 3.7
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Криптобиржа Bitget внесла Россию в список стран, в которых запрещено пользоваться сервисом",
-          "url": "https://vc.ru/crypto/3199827-kriptobirzha-bitget-zapret-rossiya-i-belarusiya?from=rss"
-        },
-        {
-          "title": "«Раз средствами не пользуются»: GPT-5.6 Sol подобрала ключ к чужому криптокошельку и потратила с него ETH в тестовой сети",
-          "url": "https://vc.ru/crypto/3198251-incident-s-gpt-5-6-sol-ispolzovanie-chuzhogo-kryptokoshelka?from=rss"
-        },
-        {
-          "title": "Tesla представила новый Roadster — во время презентации машина разогналась до 100 км/ч за 0,81 с и без трамплина пролетела над другими моделями компании",
-          "url": "https://vc.ru/transport/3197814-tesla-predstavila-obnovlennyj-roadster?from=rss"
-        },
-        {
-          "title": "«Яндекс» восстановил доступ к кабинету «Бизнеса», просмотр отчётов в «Метрике» и работу основных инструментов в «Вебмастере»",
-          "url": "https://vc.ru/marketing/3199382-yandeks-vosstanovil-dostup-k-biznes-kabinetu?from=rss"
-        },
-        {
-          "title": "Пользователи в Санкт-Петербурге пожаловались на сбой в работе домашнего интернета",
-          "url": "https://vc.ru/services/3200207-sboj-interneta-v-sankt-peterburge?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Apple в правилах App Store запретила разработчикам скрывать реальные возможности приложений на время модерации",
-          "url": "https://habr.com/ru/news/1095676/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095676"
-        },
-        {
-          "title": "Claude за полчаса разгадал загадку АНБ, которой больше 25 лет. Ответ был у криптографов под носом",
-          "url": "https://habr.com/ru/news/1095620/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095620"
-        },
-        {
-          "title": "ИИ спроектировал пистолет для печати на 3D‑принтере",
-          "url": "https://habr.com/ru/news/1095640/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095640"
-        },
-        {
-          "title": "Sony получила патент на технологию вывода на экран предсказанного изображения",
-          "url": "https://habr.com/ru/news/1095616/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095616"
-        },
-        {
-          "title": "TSMC рассматривает возможность работы с проектом Илона Маска в Техасе",
-          "url": "https://habr.com/ru/companies/selectel/news/1095094/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095094"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Искусственный интеллект для дошкольников: рейтинг 5 курсов и развивающих программ",
-          "url": "https://tproger.ru/articles/iskusstvennyj-intellekt-dlya-dowkolnikov-rejting-5-kursov-i-raz"
-        },
-        {
-          "title": "ИИ-платформы для бизнеса: сравнение решений 2026 года",
-          "url": "https://tproger.ru/articles/ii-platformy-dlya-biznesa-sravnenie-rewenij-2026-goda"
-        },
-        {
-          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
-          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
-        },
-        {
-          "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
-          "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
-        },
-        {
-          "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
-          "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261018-0252: Самара 10.5°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261018-1019",
     "generated_at": "2026-10-18T10:19:32Z",
     "weather": {
@@ -7643,5 +7563,85 @@
       ]
     },
     "summary": "Сводка digest-20261117-0130: Самара 0.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261117-1527",
+    "generated_at": "2026-11-17T15:27:11Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 1.3,
+      "feels_like_c": -1.9,
+      "description": "Пасмурно",
+      "wind_ms": 5.7
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Пользователи сообщили о сбое в работе хостинг-провайдера Timeweb",
+          "url": "https://vc.ru/services/3261007-sboy-v-rabote-hosting-provaidera-timeweb?from=rss"
+        },
+        {
+          "title": "ЦБ определил правила реестра банковских карт — чтобы ограничить их выдачу на одного человека",
+          "url": "https://vc.ru/money/3261061-cb-ustanovil-pravila-dlya-bankovskikh-kart?from=rss"
+        },
+        {
+          "title": "«Альфа-банк» анонсировал запуск сервиса предсказаний «Трендс» — за правильные прогнозы на исходы разных событий клиенты смогут получить дополнительный кешбэк",
+          "url": "https://vc.ru/services/3260656-alfa-bank-zapusk-servisa-predskazanij-trends?from=rss"
+        },
+        {
+          "title": "Хакеры встроили вредоносный скрипт в 178 популярных сайтов, включая Zoom, IKEA, Salesforce и CNN, — он позволяет похищать криптовалюту, платёжные данные и загружать эксплойты на iPhone и iPad",
+          "url": "https://vc.ru/services/3260643-hakeri-atakovali-sayty-zoom-ikea-salesforce?from=rss"
+        },
+        {
+          "title": "Российский бренд Votour объявил о начале продаж второй модели — кроссовера V6 по цене от 2,9 млн рублей",
+          "url": "https://vc.ru/transport/3261518-krossover-votour-v6-start-v-prodazhe?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Как читать тексты в эпоху слопа",
+          "url": "https://habr.com/ru/articles/1108980/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108980"
+        },
+        {
+          "title": "Клеточный автомат на микросхемах мелкой логики. Часть 2 — «Заработало!»",
+          "url": "https://habr.com/ru/articles/1105450/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105450"
+        },
+        {
+          "title": "Обновили pandas, и ноутбук работает без ошибок. Только считает уже другое",
+          "url": "https://habr.com/ru/companies/otus/articles/1105238/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105238"
+        },
+        {
+          "title": "Почему The AI Scientist сбоит в 41% случаев: анатомия галлюцинаций в Autonomous AI и физическая истина в DeepTech",
+          "url": "https://habr.com/ru/articles/1108970/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108970"
+        },
+        {
+          "title": "Когда ИИ решает, что вам нельзя. От Codex до этикосферы Станислава Лема",
+          "url": "https://habr.com/ru/articles/1108964/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108964"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Когда выйдет GPT-6.2: что известно об Astra и Sol из утечек",
+          "url": "https://tproger.ru/news/kogda-vyjdet-gpt-6-2-chto-izvestno-ob-astra-i-sol-iz-utechek"
+        },
+        {
+          "title": "Калифорния подала в суд на OpenAI из-за агентов, сбежавших из песочниц",
+          "url": "https://tproger.ru/news/kaliforniya-podala-v-sud-na-openai-iz-za-agentov-sbezhavwih-iz-pe"
+        },
+        {
+          "title": "Исследователи нашли открытые без входа данные в тысячах приложений Lovable",
+          "url": "https://tproger.ru/news/issledovateli-nawli-otkrytye-bez-vhoda-dannye-v-tysyachah-prilozhen"
+        },
+        {
+          "title": "Codex CLI 0.169.0 отключил конфиг и MCP чужих репозиториев в codex exec",
+          "url": "https://tproger.ru/news/codex-cli-0-169-0-otklyuchil-konfig-i-mcp-chuzhih-repozitoriev-v-cod"
+        },
+        {
+          "title": "OpenCode выпустила Browse: ИИ-агент работает в браузере с вашими логинами",
+          "url": "https://tproger.ru/news/opencode-vypustila-browse-ii-agent-rabotaet-v-brauzere-s-vawimi"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261117-1527: Самара 1.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

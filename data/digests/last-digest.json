@@ -1,80 +1,80 @@
 {
-  "id": "digest-20261117-0130",
-  "generated_at": "2026-11-17T01:30:34Z",
+  "id": "digest-20261117-1527",
+  "generated_at": "2026-11-17T15:27:11Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 0.8,
-    "feels_like_c": -2.2,
+    "temp_c": 1.3,
+    "feels_like_c": -1.9,
     "description": "Пасмурно",
-    "wind_ms": 4.4
+    "wind_ms": 5.7
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Власти предложили обязать банки узнавать ИНН у клиентов-физлиц — если данные не предоставят, они смогут ограничивать доступ к счетам и снятие наличных",
-        "url": "https://vc.ru/money/3258658-obyazannost-bankov-uznavat-inn-u-klientov-fizlic?from=rss"
+        "title": "Пользователи сообщили о сбое в работе хостинг-провайдера Timeweb",
+        "url": "https://vc.ru/services/3261007-sboy-v-rabote-hosting-provaidera-timeweb?from=rss"
       },
       {
-        "title": "ЕС ввёл санкции против Татьяны Ким, инвестора Александра Чачавы и денежных сервисов «ЮMoney» и «Юнистрим»",
-        "url": "https://vc.ru/money/3258463-sanktsii-es-protiv-tatyany-kim-i-aleksandra-chachavy?from=rss"
+        "title": "ЦБ определил правила реестра банковских карт — чтобы ограничить их выдачу на одного человека",
+        "url": "https://vc.ru/money/3261061-cb-ustanovil-pravila-dlya-bankovskikh-kart?from=rss"
       },
       {
-        "title": "«Альфа-банк» ведёт переговоры с «Циан» о покупке доли — «Ъ»",
-        "url": "https://vc.ru/money/3259176-alfabank-obsuzhdaet-pokupku-doli-v-tsiane?from=rss"
+        "title": "«Альфа-банк» анонсировал запуск сервиса предсказаний «Трендс» — за правильные прогнозы на исходы разных событий клиенты смогут получить дополнительный кешбэк",
+        "url": "https://vc.ru/services/3260656-alfa-bank-zapusk-servisa-predskazanij-trends?from=rss"
       },
       {
-        "title": "Минцифры запланировало запретить онлайн-оформление eSIM с неквалифицированной электронной подписью — понадобится УКЭП",
-        "url": "https://vc.ru/services/3259297-mincifry-ogranichivaet-oformlenie-esim-s-nekvalifitsirovannoy-podpisyu?from=rss"
+        "title": "Хакеры встроили вредоносный скрипт в 178 популярных сайтов, включая Zoom, IKEA, Salesforce и CNN, — он позволяет похищать криптовалюту, платёжные данные и загружать эксплойты на iPhone и iPad",
+        "url": "https://vc.ru/services/3260643-hakeri-atakovali-sayty-zoom-ikea-salesforce?from=rss"
       },
       {
-        "title": "ЕС согласовал санкции против главы Wildberries Татьяны Ким",
-        "url": "https://vc.ru/legal/3258292-sanktsii-es-protiv-tatyany-kim-i-wildberries?from=rss"
+        "title": "Российский бренд Votour объявил о начале продаж второй модели — кроссовера V6 по цене от 2,9 млн рублей",
+        "url": "https://vc.ru/transport/3261518-krossover-votour-v6-start-v-prodazhe?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Цена будущего: простота ≠ эффективность",
-        "url": "https://habr.com/ru/articles/1108642/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108642"
+        "title": "Как читать тексты в эпоху слопа",
+        "url": "https://habr.com/ru/articles/1108980/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108980"
       },
       {
-        "title": "Security Week 2647: использование ИИ-фреймворка ARTEX в реальных атаках",
-        "url": "https://habr.com/ru/companies/kaspersky/articles/1108470/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108470"
+        "title": "Клеточный автомат на микросхемах мелкой логики. Часть 2 — «Заработало!»",
+        "url": "https://habr.com/ru/articles/1105450/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105450"
       },
       {
-        "title": "Сколько стоит узнать, что у бриттона сто хитов",
-        "url": "https://habr.com/ru/articles/1108452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108452"
+        "title": "Обновили pandas, и ноутбук работает без ошибок. Только считает уже другое",
+        "url": "https://habr.com/ru/companies/otus/articles/1105238/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105238"
       },
       {
-        "title": "СМИ врут о блокировках Claude и ChatGPT. Что на самом деле важно при работе с подписками?",
-        "url": "https://habr.com/ru/companies/raketa_pay/articles/1108620/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108620"
+        "title": "Почему The AI Scientist сбоит в 41% случаев: анатомия галлюцинаций в Autonomous AI и физическая истина в DeepTech",
+        "url": "https://habr.com/ru/articles/1108970/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108970"
       },
       {
-        "title": "Zero‑Day: невидимые уязвимости цифрового мира",
-        "url": "https://habr.com/ru/articles/1108630/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108630"
+        "title": "Когда ИИ решает, что вам нельзя. От Codex до этикосферы Станислава Лема",
+        "url": "https://habr.com/ru/articles/1108964/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1108964"
       }
     ],
     "tproger": [
       {
-        "title": "Face ID в WebView: как мы подключили нативную биометрию iOS к веб-кабинету без сторонних библиотек",
-        "url": "https://tproger.ru/articles/face-id-v-webview-kak-my-podklyuchili-nativnuyu-biometriyu-ios-k-ve-3"
+        "title": "Когда выйдет GPT-6.2: что известно об Astra и Sol из утечек",
+        "url": "https://tproger.ru/news/kogda-vyjdet-gpt-6-2-chto-izvestno-ob-astra-i-sol-iz-utechek"
       },
       {
-        "title": "Как перевести видео в текст и таймкоды в 2026 году: 5 рабочих способов",
-        "url": "https://tproger.ru/articles/kak-perevesti-video-v-tekst-i-tajmkody-v-2026-godu-5-rabochih-sp"
+        "title": "Калифорния подала в суд на OpenAI из-за агентов, сбежавших из песочниц",
+        "url": "https://tproger.ru/news/kaliforniya-podala-v-sud-na-openai-iz-za-agentov-sbezhavwih-iz-pe"
       },
       {
-        "title": "30 лет передачи данных в интернете с curl",
-        "url": "https://tproger.ru/translations/30-let-peredachi-dannyh-v-internete-s-curl"
+        "title": "Исследователи нашли открытые без входа данные в тысячах приложений Lovable",
+        "url": "https://tproger.ru/news/issledovateli-nawli-otkrytye-bez-vhoda-dannye-v-tysyachah-prilozhen"
       },
       {
-        "title": "Иллюзия Claude: почему успех в кодинге заставляет верить в сверхразум",
-        "url": "https://tproger.ru/translations/illyuziya-claude-pochemu-uspeh-v-kodinge-zastavlyaet-verit-v-sverh"
+        "title": "Codex CLI 0.169.0 отключил конфиг и MCP чужих репозиториев в codex exec",
+        "url": "https://tproger.ru/news/codex-cli-0-169-0-otklyuchil-konfig-i-mcp-chuzhih-repozitoriev-v-cod"
       },
       {
-        "title": "Весь код, сгенерированный ИИ, должен быть открытым",
-        "url": "https://tproger.ru/translations/ves-kod-sgenerirovannyj-ii-dolzhen-byt-otkrytym"
+        "title": "OpenCode выпустила Browse: ИИ-агент работает в браузере с вашими логинами",
+        "url": "https://tproger.ru/news/opencode-vypustila-browse-ii-agent-rabotaet-v-brauzere-s-vawimi"
       }
     ]
   },
-  "summary": "Сводка digest-20261117-0130: Самара 0.8°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261117-1527: Самара 1.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
