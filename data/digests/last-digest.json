@@ -1,55 +1,59 @@
 {
-  "id": "digest-20261118-0028",
-  "generated_at": "2026-11-18T00:28:14Z",
+  "id": "digest-20261118-1501",
+  "generated_at": "2026-11-18T15:01:44Z",
   "weather": {
     "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Пользователи сообщили о сбое в работе хостинг-провайдера Timeweb",
-        "url": "https://vc.ru/services/3261007-sboy-v-rabote-hosting-provaidera-timeweb?from=rss"
+        "title": "Заксобрание Санкт-Петербурга одобрило запрет на продажу вейпов и жидкостей для них с 1 марта 2027 года",
+        "url": "https://vc.ru/legal/3263152-zapret-na-prodazhu-vejpov-v-sankt-peterburge?from=rss"
       },
       {
-        "title": "ЦБ определил правила реестра банковских карт — чтобы ограничить их выдачу на одного человека",
-        "url": "https://vc.ru/money/3261061-cb-ustanovil-pravila-dlya-bankovskikh-kart?from=rss"
+        "title": "«Яндекс» разработал устройство для автомобилей, которое помогает точнее определять местоположение при сбоях геолокации",
+        "url": "https://vc.ru/tech/3262796-yandeks-razrabotal-kompas-dlya-tocnogo-opredeleniya-mestopolozheniya-avtomobilej?from=rss"
       },
       {
-        "title": "Хакеры встроили вредоносный скрипт в 178 популярных сайтов, включая Zoom, IKEA, Salesforce и CNN, — он позволяет похищать криптовалюту, платёжные данные и загружать эксплойты на iPhone и iPad",
-        "url": "https://vc.ru/services/3260643-hakeri-atakovali-sayty-zoom-ikea-salesforce?from=rss"
+        "title": "Wildberries добавил детский режим: дети смогут добавлять товары в отдельную корзину, оплата — на взрослых",
+        "url": "https://vc.ru/marketplace/3263639-wildberries-zapustil-detskii-rezim?from=rss"
       },
       {
-        "title": "«Альфа-банк» анонсировал запуск сервиса предсказаний «Трендс» — за правильные прогнозы на исходы разных событий клиенты смогут получить дополнительный кешбэк",
-        "url": "https://vc.ru/services/3260656-alfa-bank-zapusk-servisa-predskazanij-trends?from=rss"
+        "title": "Госдума в первом чтении поддержала законопроект о штрафах для онлайн-кинотеатров и соцсетей за контент с дискредитацией «традиционных духовно-нравственных ценностей»",
+        "url": "https://vc.ru/media/3263623-gosduma-podderzhala-zakonoproekt-o-shtrafakh-dlya-onlajn-kinoteatrov-i-sotssetej?from=rss"
       },
       {
-        "title": "Российский бренд Votour объявил о начале продаж второй модели — кроссовера V6 по цене от 2,9 млн рублей",
-        "url": "https://vc.ru/transport/3261518-krossover-votour-v6-start-v-prodazhe?from=rss"
+        "title": "Турция ввела трёхлетние ВНЖ для иностранцев при сумме инвестиций от $150 тысяч",
+        "url": "https://vc.ru/migration/3263395-turtsiya-vnz-dlya-inostrancev-investitsii-ot-150-tysyach-dollara?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Мы каждый день разговариваем со всеми знаниями человечества. Но становимся ли мы умнее?",
-        "url": "https://habr.com/ru/articles/1109138/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109138"
+        "title": "На LeetCode появились задачи по вайбкодингу",
+        "url": "https://habr.com/ru/articles/1109494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109494"
       },
       {
-        "title": "Astra 6.2, Qwen 4, Fable 5.2 и Opus 5.5: нейросети снова соревнуются, а теперь ещё и судят друг друга",
-        "url": "https://habr.com/ru/articles/1109134/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109134"
+        "title": "Не набрасывайся на ROC AUC или как обучать промышленные ML-модели",
+        "url": "https://habr.com/ru/companies/ingos_it/articles/1109460/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109460"
       },
       {
-        "title": "[Перевод] Мы всё охотнее миримся с медленной работой программ",
-        "url": "https://habr.com/ru/articles/1109128/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109128"
+        "title": "Можно ли научить статический анализатор эффективнее понимать сложный код?",
+        "url": "https://habr.com/ru/companies/pvs-studio/articles/1109492/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109492"
       },
       {
-        "title": "Vals AI: ИИ‑модели можно использовать как автономное оружие. Они находят цели на снимках и выбирают гражданских",
-        "url": "https://habr.com/ru/articles/1109124/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109124"
+        "title": "Тесты были зелёными, а задача — неправильной: как я проверял 27 генераторов геометрии",
+        "url": "https://habr.com/ru/articles/1109488/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109488"
       },
       {
-        "title": "Палеокомпьютинг, часть 4. Ещё две Ады: восстанавливаем языки, которые Пентагон не допустил к финалу своего тендера",
-        "url": "https://habr.com/ru/companies/aenix/articles/1109118/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109118"
+        "title": "ПСБ проведёт в Ярославле ИТ-конференцию «Нейродень»",
+        "url": "https://habr.com/ru/companies/psb/articles/1109484/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109484"
       }
     ],
     "tproger": [
+      {
+        "title": "Google сбросила квоты в Antigravity на всех моделях в честь дня рождения",
+        "url": "https://tproger.ru/news/google-sbrosila-kvoty-v-antigravity-na-vseh-modelyah-v-chest-dnya"
+      },
       {
         "title": "Тео Браун и Every раскритиковали GPT-6.2 Astra после недель тестов",
         "url": "https://tproger.ru/news/teo-braun-i-every-raskritikovali-gpt-6-2-astra-posle-nedel-test"
@@ -65,12 +69,8 @@
       {
         "title": "Модели Google чаще всех объясняют через аналогии, модели OpenAI реже всех",
         "url": "https://tproger.ru/news/modeli-google-chashhe-vseh-obyasnyayut-cherez-analogii-modeli-openai"
-      },
-      {
-        "title": "Когда выйдет GPT-6.2: что известно об Astra и Sol из утечек",
-        "url": "https://tproger.ru/news/kogda-vyjdet-gpt-6-2-chto-izvestno-ob-astra-i-sol-iz-utechek"
       }
     ]
   },
-  "summary": "Сводка digest-20261118-0028: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261118-1501: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

@@ -1,81 +1,5 @@
 [
   {
-    "id": "digest-20261018-1519",
-    "generated_at": "2026-10-18T15:19:54Z",
-    "weather": {
-      "error": "<urlopen error [Errno 101] Network is unreachable>"
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "VK сообщила об атаке беспилотников на дата-центр в Ленинградской области",
-          "url": "https://vc.ru/services/3200928-vk-soobshchila-ob-atake-na-data-tsentr-v-leningradskoy-oblasti?from=rss"
-        },
-        {
-          "title": "Mercedes-AMG представила трёхмоторный электрический внедорожник GT SUV мощностью до 1153 л.с.",
-          "url": "https://vc.ru/transport/3201199-mercedes-amg-gt-suv-elektricheskij-vnedorozhnik?from=rss"
-        },
-        {
-          "title": "Ozon рассказал об атаке на логистический центр в Санкт-Петербурге",
-          "url": "https://vc.ru/marketplace/3200948-ozon-ataka-logisticheskij-tsentr-sankt-peterburg?from=rss"
-        },
-        {
-          "title": "Криптобиржа Bitget внесла Россию в список стран, в которых запрещено пользоваться сервисом",
-          "url": "https://vc.ru/crypto/3199827-kriptobirzha-bitget-zapret-rossiya-i-belarusiya?from=rss"
-        },
-        {
-          "title": "Арестованный инженер OpenAI попросил суд отпустить его под залог — он отрицает, что планировал «побег» из США",
-          "url": "https://vc.ru/legal/3200065-inzhener-openai-abdulrahman-alfazan-prosit-zalog?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "MapQuest начал показывать, где установлены камеры Flock и другие ALPR‑системы",
-          "url": "https://habr.com/ru/news/1095880/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095880"
-        },
-        {
-          "title": "Утечка данных в Burger King Japan: скомпрометирована информация 11 млн клиентов",
-          "url": "https://habr.com/ru/news/1095864/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095864"
-        },
-        {
-          "title": "В США арестовали женщину после того, как она преградила путь роботу‑доставщику Uber, чтобы защитить рабочие места людей",
-          "url": "https://habr.com/ru/news/1095858/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095858"
-        },
-        {
-          "title": "Шведские учёные разработали систему ИИ, которая находит скрытое оружие с помощью сигналов Wi‑Fi",
-          "url": "https://habr.com/ru/news/1095854/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095854"
-        },
-        {
-          "title": "Пользователь Reddit заказал iPad mini на немецком Amazon, а вместо него получил MacBook Pro 16 с M5 Pro",
-          "url": "https://habr.com/ru/news/1095848/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095848"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Искусственный интеллект для дошкольников: рейтинг 5 курсов и развивающих программ",
-          "url": "https://tproger.ru/articles/iskusstvennyj-intellekt-dlya-dowkolnikov-rejting-5-kursov-i-raz"
-        },
-        {
-          "title": "ИИ-платформы для бизнеса: сравнение решений 2026 года",
-          "url": "https://tproger.ru/articles/ii-platformy-dlya-biznesa-sravnenie-rewenij-2026-goda"
-        },
-        {
-          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
-          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
-        },
-        {
-          "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
-          "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
-        },
-        {
-          "title": "Почему вам стоит хотя бы раз поучаствовать в хакатоне",
-          "url": "https://tproger.ru/articles/pochemu-vam-stoit-hotya-by-raz-pouchastvovat-v-hakatone"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261018-1519: погода недоступна (<urlopen error [Errno 101] Network is unreachable>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261018-2002",
     "generated_at": "2026-10-18T20:02:19Z",
     "weather": {
@@ -7639,5 +7563,81 @@
       ]
     },
     "summary": "Сводка digest-20261118-0028: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261118-1501",
+    "generated_at": "2026-11-18T15:01:44Z",
+    "weather": {
+      "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Заксобрание Санкт-Петербурга одобрило запрет на продажу вейпов и жидкостей для них с 1 марта 2027 года",
+          "url": "https://vc.ru/legal/3263152-zapret-na-prodazhu-vejpov-v-sankt-peterburge?from=rss"
+        },
+        {
+          "title": "«Яндекс» разработал устройство для автомобилей, которое помогает точнее определять местоположение при сбоях геолокации",
+          "url": "https://vc.ru/tech/3262796-yandeks-razrabotal-kompas-dlya-tocnogo-opredeleniya-mestopolozheniya-avtomobilej?from=rss"
+        },
+        {
+          "title": "Wildberries добавил детский режим: дети смогут добавлять товары в отдельную корзину, оплата — на взрослых",
+          "url": "https://vc.ru/marketplace/3263639-wildberries-zapustil-detskii-rezim?from=rss"
+        },
+        {
+          "title": "Госдума в первом чтении поддержала законопроект о штрафах для онлайн-кинотеатров и соцсетей за контент с дискредитацией «традиционных духовно-нравственных ценностей»",
+          "url": "https://vc.ru/media/3263623-gosduma-podderzhala-zakonoproekt-o-shtrafakh-dlya-onlajn-kinoteatrov-i-sotssetej?from=rss"
+        },
+        {
+          "title": "Турция ввела трёхлетние ВНЖ для иностранцев при сумме инвестиций от $150 тысяч",
+          "url": "https://vc.ru/migration/3263395-turtsiya-vnz-dlya-inostrancev-investitsii-ot-150-tysyach-dollara?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "На LeetCode появились задачи по вайбкодингу",
+          "url": "https://habr.com/ru/articles/1109494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109494"
+        },
+        {
+          "title": "Не набрасывайся на ROC AUC или как обучать промышленные ML-модели",
+          "url": "https://habr.com/ru/companies/ingos_it/articles/1109460/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109460"
+        },
+        {
+          "title": "Можно ли научить статический анализатор эффективнее понимать сложный код?",
+          "url": "https://habr.com/ru/companies/pvs-studio/articles/1109492/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109492"
+        },
+        {
+          "title": "Тесты были зелёными, а задача — неправильной: как я проверял 27 генераторов геометрии",
+          "url": "https://habr.com/ru/articles/1109488/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109488"
+        },
+        {
+          "title": "ПСБ проведёт в Ярославле ИТ-конференцию «Нейродень»",
+          "url": "https://habr.com/ru/companies/psb/articles/1109484/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109484"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Google сбросила квоты в Antigravity на всех моделях в честь дня рождения",
+          "url": "https://tproger.ru/news/google-sbrosila-kvoty-v-antigravity-na-vseh-modelyah-v-chest-dnya"
+        },
+        {
+          "title": "Тео Браун и Every раскритиковали GPT-6.2 Astra после недель тестов",
+          "url": "https://tproger.ru/news/teo-braun-i-every-raskritikovali-gpt-6-2-astra-posle-nedel-test"
+        },
+        {
+          "title": "OpenAI выпустила GPT-6.2 Astra и Sol: Astra в API подешевела на 20%",
+          "url": "https://tproger.ru/news/openai-vypustila-gpt-6-2-astra-i-sol-astra-v-api-podewevela-na"
+        },
+        {
+          "title": "Anthropic рассказала, как команда Claude Code проверяет код агента",
+          "url": "https://tproger.ru/news/anthropic-rasskazala-kak-komanda-claude-code-proveryaet-kod-agen"
+        },
+        {
+          "title": "Модели Google чаще всех объясняют через аналогии, модели OpenAI реже всех",
+          "url": "https://tproger.ru/news/modeli-google-chashhe-vseh-obyasnyayut-cherez-analogii-modeli-openai"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261118-1501: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
