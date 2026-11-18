@@ -1,11 +1,19 @@
 {
-  "id": "digest-20261118-1501",
-  "generated_at": "2026-11-18T15:01:44Z",
+  "id": "digest-20261118-2351",
+  "generated_at": "2026-11-18T23:51:03Z",
   "weather": {
-    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
+    "city": "Самара",
+    "temp_c": -0.3,
+    "feels_like_c": -5.0,
+    "description": "Пасмурно",
+    "wind_ms": 14.5
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "«Я делаю Макфлурри, давайте, остановите меня!»: в X завирусилась новогодняя реклама McDonald’s с Маколеем Калкиным и «Хэппи Милом» «для взрослых»",
+        "url": "https://vc.ru/marketing/3263617-novogodnyaya-reklama-mcdonalds-s-makoley-kalkinom?from=rss"
+      },
       {
         "title": "Заксобрание Санкт-Петербурга одобрило запрет на продажу вейпов и жидкостей для них с 1 марта 2027 года",
         "url": "https://vc.ru/legal/3263152-zapret-na-prodazhu-vejpov-v-sankt-peterburge?from=rss"
@@ -15,62 +23,58 @@
         "url": "https://vc.ru/tech/3262796-yandeks-razrabotal-kompas-dlya-tocnogo-opredeleniya-mestopolozheniya-avtomobilej?from=rss"
       },
       {
-        "title": "Wildberries добавил детский режим: дети смогут добавлять товары в отдельную корзину, оплата — на взрослых",
-        "url": "https://vc.ru/marketplace/3263639-wildberries-zapustil-detskii-rezim?from=rss"
-      },
-      {
-        "title": "Госдума в первом чтении поддержала законопроект о штрафах для онлайн-кинотеатров и соцсетей за контент с дискредитацией «традиционных духовно-нравственных ценностей»",
-        "url": "https://vc.ru/media/3263623-gosduma-podderzhala-zakonoproekt-o-shtrafakh-dlya-onlajn-kinoteatrov-i-sotssetej?from=rss"
-      },
-      {
         "title": "Турция ввела трёхлетние ВНЖ для иностранцев при сумме инвестиций от $150 тысяч",
         "url": "https://vc.ru/migration/3263395-turtsiya-vnz-dlya-inostrancev-investitsii-ot-150-tysyach-dollara?from=rss"
+      },
+      {
+        "title": "Wildberries добавил детский режим: дети смогут добавлять товары в отдельную корзину, оплата — на взрослых",
+        "url": "https://vc.ru/marketplace/3263639-wildberries-zapustil-detskii-rezim?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "На LeetCode появились задачи по вайбкодингу",
-        "url": "https://habr.com/ru/articles/1109494/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109494"
+        "title": "Grid и Layout + контроль в Figma",
+        "url": "https://habr.com/ru/articles/1109640/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109640"
       },
       {
-        "title": "Не набрасывайся на ROC AUC или как обучать промышленные ML-модели",
-        "url": "https://habr.com/ru/companies/ingos_it/articles/1109460/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109460"
+        "title": "iFixit: ремонт Apple HomeView оказался «неоправданно сложным»",
+        "url": "https://habr.com/ru/articles/1109636/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109636"
       },
       {
-        "title": "Можно ли научить статический анализатор эффективнее понимать сложный код?",
-        "url": "https://habr.com/ru/companies/pvs-studio/articles/1109492/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109492"
+        "title": "Управление памятью в контейнерах STL. Ускоряем код с помощью кастомных аллокаторов",
+        "url": "https://habr.com/ru/articles/1102204/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1102204"
       },
       {
-        "title": "Тесты были зелёными, а задача — неправильной: как я проверял 27 генераторов геометрии",
-        "url": "https://habr.com/ru/articles/1109488/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109488"
+        "title": "Сайт вашего бизнеса не работает из‑за кибератаки: объясняю, как взыскать убытки с хостинг‑провайдера",
+        "url": "https://habr.com/ru/articles/1109380/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109380"
       },
       {
-        "title": "ПСБ проведёт в Ярославле ИТ-конференцию «Нейродень»",
-        "url": "https://habr.com/ru/companies/psb/articles/1109484/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109484"
+        "title": "Click SHOP API: подпись, Prepare и Complete, и ночная сверка, которая ловит «оплачено, а заказа нет»",
+        "url": "https://habr.com/ru/articles/1109616/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109616"
       }
     ],
     "tproger": [
       {
-        "title": "Google сбросила квоты в Antigravity на всех моделях в честь дня рождения",
-        "url": "https://tproger.ru/news/google-sbrosila-kvoty-v-antigravity-na-vseh-modelyah-v-chest-dnya"
+        "title": "Кодит ИИ, релизит типичный программист",
+        "url": "https://tproger.ru/interactive/kodit-ii-relizit-tipichnyj-programmist"
       },
       {
-        "title": "Тео Браун и Every раскритиковали GPT-6.2 Astra после недель тестов",
-        "url": "https://tproger.ru/news/teo-braun-i-every-raskritikovali-gpt-6-2-astra-posle-nedel-test"
+        "title": "Ошибка HTTP/2 в nginx жила с 2015 года: обновите сервер до 1.31.9",
+        "url": "https://tproger.ru/news/owibka-http-2-v-nginx-zhila-s-2015-goda-obnovite-server-do-1-31"
       },
       {
-        "title": "OpenAI выпустила GPT-6.2 Astra и Sol: Astra в API подешевела на 20%",
-        "url": "https://tproger.ru/news/openai-vypustila-gpt-6-2-astra-i-sol-astra-v-api-podewevela-na"
+        "title": "Tencent открыла веса Hy4 Flash — дешёвой модели для документов и агентов",
+        "url": "https://tproger.ru/news/tencent-otkryla-vesa-hy4-flash-dewyovoj-modeli-dlya-dokumentov-i"
       },
       {
-        "title": "Anthropic рассказала, как команда Claude Code проверяет код агента",
-        "url": "https://tproger.ru/news/anthropic-rasskazala-kak-komanda-claude-code-proveryaet-kod-agen"
+        "title": "Java4Shell: в Base64-декодере OpenJDK нашли RCE, обновите JDK",
+        "url": "https://tproger.ru/news/java4shell-v-base64-dekodere-openjdk-nawli-rce-obnovite-jdk"
       },
       {
-        "title": "Модели Google чаще всех объясняют через аналогии, модели OpenAI реже всех",
-        "url": "https://tproger.ru/news/modeli-google-chashhe-vseh-obyasnyayut-cherez-analogii-modeli-openai"
+        "title": "Anthropic две недели ломала Claude Docs силами Claude Code перед запуском",
+        "url": "https://tproger.ru/news/anthropic-dve-nedeli-lomala-claude-docs-silami-claude-code-pered"
       }
     ]
   },
-  "summary": "Сводка digest-20261118-1501: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261118-2351: Самара -0.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
