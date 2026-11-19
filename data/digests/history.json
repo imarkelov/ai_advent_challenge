@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261019-1200",
-    "generated_at": "2026-10-19T12:00:36Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 14.6,
-      "feels_like_c": 10.9,
-      "description": "Ясно",
-      "wind_ms": 18.0
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Российские банки и ЦБ начали бороться со схемой покупки USDT в странах СНГ и продажей в России за наличные — РБК",
-          "url": "https://vc.ru/crypto/3202333-rossiyskie-banki-i-tsb-protiv-shemy-pokupki-usdt-v-sng?from=rss"
-        },
-        {
-          "title": "ФАС признала недостоверной рекламу «режима 5G» у «Мегафона» — оператор заявил, что удивлён этим решением",
-          "url": "https://vc.ru/legal/3202653-fas-priznala-reklamu-5g-ot-megafona-nedostovernoy?from=rss"
-        },
-        {
-          "title": "«Искусственный»: почти документалка о том, «как мы оказались в нынешней точке», играющий в бога Сэм Альтман и Юра Борисов «в центре внимания»",
-          "url": "https://vc.ru/media/3185287-film-iskusstvennyj-sam-altman-i-yura-borisov?from=rss"
-        },
-        {
-          "title": "Олимпиадник, мемолог и любитель погулять по лесу: кто такой Александр Ван, вернувший Meta* в ИИ-гонку",
-          "url": "https://vc.ru/story/3197108-aleksandr-van-novyy-lider-meta-v-gonke-ii?from=rss"
-        },
-        {
-          "title": "Илон Маск пообещал в 2027 году передать по одной акции SpaceX «каждому ребёнку в США»",
-          "url": "https://vc.ru/money/3202790-ilon-mask-planirovat-peredat-aktsii-spacex-detyam-v-ssha?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "От выгрузок к анализу: вебинар о работе с данными 1С и других систем",
-          "url": "https://habr.com/ru/companies/infostart/news/1096246/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096246"
-        },
-        {
-          "title": "Anthropic направит 5% своих акций в свой Фонд общественного блага",
-          "url": "https://habr.com/ru/news/1096242/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096242"
-        },
-        {
-          "title": "Okdesk замкнул контур управления эксплуатацией: обновление модуля для автоматизации ТОиР",
-          "url": "https://habr.com/ru/companies/okdesk/news/1096240/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096240"
-        },
-        {
-          "title": "Вебинар: Kube-scheduler изнутри: как Kubernetes выбирает ноду для пода",
-          "url": "https://habr.com/ru/companies/astralinux/news/1096228/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096228"
-        },
-        {
-          "title": "Tesla Roadster с предзаказом до $250000 может вообще не выйти в продажу: компания не гарантирует поставку авто",
-          "url": "https://habr.com/ru/news/1096218/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096218"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "ИИ-образование для детей: рейтинг 10 школ и курсов по искусственному интеллекту в 2026 году",
-          "url": "https://tproger.ru/articles/ii-obrazovanie-dlya-detej-rejting-10-wkol-i-kursov-po-iskusstven"
-        },
-        {
-          "title": "Искусственный интеллект для дошкольников: рейтинг 5 курсов и развивающих программ",
-          "url": "https://tproger.ru/articles/iskusstvennyj-intellekt-dlya-dowkolnikov-rejting-5-kursov-i-raz"
-        },
-        {
-          "title": "ИИ-платформы для бизнеса: сравнение решений 2026 года",
-          "url": "https://tproger.ru/articles/ii-platformy-dlya-biznesa-sravnenie-rewenij-2026-goda"
-        },
-        {
-          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
-          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
-        },
-        {
-          "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
-          "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261019-1200: Самара 14.6°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261019-2157",
     "generated_at": "2026-10-19T21:57:37Z",
     "weather": {
@@ -7639,5 +7559,81 @@
       ]
     },
     "summary": "Сводка digest-20261119-0546: Самара 0.2°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261119-1511",
+    "generated_at": "2026-11-19T15:11:17Z",
+    "weather": {
+      "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Точка Банк» запустил функцию «автосоздания» интернет-магазинов под разные сферы бизнеса",
+          "url": "https://vc.ru/services/3265320-tochka-bank-avtosozdanie-internet-magazinov?from=rss"
+        },
+        {
+          "title": "Исследователи обнаружили несколько критических уязвимостей в Nginx, которые позволяют выполнять произвольный код на веб-сервере без авторизации",
+          "url": "https://vc.ru/dev/3265162-uyazvimosti-v-nginx?from=rss"
+        },
+        {
+          "title": "Instagram* разрешил редактировать «истории» без потери просмотров, лайков и ответов",
+          "url": "https://vc.ru/social/3265449-instagram-rezhal-redaktirovat-istorii-bez-poteri-lajkov?from=rss"
+        },
+        {
+          "title": "«Я делаю Макфлурри, давайте, остановите меня!»: в X завирусилась новогодняя реклама McDonald’s с Маколеем Калкиным и «Хэппи Милом» «для взрослых»",
+          "url": "https://vc.ru/marketing/3263617-novogodnyaya-reklama-mcdonalds-s-makoley-kalkinom?from=rss"
+        },
+        {
+          "title": "«Яндекс» восстановил доступ к 99,55% данных на «Диске» — остальное требует «длительной ручной проверки»",
+          "url": "https://vc.ru/services/3265717-yandeks-vosstanovil-dannye-na-diske?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Экспертная оценка трудозатрат: как точно и эффективно оценивать задачи",
+          "url": "https://habr.com/ru/companies/rtlabs/articles/1109320/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109320"
+        },
+        {
+          "title": "Что делать с данными, которые не прошли проверку качества: история 500 миллионов возвращенных строк",
+          "url": "https://habr.com/ru/companies/lamoda/articles/1109290/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109290"
+        },
+        {
+          "title": "Как DPI обнаруживает твой VPN?",
+          "url": "https://habr.com/ru/articles/1109052/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109052"
+        },
+        {
+          "title": "[Перевод] Как проверить индексы PostgreSQL после генерации ИИ‑агентом и избежать лишней нагрузки на запись",
+          "url": "https://habr.com/ru/companies/otus/articles/1107938/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107938"
+        },
+        {
+          "title": "От хаоса запросов к управляемой системе: как выстроить механику общего бэклога",
+          "url": "https://habr.com/ru/companies/korus_consulting/articles/1109980/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109980"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "OpenCode починил кэш GPT-6.2: 3 токена вместо 14 000 на шаг агента",
+          "url": "https://tproger.ru/news/codex-cli-poluchil-golosovye-zvonki-a-opencode-pochinil-kew-gpt-6"
+        },
+        {
+          "title": "Google выпустила Gemini 4 Neon: кодинг уровня Opus 5.5 почти вдвое дешевле",
+          "url": "https://tproger.ru/news/google-vypustila-gemini-4-neon-koding-urovnya-opus-5-5-pochti-vdv"
+        },
+        {
+          "title": "Кодит ИИ, релизит типичный программист",
+          "url": "https://tproger.ru/interactive/kodit-ii-relizit-tipichnyj-programmist"
+        },
+        {
+          "title": "Ошибка HTTP/2 в nginx жила с 2015 года: обновите сервер до 1.31.9",
+          "url": "https://tproger.ru/news/owibka-http-2-v-nginx-zhila-s-2015-goda-obnovite-server-do-1-31"
+        },
+        {
+          "title": "Tencent открыла веса Hy4 Flash — дешёвой модели для документов и агентов",
+          "url": "https://tproger.ru/news/tencent-otkryla-vesa-hy4-flash-dewyovoj-modeli-dlya-dokumentov-i"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261119-1511: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

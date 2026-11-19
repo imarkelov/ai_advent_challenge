@@ -1,59 +1,63 @@
 {
-  "id": "digest-20261119-0546",
-  "generated_at": "2026-11-19T05:46:39Z",
+  "id": "digest-20261119-1511",
+  "generated_at": "2026-11-19T15:11:17Z",
   "weather": {
-    "city": "Самара",
-    "temp_c": 0.2,
-    "feels_like_c": -4.8,
-    "description": "Небольшой дождь",
-    "wind_ms": 17.6
+    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "«Точка Банк» запустил функцию «автосоздания» интернет-магазинов под разные сферы бизнеса",
+        "url": "https://vc.ru/services/3265320-tochka-bank-avtosozdanie-internet-magazinov?from=rss"
+      },
+      {
+        "title": "Исследователи обнаружили несколько критических уязвимостей в Nginx, которые позволяют выполнять произвольный код на веб-сервере без авторизации",
+        "url": "https://vc.ru/dev/3265162-uyazvimosti-v-nginx?from=rss"
+      },
+      {
+        "title": "Instagram* разрешил редактировать «истории» без потери просмотров, лайков и ответов",
+        "url": "https://vc.ru/social/3265449-instagram-rezhal-redaktirovat-istorii-bez-poteri-lajkov?from=rss"
+      },
       {
         "title": "«Я делаю Макфлурри, давайте, остановите меня!»: в X завирусилась новогодняя реклама McDonald’s с Маколеем Калкиным и «Хэппи Милом» «для взрослых»",
         "url": "https://vc.ru/marketing/3263617-novogodnyaya-reklama-mcdonalds-s-makoley-kalkinom?from=rss"
       },
       {
-        "title": "Турция ввела трёхлетние ВНЖ для иностранцев при сумме инвестиций от $150 тысяч",
-        "url": "https://vc.ru/migration/3263395-turtsiya-vnz-dlya-inostrancev-investitsii-ot-150-tysyach-dollara?from=rss"
-      },
-      {
-        "title": "Заксобрание Санкт-Петербурга одобрило запрет на продажу вейпов и жидкостей для них с 1 марта 2027 года",
-        "url": "https://vc.ru/legal/3263152-zapret-na-prodazhu-vejpov-v-sankt-peterburge?from=rss"
-      },
-      {
-        "title": "«Мы назовём это ChatGPT»: вышел дублированный трейлер фильма «Искусственный интеллект» об основателях OpenAI с Эндрю Гарфилдом и Юрой Борисовым",
-        "url": "https://vc.ru/media/3264413-film-iskusstvennyj-intellekt-s-endryu-garfieldom-o-openai?from=rss"
-      },
-      {
-        "title": "«Яндекс» разработал устройство для автомобилей, которое помогает точнее определять местоположение при сбоях геолокации",
-        "url": "https://vc.ru/tech/3262796-yandeks-razrabotal-kompas-dlya-tocnogo-opredeleniya-mestopolozheniya-avtomobilej?from=rss"
+        "title": "«Яндекс» восстановил доступ к 99,55% данных на «Диске» — остальное требует «длительной ручной проверки»",
+        "url": "https://vc.ru/services/3265717-yandeks-vosstanovil-dannye-na-diske?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Ретраи, которые вы добавили ради надёжности, не дают сервису подняться после сбоя",
-        "url": "https://habr.com/ru/companies/otus/articles/1105244/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105244"
+        "title": "Экспертная оценка трудозатрат: как точно и эффективно оценивать задачи",
+        "url": "https://habr.com/ru/companies/rtlabs/articles/1109320/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109320"
       },
       {
-        "title": "13 задач на Python в OpenCode: DeepSeek Flash обошёлся в $0,67, Claude Opus — в $8,76",
-        "url": "https://habr.com/ru/articles/1109658/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109658"
+        "title": "Что делать с данными, которые не прошли проверку качества: история 500 миллионов возвращенных строк",
+        "url": "https://habr.com/ru/companies/lamoda/articles/1109290/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109290"
       },
       {
-        "title": "Как настроить Okdesk под свои процессы: новые возможности платформы в 2026 году",
-        "url": "https://habr.com/ru/companies/okdesk/articles/1109470/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109470"
+        "title": "Как DPI обнаруживает твой VPN?",
+        "url": "https://habr.com/ru/articles/1109052/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109052"
       },
       {
-        "title": "[Перевод] Ошибся в разводке SD-карты: вместо новой платы за 500+ евро — переходник, ремонт примерно за 50",
-        "url": "https://habr.com/ru/articles/1109656/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109656"
+        "title": "[Перевод] Как проверить индексы PostgreSQL после генерации ИИ‑агентом и избежать лишней нагрузки на запись",
+        "url": "https://habr.com/ru/companies/otus/articles/1107938/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107938"
       },
       {
-        "title": "Мой набор программ: собираю полезный софт в репозитории ltm_list",
-        "url": "https://habr.com/ru/articles/1109650/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109650"
+        "title": "От хаоса запросов к управляемой системе: как выстроить механику общего бэклога",
+        "url": "https://habr.com/ru/companies/korus_consulting/articles/1109980/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109980"
       }
     ],
     "tproger": [
+      {
+        "title": "OpenCode починил кэш GPT-6.2: 3 токена вместо 14 000 на шаг агента",
+        "url": "https://tproger.ru/news/codex-cli-poluchil-golosovye-zvonki-a-opencode-pochinil-kew-gpt-6"
+      },
+      {
+        "title": "Google выпустила Gemini 4 Neon: кодинг уровня Opus 5.5 почти вдвое дешевле",
+        "url": "https://tproger.ru/news/google-vypustila-gemini-4-neon-koding-urovnya-opus-5-5-pochti-vdv"
+      },
       {
         "title": "Кодит ИИ, релизит типичный программист",
         "url": "https://tproger.ru/interactive/kodit-ii-relizit-tipichnyj-programmist"
@@ -65,16 +69,8 @@
       {
         "title": "Tencent открыла веса Hy4 Flash — дешёвой модели для документов и агентов",
         "url": "https://tproger.ru/news/tencent-otkryla-vesa-hy4-flash-dewyovoj-modeli-dlya-dokumentov-i"
-      },
-      {
-        "title": "Java4Shell: в Base64-декодере OpenJDK нашли RCE, обновите JDK",
-        "url": "https://tproger.ru/news/java4shell-v-base64-dekodere-openjdk-nawli-rce-obnovite-jdk"
-      },
-      {
-        "title": "Anthropic две недели ломала Claude Docs силами Claude Code перед запуском",
-        "url": "https://tproger.ru/news/anthropic-dve-nedeli-lomala-claude-docs-silami-claude-code-pered"
       }
     ]
   },
-  "summary": "Сводка digest-20261119-0546: Самара 0.2°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261119-1511: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
