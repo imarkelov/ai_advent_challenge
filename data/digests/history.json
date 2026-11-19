@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261019-0306",
-    "generated_at": "2026-10-19T03:06:00Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 10.4,
-      "feels_like_c": 8.0,
-      "description": "Переменная облачность",
-      "wind_ms": 1.9
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "«Искусственный»: почти документалка о том, «как мы оказались в нынешней точке», играющий в бога Сэм Альтман и Юра Борисов «в центре внимания»",
-          "url": "https://vc.ru/media/3185287-film-iskusstvennyj-sam-altman-i-yura-borisov?from=rss"
-        },
-        {
-          "title": "Mercedes-AMG представила трёхмоторный электрический внедорожник GT SUV мощностью до 1153 л.с.",
-          "url": "https://vc.ru/transport/3201199-mercedes-amg-gt-suv-elektricheskij-vnedorozhnik?from=rss"
-        },
-        {
-          "title": "VK сообщила об атаке беспилотников на дата-центр в Ленинградской области",
-          "url": "https://vc.ru/services/3200928-vk-soobshchila-ob-atake-na-data-tsentr-v-leningradskoy-oblasti?from=rss"
-        },
-        {
-          "title": "Ozon рассказал об атаке на логистический центр в Санкт-Петербурге",
-          "url": "https://vc.ru/marketplace/3200948-ozon-ataka-logisticheskij-tsentr-sankt-peterburg?from=rss"
-        },
-        {
-          "title": "Криптобиржа Bitget внесла Россию в список стран, в которых запрещено пользоваться сервисом",
-          "url": "https://vc.ru/crypto/3199827-kriptobirzha-bitget-zapret-rossiya-i-belarusiya?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Коммиттер PostgreSQL: LLM‑ревью нашло в версии 19 больше ошибок, чем успели исправить",
-          "url": "https://habr.com/ru/news/1095950/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095950"
-        },
-        {
-          "title": "Apple начала продавать чехлы для iPhone Duo, которые крепятся к корпусу на клеевую полоску",
-          "url": "https://habr.com/ru/news/1095922/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095922"
-        },
-        {
-          "title": "Bitdefender обнаружила вредоносное ПО в прошивках китайских Android‑смартфонов на платформе MediaTek",
-          "url": "https://habr.com/ru/news/1095912/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095912"
-        },
-        {
-          "title": "В Anthropic стали меньше нанимать джунов и больше проводить времени на совещаниях",
-          "url": "https://habr.com/ru/news/1095894/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095894"
-        },
-        {
-          "title": "MapQuest начал показывать, где установлены камеры Flock и другие ALPR‑системы",
-          "url": "https://habr.com/ru/news/1095880/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1095880"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "ИИ-образование для детей: рейтинг 10 школ и курсов по искусственному интеллекту в 2026 году",
-          "url": "https://tproger.ru/articles/ii-obrazovanie-dlya-detej-rejting-10-wkol-i-kursov-po-iskusstven"
-        },
-        {
-          "title": "Искусственный интеллект для дошкольников: рейтинг 5 курсов и развивающих программ",
-          "url": "https://tproger.ru/articles/iskusstvennyj-intellekt-dlya-dowkolnikov-rejting-5-kursov-i-raz"
-        },
-        {
-          "title": "ИИ-платформы для бизнеса: сравнение решений 2026 года",
-          "url": "https://tproger.ru/articles/ii-platformy-dlya-biznesa-sravnenie-rewenij-2026-goda"
-        },
-        {
-          "title": "От Татлина до современных инженеров: что связывает идеи прошлого и технологии будущего",
-          "url": "https://tproger.ru/articles/ot-tatlina-do-sovremennyh-inzhenerov-chto-svyazyvaet-idei-prowlogo"
-        },
-        {
-          "title": "Cloud.ru представил сервисы для автоматизации разработки и работы с ИИ-агентами",
-          "url": "https://tproger.ru/news/cloud-ru-predstavil-servisy-dlya-avtomatizacii-razrabotki-i-rabot"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261019-0306: Самара 10.4°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261019-1200",
     "generated_at": "2026-10-19T12:00:36Z",
     "weather": {
@@ -7639,5 +7559,85 @@
       ]
     },
     "summary": "Сводка digest-20261118-2351: Самара -0.3°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261119-0546",
+    "generated_at": "2026-11-19T05:46:39Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 0.2,
+      "feels_like_c": -4.8,
+      "description": "Небольшой дождь",
+      "wind_ms": 17.6
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Я делаю Макфлурри, давайте, остановите меня!»: в X завирусилась новогодняя реклама McDonald’s с Маколеем Калкиным и «Хэппи Милом» «для взрослых»",
+          "url": "https://vc.ru/marketing/3263617-novogodnyaya-reklama-mcdonalds-s-makoley-kalkinom?from=rss"
+        },
+        {
+          "title": "Турция ввела трёхлетние ВНЖ для иностранцев при сумме инвестиций от $150 тысяч",
+          "url": "https://vc.ru/migration/3263395-turtsiya-vnz-dlya-inostrancev-investitsii-ot-150-tysyach-dollara?from=rss"
+        },
+        {
+          "title": "Заксобрание Санкт-Петербурга одобрило запрет на продажу вейпов и жидкостей для них с 1 марта 2027 года",
+          "url": "https://vc.ru/legal/3263152-zapret-na-prodazhu-vejpov-v-sankt-peterburge?from=rss"
+        },
+        {
+          "title": "«Мы назовём это ChatGPT»: вышел дублированный трейлер фильма «Искусственный интеллект» об основателях OpenAI с Эндрю Гарфилдом и Юрой Борисовым",
+          "url": "https://vc.ru/media/3264413-film-iskusstvennyj-intellekt-s-endryu-garfieldom-o-openai?from=rss"
+        },
+        {
+          "title": "«Яндекс» разработал устройство для автомобилей, которое помогает точнее определять местоположение при сбоях геолокации",
+          "url": "https://vc.ru/tech/3262796-yandeks-razrabotal-kompas-dlya-tocnogo-opredeleniya-mestopolozheniya-avtomobilej?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Ретраи, которые вы добавили ради надёжности, не дают сервису подняться после сбоя",
+          "url": "https://habr.com/ru/companies/otus/articles/1105244/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1105244"
+        },
+        {
+          "title": "13 задач на Python в OpenCode: DeepSeek Flash обошёлся в $0,67, Claude Opus — в $8,76",
+          "url": "https://habr.com/ru/articles/1109658/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109658"
+        },
+        {
+          "title": "Как настроить Okdesk под свои процессы: новые возможности платформы в 2026 году",
+          "url": "https://habr.com/ru/companies/okdesk/articles/1109470/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109470"
+        },
+        {
+          "title": "[Перевод] Ошибся в разводке SD-карты: вместо новой платы за 500+ евро — переходник, ремонт примерно за 50",
+          "url": "https://habr.com/ru/articles/1109656/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109656"
+        },
+        {
+          "title": "Мой набор программ: собираю полезный софт в репозитории ltm_list",
+          "url": "https://habr.com/ru/articles/1109650/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109650"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Кодит ИИ, релизит типичный программист",
+          "url": "https://tproger.ru/interactive/kodit-ii-relizit-tipichnyj-programmist"
+        },
+        {
+          "title": "Ошибка HTTP/2 в nginx жила с 2015 года: обновите сервер до 1.31.9",
+          "url": "https://tproger.ru/news/owibka-http-2-v-nginx-zhila-s-2015-goda-obnovite-server-do-1-31"
+        },
+        {
+          "title": "Tencent открыла веса Hy4 Flash — дешёвой модели для документов и агентов",
+          "url": "https://tproger.ru/news/tencent-otkryla-vesa-hy4-flash-dewyovoj-modeli-dlya-dokumentov-i"
+        },
+        {
+          "title": "Java4Shell: в Base64-декодере OpenJDK нашли RCE, обновите JDK",
+          "url": "https://tproger.ru/news/java4shell-v-base64-dekodere-openjdk-nawli-rce-obnovite-jdk"
+        },
+        {
+          "title": "Anthropic две недели ломала Claude Docs силами Claude Code перед запуском",
+          "url": "https://tproger.ru/news/anthropic-dve-nedeli-lomala-claude-docs-silami-claude-code-pered"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261119-0546: Самара 0.2°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
