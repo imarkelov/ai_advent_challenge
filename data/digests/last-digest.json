@@ -1,59 +1,71 @@
 {
-  "id": "digest-20261120-0015",
-  "generated_at": "2026-11-20T00:15:18Z",
+  "id": "digest-20261120-1450",
+  "generated_at": "2026-11-20T14:50:38Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 3.1,
-    "feels_like_c": -0.1,
+    "temp_c": 4.1,
+    "feels_like_c": 1.3,
     "description": "Пасмурно",
-    "wind_ms": 9.9
+    "wind_ms": 8.0
   },
   "news": {
     "vc.ru": [
+      {
+        "title": "У объединённой компании Wildberries и Russ появились два новых совладельца — ЗПИФы «Томь» и «Гало» получили в сумме 30% компании, а доля Татьяны Ким сократилась с 65% до 45%",
+        "url": "https://vc.ru/marketplace/3268179-izmeneniya-v-sostave-sovladeletsej-wildberries-i-russ?from=rss"
+      },
+      {
+        "title": "Сервисы доставки попросили отложить до 2029 года введение новых правил для курьеров — о запрете езды на тротуарах и получении прав на мопеды",
+        "url": "https://vc.ru/services/3267556-servisy-dostavki-trebuyut-otlozhit-novye-pravila-dlya-kuryerov?from=rss"
+      },
       {
         "title": "Разработчик из Китая выпустил Andarium — эмулятор Android на iPhone для запуска APK-файлов приложений",
         "url": "https://vc.ru/services/3266775-andarium-emulyator-android-na-iphone?from=rss"
       },
       {
-        "title": "Microsoft закроет летом 2027 года сервис для управления задачами To Do",
-        "url": "https://vc.ru/services/3266883-microsoft-zakroet-servis-to-do-perehod-na-planner?from=rss"
+        "title": "Эстония официально сообщила о закрытии автомобильных пунктов пропуска на границе с Россией с 1 декабря 2026 года",
+        "url": "https://vc.ru/migration/3268303-zakrytie-avtomobilnykh-punktov-propuska-estoniey-na-granitse-s-rossiey?from=rss"
       },
       {
-        "title": "«Точка Банк» запустил функцию «автосоздания» интернет-магазинов под разные сферы бизнеса",
-        "url": "https://vc.ru/services/3265320-tochka-bank-avtosozdanie-internet-magazinov?from=rss"
-      },
-      {
-        "title": "Instagram* разрешил редактировать «истории» без потери просмотров, лайков и ответов",
-        "url": "https://vc.ru/social/3265449-instagram-rezhal-redaktirovat-istorii-bez-poteri-lajkov?from=rss"
-      },
-      {
-        "title": "Исследователи обнаружили несколько критических уязвимостей в Nginx, которые позволяют выполнять произвольный код на веб-сервере без авторизации",
-        "url": "https://vc.ru/dev/3265162-uyazvimosti-v-nginx?from=rss"
+        "title": "Операторы связи начнут маркировать звонки с иностранных номеров с 1 марта 2027 года",
+        "url": "https://vc.ru/services/3268411-markirovka-zvonkov-s-inostrannyh-nomerov?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Сравнение риск-ориентированных методов планирования пути четвероногого робота на вероятностной карте проходимости",
-        "url": "https://habr.com/ru/articles/1110108/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110108"
+        "title": "В VK подали второй иск против американской корпорации Apple в Арбитражный суд Москвы",
+        "url": "https://habr.com/ru/articles/1110468/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110468"
       },
       {
-        "title": "[Перевод] Следующий флагманский космический телескоп (возможно) ответит на главный вопрос: «Одни ли мы во Вселенной?»",
-        "url": "https://habr.com/ru/articles/1110106/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110106"
+        "title": "F6 расследовала первый случай эксплуатации критической уязвимости CVE-2026-76466 в Cisco Expressway",
+        "url": "https://habr.com/ru/companies/F6/articles/1110438/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110438"
       },
       {
-        "title": "Нескучные тесты локальных LLM",
-        "url": "https://habr.com/ru/articles/1110104/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110104"
+        "title": "Как провести нагрузочное тестирование правильно. Часть 3: мифы и типичные ошибки",
+        "url": "https://habr.com/ru/companies/lemana_tech/articles/1110390/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110390"
       },
       {
-        "title": "Рой дронов держит строй без GPS: адаптивный консенсус и цена его точности",
-        "url": "https://habr.com/ru/articles/1110098/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110098"
+        "title": "«Недействительная схема (ai-catalog.json)» в Google PageSpeed Insights: как исправить за 10 минут",
+        "url": "https://habr.com/ru/articles/1110456/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110456"
       },
       {
-        "title": "Ещё 6 SQL‑тренажёров для самостоятельной практики. Что посоветовали на Хабре",
-        "url": "https://habr.com/ru/articles/1110096/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110096"
+        "title": "Google выбрала ракету Blue Origin для запуска спутников с ИИ-чипами",
+        "url": "https://habr.com/ru/companies/speshu_ai/articles/1110454/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110454"
       }
     ],
     "tproger": [
+      {
+        "title": "OpenAI открыла GPT-Live-1.1 в API и удешевила паузы в разговоре в 2,5 раза",
+        "url": "https://tproger.ru/news/openai-otkryla-gpt-live-1-1-v-api-i-udewevila-pauzy-v-razgovore"
+      },
+      {
+        "title": "Google открыла Genie 4 в Gemini API: живой мир за $0,10 в секунду",
+        "url": "https://tproger.ru/news/google-otkryla-genie-4-v-gemini-api-zhivoj-mir-za-0-10-v-sekund"
+      },
+      {
+        "title": "Аналоги Gamma App: чем заменить Gamma в России",
+        "url": "https://tproger.ru/articles/analogi-gamma-app-chem-zamenit-gamma-v-rossii"
+      },
       {
         "title": "Модель Gestalt обошла людей и Claude Fable 5.2 в слепом тесте дизайна",
         "url": "https://tproger.ru/news/model-gestalt-obowla-lyudej-i-claude-fable-5-2-v-slepom-teste-di"
@@ -61,20 +73,8 @@
       {
         "title": "OpenCode починил кэш GPT-6.2: 3 токена вместо 14 000 на шаг агента",
         "url": "https://tproger.ru/news/codex-cli-poluchil-golosovye-zvonki-a-opencode-pochinil-kew-gpt-6"
-      },
-      {
-        "title": "Google выпустила Gemini 4 Neon: кодинг уровня Opus 5.5 почти вдвое дешевле",
-        "url": "https://tproger.ru/news/google-vypustila-gemini-4-neon-koding-urovnya-opus-5-5-pochti-vdv"
-      },
-      {
-        "title": "Кодит ИИ, релизит типичный программист",
-        "url": "https://tproger.ru/interactive/kodit-ii-relizit-tipichnyj-programmist"
-      },
-      {
-        "title": "Ошибка HTTP/2 в nginx жила с 2015 года: обновите сервер до 1.31.9",
-        "url": "https://tproger.ru/news/owibka-http-2-v-nginx-zhila-s-2015-goda-obnovite-server-do-1-31"
       }
     ]
   },
-  "summary": "Сводка digest-20261120-0015: Самара 3.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261120-1450: Самара 4.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
