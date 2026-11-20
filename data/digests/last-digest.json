@@ -1,55 +1,63 @@
 {
-  "id": "digest-20261119-1511",
-  "generated_at": "2026-11-19T15:11:17Z",
+  "id": "digest-20261120-0015",
+  "generated_at": "2026-11-20T00:15:18Z",
   "weather": {
-    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
+    "city": "Самара",
+    "temp_c": 3.1,
+    "feels_like_c": -0.1,
+    "description": "Пасмурно",
+    "wind_ms": 9.9
   },
   "news": {
     "vc.ru": [
       {
-        "title": "«Точка Банк» запустил функцию «автосоздания» интернет-магазинов под разные сферы бизнеса",
-        "url": "https://vc.ru/services/3265320-tochka-bank-avtosozdanie-internet-magazinov?from=rss"
+        "title": "Разработчик из Китая выпустил Andarium — эмулятор Android на iPhone для запуска APK-файлов приложений",
+        "url": "https://vc.ru/services/3266775-andarium-emulyator-android-na-iphone?from=rss"
       },
       {
-        "title": "Исследователи обнаружили несколько критических уязвимостей в Nginx, которые позволяют выполнять произвольный код на веб-сервере без авторизации",
-        "url": "https://vc.ru/dev/3265162-uyazvimosti-v-nginx?from=rss"
+        "title": "Microsoft закроет летом 2027 года сервис для управления задачами To Do",
+        "url": "https://vc.ru/services/3266883-microsoft-zakroet-servis-to-do-perehod-na-planner?from=rss"
+      },
+      {
+        "title": "«Точка Банк» запустил функцию «автосоздания» интернет-магазинов под разные сферы бизнеса",
+        "url": "https://vc.ru/services/3265320-tochka-bank-avtosozdanie-internet-magazinov?from=rss"
       },
       {
         "title": "Instagram* разрешил редактировать «истории» без потери просмотров, лайков и ответов",
         "url": "https://vc.ru/social/3265449-instagram-rezhal-redaktirovat-istorii-bez-poteri-lajkov?from=rss"
       },
       {
-        "title": "«Я делаю Макфлурри, давайте, остановите меня!»: в X завирусилась новогодняя реклама McDonald’s с Маколеем Калкиным и «Хэппи Милом» «для взрослых»",
-        "url": "https://vc.ru/marketing/3263617-novogodnyaya-reklama-mcdonalds-s-makoley-kalkinom?from=rss"
-      },
-      {
-        "title": "«Яндекс» восстановил доступ к 99,55% данных на «Диске» — остальное требует «длительной ручной проверки»",
-        "url": "https://vc.ru/services/3265717-yandeks-vosstanovil-dannye-na-diske?from=rss"
+        "title": "Исследователи обнаружили несколько критических уязвимостей в Nginx, которые позволяют выполнять произвольный код на веб-сервере без авторизации",
+        "url": "https://vc.ru/dev/3265162-uyazvimosti-v-nginx?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Экспертная оценка трудозатрат: как точно и эффективно оценивать задачи",
-        "url": "https://habr.com/ru/companies/rtlabs/articles/1109320/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109320"
+        "title": "Сравнение риск-ориентированных методов планирования пути четвероногого робота на вероятностной карте проходимости",
+        "url": "https://habr.com/ru/articles/1110108/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110108"
       },
       {
-        "title": "Что делать с данными, которые не прошли проверку качества: история 500 миллионов возвращенных строк",
-        "url": "https://habr.com/ru/companies/lamoda/articles/1109290/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109290"
+        "title": "[Перевод] Следующий флагманский космический телескоп (возможно) ответит на главный вопрос: «Одни ли мы во Вселенной?»",
+        "url": "https://habr.com/ru/articles/1110106/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110106"
       },
       {
-        "title": "Как DPI обнаруживает твой VPN?",
-        "url": "https://habr.com/ru/articles/1109052/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109052"
+        "title": "Нескучные тесты локальных LLM",
+        "url": "https://habr.com/ru/articles/1110104/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110104"
       },
       {
-        "title": "[Перевод] Как проверить индексы PostgreSQL после генерации ИИ‑агентом и избежать лишней нагрузки на запись",
-        "url": "https://habr.com/ru/companies/otus/articles/1107938/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1107938"
+        "title": "Рой дронов держит строй без GPS: адаптивный консенсус и цена его точности",
+        "url": "https://habr.com/ru/articles/1110098/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110098"
       },
       {
-        "title": "От хаоса запросов к управляемой системе: как выстроить механику общего бэклога",
-        "url": "https://habr.com/ru/companies/korus_consulting/articles/1109980/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109980"
+        "title": "Ещё 6 SQL‑тренажёров для самостоятельной практики. Что посоветовали на Хабре",
+        "url": "https://habr.com/ru/articles/1110096/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110096"
       }
     ],
     "tproger": [
+      {
+        "title": "Модель Gestalt обошла людей и Claude Fable 5.2 в слепом тесте дизайна",
+        "url": "https://tproger.ru/news/model-gestalt-obowla-lyudej-i-claude-fable-5-2-v-slepom-teste-di"
+      },
       {
         "title": "OpenCode починил кэш GPT-6.2: 3 токена вместо 14 000 на шаг агента",
         "url": "https://tproger.ru/news/codex-cli-poluchil-golosovye-zvonki-a-opencode-pochinil-kew-gpt-6"
@@ -65,12 +73,8 @@
       {
         "title": "Ошибка HTTP/2 в nginx жила с 2015 года: обновите сервер до 1.31.9",
         "url": "https://tproger.ru/news/owibka-http-2-v-nginx-zhila-s-2015-goda-obnovite-server-do-1-31"
-      },
-      {
-        "title": "Tencent открыла веса Hy4 Flash — дешёвой модели для документов и агентов",
-        "url": "https://tproger.ru/news/tencent-otkryla-vesa-hy4-flash-dewyovoj-modeli-dlya-dokumentov-i"
       }
     ]
   },
-  "summary": "Сводка digest-20261119-1511: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261120-0015: Самара 3.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
