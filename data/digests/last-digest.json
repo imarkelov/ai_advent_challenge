@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261121-0529",
-  "generated_at": "2026-11-21T05:29:04Z",
+  "id": "digest-20261121-1408",
+  "generated_at": "2026-11-21T14:08:24Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 4.6,
-    "feels_like_c": 1.8,
-    "description": "Лёгкая морось",
-    "wind_ms": 9.3
+    "temp_c": 7.0,
+    "feels_like_c": 4.3,
+    "description": "Небольшой дождь",
+    "wind_ms": 11.8
   },
   "news": {
     "vc.ru": [
       {
+        "title": "«Посредственность нужно искоренять»: Дженсен Хуанг годами «терроризировал» сотрудников Nvidia, но оставался для некоторых визионером",
+        "url": "https://vc.ru/hr/3269242-dzhensen-khuang-i-stil-upravleniya-v-nvidia?from=rss"
+      },
+      {
+        "title": "«Для них миллион — погрешность округления»: сотрудники ИИ-стартапов берут кредиты под залог акций и разжигают ценовые войны за недвижимость в Сан-Франциско",
+        "url": "https://vc.ru/money/3268529-kredity-pod-zalog-aktsiy-ii-kompanij-san-francisko?from=rss"
+      },
+      {
+        "title": "«Это и есть будущее?»: Neuralink показала, как её пациент играет в GTA VI с помощью нейрочипа",
+        "url": "https://vc.ru/future/3270008-neuralink-patsient-upravlyaet-gta-vi?from=rss"
+      },
+      {
+        "title": "Татьяна Ким перестала быть гендиректором Wildberries",
+        "url": "https://vc.ru/marketplace/3270134-tatiana-kim-pokinula-post-gendirektora-wildberries?from=rss"
+      },
+      {
         "title": "Китайская BYD выпустила гибридный внедорожник с рулём, который складывается в переднюю панель",
         "url": "https://vc.ru/transport/3269200-gibridnyj-vnedorozhnik-byd-ti-9-s-skladnym-rulem?from=rss"
-      },
-      {
-        "title": "У объединённой компании Wildberries и Russ появились два новых совладельца — ЗПИФы «Томь» и «Гало» получили в сумме 30% компании, а доля Татьяны Ким сократилась с 65% до 45%",
-        "url": "https://vc.ru/marketplace/3268179-izmeneniya-v-sostave-sovladeletsej-wildberries-i-russ?from=rss"
-      },
-      {
-        "title": "Сервисы доставки попросили отложить до 2029 года введение новых правил для курьеров — о запрете езды на тротуарах и получении прав на мопеды",
-        "url": "https://vc.ru/services/3267556-servisy-dostavki-trebuyut-otlozhit-novye-pravila-dlya-kuryerov?from=rss"
-      },
-      {
-        "title": "Эстония официально сообщила о закрытии автомобильных пунктов пропуска на границе с Россией с 1 декабря 2026 года",
-        "url": "https://vc.ru/migration/3268303-zakrytie-avtomobilnykh-punktov-propuska-estoniey-na-granitse-s-rossiey?from=rss"
-      },
-      {
-        "title": "Разработчик из Китая выпустил Andarium — эмулятор Android на iPhone для запуска APK-файлов приложений",
-        "url": "https://vc.ru/services/3266775-andarium-emulyator-android-na-iphone?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Краткий экскурс по серии или иносказания древних. Часть 3. Alone in the Dark (1992-2024)",
-        "url": "https://habr.com/ru/articles/1110576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110576"
+        "title": "Gemini 4 Neon догнала Opus 5.5, но релиз почти никто не заметил",
+        "url": "https://habr.com/ru/articles/1110692/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110692"
       },
       {
-        "title": "Релиз FFmpeg 9.1 Gauss",
-        "url": "https://habr.com/ru/articles/1110256/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110256"
+        "title": "[Перевод] Дообучаем на Mac малую языковую модель для RAG в браузере",
+        "url": "https://habr.com/ru/companies/otus/articles/1106704/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106704"
       },
       {
-        "title": "Выпуск интегрированной среды разработки Apache NetBeans 32",
-        "url": "https://habr.com/ru/articles/1110264/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110264"
+        "title": "Как я перестал быть диспетчером у своих ИИ-агентов",
+        "url": "https://habr.com/ru/articles/1110668/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110668"
       },
       {
-        "title": "Логотип NVIDIA: пригреть змею на груди",
-        "url": "https://habr.com/ru/articles/1110574/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110574"
+        "title": "Эволюция NFQWS2 ASUS Community (+ Keenetic)",
+        "url": "https://habr.com/ru/articles/1110676/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110676"
       },
       {
-        "title": "[Перевод] Карты Уордли. Глава 3 «Изучаем карту»",
-        "url": "https://habr.com/ru/articles/1110568/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110568"
+        "title": "Аналоговый гитарный аудиотракт с цифровыми стереоэффектами, версия 2",
+        "url": "https://habr.com/ru/companies/ruvds/articles/1079238/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1079238"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261121-0529: Самара 4.6°C, Лёгкая морось; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261121-1408: Самара 7.0°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
