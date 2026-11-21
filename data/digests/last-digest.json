@@ -1,8 +1,12 @@
 {
-  "id": "digest-20261120-2338",
-  "generated_at": "2026-11-20T23:38:35Z",
+  "id": "digest-20261121-0529",
+  "generated_at": "2026-11-21T05:29:04Z",
   "weather": {
-    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
+    "city": "Самара",
+    "temp_c": 4.6,
+    "feels_like_c": 1.8,
+    "description": "Лёгкая морось",
+    "wind_ms": 9.3
   },
   "news": {
     "vc.ru": [
@@ -19,34 +23,34 @@
         "url": "https://vc.ru/services/3267556-servisy-dostavki-trebuyut-otlozhit-novye-pravila-dlya-kuryerov?from=rss"
       },
       {
-        "title": "Разработчик из Китая выпустил Andarium — эмулятор Android на iPhone для запуска APK-файлов приложений",
-        "url": "https://vc.ru/services/3266775-andarium-emulyator-android-na-iphone?from=rss"
-      },
-      {
         "title": "Эстония официально сообщила о закрытии автомобильных пунктов пропуска на границе с Россией с 1 декабря 2026 года",
         "url": "https://vc.ru/migration/3268303-zakrytie-avtomobilnykh-punktov-propuska-estoniey-na-granitse-s-rossiey?from=rss"
+      },
+      {
+        "title": "Разработчик из Китая выпустил Andarium — эмулятор Android на iPhone для запуска APK-файлов приложений",
+        "url": "https://vc.ru/services/3266775-andarium-emulyator-android-na-iphone?from=rss"
       }
     ],
     "habr": [
       {
+        "title": "Краткий экскурс по серии или иносказания древних. Часть 3. Alone in the Dark (1992-2024)",
+        "url": "https://habr.com/ru/articles/1110576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110576"
+      },
+      {
+        "title": "Релиз FFmpeg 9.1 Gauss",
+        "url": "https://habr.com/ru/articles/1110256/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110256"
+      },
+      {
+        "title": "Выпуск интегрированной среды разработки Apache NetBeans 32",
+        "url": "https://habr.com/ru/articles/1110264/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110264"
+      },
+      {
+        "title": "Логотип NVIDIA: пригреть змею на груди",
+        "url": "https://habr.com/ru/articles/1110574/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110574"
+      },
+      {
         "title": "[Перевод] Карты Уордли. Глава 3 «Изучаем карту»",
         "url": "https://habr.com/ru/articles/1110568/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110568"
-      },
-      {
-        "title": "Как я свой терминал делал с блэкджеком и двумя Fable",
-        "url": "https://habr.com/ru/articles/1110564/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110564"
-      },
-      {
-        "title": "Sound: может ли результат вайб-кодинга стать ЯП?",
-        "url": "https://habr.com/ru/articles/1110562/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110562"
-      },
-      {
-        "title": "Доказательство гипотезы Римана с помощью ИИ",
-        "url": "https://habr.com/ru/articles/1110558/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110558"
-      },
-      {
-        "title": "Куда инвестировать в AI: кто заработает на новой промышленной революции?",
-        "url": "https://habr.com/ru/articles/1110552/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110552"
       }
     ],
     "tproger": [
@@ -72,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261120-2338: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261121-0529: Самара 4.6°C, Лёгкая морось; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

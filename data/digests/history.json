@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261020-1617",
-    "generated_at": "2026-10-20T16:17:52Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 5.3,
-      "feels_like_c": 2.5,
-      "description": "Переменная облачность",
-      "wind_ms": 3.6
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Хакеры взломали систему управления серверами VMmanager, принадлежащую «Группе Астра»",
-          "url": "https://vc.ru/services/3205145-vzlom-sistemy-upravleniya-vmmanager-ot-gruppy-astra?from=rss"
-        },
-        {
-          "title": "На фоне кризиса на рынке труда: доктор наук из Принстона откликнулся на 2300 вакансий за два года, но не нашёл работу в США",
-          "url": "https://vc.ru/hr/3203689-krizis-na-rynke-truda-doktor-nauk-iz-prinstona-ne-nashyel-rabotu?from=rss"
-        },
-        {
-          "title": "«Яндекс» вернул возможность запускать новые кампании в «Директе» и управлять старыми",
-          "url": "https://vc.ru/marketing/3205578-yandeks-vosstanovil-dostup-k-direktu?from=rss"
-        },
-        {
-          "title": "Криптобиржа MEXC вслед за Bitget объявила о прекращении предоставления услуг пользователям в России и Беларуси",
-          "url": "https://vc.ru/crypto/3206027-kriptobirzha-mexc-prekrashchaet-uslugi-dlya-polzovateley-v-rossii-i-belarusi?from=rss"
-        },
-        {
-          "title": "«Ъ» обнаружил, что МТС предлагает для доступа к 5G подключить платный тариф — оператор говорит, что 5G можно пользоваться бесплатно, а подписка даёт дополнительный трафик",
-          "url": "https://vc.ru/services/3205277-mts-predlagaet-platnyj-dostup-k-5g?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "«Яндекс»: продолжаем восстанавливать полную функциональность «Яндекс 360»",
-          "url": "https://habr.com/ru/news/1096908/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096908"
-        },
-        {
-          "title": "В США тимлид отправил резюме в собственную команду и получил отказ за 6 минут, так как HR переложили отбор на нейросеть",
-          "url": "https://habr.com/ru/news/1096876/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096876"
-        },
-        {
-          "title": "В Руцентре объединили усилия с «Лабораторией Касперского» для защиты доменной инфраструктуры",
-          "url": "https://habr.com/ru/companies/runity/news/1096890/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096890"
-        },
-        {
-          "title": "Inception выпустила Mercury 3, диффузионную LLM со скоростью 1 068 токенов в секунду",
-          "url": "https://habr.com/ru/companies/koda/news/1096840/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096840"
-        },
-        {
-          "title": "Китайцы испытали харвестер, добывающий железо из песка в пустыне",
-          "url": "https://habr.com/ru/news/1096834/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096834"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Почему релизы приходится спасать по ночам и что с этим делать",
-          "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
-        },
-        {
-          "title": "Как я перестал относиться к ИИ как к человеку: опыт соло-разработки двух пет-проектов",
-          "url": "https://tproger.ru/blogs/kak-ya-perestal-otnositsya-k-ii-kak-k-cheloveku-opyt-solo-razrabo"
-        },
-        {
-          "title": "Как написать сопроводительное письмо с помощью ИИ",
-          "url": "https://tproger.ru/articles/kak-napisat-soprovoditelnoe-pismo-s-pomoshhyu-ii"
-        },
-        {
-          "title": "ИИ для детей дошкольного возраста: рейтинг 5 программ и занятий в 2026 году",
-          "url": "https://tproger.ru/articles/ii-dlya-detej-dowkolnogo-vozrasta-rejting-5-programm-i-zanyatij"
-        },
-        {
-          "title": "Обновил, но не работает: как устроен кэш и почему его нельзя просто выключить",
-          "url": "https://tproger.ru/articles/obnovil-no-ne-rabotaet-kak-ustroen-kew-i-pochemu-ego-nelzya-pro"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261020-1617: Самара 5.3°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261020-2112",
     "generated_at": "2026-10-20T21:12:26Z",
     "weather": {
@@ -7631,5 +7551,85 @@
       ]
     },
     "summary": "Сводка digest-20261120-2338: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261121-0529",
+    "generated_at": "2026-11-21T05:29:04Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 4.6,
+      "feels_like_c": 1.8,
+      "description": "Лёгкая морось",
+      "wind_ms": 9.3
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Китайская BYD выпустила гибридный внедорожник с рулём, который складывается в переднюю панель",
+          "url": "https://vc.ru/transport/3269200-gibridnyj-vnedorozhnik-byd-ti-9-s-skladnym-rulem?from=rss"
+        },
+        {
+          "title": "У объединённой компании Wildberries и Russ появились два новых совладельца — ЗПИФы «Томь» и «Гало» получили в сумме 30% компании, а доля Татьяны Ким сократилась с 65% до 45%",
+          "url": "https://vc.ru/marketplace/3268179-izmeneniya-v-sostave-sovladeletsej-wildberries-i-russ?from=rss"
+        },
+        {
+          "title": "Сервисы доставки попросили отложить до 2029 года введение новых правил для курьеров — о запрете езды на тротуарах и получении прав на мопеды",
+          "url": "https://vc.ru/services/3267556-servisy-dostavki-trebuyut-otlozhit-novye-pravila-dlya-kuryerov?from=rss"
+        },
+        {
+          "title": "Эстония официально сообщила о закрытии автомобильных пунктов пропуска на границе с Россией с 1 декабря 2026 года",
+          "url": "https://vc.ru/migration/3268303-zakrytie-avtomobilnykh-punktov-propuska-estoniey-na-granitse-s-rossiey?from=rss"
+        },
+        {
+          "title": "Разработчик из Китая выпустил Andarium — эмулятор Android на iPhone для запуска APK-файлов приложений",
+          "url": "https://vc.ru/services/3266775-andarium-emulyator-android-na-iphone?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Краткий экскурс по серии или иносказания древних. Часть 3. Alone in the Dark (1992-2024)",
+          "url": "https://habr.com/ru/articles/1110576/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110576"
+        },
+        {
+          "title": "Релиз FFmpeg 9.1 Gauss",
+          "url": "https://habr.com/ru/articles/1110256/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110256"
+        },
+        {
+          "title": "Выпуск интегрированной среды разработки Apache NetBeans 32",
+          "url": "https://habr.com/ru/articles/1110264/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110264"
+        },
+        {
+          "title": "Логотип NVIDIA: пригреть змею на груди",
+          "url": "https://habr.com/ru/articles/1110574/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110574"
+        },
+        {
+          "title": "[Перевод] Карты Уордли. Глава 3 «Изучаем карту»",
+          "url": "https://habr.com/ru/articles/1110568/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110568"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Inkling 2 Mini от Thinking Machines запускается на Mac с 32 ГБ памяти",
+          "url": "https://tproger.ru/news/inkling-2-mini-ot-thinking-machines-zapuskaetsya-na-mac-s-32-gb-p"
+        },
+        {
+          "title": "Правка истории диалога сбросит рассуждения GPT-6.2 в API OpenAI",
+          "url": "https://tproger.ru/news/pravka-istorii-dialoga-sbrosit-rassuzhdeniya-gpt-6-2-v-api-openai"
+        },
+        {
+          "title": "Antigravity даст на 20% больше работы с Gemini 4 Neon и снова сбросит квоты",
+          "url": "https://tproger.ru/news/antigravity-dast-na-20-bolwe-raboty-s-gemini-4-neon-i-snova-sb"
+        },
+        {
+          "title": "Google намекнула на подписку Gemini в сторонних агентах со 2 декабря",
+          "url": "https://tproger.ru/news/google-nameknula-na-podpisku-gemini-v-storonnih-agentah-so-2-dek"
+        },
+        {
+          "title": "OpenAI открыла GPT-Live-1.1 в API и удешевила паузы в разговоре в 2,5 раза",
+          "url": "https://tproger.ru/news/openai-otkryla-gpt-live-1-1-v-api-i-udewevila-pauzy-v-razgovore"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261121-0529: Самара 4.6°C, Лёгкая морось; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
