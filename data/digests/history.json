@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261021-0310",
-    "generated_at": "2026-10-21T03:10:37Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 0.7,
-      "feels_like_c": -2.0,
-      "description": "Преимущественно ясно",
-      "wind_ms": 2.5
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "«Альфа-банк» готовится до конца 2026 года запустить видеоплатформу с фокусом на ИИ-видео, микросериалы и шоу со звёздами — РБК",
-          "url": "https://vc.ru/media/3206196-alfa-bank-zapusk-videoplatformu-s-ii-video?from=rss"
-        },
-        {
-          "title": "Хакеры взломали систему управления серверами VMmanager, принадлежащую «Группе Астра»",
-          "url": "https://vc.ru/services/3205145-vzlom-sistemy-upravleniya-vmmanager-ot-gruppy-astra?from=rss"
-        },
-        {
-          "title": "Популярный у российских туристов в Турции платёжный сервис Letim объявил о прекращении работы с 30 ноября 2026 года",
-          "url": "https://vc.ru/money/3206139-servis-letim-prekrashchaet-rabotu?from=rss"
-        },
-        {
-          "title": "На фоне кризиса на рынке труда: доктор наук из Принстона откликнулся на 2300 вакансий за два года, но не нашёл работу в США",
-          "url": "https://vc.ru/hr/3203689-krizis-na-rynke-truda-doktor-nauk-iz-prinstona-ne-nashyel-rabotu?from=rss"
-        },
-        {
-          "title": "Криптобиржа MEXC вслед за Bitget объявила о прекращении предоставления услуг пользователям в России и Беларуси",
-          "url": "https://vc.ru/crypto/3206027-kriptobirzha-mexc-prekrashchaet-uslugi-dlya-polzovateley-v-rossii-i-belarusi?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "С начала года из рекомендаций Spotify исключили более 50 млн сгенерированных треков",
-          "url": "https://habr.com/ru/news/1097024/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097024"
-        },
-        {
-          "title": "Релиз открытого музыкального проигрывателя Audacious 4.6.2",
-          "url": "https://habr.com/ru/news/1096782/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096782"
-        },
-        {
-          "title": "Вышло обновление RapidRAW 1.6.6 — открытого редактора изображений RAW",
-          "url": "https://habr.com/ru/news/1096768/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096768"
-        },
-        {
-          "title": "Критическая уязвимость в PHP",
-          "url": "https://habr.com/ru/news/1097016/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097016"
-        },
-        {
-          "title": "В OrcaSlicer 2.5 появилась поддержка плагинов, функции смешивания цветов и встроенного CAD",
-          "url": "https://habr.com/ru/news/1096948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1096948"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Почему релизы приходится спасать по ночам и что с этим делать",
-          "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
-        },
-        {
-          "title": "Как я перестал относиться к ИИ как к человеку: опыт соло-разработки двух пет-проектов",
-          "url": "https://tproger.ru/blogs/kak-ya-perestal-otnositsya-k-ii-kak-k-cheloveku-opyt-solo-razrabo"
-        },
-        {
-          "title": "Как написать сопроводительное письмо с помощью ИИ",
-          "url": "https://tproger.ru/articles/kak-napisat-soprovoditelnoe-pismo-s-pomoshhyu-ii"
-        },
-        {
-          "title": "ИИ для детей дошкольного возраста: рейтинг 5 программ и занятий в 2026 году",
-          "url": "https://tproger.ru/articles/ii-dlya-detej-dowkolnogo-vozrasta-rejting-5-programm-i-zanyatij"
-        },
-        {
-          "title": "Обновил, но не работает: как устроен кэш и почему его нельзя просто выключить",
-          "url": "https://tproger.ru/articles/obnovil-no-ne-rabotaet-kak-ustroen-kew-i-pochemu-ego-nelzya-pro"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261021-0310: Самара 0.7°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261021-1106",
     "generated_at": "2026-10-21T11:06:12Z",
     "weather": {
@@ -7631,5 +7551,85 @@
       ]
     },
     "summary": "Сводка digest-20261121-1408: Самара 7.0°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261121-2243",
+    "generated_at": "2026-11-21T22:43:55Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 6.2,
+      "feels_like_c": 3.0,
+      "description": "Небольшой дождь",
+      "wind_ms": 13.0
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Посредственность нужно искоренять»: Дженсен Хуанг годами «терроризировал» сотрудников Nvidia, но оставался для некоторых визионером",
+          "url": "https://vc.ru/hr/3269242-dzhensen-khuang-i-stil-upravleniya-v-nvidia?from=rss"
+        },
+        {
+          "title": "«Для них миллион — погрешность округления»: сотрудники ИИ-стартапов берут кредиты под залог акций и разжигают ценовые войны за недвижимость в Сан-Франциско",
+          "url": "https://vc.ru/money/3268529-kredity-pod-zalog-aktsiy-ii-kompanij-san-francisko?from=rss"
+        },
+        {
+          "title": "«Это и есть будущее?»: Neuralink показала, как её пациент играет в GTA VI с помощью нейрочипа",
+          "url": "https://vc.ru/future/3270008-neuralink-patsient-upravlyaet-gta-vi?from=rss"
+        },
+        {
+          "title": "Татьяна Ким перестала быть гендиректором Wildberries",
+          "url": "https://vc.ru/marketplace/3270134-tatiana-kim-pokinula-post-gendirektora-wildberries?from=rss"
+        },
+        {
+          "title": "Китайская BYD выпустила гибридный внедорожник с рулём, который складывается в переднюю панель",
+          "url": "https://vc.ru/transport/3269200-gibridnyj-vnedorozhnik-byd-ti-9-s-skladnym-rulem?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Я знаю, но рассказать не могу",
+          "url": "https://habr.com/ru/articles/1110772/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110772"
+        },
+        {
+          "title": "СССР и микроэлектроника: анатомия отставания. Часть образовательная",
+          "url": "https://habr.com/ru/articles/1110768/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110768"
+        },
+        {
+          "title": "«Наши две флагманские языковые модели входят в число лучших в мире». Проверяем по открытому рейтингу",
+          "url": "https://habr.com/ru/articles/1110766/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110766"
+        },
+        {
+          "title": "Недостающий кусок Databricks Bundles: таблицы Unity Catalog как код",
+          "url": "https://habr.com/ru/articles/1109206/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109206"
+        },
+        {
+          "title": "ИИ‑агенты, работающие в России",
+          "url": "https://habr.com/ru/articles/1110764/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110764"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Codex CLI включил новый интерфейс, а Cline CLI запускает задачи в yolo",
+          "url": "https://tproger.ru/news/codex-cli-vklyuchil-novyj-interfejs-a-cline-cli-zapuskaet-zadachi"
+        },
+        {
+          "title": "Адаптер под агента Pi поднял Qwen3.8-27B с 39 до 65% на SWE-bench Pro",
+          "url": "https://tproger.ru/news/adapter-pod-agenta-pi-podnyal-qwen3-8-27b-s-39-do-65-na-swe-benc"
+        },
+        {
+          "title": "Winedroid без Android запускает APK на Linux, macOS и в браузере",
+          "url": "https://tproger.ru/news/winedroid-bez-android-zapuskaet-apk-na-linux-macos-i-v-brauzere"
+        },
+        {
+          "title": "Гипотезу Римана доказали с Claude: 17 млн строк на Lean прошли проверку",
+          "url": "https://tproger.ru/news/gipotezu-rimana-dokazali-s-claude-17-mln-strok-na-lean-prowli-p"
+        },
+        {
+          "title": "Открытая Qwen3.5 27B нашла у себя ошибку и исправила её в своих весах",
+          "url": "https://tproger.ru/news/otkrytaya-qwen3-5-27b-nawla-u-sebya-owibku-i-ispravila-eyo-v-svoih"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261121-2243: Самара 6.2°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

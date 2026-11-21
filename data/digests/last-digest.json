@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261121-1408",
-  "generated_at": "2026-11-21T14:08:24Z",
+  "id": "digest-20261121-2243",
+  "generated_at": "2026-11-21T22:43:55Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 7.0,
-    "feels_like_c": 4.3,
+    "temp_c": 6.2,
+    "feels_like_c": 3.0,
     "description": "Небольшой дождь",
-    "wind_ms": 11.8
+    "wind_ms": 13.0
   },
   "news": {
     "vc.ru": [
@@ -33,48 +33,48 @@
     ],
     "habr": [
       {
-        "title": "Gemini 4 Neon догнала Opus 5.5, но релиз почти никто не заметил",
-        "url": "https://habr.com/ru/articles/1110692/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110692"
+        "title": "Я знаю, но рассказать не могу",
+        "url": "https://habr.com/ru/articles/1110772/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110772"
       },
       {
-        "title": "[Перевод] Дообучаем на Mac малую языковую модель для RAG в браузере",
-        "url": "https://habr.com/ru/companies/otus/articles/1106704/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1106704"
+        "title": "СССР и микроэлектроника: анатомия отставания. Часть образовательная",
+        "url": "https://habr.com/ru/articles/1110768/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110768"
       },
       {
-        "title": "Как я перестал быть диспетчером у своих ИИ-агентов",
-        "url": "https://habr.com/ru/articles/1110668/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110668"
+        "title": "«Наши две флагманские языковые модели входят в число лучших в мире». Проверяем по открытому рейтингу",
+        "url": "https://habr.com/ru/articles/1110766/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110766"
       },
       {
-        "title": "Эволюция NFQWS2 ASUS Community (+ Keenetic)",
-        "url": "https://habr.com/ru/articles/1110676/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110676"
+        "title": "Недостающий кусок Databricks Bundles: таблицы Unity Catalog как код",
+        "url": "https://habr.com/ru/articles/1109206/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109206"
       },
       {
-        "title": "Аналоговый гитарный аудиотракт с цифровыми стереоэффектами, версия 2",
-        "url": "https://habr.com/ru/companies/ruvds/articles/1079238/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1079238"
+        "title": "ИИ‑агенты, работающие в России",
+        "url": "https://habr.com/ru/articles/1110764/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110764"
       }
     ],
     "tproger": [
       {
-        "title": "Inkling 2 Mini от Thinking Machines запускается на Mac с 32 ГБ памяти",
-        "url": "https://tproger.ru/news/inkling-2-mini-ot-thinking-machines-zapuskaetsya-na-mac-s-32-gb-p"
+        "title": "Codex CLI включил новый интерфейс, а Cline CLI запускает задачи в yolo",
+        "url": "https://tproger.ru/news/codex-cli-vklyuchil-novyj-interfejs-a-cline-cli-zapuskaet-zadachi"
       },
       {
-        "title": "Правка истории диалога сбросит рассуждения GPT-6.2 в API OpenAI",
-        "url": "https://tproger.ru/news/pravka-istorii-dialoga-sbrosit-rassuzhdeniya-gpt-6-2-v-api-openai"
+        "title": "Адаптер под агента Pi поднял Qwen3.8-27B с 39 до 65% на SWE-bench Pro",
+        "url": "https://tproger.ru/news/adapter-pod-agenta-pi-podnyal-qwen3-8-27b-s-39-do-65-na-swe-benc"
       },
       {
-        "title": "Antigravity даст на 20% больше работы с Gemini 4 Neon и снова сбросит квоты",
-        "url": "https://tproger.ru/news/antigravity-dast-na-20-bolwe-raboty-s-gemini-4-neon-i-snova-sb"
+        "title": "Winedroid без Android запускает APK на Linux, macOS и в браузере",
+        "url": "https://tproger.ru/news/winedroid-bez-android-zapuskaet-apk-na-linux-macos-i-v-brauzere"
       },
       {
-        "title": "Google намекнула на подписку Gemini в сторонних агентах со 2 декабря",
-        "url": "https://tproger.ru/news/google-nameknula-na-podpisku-gemini-v-storonnih-agentah-so-2-dek"
+        "title": "Гипотезу Римана доказали с Claude: 17 млн строк на Lean прошли проверку",
+        "url": "https://tproger.ru/news/gipotezu-rimana-dokazali-s-claude-17-mln-strok-na-lean-prowli-p"
       },
       {
-        "title": "OpenAI открыла GPT-Live-1.1 в API и удешевила паузы в разговоре в 2,5 раза",
-        "url": "https://tproger.ru/news/openai-otkryla-gpt-live-1-1-v-api-i-udewevila-pauzy-v-razgovore"
+        "title": "Открытая Qwen3.5 27B нашла у себя ошибку и исправила её в своих весах",
+        "url": "https://tproger.ru/news/otkrytaya-qwen3-5-27b-nawla-u-sebya-owibku-i-ispravila-eyo-v-svoih"
       }
     ]
   },
-  "summary": "Сводка digest-20261121-1408: Самара 7.0°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261121-2243: Самара 6.2°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
