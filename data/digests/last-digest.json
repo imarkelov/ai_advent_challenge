@@ -1,56 +1,56 @@
 {
-  "id": "digest-20261122-0454",
-  "generated_at": "2026-11-22T04:54:49Z",
+  "id": "digest-20261122-1358",
+  "generated_at": "2026-11-22T13:58:54Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 5.1,
+    "temp_c": 4.7,
     "feels_like_c": 1.5,
     "description": "Переменная облачность",
-    "wind_ms": 14.5
+    "wind_ms": 9.7
   },
   "news": {
     "vc.ru": [
       {
+        "title": "Суд в Нидерландах запретил начинать продажи BYD Ti 7 в ЕС в рамках дела о сходстве машины с Land Rover Defender",
+        "url": "https://vc.ru/transport/3271185-sud-v-niderlandah-zapretil-prodazhi-byd-ti-7?from=rss"
+      },
+      {
         "title": "«Посредственность нужно искоренять»: Дженсен Хуанг годами «терроризировал» сотрудников Nvidia, но оставался для некоторых визионером",
         "url": "https://vc.ru/hr/3269242-dzhensen-khuang-i-stil-upravleniya-v-nvidia?from=rss"
+      },
+      {
+        "title": "Чтобы агент осилил: как СМИ экспериментируют с контентом для нейросетей",
+        "url": "https://vc.ru/media/3248455-kak-smi-adaptirovatsya-k-neyrosetyam?from=rss"
       },
       {
         "title": "«Для них миллион — погрешность округления»: сотрудники ИИ-стартапов берут кредиты под залог акций и разжигают ценовые войны за недвижимость в Сан-Франциско",
         "url": "https://vc.ru/money/3268529-kredity-pod-zalog-aktsiy-ii-kompanij-san-francisko?from=rss"
       },
       {
-        "title": "«Это и есть будущее?»: Neuralink показала, как её пациент играет в GTA VI с помощью нейрочипа",
-        "url": "https://vc.ru/future/3270008-neuralink-patsient-upravlyaet-gta-vi?from=rss"
-      },
-      {
         "title": "Татьяна Ким перестала быть гендиректором Wildberries",
         "url": "https://vc.ru/marketplace/3270134-tatiana-kim-pokinula-post-gendirektora-wildberries?from=rss"
-      },
-      {
-        "title": "Китайская BYD выпустила гибридный внедорожник с рулём, который складывается в переднюю панель",
-        "url": "https://vc.ru/transport/3269200-gibridnyj-vnedorozhnik-byd-ti-9-s-skladnym-rulem?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Вышел AnyDesk 9.8.4 для Windows, AnyDesk 9.1.0 для Android и AnyDesk 8.1.1 для Linux и Raspberry Pi",
-        "url": "https://habr.com/ru/articles/1110524/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110524"
+        "title": "Доверяй, но запрещай – или как ограничивать полномочия AI-агента на разных уровнях",
+        "url": "https://habr.com/ru/companies/magnit/articles/1110850/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110850"
       },
       {
-        "title": "Как Nvidia и Toshiba кинули всех: разыскивается O2 Xda Flame для хардкорного моддерского проекта",
-        "url": "https://habr.com/ru/articles/1110788/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110788"
+        "title": "[Перевод] Databricks World Tour Amsterdam 2026 фоторепортаж",
+        "url": "https://habr.com/ru/articles/1110860/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110860"
       },
       {
-        "title": "Месяц разработки Geo Collector: офлайн-карты России и Армении, 94 настройки карты и первая версия для Android",
-        "url": "https://habr.com/ru/articles/1110786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110786"
+        "title": "Кофе защищает от… забыл",
+        "url": "https://habr.com/ru/articles/1110780/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110780"
       },
       {
-        "title": "Обзор дисплея ILI9341",
-        "url": "https://habr.com/ru/articles/1101948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101948"
+        "title": "Снижаем текучку бесконечной лентой",
+        "url": "https://habr.com/ru/articles/1110856/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110856"
       },
       {
-        "title": "Как научить AI-агента проверять Windows-приложение через настоящий GUI: архитектура Deskcheck",
-        "url": "https://habr.com/ru/articles/1110776/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110776"
+        "title": "Серия Grand Theft Auto: реальные прототипы группировок и персонажей",
+        "url": "https://habr.com/ru/companies/ruvds/articles/1110010/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110010"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261122-0454: Самара 5.1°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261122-1358: Самара 4.7°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

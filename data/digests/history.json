@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261021-1633",
-    "generated_at": "2026-10-21T16:33:09Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 4.6,
-      "feels_like_c": 1.9,
-      "description": "Ясно",
-      "wind_ms": 4.6
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Unitree представила человекоподобного «робота-телохранителя» H2-X — в рекламном ролике он разбивает дверь автомобиля ногой и «защищает» человека",
-          "url": "https://vc.ru/tech/3207799-unitree-h2-x-robot-telohranitel?from=rss"
-        },
-        {
-          "title": "Тимлид рассказал на Reddit, как откликнулся на вакансию в своей компании и получил отказ — не прошёл автоматический фильтр",
-          "url": "https://vc.ru/hr/3207206-timlid-na-reddit-rasskazal-ob-otkaze-pri-otklyke-na-vakansiyu?from=rss"
-        },
-        {
-          "title": "Дептранс Москвы начал тестировать ровера-заправщика для электромобилей",
-          "url": "https://vc.ru/transport/3207552-depttrans-moskvy-testiruet-mobilnuyu-zaryadnuyu-stantsiyu?from=rss"
-        },
-        {
-          "title": "WSJ: Anthropic за первую половину 2026 года получила чистый убыток в $80,7 млрд и $16,3 млрд выручки",
-          "url": "https://vc.ru/money/3206919-anthropic-ubytki-i-riski-ot-ii?from=rss"
-        },
-        {
-          "title": "«Авито Услуги» запустили услугу доставки посылок из одного пункта выдачи в другой",
-          "url": "https://vc.ru/services/3207106-avito-uslugi-dostavka-posylok?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Microsoft добавила в PowerToys функцию блокировки кнопки мыши",
-          "url": "https://habr.com/ru/news/1097464/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097464"
-        },
-        {
-          "title": "Критическое обновление PHP: инструкция для владельцев коробочного Битрикс24 и сайтов на «1С-Битрикс: Управление сайтом»",
-          "url": "https://habr.com/ru/news/1097474/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097474"
-        },
-        {
-          "title": "В связи с критическими уязвимостями в PHP часть сайтов в сети отключены для применения фиксов",
-          "url": "https://habr.com/ru/news/1097444/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097444"
-        },
-        {
-          "title": "Суд обязал Meta* перечислить руководителей, которые одобрили скачивание книг из онлайн‑библиотек Anna’s Archive и LibGen",
-          "url": "https://habr.com/ru/news/1097452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097452"
-        },
-        {
-          "title": "В MWS Tables появился ИИ-помощник для быстрой настройки рабочих процессов",
-          "url": "https://habr.com/ru/companies/mws/news/1097438/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097438"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Почему релизы приходится спасать по ночам и что с этим делать",
-          "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
-        },
-        {
-          "title": "Как я перестал относиться к ИИ как к человеку: опыт соло-разработки двух пет-проектов",
-          "url": "https://tproger.ru/blogs/kak-ya-perestal-otnositsya-k-ii-kak-k-cheloveku-opyt-solo-razrabo"
-        },
-        {
-          "title": "Как написать сопроводительное письмо с помощью ИИ",
-          "url": "https://tproger.ru/articles/kak-napisat-soprovoditelnoe-pismo-s-pomoshhyu-ii"
-        },
-        {
-          "title": "ИИ для детей дошкольного возраста: рейтинг 5 программ и занятий в 2026 году",
-          "url": "https://tproger.ru/articles/ii-dlya-detej-dowkolnogo-vozrasta-rejting-5-programm-i-zanyatij"
-        },
-        {
-          "title": "Обновил, но не работает: как устроен кэш и почему его нельзя просто выключить",
-          "url": "https://tproger.ru/articles/obnovil-no-ne-rabotaet-kak-ustroen-kew-i-pochemu-ego-nelzya-pro"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261021-1633: Самара 4.6°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261021-2112",
     "generated_at": "2026-10-21T21:12:37Z",
     "weather": {
@@ -7631,5 +7551,85 @@
       ]
     },
     "summary": "Сводка digest-20261122-0454: Самара 5.1°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261122-1358",
+    "generated_at": "2026-11-22T13:58:54Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 4.7,
+      "feels_like_c": 1.5,
+      "description": "Переменная облачность",
+      "wind_ms": 9.7
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Суд в Нидерландах запретил начинать продажи BYD Ti 7 в ЕС в рамках дела о сходстве машины с Land Rover Defender",
+          "url": "https://vc.ru/transport/3271185-sud-v-niderlandah-zapretil-prodazhi-byd-ti-7?from=rss"
+        },
+        {
+          "title": "«Посредственность нужно искоренять»: Дженсен Хуанг годами «терроризировал» сотрудников Nvidia, но оставался для некоторых визионером",
+          "url": "https://vc.ru/hr/3269242-dzhensen-khuang-i-stil-upravleniya-v-nvidia?from=rss"
+        },
+        {
+          "title": "Чтобы агент осилил: как СМИ экспериментируют с контентом для нейросетей",
+          "url": "https://vc.ru/media/3248455-kak-smi-adaptirovatsya-k-neyrosetyam?from=rss"
+        },
+        {
+          "title": "«Для них миллион — погрешность округления»: сотрудники ИИ-стартапов берут кредиты под залог акций и разжигают ценовые войны за недвижимость в Сан-Франциско",
+          "url": "https://vc.ru/money/3268529-kredity-pod-zalog-aktsiy-ii-kompanij-san-francisko?from=rss"
+        },
+        {
+          "title": "Татьяна Ким перестала быть гендиректором Wildberries",
+          "url": "https://vc.ru/marketplace/3270134-tatiana-kim-pokinula-post-gendirektora-wildberries?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Доверяй, но запрещай – или как ограничивать полномочия AI-агента на разных уровнях",
+          "url": "https://habr.com/ru/companies/magnit/articles/1110850/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110850"
+        },
+        {
+          "title": "[Перевод] Databricks World Tour Amsterdam 2026 фоторепортаж",
+          "url": "https://habr.com/ru/articles/1110860/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110860"
+        },
+        {
+          "title": "Кофе защищает от… забыл",
+          "url": "https://habr.com/ru/articles/1110780/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110780"
+        },
+        {
+          "title": "Снижаем текучку бесконечной лентой",
+          "url": "https://habr.com/ru/articles/1110856/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110856"
+        },
+        {
+          "title": "Серия Grand Theft Auto: реальные прототипы группировок и персонажей",
+          "url": "https://habr.com/ru/companies/ruvds/articles/1110010/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110010"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Codex CLI включил новый интерфейс, а Cline CLI запускает задачи в yolo",
+          "url": "https://tproger.ru/news/codex-cli-vklyuchil-novyj-interfejs-a-cline-cli-zapuskaet-zadachi"
+        },
+        {
+          "title": "Адаптер под агента Pi поднял Qwen3.8-27B с 39 до 65% на SWE-bench Pro",
+          "url": "https://tproger.ru/news/adapter-pod-agenta-pi-podnyal-qwen3-8-27b-s-39-do-65-na-swe-benc"
+        },
+        {
+          "title": "Winedroid без Android запускает APK на Linux, macOS и в браузере",
+          "url": "https://tproger.ru/news/winedroid-bez-android-zapuskaet-apk-na-linux-macos-i-v-brauzere"
+        },
+        {
+          "title": "Гипотезу Римана доказали с Claude: 17 млн строк на Lean прошли проверку",
+          "url": "https://tproger.ru/news/gipotezu-rimana-dokazali-s-claude-17-mln-strok-na-lean-prowli-p"
+        },
+        {
+          "title": "Открытая Qwen3.5 27B нашла у себя ошибку и исправила её в своих весах",
+          "url": "https://tproger.ru/news/otkrytaya-qwen3-5-27b-nawla-u-sebya-owibku-i-ispravila-eyo-v-svoih"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261122-1358: Самара 4.7°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
