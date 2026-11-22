@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261121-2243",
-  "generated_at": "2026-11-21T22:43:55Z",
+  "id": "digest-20261122-0454",
+  "generated_at": "2026-11-22T04:54:49Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 6.2,
-    "feels_like_c": 3.0,
-    "description": "Небольшой дождь",
-    "wind_ms": 13.0
+    "temp_c": 5.1,
+    "feels_like_c": 1.5,
+    "description": "Переменная облачность",
+    "wind_ms": 14.5
   },
   "news": {
     "vc.ru": [
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
-        "title": "Я знаю, но рассказать не могу",
-        "url": "https://habr.com/ru/articles/1110772/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110772"
+        "title": "Вышел AnyDesk 9.8.4 для Windows, AnyDesk 9.1.0 для Android и AnyDesk 8.1.1 для Linux и Raspberry Pi",
+        "url": "https://habr.com/ru/articles/1110524/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110524"
       },
       {
-        "title": "СССР и микроэлектроника: анатомия отставания. Часть образовательная",
-        "url": "https://habr.com/ru/articles/1110768/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110768"
+        "title": "Как Nvidia и Toshiba кинули всех: разыскивается O2 Xda Flame для хардкорного моддерского проекта",
+        "url": "https://habr.com/ru/articles/1110788/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110788"
       },
       {
-        "title": "«Наши две флагманские языковые модели входят в число лучших в мире». Проверяем по открытому рейтингу",
-        "url": "https://habr.com/ru/articles/1110766/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110766"
+        "title": "Месяц разработки Geo Collector: офлайн-карты России и Армении, 94 настройки карты и первая версия для Android",
+        "url": "https://habr.com/ru/articles/1110786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110786"
       },
       {
-        "title": "Недостающий кусок Databricks Bundles: таблицы Unity Catalog как код",
-        "url": "https://habr.com/ru/articles/1109206/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109206"
+        "title": "Обзор дисплея ILI9341",
+        "url": "https://habr.com/ru/articles/1101948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101948"
       },
       {
-        "title": "ИИ‑агенты, работающие в России",
-        "url": "https://habr.com/ru/articles/1110764/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110764"
+        "title": "Как научить AI-агента проверять Windows-приложение через настоящий GUI: архитектура Deskcheck",
+        "url": "https://habr.com/ru/articles/1110776/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110776"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261121-2243: Самара 6.2°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261122-0454: Самара 5.1°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

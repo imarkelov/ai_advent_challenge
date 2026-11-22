@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261021-1106",
-    "generated_at": "2026-10-21T11:06:12Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 8.7,
-      "feels_like_c": 6.0,
-      "description": "Пасмурно",
-      "wind_ms": 3.5
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Тимлид рассказал на Reddit, как откликнулся на вакансию в своей компании и получил отказ — не прошёл автоматический фильтр",
-          "url": "https://vc.ru/hr/3207206-timlid-na-reddit-rasskazal-ob-otkaze-pri-otklyke-na-vakansiyu?from=rss"
-        },
-        {
-          "title": "WSJ: Anthropic за первую половину 2026 года получила чистый убыток в $80,7 млрд и $16,3 млрд выручки",
-          "url": "https://vc.ru/money/3206919-anthropic-ubytki-i-riski-ot-ii?from=rss"
-        },
-        {
-          "title": "«Авито Услуги» запустили услугу доставки посылок из одного пункта выдачи в другой",
-          "url": "https://vc.ru/services/3207106-avito-uslugi-dostavka-posylok?from=rss"
-        },
-        {
-          "title": "«Альфа-банк» готовится до конца 2026 года запустить видеоплатформу с фокусом на ИИ-видео, микросериалы и шоу со звёздами — РБК",
-          "url": "https://vc.ru/media/3206196-alfa-bank-zapusk-videoplatformu-s-ii-video?from=rss"
-        },
-        {
-          "title": "YouTube начал в тестовом режиме скрывать кнопку дизлайка под видео у части пользователей",
-          "url": "https://vc.ru/services/3207456-youtube-izmenil-interfeys-skryv-knopku-dizlayka?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Amazon предлагает молодежи в Великобритании вакансии с зарплатой от £31 000, опыт работы и резюме не требуются",
-          "url": "https://habr.com/ru/news/1097248/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097248"
-        },
-        {
-          "title": "«Ъ»: Минпромторг ищет партнёров для российских разработчиков электроники в Индии",
-          "url": "https://habr.com/ru/news/1097240/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097240"
-        },
-        {
-          "title": "Xbox готовит новые раунды увольнений в октябре, ноябре и январе",
-          "url": "https://habr.com/ru/news/1097208/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097208"
-        },
-        {
-          "title": "Киберспортивная организация Evil Geniuses объявила о прекращении деятельности",
-          "url": "https://habr.com/ru/news/1097154/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097154"
-        },
-        {
-          "title": "Microsoft: у некоторых корпоративных пользователей Edge 155 может не запускаться",
-          "url": "https://habr.com/ru/news/1097178/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097178"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Почему релизы приходится спасать по ночам и что с этим делать",
-          "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
-        },
-        {
-          "title": "Как я перестал относиться к ИИ как к человеку: опыт соло-разработки двух пет-проектов",
-          "url": "https://tproger.ru/blogs/kak-ya-perestal-otnositsya-k-ii-kak-k-cheloveku-opyt-solo-razrabo"
-        },
-        {
-          "title": "Как написать сопроводительное письмо с помощью ИИ",
-          "url": "https://tproger.ru/articles/kak-napisat-soprovoditelnoe-pismo-s-pomoshhyu-ii"
-        },
-        {
-          "title": "ИИ для детей дошкольного возраста: рейтинг 5 программ и занятий в 2026 году",
-          "url": "https://tproger.ru/articles/ii-dlya-detej-dowkolnogo-vozrasta-rejting-5-programm-i-zanyatij"
-        },
-        {
-          "title": "Обновил, но не работает: как устроен кэш и почему его нельзя просто выключить",
-          "url": "https://tproger.ru/articles/obnovil-no-ne-rabotaet-kak-ustroen-kew-i-pochemu-ego-nelzya-pro"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261021-1106: Самара 8.7°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261021-1633",
     "generated_at": "2026-10-21T16:33:09Z",
     "weather": {
@@ -7631,5 +7551,85 @@
       ]
     },
     "summary": "Сводка digest-20261121-2243: Самара 6.2°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261122-0454",
+    "generated_at": "2026-11-22T04:54:49Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 5.1,
+      "feels_like_c": 1.5,
+      "description": "Переменная облачность",
+      "wind_ms": 14.5
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "«Посредственность нужно искоренять»: Дженсен Хуанг годами «терроризировал» сотрудников Nvidia, но оставался для некоторых визионером",
+          "url": "https://vc.ru/hr/3269242-dzhensen-khuang-i-stil-upravleniya-v-nvidia?from=rss"
+        },
+        {
+          "title": "«Для них миллион — погрешность округления»: сотрудники ИИ-стартапов берут кредиты под залог акций и разжигают ценовые войны за недвижимость в Сан-Франциско",
+          "url": "https://vc.ru/money/3268529-kredity-pod-zalog-aktsiy-ii-kompanij-san-francisko?from=rss"
+        },
+        {
+          "title": "«Это и есть будущее?»: Neuralink показала, как её пациент играет в GTA VI с помощью нейрочипа",
+          "url": "https://vc.ru/future/3270008-neuralink-patsient-upravlyaet-gta-vi?from=rss"
+        },
+        {
+          "title": "Татьяна Ким перестала быть гендиректором Wildberries",
+          "url": "https://vc.ru/marketplace/3270134-tatiana-kim-pokinula-post-gendirektora-wildberries?from=rss"
+        },
+        {
+          "title": "Китайская BYD выпустила гибридный внедорожник с рулём, который складывается в переднюю панель",
+          "url": "https://vc.ru/transport/3269200-gibridnyj-vnedorozhnik-byd-ti-9-s-skladnym-rulem?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Вышел AnyDesk 9.8.4 для Windows, AnyDesk 9.1.0 для Android и AnyDesk 8.1.1 для Linux и Raspberry Pi",
+          "url": "https://habr.com/ru/articles/1110524/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110524"
+        },
+        {
+          "title": "Как Nvidia и Toshiba кинули всех: разыскивается O2 Xda Flame для хардкорного моддерского проекта",
+          "url": "https://habr.com/ru/articles/1110788/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110788"
+        },
+        {
+          "title": "Месяц разработки Geo Collector: офлайн-карты России и Армении, 94 настройки карты и первая версия для Android",
+          "url": "https://habr.com/ru/articles/1110786/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110786"
+        },
+        {
+          "title": "Обзор дисплея ILI9341",
+          "url": "https://habr.com/ru/articles/1101948/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1101948"
+        },
+        {
+          "title": "Как научить AI-агента проверять Windows-приложение через настоящий GUI: архитектура Deskcheck",
+          "url": "https://habr.com/ru/articles/1110776/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110776"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Codex CLI включил новый интерфейс, а Cline CLI запускает задачи в yolo",
+          "url": "https://tproger.ru/news/codex-cli-vklyuchil-novyj-interfejs-a-cline-cli-zapuskaet-zadachi"
+        },
+        {
+          "title": "Адаптер под агента Pi поднял Qwen3.8-27B с 39 до 65% на SWE-bench Pro",
+          "url": "https://tproger.ru/news/adapter-pod-agenta-pi-podnyal-qwen3-8-27b-s-39-do-65-na-swe-benc"
+        },
+        {
+          "title": "Winedroid без Android запускает APK на Linux, macOS и в браузере",
+          "url": "https://tproger.ru/news/winedroid-bez-android-zapuskaet-apk-na-linux-macos-i-v-brauzere"
+        },
+        {
+          "title": "Гипотезу Римана доказали с Claude: 17 млн строк на Lean прошли проверку",
+          "url": "https://tproger.ru/news/gipotezu-rimana-dokazali-s-claude-17-mln-strok-na-lean-prowli-p"
+        },
+        {
+          "title": "Открытая Qwen3.5 27B нашла у себя ошибку и исправила её в своих весах",
+          "url": "https://tproger.ru/news/otkrytaya-qwen3-5-27b-nawla-u-sebya-owibku-i-ispravila-eyo-v-svoih"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261122-0454: Самара 5.1°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
