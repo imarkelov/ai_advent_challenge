@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261122-1358",
-  "generated_at": "2026-11-22T13:58:54Z",
+  "id": "digest-20261122-2311",
+  "generated_at": "2026-11-22T23:11:04Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 4.7,
-    "feels_like_c": 1.5,
-    "description": "Переменная облачность",
-    "wind_ms": 9.7
+    "temp_c": 3.4,
+    "feels_like_c": 1.4,
+    "description": "Пасмурно",
+    "wind_ms": 1.8
   },
   "news": {
     "vc.ru": [
@@ -15,45 +15,53 @@
         "url": "https://vc.ru/transport/3271185-sud-v-niderlandah-zapretil-prodazhi-byd-ti-7?from=rss"
       },
       {
-        "title": "«Посредственность нужно искоренять»: Дженсен Хуанг годами «терроризировал» сотрудников Nvidia, но оставался для некоторых визионером",
-        "url": "https://vc.ru/hr/3269242-dzhensen-khuang-i-stil-upravleniya-v-nvidia?from=rss"
+        "title": "День 1733: Минтранс получил более 1600 предложений по доработке поправок к ПДД для электросамокатов",
+        "url": "https://vc.ru/money/3271463-mintrans-popravki-pdd-elektrosamokaty?from=rss"
       },
       {
         "title": "Чтобы агент осилил: как СМИ экспериментируют с контентом для нейросетей",
         "url": "https://vc.ru/media/3248455-kak-smi-adaptirovatsya-k-neyrosetyam?from=rss"
       },
       {
-        "title": "«Для них миллион — погрешность округления»: сотрудники ИИ-стартапов берут кредиты под залог акций и разжигают ценовые войны за недвижимость в Сан-Франциско",
-        "url": "https://vc.ru/money/3268529-kredity-pod-zalog-aktsiy-ii-kompanij-san-francisko?from=rss"
+        "title": "«Посредственность нужно искоренять»: Дженсен Хуанг годами «терроризировал» сотрудников Nvidia, но оставался для некоторых визионером",
+        "url": "https://vc.ru/hr/3269242-dzhensen-khuang-i-stil-upravleniya-v-nvidia?from=rss"
       },
       {
-        "title": "Татьяна Ким перестала быть гендиректором Wildberries",
-        "url": "https://vc.ru/marketplace/3270134-tatiana-kim-pokinula-post-gendirektora-wildberries?from=rss"
+        "title": "«Это становится пыткой»: экипаж предлагавшего «непрерывный» круиз лайнера Villa Vie Odyssey три недели не может сойти на берег",
+        "url": "https://vc.ru/offline/3271628-ekipazh-lainera-villa-vie-odyssey-ne-mozhet-sojti-na-bereg?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Доверяй, но запрещай – или как ограничивать полномочия AI-агента на разных уровнях",
-        "url": "https://habr.com/ru/companies/magnit/articles/1110850/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110850"
+        "title": "«Ваш разговор стал слишком длинным»: как Google Antigravity неожиданно режет контекст и как Gemini это решил",
+        "url": "https://habr.com/ru/articles/1111006/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111006"
       },
       {
-        "title": "[Перевод] Databricks World Tour Amsterdam 2026 фоторепортаж",
-        "url": "https://habr.com/ru/articles/1110860/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110860"
+        "title": "Модель вселенной как многопоточного гексагонального вычислителя на горизонте событий Белой дыры",
+        "url": "https://habr.com/ru/articles/1111004/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111004"
       },
       {
-        "title": "Кофе защищает от… забыл",
-        "url": "https://habr.com/ru/articles/1110780/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110780"
+        "title": "Агентская разработка в геймдеве на Unity, или Как я скормил агенту рекламу мобильной игры",
+        "url": "https://habr.com/ru/articles/1110996/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110996"
       },
       {
-        "title": "Снижаем текучку бесконечной лентой",
-        "url": "https://habr.com/ru/articles/1110856/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110856"
+        "title": "Гипотеза Римана. Часть вторая: как устроено опубликованное доказательство",
+        "url": "https://habr.com/ru/articles/1110970/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110970"
       },
       {
-        "title": "Серия Grand Theft Auto: реальные прототипы группировок и персонажей",
-        "url": "https://habr.com/ru/companies/ruvds/articles/1110010/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110010"
+        "title": "Гипотеза Римана. Часть первая: как мы её не доказали",
+        "url": "https://habr.com/ru/articles/1110964/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110964"
       }
     ],
     "tproger": [
+      {
+        "title": "OpenAI раскрыла замеры моделей и предложила общие лимиты для ИИ",
+        "url": "https://tproger.ru/news/openai-raskryla-zamery-modelej-i-predlozhila-obshhie-limity-dlya-ii"
+      },
+      {
+        "title": "Gemini 4 Neon возглавила LiveBench, но уступает в кодинге и терминале",
+        "url": "https://tproger.ru/news/gemini-4-neon-vozglavila-livebench-no-ustupaet-v-kodinge-i-term"
+      },
       {
         "title": "Codex CLI включил новый интерфейс, а Cline CLI запускает задачи в yolo",
         "url": "https://tproger.ru/news/codex-cli-vklyuchil-novyj-interfejs-a-cline-cli-zapuskaet-zadachi"
@@ -65,16 +73,8 @@
       {
         "title": "Winedroid без Android запускает APK на Linux, macOS и в браузере",
         "url": "https://tproger.ru/news/winedroid-bez-android-zapuskaet-apk-na-linux-macos-i-v-brauzere"
-      },
-      {
-        "title": "Гипотезу Римана доказали с Claude: 17 млн строк на Lean прошли проверку",
-        "url": "https://tproger.ru/news/gipotezu-rimana-dokazali-s-claude-17-mln-strok-na-lean-prowli-p"
-      },
-      {
-        "title": "Открытая Qwen3.5 27B нашла у себя ошибку и исправила её в своих весах",
-        "url": "https://tproger.ru/news/otkrytaya-qwen3-5-27b-nawla-u-sebya-owibku-i-ispravila-eyo-v-svoih"
       }
     ]
   },
-  "summary": "Сводка digest-20261122-1358: Самара 4.7°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261122-2311: Самара 3.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
