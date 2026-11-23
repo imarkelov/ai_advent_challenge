@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261022-0308",
-    "generated_at": "2026-10-22T03:08:51Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 0.5,
-      "feels_like_c": -2.5,
-      "description": "Преимущественно ясно",
-      "wind_ms": 4.4
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Unitree представила человекоподобного «робота-телохранителя» H2-X — в рекламном ролике он разбивает дверь автомобиля ногой и «защищает» человека",
-          "url": "https://vc.ru/tech/3207799-unitree-h2-x-robot-telohranitel?from=rss"
-        },
-        {
-          "title": "Тимлид рассказал на Reddit, как откликнулся на вакансию в своей компании и получил отказ — не прошёл автоматический фильтр",
-          "url": "https://vc.ru/hr/3207206-timlid-na-reddit-rasskazal-ob-otkaze-pri-otklyke-na-vakansiyu?from=rss"
-        },
-        {
-          "title": "Дептранс Москвы начал тестировать ровера-заправщика для электромобилей",
-          "url": "https://vc.ru/transport/3207552-depttrans-moskvy-testiruet-mobilnuyu-zaryadnuyu-stantsiyu?from=rss"
-        },
-        {
-          "title": "«Созданный из звука»: Apple официально объявила о редизайне логотипа Apple Music",
-          "url": "https://vc.ru/design/3208324-redizayn-logotipa-apple-music?from=rss"
-        },
-        {
-          "title": "WSJ: Anthropic за первую половину 2026 года получила чистый убыток в $80,7 млрд и $16,3 млрд выручки",
-          "url": "https://vc.ru/money/3206919-anthropic-ubytki-i-riski-ot-ii?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Представлен открытый нео-гротескный шрифт Nordwand-Mono, разработанный для программирования",
-          "url": "https://habr.com/ru/news/1097280/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097280"
-        },
-        {
-          "title": "Выпуск qBittorrent 5.3.0",
-          "url": "https://habr.com/ru/news/1097102/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097102"
-        },
-        {
-          "title": "Anthropic представила агента Claude Duet: сам вам пишет и следит за задачами",
-          "url": "https://habr.com/ru/companies/bothub/news/1097562/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097562"
-        },
-        {
-          "title": "Anthropic представили персонального AI-агента Claude Duet на базе Opus 5.5",
-          "url": "https://habr.com/ru/news/1097546/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097546"
-        },
-        {
-          "title": "Таблетка от облысения стала ближе к выходу на рынок после успешных испытаний поздней стадии",
-          "url": "https://habr.com/ru/news/1097522/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1097522"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Почему релизы приходится спасать по ночам и что с этим делать",
-          "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
-        },
-        {
-          "title": "Как я перестал относиться к ИИ как к человеку: опыт соло-разработки двух пет-проектов",
-          "url": "https://tproger.ru/blogs/kak-ya-perestal-otnositsya-k-ii-kak-k-cheloveku-opyt-solo-razrabo"
-        },
-        {
-          "title": "Как написать сопроводительное письмо с помощью ИИ",
-          "url": "https://tproger.ru/articles/kak-napisat-soprovoditelnoe-pismo-s-pomoshhyu-ii"
-        },
-        {
-          "title": "ИИ для детей дошкольного возраста: рейтинг 5 программ и занятий в 2026 году",
-          "url": "https://tproger.ru/articles/ii-dlya-detej-dowkolnogo-vozrasta-rejting-5-programm-i-zanyatij"
-        },
-        {
-          "title": "Обновил, но не работает: как устроен кэш и почему его нельзя просто выключить",
-          "url": "https://tproger.ru/articles/obnovil-no-ne-rabotaet-kak-ustroen-kew-i-pochemu-ego-nelzya-pro"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261022-0308: Самара 0.5°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261022-1106",
     "generated_at": "2026-10-22T11:06:01Z",
     "weather": {
@@ -7631,5 +7551,85 @@
       ]
     },
     "summary": "Сводка digest-20261122-2311: Самара 3.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261123-0535",
+    "generated_at": "2026-11-23T05:35:33Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 3.8,
+      "feels_like_c": 1.6,
+      "description": "Небольшой дождь",
+      "wind_ms": 4.2
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Суд в Нидерландах запретил начинать продажи BYD Ti 7 в ЕС в рамках дела о сходстве машины с Land Rover Defender",
+          "url": "https://vc.ru/transport/3271185-sud-v-niderlandah-zapretil-prodazhi-byd-ti-7?from=rss"
+        },
+        {
+          "title": "День 1733: Минтранс получил более 1600 предложений по доработке поправок к ПДД для электросамокатов",
+          "url": "https://vc.ru/money/3271463-mintrans-popravki-pdd-elektrosamokaty?from=rss"
+        },
+        {
+          "title": "Чтобы агент осилил: как СМИ экспериментируют с контентом для нейросетей",
+          "url": "https://vc.ru/media/3248455-kak-smi-adaptirovatsya-k-neyrosetyam?from=rss"
+        },
+        {
+          "title": "«Посредственность нужно искоренять»: Дженсен Хуанг годами «терроризировал» сотрудников Nvidia, но оставался для некоторых визионером",
+          "url": "https://vc.ru/hr/3269242-dzhensen-khuang-i-stil-upravleniya-v-nvidia?from=rss"
+        },
+        {
+          "title": "«Это становится пыткой»: экипаж предлагавшего «непрерывный» круиз лайнера Villa Vie Odyssey три недели не может сойти на берег",
+          "url": "https://vc.ru/offline/3271628-ekipazh-lainera-villa-vie-odyssey-ne-mozhet-sojti-na-bereg?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "ИИ навставляло кучу ненужных конденсаторов, резисторов и буферов в схему для пятиклассников. Возможно назло промпту",
+          "url": "https://habr.com/ru/articles/1110942/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110942"
+        },
+        {
+          "title": "Архитектурный челленж стека: ограничения MCP Tasks или как запускать долгие задачи в проде",
+          "url": "https://habr.com/ru/companies/raft/articles/1110946/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110946"
+        },
+        {
+          "title": "Пользователь починил Linux-сервер. А вернулся ли он завтра?",
+          "url": "https://habr.com/ru/articles/1110934/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110934"
+        },
+        {
+          "title": "Личность и ее стратегия. Кибернетическая модель ума",
+          "url": "https://habr.com/ru/companies/gai_company/articles/1110974/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110974"
+        },
+        {
+          "title": "ПОКА Я ТРЕНИРУЮ ТЕЛО, ИИ УЧИТСЯ ЭВОЛЮЦИОНИРОВАТЬ. КОМУ БУДЕТ ПРИНАДЛЕЖАТЬ БУДУЩЕЕ?",
+          "url": "https://habr.com/ru/articles/1111014/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111014"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "OpenAI раскрыла замеры моделей и предложила общие лимиты для ИИ",
+          "url": "https://tproger.ru/news/openai-raskryla-zamery-modelej-i-predlozhila-obshhie-limity-dlya-ii"
+        },
+        {
+          "title": "Gemini 4 Neon возглавила LiveBench, но уступает в кодинге и терминале",
+          "url": "https://tproger.ru/news/gemini-4-neon-vozglavila-livebench-no-ustupaet-v-kodinge-i-term"
+        },
+        {
+          "title": "Codex CLI включил новый интерфейс, а Cline CLI запускает задачи в yolo",
+          "url": "https://tproger.ru/news/codex-cli-vklyuchil-novyj-interfejs-a-cline-cli-zapuskaet-zadachi"
+        },
+        {
+          "title": "Адаптер под агента Pi поднял Qwen3.8-27B с 39 до 65% на SWE-bench Pro",
+          "url": "https://tproger.ru/news/adapter-pod-agenta-pi-podnyal-qwen3-8-27b-s-39-do-65-na-swe-benc"
+        },
+        {
+          "title": "Winedroid без Android запускает APK на Linux, macOS и в браузере",
+          "url": "https://tproger.ru/news/winedroid-bez-android-zapuskaet-apk-na-linux-macos-i-v-brauzere"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261123-0535: Самара 3.8°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

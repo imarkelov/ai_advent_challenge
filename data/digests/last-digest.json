@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261122-2311",
-  "generated_at": "2026-11-22T23:11:04Z",
+  "id": "digest-20261123-0535",
+  "generated_at": "2026-11-23T05:35:33Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 3.4,
-    "feels_like_c": 1.4,
-    "description": "Пасмурно",
-    "wind_ms": 1.8
+    "temp_c": 3.8,
+    "feels_like_c": 1.6,
+    "description": "Небольшой дождь",
+    "wind_ms": 4.2
   },
   "news": {
     "vc.ru": [
@@ -33,24 +33,24 @@
     ],
     "habr": [
       {
-        "title": "«Ваш разговор стал слишком длинным»: как Google Antigravity неожиданно режет контекст и как Gemini это решил",
-        "url": "https://habr.com/ru/articles/1111006/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111006"
+        "title": "ИИ навставляло кучу ненужных конденсаторов, резисторов и буферов в схему для пятиклассников. Возможно назло промпту",
+        "url": "https://habr.com/ru/articles/1110942/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110942"
       },
       {
-        "title": "Модель вселенной как многопоточного гексагонального вычислителя на горизонте событий Белой дыры",
-        "url": "https://habr.com/ru/articles/1111004/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111004"
+        "title": "Архитектурный челленж стека: ограничения MCP Tasks или как запускать долгие задачи в проде",
+        "url": "https://habr.com/ru/companies/raft/articles/1110946/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110946"
       },
       {
-        "title": "Агентская разработка в геймдеве на Unity, или Как я скормил агенту рекламу мобильной игры",
-        "url": "https://habr.com/ru/articles/1110996/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110996"
+        "title": "Пользователь починил Linux-сервер. А вернулся ли он завтра?",
+        "url": "https://habr.com/ru/articles/1110934/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110934"
       },
       {
-        "title": "Гипотеза Римана. Часть вторая: как устроено опубликованное доказательство",
-        "url": "https://habr.com/ru/articles/1110970/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110970"
+        "title": "Личность и ее стратегия. Кибернетическая модель ума",
+        "url": "https://habr.com/ru/companies/gai_company/articles/1110974/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110974"
       },
       {
-        "title": "Гипотеза Римана. Часть первая: как мы её не доказали",
-        "url": "https://habr.com/ru/articles/1110964/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110964"
+        "title": "ПОКА Я ТРЕНИРУЮ ТЕЛО, ИИ УЧИТСЯ ЭВОЛЮЦИОНИРОВАТЬ. КОМУ БУДЕТ ПРИНАДЛЕЖАТЬ БУДУЩЕЕ?",
+        "url": "https://habr.com/ru/articles/1111014/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111014"
       }
     ],
     "tproger": [
@@ -76,5 +76,5 @@
       }
     ]
   },
-  "summary": "Сводка digest-20261122-2311: Самара 3.4°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261123-0535: Самара 3.8°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
