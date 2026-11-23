@@ -1,59 +1,67 @@
 {
-  "id": "digest-20261123-0535",
-  "generated_at": "2026-11-23T05:35:33Z",
+  "id": "digest-20261123-1716",
+  "generated_at": "2026-11-23T17:16:46Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 3.8,
-    "feels_like_c": 1.6,
-    "description": "Небольшой дождь",
-    "wind_ms": 4.2
+    "temp_c": 0.0,
+    "feels_like_c": -3.5,
+    "description": "Ясно",
+    "wind_ms": 8.1
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Суд в Нидерландах запретил начинать продажи BYD Ti 7 в ЕС в рамках дела о сходстве машины с Land Rover Defender",
-        "url": "https://vc.ru/transport/3271185-sud-v-niderlandah-zapretil-prodazhi-byd-ti-7?from=rss"
+        "title": "Совет директоров Nvidia вернул Дженсена Хуанга на пост главы компании",
+        "url": "https://vc.ru/hr/3273564-novosti-nvidia-dzhensen-huang-vozvrashchaetsya-na-post-gendirektora?from=rss"
       },
       {
-        "title": "День 1733: Минтранс получил более 1600 предложений по доработке поправок к ПДД для электросамокатов",
-        "url": "https://vc.ru/money/3271463-mintrans-popravki-pdd-elektrosamokaty?from=rss"
+        "title": "«Как в GTA»: Tesla добавила в систему автономного вождения функцию визуализации поездки от третьего лица",
+        "url": "https://vc.ru/transport/3272523-tesla-vnedrila-funkciyu-reality-view?from=rss"
       },
       {
-        "title": "Чтобы агент осилил: как СМИ экспериментируют с контентом для нейросетей",
-        "url": "https://vc.ru/media/3248455-kak-smi-adaptirovatsya-k-neyrosetyam?from=rss"
+        "title": "Kodak представила брелок-фоторамку за $35, который можно использовать как трекер",
+        "url": "https://vc.ru/tech/3273197-kodak-slidetag-brelok-fotoramka?from=rss"
       },
       {
-        "title": "«Посредственность нужно искоренять»: Дженсен Хуанг годами «терроризировал» сотрудников Nvidia, но оставался для некоторых визионером",
-        "url": "https://vc.ru/hr/3269242-dzhensen-khuang-i-stil-upravleniya-v-nvidia?from=rss"
+        "title": "Санкции против 60 банков и запрет на визы для бывших военнослужащих: Еврокомиссия представила проект 22 пакета санкций против России",
+        "url": "https://vc.ru/legal/3273899-sankcii-protiv-60-bankov-i-zapret-na-vizy-dlya-byvshih-voennosluzhashih-evrokomissiya-predstavila-proekt-22-paketa-sankcii-protiv-rossii?from=rss"
       },
       {
-        "title": "«Это становится пыткой»: экипаж предлагавшего «непрерывный» круиз лайнера Villa Vie Odyssey три недели не может сойти на берег",
-        "url": "https://vc.ru/offline/3271628-ekipazh-lainera-villa-vie-odyssey-ne-mozhet-sojti-na-bereg?from=rss"
+        "title": "День 1734: правительство вернулось к обсуждению прокатных удостоверений для видеоигр",
+        "url": "https://vc.ru/money/3272247-obsuzhdenie-prokatnyh-udostovereniy-dlya-videoigr?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "ИИ навставляло кучу ненужных конденсаторов, резисторов и буферов в схему для пятиклассников. Возможно назло промпту",
-        "url": "https://habr.com/ru/articles/1110942/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110942"
+        "title": "Security Week 2648: парад критических уязвимостей",
+        "url": "https://habr.com/ru/companies/kaspersky/articles/1111076/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111076"
       },
       {
-        "title": "Архитектурный челленж стека: ограничения MCP Tasks или как запускать долгие задачи в проде",
-        "url": "https://habr.com/ru/companies/raft/articles/1110946/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110946"
+        "title": "Как расширение Chrome слушает звук вкладки: tabCapture, offscreen-документ и Manifest V3",
+        "url": "https://habr.com/ru/articles/1111454/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111454"
       },
       {
-        "title": "Пользователь починил Linux-сервер. А вернулся ли он завтра?",
-        "url": "https://habr.com/ru/articles/1110934/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110934"
+        "title": "Защита чувствительных данных в T Data Platform",
+        "url": "https://habr.com/ru/companies/tbank/articles/1111154/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111154"
       },
       {
-        "title": "Личность и ее стратегия. Кибернетическая модель ума",
-        "url": "https://habr.com/ru/companies/gai_company/articles/1110974/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110974"
+        "title": "Рынок найма в ИТ ждет ренессанс",
+        "url": "https://habr.com/ru/articles/1110976/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110976"
       },
       {
-        "title": "ПОКА Я ТРЕНИРУЮ ТЕЛО, ИИ УЧИТСЯ ЭВОЛЮЦИОНИРОВАТЬ. КОМУ БУДЕТ ПРИНАДЛЕЖАТЬ БУДУЩЕЕ?",
-        "url": "https://habr.com/ru/articles/1111014/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111014"
+        "title": "Видимость бренда в нейросетях: почему для аудита Алисы AI и ChatGPT нужны обращения клиентов",
+        "url": "https://habr.com/ru/articles/1111448/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111448"
       }
     ],
     "tproger": [
+      {
+        "title": "Лучший хостинг для Python-приложений на Flask, FastAPI и Django",
+        "url": "https://tproger.ru/articles/luchwij-hosting-dlya-python-prilozhenij-na-flask-fastapi-i-django"
+      },
+      {
+        "title": "Z.ai выпустила GLM-5.4: недельная квота в Coding Plan на 50% выше",
+        "url": "https://tproger.ru/news/z-ai-vypustila-glm-5-4-nedelnaya-kvota-v-coding-plan-na-50-vyw"
+      },
       {
         "title": "OpenAI раскрыла замеры моделей и предложила общие лимиты для ИИ",
         "url": "https://tproger.ru/news/openai-raskryla-zamery-modelej-i-predlozhila-obshhie-limity-dlya-ii"
@@ -65,16 +73,8 @@
       {
         "title": "Codex CLI включил новый интерфейс, а Cline CLI запускает задачи в yolo",
         "url": "https://tproger.ru/news/codex-cli-vklyuchil-novyj-interfejs-a-cline-cli-zapuskaet-zadachi"
-      },
-      {
-        "title": "Адаптер под агента Pi поднял Qwen3.8-27B с 39 до 65% на SWE-bench Pro",
-        "url": "https://tproger.ru/news/adapter-pod-agenta-pi-podnyal-qwen3-8-27b-s-39-do-65-na-swe-benc"
-      },
-      {
-        "title": "Winedroid без Android запускает APK на Linux, macOS и в браузере",
-        "url": "https://tproger.ru/news/winedroid-bez-android-zapuskaet-apk-na-linux-macos-i-v-brauzere"
       }
     ]
   },
-  "summary": "Сводка digest-20261123-0535: Самара 3.8°C, Небольшой дождь; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261123-1716: Самара 0.0°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
