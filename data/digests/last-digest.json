@@ -1,18 +1,22 @@
 {
-  "id": "digest-20261123-1716",
-  "generated_at": "2026-11-23T17:16:46Z",
+  "id": "digest-20261124-0345",
+  "generated_at": "2026-11-24T03:45:12Z",
   "weather": {
     "city": "Самара",
-    "temp_c": 0.0,
-    "feels_like_c": -3.5,
-    "description": "Ясно",
-    "wind_ms": 8.1
+    "temp_c": -1.6,
+    "feels_like_c": -4.9,
+    "description": "Пасмурно",
+    "wind_ms": 5.0
   },
   "news": {
     "vc.ru": [
       {
         "title": "Совет директоров Nvidia вернул Дженсена Хуанга на пост главы компании",
         "url": "https://vc.ru/hr/3273564-novosti-nvidia-dzhensen-huang-vozvrashchaetsya-na-post-gendirektora?from=rss"
+      },
+      {
+        "title": "Санкции против 60 банков и запрет на визы для бывших военнослужащих: Еврокомиссия представила проект 22 пакета санкций против России",
+        "url": "https://vc.ru/legal/3273899-sanktsii-protiv-rossiiskikh-bankov-i-vizovye-ogranicheniya?from=rss"
       },
       {
         "title": "«Как в GTA»: Tesla добавила в систему автономного вождения функцию визуализации поездки от третьего лица",
@@ -23,58 +27,54 @@
         "url": "https://vc.ru/tech/3273197-kodak-slidetag-brelok-fotoramka?from=rss"
       },
       {
-        "title": "Санкции против 60 банков и запрет на визы для бывших военнослужащих: Еврокомиссия представила проект 22 пакета санкций против России",
-        "url": "https://vc.ru/legal/3273899-sankcii-protiv-60-bankov-i-zapret-na-vizy-dlya-byvshih-voennosluzhashih-evrokomissiya-predstavila-proekt-22-paketa-sankcii-protiv-rossii?from=rss"
-      },
-      {
-        "title": "День 1734: правительство вернулось к обсуждению прокатных удостоверений для видеоигр",
-        "url": "https://vc.ru/money/3272247-obsuzhdenie-prokatnyh-udostovereniy-dlya-videoigr?from=rss"
+        "title": "FT: Mercedes-Benz опередила Tesla и первой прошла в Германии сертификацию системы автономного вождения — это позволит использовать технологию по всему ЕС",
+        "url": "https://vc.ru/transport/3273743-mercedes-benz-avtonomnoye-vozhdenie-germaniya?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Security Week 2648: парад критических уязвимостей",
-        "url": "https://habr.com/ru/companies/kaspersky/articles/1111076/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111076"
+        "title": "Выпуск Rust Coreutils 0.13.0",
+        "url": "https://habr.com/ru/articles/1111104/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111104"
       },
       {
-        "title": "Как расширение Chrome слушает звук вкладки: tabCapture, offscreen-документ и Manifest V3",
-        "url": "https://habr.com/ru/articles/1111454/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111454"
+        "title": "Те же галеры, вид сбоку — наем, KPI и выгорание в кибергруппировках",
+        "url": "https://habr.com/ru/companies/ispsystem/articles/1111532/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111532"
       },
       {
-        "title": "Защита чувствительных данных в T Data Platform",
-        "url": "https://habr.com/ru/companies/tbank/articles/1111154/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111154"
+        "title": "Какие ИИ-боты читают ваш сайт и как ими управлять: GPTBot, ClaudeBot, PerplexityBot, YandexAdditional и другие",
+        "url": "https://habr.com/ru/articles/1111320/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111320"
       },
       {
-        "title": "Рынок найма в ИТ ждет ренессанс",
-        "url": "https://habr.com/ru/articles/1110976/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1110976"
+        "title": "Что такое RGB MiniLED и чем телевизор с этой подсветкой отличается от других экранов",
+        "url": "https://habr.com/ru/companies/hisense_tv/articles/1111536/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111536"
       },
       {
-        "title": "Видимость бренда в нейросетях: почему для аудита Алисы AI и ChatGPT нужны обращения клиентов",
-        "url": "https://habr.com/ru/articles/1111448/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111448"
+        "title": "К чему нас приведёт полный контроль в руках ИИ?",
+        "url": "https://habr.com/ru/articles/1111538/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111538"
       }
     ],
     "tproger": [
       {
-        "title": "Лучший хостинг для Python-приложений на Flask, FastAPI и Django",
-        "url": "https://tproger.ru/articles/luchwij-hosting-dlya-python-prilozhenij-na-flask-fastapi-i-django"
+        "title": "API DeepSeek удалось пополнить картой Сбера через китайский QR",
+        "url": "https://tproger.ru/news/api-deepseek-udalos-popolnit-kartoj-sbera-cherez-kitajskij-qr"
       },
       {
-        "title": "Z.ai выпустила GLM-5.4: недельная квота в Coding Plan на 50% выше",
-        "url": "https://tproger.ru/news/z-ai-vypustila-glm-5-4-nedelnaya-kvota-v-coding-plan-na-50-vyw"
+        "title": "Claude Ship стал проверять, чинить и одобрять pull request по правилам",
+        "url": "https://tproger.ru/news/claude-ship-stal-proveryat-chinit-i-odobryat-pull-request-po-pr"
       },
       {
-        "title": "OpenAI раскрыла замеры моделей и предложила общие лимиты для ИИ",
-        "url": "https://tproger.ru/news/openai-raskryla-zamery-modelej-i-predlozhila-obshhie-limity-dlya-ii"
+        "title": "Как проверить домашний Wi-Fi через ИИ-агента: безопасный промпт",
+        "url": "https://tproger.ru/news/kak-proverit-domawnij-wi-fi-cherez-ii-agenta-bezopasnyj-prompt"
       },
       {
-        "title": "Gemini 4 Neon возглавила LiveBench, но уступает в кодинге и терминале",
-        "url": "https://tproger.ru/news/gemini-4-neon-vozglavila-livebench-no-ustupaet-v-kodinge-i-term"
+        "title": "Google обнулила квоты Gemini в Antigravity и пообещала Carbon на Pro",
+        "url": "https://tproger.ru/news/google-obnulila-kvoty-gemini-v-antigravity-i-poobeshhala-carbon-na"
       },
       {
-        "title": "Codex CLI включил новый интерфейс, а Cline CLI запускает задачи в yolo",
-        "url": "https://tproger.ru/news/codex-cli-vklyuchil-novyj-interfejs-a-cline-cli-zapuskaet-zadachi"
+        "title": "Kagi открыла публичную бету почты Kagi Mail со своими доменами",
+        "url": "https://tproger.ru/news/kagi-otkryla-publichnuyu-betu-pochty-kagi-mail-so-svoimi-domenami"
       }
     ]
   },
-  "summary": "Сводка digest-20261123-1716: Самара 0.0°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261124-0345: Самара -1.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
