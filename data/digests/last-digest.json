@@ -1,80 +1,76 @@
 {
-  "id": "digest-20261124-0345",
-  "generated_at": "2026-11-24T03:45:12Z",
+  "id": "digest-20261124-1655",
+  "generated_at": "2026-11-24T16:55:14Z",
   "weather": {
-    "city": "Самара",
-    "temp_c": -1.6,
-    "feels_like_c": -4.9,
-    "description": "Пасмурно",
-    "wind_ms": 5.0
+    "error": "<urlopen error [Errno 104] Connection reset by peer>"
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Совет директоров Nvidia вернул Дженсена Хуанга на пост главы компании",
-        "url": "https://vc.ru/hr/3273564-novosti-nvidia-dzhensen-huang-vozvrashchaetsya-na-post-gendirektora?from=rss"
+        "title": "Госдума обязала ЦБ передавать ФНС данные о гражданах «с признаками систематического получения доходов от других физлиц»",
+        "url": "https://vc.ru/money/3275949-gosduma-zakon-tsb-fns-dannye-grazhdan?from=rss"
       },
       {
-        "title": "Санкции против 60 банков и запрет на визы для бывших военнослужащих: Еврокомиссия представила проект 22 пакета санкций против России",
-        "url": "https://vc.ru/legal/3273899-sanktsii-protiv-rossiiskikh-bankov-i-vizovye-ogranicheniya?from=rss"
+        "title": "Госдума приняла законопроект о бюджете на 2027-2029 годы: в него вошла прогрессивная ставка НДФЛ в 13-22% на доходы россиян от вкладов, инвестиций в ценные бумаги и продажи имущества",
+        "url": "https://vc.ru/money/3275761-gosduma-prinyala-zakon-o-progessivnom-ndfl?from=rss"
       },
       {
-        "title": "«Как в GTA»: Tesla добавила в систему автономного вождения функцию визуализации поездки от третьего лица",
-        "url": "https://vc.ru/transport/3272523-tesla-vnedrila-funkciyu-reality-view?from=rss"
+        "title": "ТАСС: в Госдуме подготовили законопроект о квотах на показ российского кино — он предусматривает периоды, когда кинотеатры не смогут показывать зарубежные фильмы",
+        "url": "https://vc.ru/legal/3275007-zakonoproekt-o-kvotakh-na-pokaz-rossiyskogo-kino?from=rss"
       },
       {
-        "title": "Kodak представила брелок-фоторамку за $35, который можно использовать как трекер",
-        "url": "https://vc.ru/tech/3273197-kodak-slidetag-brelok-fotoramka?from=rss"
+        "title": "Облако под землёй: как строят дата-центры в шахтах и ядерных бункерах",
+        "url": "https://vc.ru/future/3272654-data-tsentry-pod-zemley?from=rss"
       },
       {
-        "title": "FT: Mercedes-Benz опередила Tesla и первой прошла в Германии сертификацию системы автономного вождения — это позволит использовать технологию по всему ЕС",
-        "url": "https://vc.ru/transport/3273743-mercedes-benz-avtonomnoye-vozhdenie-germaniya?from=rss"
+        "title": "СМИ: Дженсена Хуанга восстановили в должности главы Nvidia без обсуждения с топ-менеджментом — зато в заседании совета директоров участвовал Дональд Трамп",
+        "url": "https://vc.ru/hr/3274778-dzhensen-huang-vozvrashchenie-v-nvidia?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Выпуск Rust Coreutils 0.13.0",
-        "url": "https://habr.com/ru/articles/1111104/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111104"
+        "title": "Практика Go: одно неэкспортируемое поле — и [REDACTED] превращается в пароль",
+        "url": "https://habr.com/ru/articles/1111544/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111544"
       },
       {
-        "title": "Те же галеры, вид сбоку — наем, KPI и выгорание в кибергруппировках",
-        "url": "https://habr.com/ru/companies/ispsystem/articles/1111532/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111532"
+        "title": "Nomadic показала дрон Nomad, который заряжается от высоковольтных линий и мониторит до 25 км электросетей",
+        "url": "https://habr.com/ru/articles/1111910/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111910"
       },
       {
-        "title": "Какие ИИ-боты читают ваш сайт и как ими управлять: GPTBot, ClaudeBot, PerplexityBot, YandexAdditional и другие",
-        "url": "https://habr.com/ru/articles/1111320/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111320"
+        "title": "Obsidian для рекрутера: кандидаты, вакансии и гонорары в одном хранилище",
+        "url": "https://habr.com/ru/articles/1111902/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111902"
       },
       {
-        "title": "Что такое RGB MiniLED и чем телевизор с этой подсветкой отличается от других экранов",
-        "url": "https://habr.com/ru/companies/hisense_tv/articles/1111536/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111536"
+        "title": "[Перевод] Собрали 3D-ускоритель внутри ПЛИС Tang Nano 20K: Quake вырос с 3,7 до 15 кадров в секунду",
+        "url": "https://habr.com/ru/articles/1111900/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111900"
       },
       {
-        "title": "К чему нас приведёт полный контроль в руках ИИ?",
-        "url": "https://habr.com/ru/articles/1111538/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111538"
+        "title": "Blockbench: не всё же моделить в Blender",
+        "url": "https://habr.com/ru/articles/1111898/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111898"
       }
     ],
     "tproger": [
       {
-        "title": "API DeepSeek удалось пополнить картой Сбера через китайский QR",
-        "url": "https://tproger.ru/news/api-deepseek-udalos-popolnit-kartoj-sbera-cherez-kitajskij-qr"
+        "title": "Aleph Alpha открыла Kolibri 1.1, но llama.cpp пока не умеет её запускать",
+        "url": "https://tproger.ru/news/aleph-alpha-otkryla-kolibri-1-1-no-llama-cpp-poka-ne-umeet-eyo-z"
       },
       {
-        "title": "Claude Ship стал проверять, чинить и одобрять pull request по правилам",
-        "url": "https://tproger.ru/news/claude-ship-stal-proveryat-chinit-i-odobryat-pull-request-po-pr"
+        "title": "Google представила защиту ИИ-агентов от скрытых команд в данных",
+        "url": "https://tproger.ru/news/google-predstavila-zashhitu-ii-agentov-ot-skrytyh-komand-v-dannyh"
       },
       {
-        "title": "Как проверить домашний Wi-Fi через ИИ-агента: безопасный промпт",
-        "url": "https://tproger.ru/news/kak-proverit-domawnij-wi-fi-cherez-ii-agenta-bezopasnyj-prompt"
+        "title": "Baidu открыла веса ERNIE 5.5 Flash Preview с контекстом 1 млн токенов",
+        "url": "https://tproger.ru/news/baidu-otkryla-vesa-ernie-5-5-flash-preview-s-kontekstom-1-mln-to"
       },
       {
-        "title": "Google обнулила квоты Gemini в Antigravity и пообещала Carbon на Pro",
-        "url": "https://tproger.ru/news/google-obnulila-kvoty-gemini-v-antigravity-i-poobeshhala-carbon-na"
+        "title": "OpenAI и Cisco открыли Shirudo для защиты Linux-серверов до патча",
+        "url": "https://tproger.ru/news/openai-i-cisco-otkryli-shirudo-dlya-zashhity-linux-serverov-do-patch"
       },
       {
-        "title": "Kagi открыла публичную бету почты Kagi Mail со своими доменами",
-        "url": "https://tproger.ru/news/kagi-otkryla-publichnuyu-betu-pochty-kagi-mail-so-svoimi-domenami"
+        "title": "Claude доказала алгебраический аналог P против NP, Lean проверил вывод",
+        "url": "https://tproger.ru/news/claude-dokazala-algebraicheskij-analog-p-protiv-np-lean-proveril"
       }
     ]
   },
-  "summary": "Сводка digest-20261124-0345: Самара -1.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261124-1655: погода недоступна (<urlopen error [Errno 104] Connection reset by peer>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
