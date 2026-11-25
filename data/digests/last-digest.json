@@ -1,8 +1,8 @@
 {
-  "id": "digest-20261124-1655",
-  "generated_at": "2026-11-24T16:55:14Z",
+  "id": "digest-20261125-0152",
+  "generated_at": "2026-11-25T01:52:42Z",
   "weather": {
-    "error": "<urlopen error [Errno 104] Connection reset by peer>"
+    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
   },
   "news": {
     "vc.ru": [
@@ -23,54 +23,54 @@
         "url": "https://vc.ru/future/3272654-data-tsentry-pod-zemley?from=rss"
       },
       {
-        "title": "СМИ: Дженсена Хуанга восстановили в должности главы Nvidia без обсуждения с топ-менеджментом — зато в заседании совета директоров участвовал Дональд Трамп",
-        "url": "https://vc.ru/hr/3274778-dzhensen-huang-vozvrashchenie-v-nvidia?from=rss"
+        "title": "В «цифре» вышла документалка «Увидеть всё» о жизни основательницы Theranos Элизабет Холмс перед началом её тюремного срока",
+        "url": "https://vc.ru/media/3275048-dokumentalnyj-film-uvidet-vse-o-elizabet-holms-i-theranos?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Практика Go: одно неэкспортируемое поле — и [REDACTED] превращается в пароль",
-        "url": "https://habr.com/ru/articles/1111544/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111544"
+        "title": "Прачечная AudiA6: они отмыли 10 333 BTC. Интервью с подельником специальный выпуск для habr (эксклюзив)",
+        "url": "https://habr.com/ru/articles/1111988/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111988"
       },
       {
-        "title": "Nomadic показала дрон Nomad, который заряжается от высоковольтных линий и мониторит до 25 км электросетей",
-        "url": "https://habr.com/ru/articles/1111910/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111910"
+        "title": "[Перевод] Дата-центры для ИИ. Кто на самом деле за них платит?",
+        "url": "https://habr.com/ru/articles/1111976/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111976"
       },
       {
-        "title": "Obsidian для рекрутера: кандидаты, вакансии и гонорары в одном хранилище",
-        "url": "https://habr.com/ru/articles/1111902/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111902"
+        "title": "Tesla P100",
+        "url": "https://habr.com/ru/articles/1111984/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111984"
       },
       {
-        "title": "[Перевод] Собрали 3D-ускоритель внутри ПЛИС Tang Nano 20K: Quake вырос с 3,7 до 15 кадров в секунду",
-        "url": "https://habr.com/ru/articles/1111900/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111900"
+        "title": "Обычный пользователь macOS и его воображаемые друзья cp, mv, mkdir и diskutil",
+        "url": "https://habr.com/ru/articles/1111978/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111978"
       },
       {
-        "title": "Blockbench: не всё же моделить в Blender",
-        "url": "https://habr.com/ru/articles/1111898/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111898"
+        "title": "Патентный ландшафт семантических слоев: Почему dbt, Looker и Cube не патентуют их, а Microsoft и IBM — да (2010-26)",
+        "url": "https://habr.com/ru/articles/1111972/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111972"
       }
     ],
     "tproger": [
       {
-        "title": "Aleph Alpha открыла Kolibri 1.1, но llama.cpp пока не умеет её запускать",
-        "url": "https://tproger.ru/news/aleph-alpha-otkryla-kolibri-1-1-no-llama-cpp-poka-ne-umeet-eyo-z"
+        "title": "Шпаргалка по curl в 2026 году с проверенными примерами запросов",
+        "url": "https://tproger.ru/articles/wpargalka-po-curl-v-2026-godu-s-proverennymi-primerami-zaprosov"
       },
       {
-        "title": "Google представила защиту ИИ-агентов от скрытых команд в данных",
-        "url": "https://tproger.ru/news/google-predstavila-zashhitu-ii-agentov-ot-skrytyh-komand-v-dannyh"
+        "title": "Как написать unit-файл systemd и включить автозапуск в 2026 году",
+        "url": "https://tproger.ru/articles/kak-napisat-unit-fajl-systemd-i-vklyuchit-avtozapusk-v-2026-godu"
       },
       {
-        "title": "Baidu открыла веса ERNIE 5.5 Flash Preview с контекстом 1 млн токенов",
-        "url": "https://tproger.ru/news/baidu-otkryla-vesa-ernie-5-5-flash-preview-s-kontekstom-1-mln-to"
+        "title": "Makefile для начинающих: цели, переменные и сборка проекта на C",
+        "url": "https://tproger.ru/articles/makefile-dlya-nachinayushhih-celi-peremennye-i-sborka-proekta-na-c"
       },
       {
-        "title": "OpenAI и Cisco открыли Shirudo для защиты Linux-серверов до патча",
-        "url": "https://tproger.ru/news/openai-i-cisco-otkryli-shirudo-dlya-zashhity-linux-serverov-do-patch"
+        "title": "Как устроен JWT и как правильно проверять токен в 2026 году",
+        "url": "https://tproger.ru/articles/kak-ustroen-jwt-i-kak-pravilno-proveryat-token-v-2026-godu"
       },
       {
-        "title": "Claude доказала алгебраический аналог P против NP, Lean проверил вывод",
-        "url": "https://tproger.ru/news/claude-dokazala-algebraicheskij-analog-p-protiv-np-lean-proveril"
+        "title": "Синтаксис crontab и 30 готовых расписаний cron для Linux в 2026 году",
+        "url": "https://tproger.ru/articles/sintaksis-crontab-i-30-gotovyh-raspisanij-cron-dlya-linux-v-2026"
       }
     ]
   },
-  "summary": "Сводка digest-20261124-1655: погода недоступна (<urlopen error [Errno 104] Connection reset by peer>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261125-0152: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
