@@ -1,76 +1,80 @@
 {
-  "id": "digest-20261125-0152",
-  "generated_at": "2026-11-25T01:52:42Z",
+  "id": "digest-20261125-1644",
+  "generated_at": "2026-11-25T16:44:04Z",
   "weather": {
-    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
+    "city": "Самара",
+    "temp_c": 0.1,
+    "feels_like_c": -3.3,
+    "description": "Пасмурно",
+    "wind_ms": 5.2
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Госдума обязала ЦБ передавать ФНС данные о гражданах «с признаками систематического получения доходов от других физлиц»",
-        "url": "https://vc.ru/money/3275949-gosduma-zakon-tsb-fns-dannye-grazhdan?from=rss"
+        "title": "Суд в США признал Huawei виновной в «многолетней» краже технологий американских компаний и мошенничестве",
+        "url": "https://vc.ru/legal/3277539-sud-v-ssha-priznal-huawei-vinovnoj-v-kraze-tehnologij?from=rss"
       },
       {
-        "title": "Госдума приняла законопроект о бюджете на 2027-2029 годы: в него вошла прогрессивная ставка НДФЛ в 13-22% на доходы россиян от вкладов, инвестиций в ценные бумаги и продажи имущества",
-        "url": "https://vc.ru/money/3275761-gosduma-prinyala-zakon-o-progessivnom-ndfl?from=rss"
+        "title": "Гильотина, что убьёт остатки иностранного кино: что в киноотрасли говорят об идее ввести квоты для российских фильмов",
+        "url": "https://vc.ru/media/3278117-kvoty-na-pokaz-rossijskogo-kino?from=rss"
       },
       {
-        "title": "ТАСС: в Госдуме подготовили законопроект о квотах на показ российского кино — он предусматривает периоды, когда кинотеатры не смогут показывать зарубежные фильмы",
-        "url": "https://vc.ru/legal/3275007-zakonoproekt-o-kvotakh-na-pokaz-rossiyskogo-kino?from=rss"
+        "title": "Приложение Mir Pay заработало на часах Samsung",
+        "url": "https://vc.ru/money/3277518-mir-pay-na-chasakh-samsung-galaxy-watch?from=rss"
       },
       {
-        "title": "Облако под землёй: как строят дата-центры в шахтах и ядерных бункерах",
-        "url": "https://vc.ru/future/3272654-data-tsentry-pod-zemley?from=rss"
+        "title": "Хостинг-провайдер Beget сообщил о восстановлении аккредитации в качестве регистратора доменов .ru и .рф",
+        "url": "https://vc.ru/services/3278662-hosting-beget-vosstanovlenie-akkreditacii?from=rss"
       },
       {
-        "title": "В «цифре» вышла документалка «Увидеть всё» о жизни основательницы Theranos Элизабет Холмс перед началом её тюремного срока",
-        "url": "https://vc.ru/media/3275048-dokumentalnyj-film-uvidet-vse-o-elizabet-holms-i-theranos?from=rss"
+        "title": "В Max добавили возможность предъявлять СТС и водительские права по QR-коду",
+        "url": "https://vc.ru/transport/3278211-vozmozhnost-predyavleniya-sts-i-voditelskikh-prav-po-qr-kodu-v-max?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Прачечная AudiA6: они отмыли 10 333 BTC. Интервью с подельником специальный выпуск для habr (эксклюзив)",
-        "url": "https://habr.com/ru/articles/1111988/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111988"
+        "title": "Экскурсия по Forensic Commander: как устроен двухпанельный комбайн для криминалиста",
+        "url": "https://habr.com/ru/articles/1112368/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112368"
       },
       {
-        "title": "[Перевод] Дата-центры для ИИ. Кто на самом деле за них платит?",
-        "url": "https://habr.com/ru/articles/1111976/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111976"
+        "title": "Кто же забрал награды InterComm в номинации «Лучший блог на Хабре»? Поздравляем победителей",
+        "url": "https://habr.com/ru/companies/habr/articles/1112366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112366"
       },
       {
-        "title": "Tesla P100",
-        "url": "https://habr.com/ru/articles/1111984/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111984"
+        "title": "Как создатель Minecraft стал вайбкодером (и почему не стоит над ним смеяться)",
+        "url": "https://habr.com/ru/articles/1112364/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112364"
       },
       {
-        "title": "Обычный пользователь macOS и его воображаемые друзья cp, mv, mkdir и diskutil",
-        "url": "https://habr.com/ru/articles/1111978/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111978"
+        "title": "[Перевод] Я написал эмулятор IBM PC с нуля, и в DOS на нём теперь можно зайти по SSH",
+        "url": "https://habr.com/ru/articles/1112362/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112362"
       },
       {
-        "title": "Патентный ландшафт семантических слоев: Почему dbt, Looker и Cube не патентуют их, а Microsoft и IBM — да (2010-26)",
-        "url": "https://habr.com/ru/articles/1111972/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111972"
+        "title": "gpt6.2 astra вайбкодит хуже чем предыдущие модели?",
+        "url": "https://habr.com/ru/articles/1111906/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111906"
       }
     ],
     "tproger": [
       {
-        "title": "Шпаргалка по curl в 2026 году с проверенными примерами запросов",
-        "url": "https://tproger.ru/articles/wpargalka-po-curl-v-2026-godu-s-proverennymi-primerami-zaprosov"
+        "title": "Cloudflare открыла ИИ-агентам поиск по сайту одним переключателем",
+        "url": "https://tproger.ru/news/cloudflare-otkryla-ii-agentam-poisk-po-sajtu-odnim-pereklyuchatele"
       },
       {
-        "title": "Как написать unit-файл systemd и включить автозапуск в 2026 году",
-        "url": "https://tproger.ru/articles/kak-napisat-unit-fajl-systemd-i-vklyuchit-avtozapusk-v-2026-godu"
+        "title": "КЦ вернул Beget аккредитацию регистратора доменов RU и РФ после атаки",
+        "url": "https://tproger.ru/news/kc-vernul-beget-akkreditaciyu-registratora-domenov-ru-i-rf-posle"
       },
       {
-        "title": "Makefile для начинающих: цели, переменные и сборка проекта на C",
-        "url": "https://tproger.ru/articles/makefile-dlya-nachinayushhih-celi-peremennye-i-sborka-proekta-na-c"
+        "title": "В LibreOffice теперь нужно разрешение, чтобы писать код с помощью LLM",
+        "url": "https://tproger.ru/news/v-libreoffice-teper-nuzhno-razrewenie-chtoby-pisat-kod-s-pomoshh"
       },
       {
-        "title": "Как устроен JWT и как правильно проверять токен в 2026 году",
-        "url": "https://tproger.ru/articles/kak-ustroen-jwt-i-kak-pravilno-proveryat-token-v-2026-godu"
+        "title": "Cognition выпустила SWE-2.1: бесплатно до 8 декабря в Devin CLI",
+        "url": "https://tproger.ru/news/cognition-vypustila-swe-2-1-besplatno-do-8-dekabrya-v-devin-cli"
       },
       {
-        "title": "Синтаксис crontab и 30 готовых расписаний cron для Linux в 2026 году",
-        "url": "https://tproger.ru/articles/sintaksis-crontab-i-30-gotovyh-raspisanij-cron-dlya-linux-v-2026"
+        "title": "Что на самом деле ждёт руководство, когда даёт вам большую задачу, и почему не надо её сразу бежать решать",
+        "url": "https://tproger.ru/articles/chego-zhdet-rukovodstvo"
       }
     ]
   },
-  "summary": "Сводка digest-20261125-0152: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261125-1644: Самара 0.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

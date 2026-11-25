@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261023-1057",
-    "generated_at": "2026-10-23T10:57:31Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 12.0,
-      "feels_like_c": 8.8,
-      "description": "Преимущественно ясно",
-      "wind_ms": 8.0
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Правительство начало обсуждать досрочное завершение в 2026 году программы льготной ипотеки для ИТ-специалистов — РБК",
-          "url": "https://vc.ru/money/3211674-obsuzhdenie-zaversheniya-programmy-lgotnoy-ipoteki-dlya-it-spetsialistov?from=rss"
-        },
-        {
-          "title": "Такси-сервис inDrive и китайская Pony.ai начнут тестировать роботакси в Казахстане в 2027 году",
-          "url": "https://vc.ru/transport/3211386-zapusk-robotaksi-indrive-i-ponyai-v-kazahstane?from=rss"
-        },
-        {
-          "title": "Правительство внесло в Госдуму законопроект о повышении штрафов за езду без прав — с 5-15 тысяч рублей до 15-30 тысяч рублей",
-          "url": "https://vc.ru/transport/3211319-uzhestochienie-shtrafov-za-ezdu-bez-prav?from=rss"
-        },
-        {
-          "title": "Cloudflare зафиксировала «миллионы» атак на сайты по всему миру из-за уязвимости в языке PHP",
-          "url": "https://vc.ru/services/3209892-cloudflare-zafiksirovala-ataki-na-sayty-iz-za-uiazvimosti-php?from=rss"
-        },
-        {
-          "title": "Госдума поддержала в первом чтении законопроект об отнесении семейных микропредприятий к социальным — они смогут рассчитывать на господдержку",
-          "url": "https://vc.ru/legal/3210108-gosduma-zakonoproekt-o-podderzhke-semejnyh-mikropredpriyatiy?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Разработчик Telegram: 99,9% клиентского кода мессенджера пишет AI, а тех кто до сих пор пишет код вручную надо увольнять",
-          "url": "https://habr.com/ru/news/1098400/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098400"
-        },
-        {
-          "title": "В сети появился слитый трейлер новой Mass Effect: профильные СМИ подтверждают его подлинность",
-          "url": "https://habr.com/ru/companies/ggsel/news/1098396/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098396"
-        },
-        {
-          "title": "Oura подала в суд на конкурента Ultrahuman из‑за патентов на технологии для умных колец",
-          "url": "https://habr.com/ru/news/1098374/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098374"
-        },
-        {
-          "title": "«Лента» перенесла учёт 200 тысяч активов с OmniTracker на SimpleOne",
-          "url": "https://habr.com/ru/companies/simpleone/news/1098366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098366"
-        },
-        {
-          "title": "СМИ: в РФ обсуждают возможность завершения программы IT-ипотеки в этом году",
-          "url": "https://habr.com/ru/news/1098344/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098344"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "6 инструментов разработчика для ежедневной работы в 2026 году",
-          "url": "https://tproger.ru/digest/6-instrumentov-razrabotchika-dlya-ezhednevnoj-raboty-v-2026-godu"
-        },
-        {
-          "title": "immers.cloud запускает публичные API для open-source нейросетей с оплатой за токены",
-          "url": "https://tproger.ru/news/immers-cloud-zapuskaet-publichnye-api-dlya-open-source-nejrosetej"
-        },
-        {
-          "title": "Изучение нейросетей для детей: рейтинг 5 школ и курсов в 2026 году",
-          "url": "https://tproger.ru/articles/izuchenie-nejrosetej-dlya-detej-rejting-5-wkol-i-kursov-v-2026-go"
-        },
-        {
-          "title": "Почему релизы приходится спасать по ночам и что с этим делать",
-          "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
-        },
-        {
-          "title": "Как я перестал относиться к ИИ как к человеку: опыт соло-разработки двух пет-проектов",
-          "url": "https://tproger.ru/blogs/kak-ya-perestal-otnositsya-k-ii-kak-k-cheloveku-opyt-solo-razrabo"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261023-1057: Самара 12.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261023-1624",
     "generated_at": "2026-10-23T16:24:02Z",
     "weather": {
@@ -7623,5 +7543,85 @@
       ]
     },
     "summary": "Сводка digest-20261125-0152: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261125-1644",
+    "generated_at": "2026-11-25T16:44:04Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": 0.1,
+      "feels_like_c": -3.3,
+      "description": "Пасмурно",
+      "wind_ms": 5.2
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Суд в США признал Huawei виновной в «многолетней» краже технологий американских компаний и мошенничестве",
+          "url": "https://vc.ru/legal/3277539-sud-v-ssha-priznal-huawei-vinovnoj-v-kraze-tehnologij?from=rss"
+        },
+        {
+          "title": "Гильотина, что убьёт остатки иностранного кино: что в киноотрасли говорят об идее ввести квоты для российских фильмов",
+          "url": "https://vc.ru/media/3278117-kvoty-na-pokaz-rossijskogo-kino?from=rss"
+        },
+        {
+          "title": "Приложение Mir Pay заработало на часах Samsung",
+          "url": "https://vc.ru/money/3277518-mir-pay-na-chasakh-samsung-galaxy-watch?from=rss"
+        },
+        {
+          "title": "Хостинг-провайдер Beget сообщил о восстановлении аккредитации в качестве регистратора доменов .ru и .рф",
+          "url": "https://vc.ru/services/3278662-hosting-beget-vosstanovlenie-akkreditacii?from=rss"
+        },
+        {
+          "title": "В Max добавили возможность предъявлять СТС и водительские права по QR-коду",
+          "url": "https://vc.ru/transport/3278211-vozmozhnost-predyavleniya-sts-i-voditelskikh-prav-po-qr-kodu-v-max?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Экскурсия по Forensic Commander: как устроен двухпанельный комбайн для криминалиста",
+          "url": "https://habr.com/ru/articles/1112368/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112368"
+        },
+        {
+          "title": "Кто же забрал награды InterComm в номинации «Лучший блог на Хабре»? Поздравляем победителей",
+          "url": "https://habr.com/ru/companies/habr/articles/1112366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112366"
+        },
+        {
+          "title": "Как создатель Minecraft стал вайбкодером (и почему не стоит над ним смеяться)",
+          "url": "https://habr.com/ru/articles/1112364/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112364"
+        },
+        {
+          "title": "[Перевод] Я написал эмулятор IBM PC с нуля, и в DOS на нём теперь можно зайти по SSH",
+          "url": "https://habr.com/ru/articles/1112362/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112362"
+        },
+        {
+          "title": "gpt6.2 astra вайбкодит хуже чем предыдущие модели?",
+          "url": "https://habr.com/ru/articles/1111906/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111906"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "Cloudflare открыла ИИ-агентам поиск по сайту одним переключателем",
+          "url": "https://tproger.ru/news/cloudflare-otkryla-ii-agentam-poisk-po-sajtu-odnim-pereklyuchatele"
+        },
+        {
+          "title": "КЦ вернул Beget аккредитацию регистратора доменов RU и РФ после атаки",
+          "url": "https://tproger.ru/news/kc-vernul-beget-akkreditaciyu-registratora-domenov-ru-i-rf-posle"
+        },
+        {
+          "title": "В LibreOffice теперь нужно разрешение, чтобы писать код с помощью LLM",
+          "url": "https://tproger.ru/news/v-libreoffice-teper-nuzhno-razrewenie-chtoby-pisat-kod-s-pomoshh"
+        },
+        {
+          "title": "Cognition выпустила SWE-2.1: бесплатно до 8 декабря в Devin CLI",
+          "url": "https://tproger.ru/news/cognition-vypustila-swe-2-1-besplatno-do-8-dekabrya-v-devin-cli"
+        },
+        {
+          "title": "Что на самом деле ждёт руководство, когда даёт вам большую задачу, и почему не надо её сразу бежать решать",
+          "url": "https://tproger.ru/articles/chego-zhdet-rukovodstvo"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261125-1644: Самара 0.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
