@@ -1,80 +1,76 @@
 {
-  "id": "digest-20261125-1644",
-  "generated_at": "2026-11-25T16:44:04Z",
+  "id": "digest-20261126-0129",
+  "generated_at": "2026-11-26T01:29:54Z",
   "weather": {
-    "city": "Самара",
-    "temp_c": 0.1,
-    "feels_like_c": -3.3,
-    "description": "Пасмурно",
-    "wind_ms": 5.2
+    "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Суд в США признал Huawei виновной в «многолетней» краже технологий американских компаний и мошенничестве",
-        "url": "https://vc.ru/legal/3277539-sud-v-ssha-priznal-huawei-vinovnoj-v-kraze-tehnologij?from=rss"
+        "title": "Российская Neiry начала продавать услуги аэрофотосъёмки с помощью голубей-«биодронов»",
+        "url": "https://vc.ru/tech/3278920-neiry-aerofotosyemka-golubei-biodronov?from=rss"
       },
       {
         "title": "Гильотина, что убьёт остатки иностранного кино: что в киноотрасли говорят об идее ввести квоты для российских фильмов",
         "url": "https://vc.ru/media/3278117-kvoty-na-pokaz-rossijskogo-kino?from=rss"
       },
       {
-        "title": "Приложение Mir Pay заработало на часах Samsung",
-        "url": "https://vc.ru/money/3277518-mir-pay-na-chasakh-samsung-galaxy-watch?from=rss"
+        "title": "Суд в США признал Huawei виновной в «многолетней» краже технологий американских компаний и мошенничестве",
+        "url": "https://vc.ru/legal/3277539-sud-v-ssha-priznal-huawei-vinovnoj-v-kraze-tehnologij?from=rss"
       },
       {
         "title": "Хостинг-провайдер Beget сообщил о восстановлении аккредитации в качестве регистратора доменов .ru и .рф",
         "url": "https://vc.ru/services/3278662-hosting-beget-vosstanovlenie-akkreditacii?from=rss"
       },
       {
-        "title": "В Max добавили возможность предъявлять СТС и водительские права по QR-коду",
-        "url": "https://vc.ru/transport/3278211-vozmozhnost-predyavleniya-sts-i-voditelskikh-prav-po-qr-kodu-v-max?from=rss"
+        "title": "Приложение Mir Pay заработало на часах Samsung",
+        "url": "https://vc.ru/money/3277518-mir-pay-na-chasakh-samsung-galaxy-watch?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Экскурсия по Forensic Commander: как устроен двухпанельный комбайн для криминалиста",
-        "url": "https://habr.com/ru/articles/1112368/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112368"
+        "title": "По документам труба бесшовная: с чего начинать оценку безопасности старого трубопровода",
+        "url": "https://habr.com/ru/articles/1112486/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112486"
       },
       {
-        "title": "Кто же забрал награды InterComm в номинации «Лучший блог на Хабре»? Поздравляем победителей",
-        "url": "https://habr.com/ru/companies/habr/articles/1112366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112366"
+        "title": "Запрещай, запрещай, а остальное всё — дребедень. Песня о безопаснике Бобби и нейросетях",
+        "url": "https://habr.com/ru/articles/1112482/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112482"
       },
       {
-        "title": "Как создатель Minecraft стал вайбкодером (и почему не стоит над ним смеяться)",
-        "url": "https://habr.com/ru/articles/1112364/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112364"
+        "title": "Машина, чайник и 15 кВт: как заряжать электромобиль дома и не выбивать автомат",
+        "url": "https://habr.com/ru/articles/1112480/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112480"
       },
       {
-        "title": "[Перевод] Я написал эмулятор IBM PC с нуля, и в DOS на нём теперь можно зайти по SSH",
-        "url": "https://habr.com/ru/articles/1112362/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112362"
+        "title": "Решение проблемы планировщика задач для распределенного кластера видео обработки",
+        "url": "https://habr.com/ru/articles/1112470/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112470"
       },
       {
-        "title": "gpt6.2 astra вайбкодит хуже чем предыдущие модели?",
-        "url": "https://habr.com/ru/articles/1111906/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1111906"
+        "title": "DAG зелёный, а данные неправильные: Data Quality на практике с ClickHouse и Airflow",
+        "url": "https://habr.com/ru/articles/1112466/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112466"
       }
     ],
     "tproger": [
       {
-        "title": "Cloudflare открыла ИИ-агентам поиск по сайту одним переключателем",
-        "url": "https://tproger.ru/news/cloudflare-otkryla-ii-agentam-poisk-po-sajtu-odnim-pereklyuchatele"
+        "title": "OpenAI опровергла полиномиальную гипотезу Хирша о многогранниках",
+        "url": "https://tproger.ru/news/openai-oprovergla-polinomialnuyu-gipotezu-hirwa-o-mnogogrannikah"
       },
       {
-        "title": "КЦ вернул Beget аккредитацию регистратора доменов RU и РФ после атаки",
-        "url": "https://tproger.ru/news/kc-vernul-beget-akkreditaciyu-registratora-domenov-ru-i-rf-posle"
+        "title": "Утечку бенчмарков Claude Opus 5.6 дорисовали на график OpenAI",
+        "url": "https://tproger.ru/news/utechku-benchmarkov-claude-opus-5-6-dorisovali-na-grafik-openai"
       },
       {
-        "title": "В LibreOffice теперь нужно разрешение, чтобы писать код с помощью LLM",
-        "url": "https://tproger.ru/news/v-libreoffice-teper-nuzhno-razrewenie-chtoby-pisat-kod-s-pomoshh"
+        "title": "Antigravity доработали кэш Neon: в квоту стало входить на 28% больше задач",
+        "url": "https://tproger.ru/news/antigravity-dorabotali-kew-neon-v-kvotu-stalo-vhodit-na-28-bo"
       },
       {
-        "title": "Cognition выпустила SWE-2.1: бесплатно до 8 декабря в Devin CLI",
-        "url": "https://tproger.ru/news/cognition-vypustila-swe-2-1-besplatno-do-8-dekabrya-v-devin-cli"
+        "title": "Как получить HTTPS-сертификат Let's Encrypt через certbot в 2026 году",
+        "url": "https://tproger.ru/articles/kak-poluchit-https-sertifikat-let-s-encrypt-cherez-certbot-v-2026"
       },
       {
-        "title": "Что на самом деле ждёт руководство, когда даёт вам большую задачу, и почему не надо её сразу бежать решать",
-        "url": "https://tproger.ru/articles/chego-zhdet-rukovodstvo"
+        "title": "Шпаргалка по Vim: основные команды и режимы для новичков",
+        "url": "https://tproger.ru/articles/wpargalka-po-vim-osnovnye-komandy-i-rezhimy-dlya-novichkov"
       }
     ]
   },
-  "summary": "Сводка digest-20261125-1644: Самара 0.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261126-0129: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }

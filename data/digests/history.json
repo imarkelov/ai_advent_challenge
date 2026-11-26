@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261023-1624",
-    "generated_at": "2026-10-23T16:24:02Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 8.0,
-      "feels_like_c": 5.4,
-      "description": "Преимущественно ясно",
-      "wind_ms": 4.7
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Правительство начало обсуждать досрочное завершение в 2026 году программы льготной ипотеки для ИТ-специалистов — РБК",
-          "url": "https://vc.ru/money/3211674-obsuzhdenie-zaversheniya-programmy-lgotnoy-ipoteki-dlya-it-spetsialistov?from=rss"
-        },
-        {
-          "title": "Volvo Cars сократит 2500 рабочих мест на фоне падения выручки в Китае почти на 50%",
-          "url": "https://vc.ru/transport/3212447-volvo-cars-sokratit-rabotnye-mesta?from=rss"
-        },
-        {
-          "title": "Apple спрятала на сайте Apple Music интерактивный iPod в честь двадцатипятилетия устройства",
-          "url": "https://vc.ru/marketing/3212208-apple-music-interaktivnyj-ipod-na-sajte?from=rss"
-        },
-        {
-          "title": "Такси-сервис inDrive и китайская Pony.ai начнут тестировать роботакси в Казахстане в 2027 году",
-          "url": "https://vc.ru/transport/3211386-zapusk-robotaksi-indrive-i-ponyai-v-kazahstane?from=rss"
-        },
-        {
-          "title": "Правительство внесло в Госдуму законопроект о повышении штрафов за езду без прав — с 5-15 тысяч рублей до 15-30 тысяч рублей",
-          "url": "https://vc.ru/transport/3211319-uzhestochienie-shtrafov-za-ezdu-bez-prav?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Банки США закрывают доступ ИИ‑агентам, которые стали слишком самостоятельными",
-          "url": "https://habr.com/ru/news/1098690/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098690"
-        },
-        {
-          "title": "Z.ai раздаёт по 500 млн токенов GLM-5.3 и GLM-5.3-Flash в ZCode к Дню программиста",
-          "url": "https://habr.com/ru/news/1098648/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098648"
-        },
-        {
-          "title": "В «Яндексе» восстановили доступ к 90,47% данных клиентов Yandex Cloud",
-          "url": "https://habr.com/ru/news/1098646/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098646"
-        },
-        {
-          "title": "Micron закрывает проект 4F² DRAM после двух десятилетий исследований",
-          "url": "https://habr.com/ru/companies/selectel/news/1098474/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098474"
-        },
-        {
-          "title": "Выращенные в пробирке мышиные мышцы позволяют крошечным роботам прыгать, плавать и хватать предметы",
-          "url": "https://habr.com/ru/news/1098600/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098600"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "Ловушка масштаба: почему команда растёт, а обновления выходят медленнее",
-          "url": "https://tproger.ru/articles/lovuwka-maswtaba-pochemu-komanda-rastyot-a-obnovleniya-vyhodyat-me"
-        },
-        {
-          "title": "6 инструментов разработчика для ежедневной работы в 2026 году",
-          "url": "https://tproger.ru/digest/6-instrumentov-razrabotchika-dlya-ezhednevnoj-raboty-v-2026-godu"
-        },
-        {
-          "title": "immers.cloud запускает публичные API для open-source нейросетей с оплатой за токены",
-          "url": "https://tproger.ru/news/immers-cloud-zapuskaet-publichnye-api-dlya-open-source-nejrosetej"
-        },
-        {
-          "title": "Изучение нейросетей для детей: рейтинг 5 школ и курсов в 2026 году",
-          "url": "https://tproger.ru/articles/izuchenie-nejrosetej-dlya-detej-rejting-5-wkol-i-kursov-v-2026-go"
-        },
-        {
-          "title": "Почему релизы приходится спасать по ночам и что с этим делать",
-          "url": "https://tproger.ru/articles/pochemu-relizy-prihoditsya-spasat-po-nocham-i-chto-s-etim-delat"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261023-1624: Самара 8.0°C, Преимущественно ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261023-2056",
     "generated_at": "2026-10-23T20:56:11Z",
     "weather": {
@@ -7623,5 +7543,81 @@
       ]
     },
     "summary": "Сводка digest-20261125-1644: Самара 0.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261126-0129",
+    "generated_at": "2026-11-26T01:29:54Z",
+    "weather": {
+      "error": "<urlopen error _ssl.c:994: The handshake operation timed out>"
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Российская Neiry начала продавать услуги аэрофотосъёмки с помощью голубей-«биодронов»",
+          "url": "https://vc.ru/tech/3278920-neiry-aerofotosyemka-golubei-biodronov?from=rss"
+        },
+        {
+          "title": "Гильотина, что убьёт остатки иностранного кино: что в киноотрасли говорят об идее ввести квоты для российских фильмов",
+          "url": "https://vc.ru/media/3278117-kvoty-na-pokaz-rossijskogo-kino?from=rss"
+        },
+        {
+          "title": "Суд в США признал Huawei виновной в «многолетней» краже технологий американских компаний и мошенничестве",
+          "url": "https://vc.ru/legal/3277539-sud-v-ssha-priznal-huawei-vinovnoj-v-kraze-tehnologij?from=rss"
+        },
+        {
+          "title": "Хостинг-провайдер Beget сообщил о восстановлении аккредитации в качестве регистратора доменов .ru и .рф",
+          "url": "https://vc.ru/services/3278662-hosting-beget-vosstanovlenie-akkreditacii?from=rss"
+        },
+        {
+          "title": "Приложение Mir Pay заработало на часах Samsung",
+          "url": "https://vc.ru/money/3277518-mir-pay-na-chasakh-samsung-galaxy-watch?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "По документам труба бесшовная: с чего начинать оценку безопасности старого трубопровода",
+          "url": "https://habr.com/ru/articles/1112486/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112486"
+        },
+        {
+          "title": "Запрещай, запрещай, а остальное всё — дребедень. Песня о безопаснике Бобби и нейросетях",
+          "url": "https://habr.com/ru/articles/1112482/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112482"
+        },
+        {
+          "title": "Машина, чайник и 15 кВт: как заряжать электромобиль дома и не выбивать автомат",
+          "url": "https://habr.com/ru/articles/1112480/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112480"
+        },
+        {
+          "title": "Решение проблемы планировщика задач для распределенного кластера видео обработки",
+          "url": "https://habr.com/ru/articles/1112470/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112470"
+        },
+        {
+          "title": "DAG зелёный, а данные неправильные: Data Quality на практике с ClickHouse и Airflow",
+          "url": "https://habr.com/ru/articles/1112466/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112466"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "OpenAI опровергла полиномиальную гипотезу Хирша о многогранниках",
+          "url": "https://tproger.ru/news/openai-oprovergla-polinomialnuyu-gipotezu-hirwa-o-mnogogrannikah"
+        },
+        {
+          "title": "Утечку бенчмарков Claude Opus 5.6 дорисовали на график OpenAI",
+          "url": "https://tproger.ru/news/utechku-benchmarkov-claude-opus-5-6-dorisovali-na-grafik-openai"
+        },
+        {
+          "title": "Antigravity доработали кэш Neon: в квоту стало входить на 28% больше задач",
+          "url": "https://tproger.ru/news/antigravity-dorabotali-kew-neon-v-kvotu-stalo-vhodit-na-28-bo"
+        },
+        {
+          "title": "Как получить HTTPS-сертификат Let's Encrypt через certbot в 2026 году",
+          "url": "https://tproger.ru/articles/kak-poluchit-https-sertifikat-let-s-encrypt-cherez-certbot-v-2026"
+        },
+        {
+          "title": "Шпаргалка по Vim: основные команды и режимы для новичков",
+          "url": "https://tproger.ru/articles/wpargalka-po-vim-osnovnye-komandy-i-rezhimy-dlya-novichkov"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261126-0129: погода недоступна (<urlopen error _ssl.c:994: The handshake operation timed out>); новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]
