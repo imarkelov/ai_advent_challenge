@@ -1,85 +1,5 @@
 [
   {
-    "id": "digest-20261024-1013",
-    "generated_at": "2026-10-24T10:13:56Z",
-    "weather": {
-      "city": "Самара",
-      "temp_c": 10.7,
-      "feels_like_c": 7.5,
-      "description": "Ясно",
-      "wind_ms": 6.3
-    },
-    "news": {
-      "vc.ru": [
-        {
-          "title": "Правительство начало обсуждать досрочное завершение в 2026 году программы льготной ипотеки для ИТ-специалистов — РБК",
-          "url": "https://vc.ru/money/3211674-obsuzhdenie-zaversheniya-programmy-lgotnoy-ipoteki-dlya-it-spetsialistov?from=rss"
-        },
-        {
-          "title": "Volvo Cars сократит 2500 рабочих мест на фоне падения выручки в Китае почти на 50%",
-          "url": "https://vc.ru/transport/3212447-volvo-cars-sokratit-rabotnye-mesta?from=rss"
-        },
-        {
-          "title": "Apple спрятала на сайте Apple Music интерактивный iPod в честь двадцатипятилетия устройства",
-          "url": "https://vc.ru/marketing/3212208-apple-music-interaktivnyj-ipod-na-sajte?from=rss"
-        },
-        {
-          "title": "Такси-сервис inDrive и китайская Pony.ai начнут тестировать роботакси в Казахстане в 2027 году",
-          "url": "https://vc.ru/transport/3211386-zapusk-robotaksi-indrive-i-ponyai-v-kazahstane?from=rss"
-        },
-        {
-          "title": "«Яндекс Такси» сообщило, что возобновило работу во всех городах России: пассажирам доступны все тарифы и оплата, а водителям — вывод денег",
-          "url": "https://vc.ru/transport/3211983-yandeks-taksi-vosstanovilo-rabotu-v-gorodah-rossii?from=rss"
-        }
-      ],
-      "habr": [
-        {
-          "title": "Жителя Сиднея задержали за обсуждение с Claude стрельбы в детском саду",
-          "url": "https://habr.com/ru/news/1098870/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098870"
-        },
-        {
-          "title": "Выпуск обновления дистрибутива для одноплатных ПК DietPi 10.8",
-          "url": "https://habr.com/ru/news/1098216/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098216"
-        },
-        {
-          "title": "Банки США блокируют ИИ‑агентов (которым клиенты сами отдали пароли)",
-          "url": "https://habr.com/ru/news/1098872/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098872"
-        },
-        {
-          "title": "OpenAI не будет обучать ИИ‑модели на данных из «живого» интернета",
-          "url": "https://habr.com/ru/news/1098862/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098862"
-        },
-        {
-          "title": "LibreOffice заявила о манипуляциях Microsoft процессом стандартизации в ISO",
-          "url": "https://habr.com/ru/news/1098854/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1098854"
-        }
-      ],
-      "tproger": [
-        {
-          "title": "ИИ для детей: рейтинг 5 курсов по искусственному интеллекту в 2026 году",
-          "url": "https://tproger.ru/articles/ii-dlya-detej-rejting-5-kursov-po-iskusstvennomu-intellektu-v-20-2"
-        },
-        {
-          "title": "Ловушка масштаба: почему команда растёт, а обновления выходят медленнее",
-          "url": "https://tproger.ru/articles/lovuwka-maswtaba-pochemu-komanda-rastyot-a-obnovleniya-vyhodyat-me"
-        },
-        {
-          "title": "6 инструментов разработчика для ежедневной работы в 2026 году",
-          "url": "https://tproger.ru/digest/6-instrumentov-razrabotchika-dlya-ezhednevnoj-raboty-v-2026-godu"
-        },
-        {
-          "title": "immers.cloud запускает публичные API для open-source нейросетей с оплатой за токены",
-          "url": "https://tproger.ru/news/immers-cloud-zapuskaet-publichnye-api-dlya-open-source-nejrosetej"
-        },
-        {
-          "title": "Изучение нейросетей для детей: рейтинг 5 школ и курсов в 2026 году",
-          "url": "https://tproger.ru/articles/izuchenie-nejrosetej-dlya-detej-rejting-5-wkol-i-kursov-v-2026-go"
-        }
-      ]
-    },
-    "summary": "Сводка digest-20261024-1013: Самара 10.7°C, Ясно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
-  },
-  {
     "id": "digest-20261024-1519",
     "generated_at": "2026-10-24T15:19:59Z",
     "weather": {
@@ -7619,5 +7539,85 @@
       ]
     },
     "summary": "Сводка digest-20261127-0127: Самара -2.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  },
+  {
+    "id": "digest-20261127-1603",
+    "generated_at": "2026-11-27T16:03:40Z",
+    "weather": {
+      "city": "Самара",
+      "temp_c": -2.1,
+      "feels_like_c": -7.6,
+      "description": "Пасмурно",
+      "wind_ms": 18.4
+    },
+    "news": {
+      "vc.ru": [
+        {
+          "title": "Китаянка рассказала в соцсетях, как ей отменили собеседование из-за того, что она отказалась купить HR-менеджеру напиток",
+          "url": "https://vc.ru/hr/3282879-kitayanka-rasskazala-o-sobesedovanii-otmenennom-iz-za-otkaza-kupit-napitok?from=rss"
+        },
+        {
+          "title": "«Яндекс» до конца 2026 года начнёт тестировать доставку с использованием человекоподобных роботов «в четырёх локациях» — «Ъ»",
+          "url": "https://vc.ru/services/3282152-dostavka-s-pomoshchyu-chelovekopodobnykh-robotov-ot-yandeksa?from=rss"
+        },
+        {
+          "title": "В Великобритании отменили рождественскую ярмарку, которую рекламировали с помощью ИИ-контента как «праздничную сказку» — но посетители увидели полупустой ангар с протекающей крышей",
+          "url": "https://vc.ru/offline/3282439-otmena-rozhdestvenskoy-yarmarki-v-velikobritanii?from=rss"
+        },
+        {
+          "title": "Google обяжет разработчиков приложений раскрывать свои адреса и номера телефонов для соблюдения законодательства ЕС",
+          "url": "https://vc.ru/legal/3282459-google-obiazet-razrabotchikov-prilozhenii-raskryvat-kontaktnye-dannye?from=rss"
+        },
+        {
+          "title": "День 1738: годовая инфляция в ноябре ускорилась до 7,17%",
+          "url": "https://vc.ru/money/3281924-godovaya-inflyatsiya-v-rossii-uskorilas-do-717?from=rss"
+        }
+      ],
+      "habr": [
+        {
+          "title": "Ratcast — продолжаем допиливать совместный стриминг без серверов и блокировок",
+          "url": "https://habr.com/ru/articles/1113374/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113374"
+        },
+        {
+          "title": "Отладка и диагностика ПО в ЗОСРВ «Нейтрино»: какие инструменты доступны разработчику?",
+          "url": "https://habr.com/ru/companies/swd_es/articles/1113368/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113368"
+        },
+        {
+          "title": "Есть один вопрос",
+          "url": "https://habr.com/ru/articles/1113366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113366"
+        },
+        {
+          "title": "В Минцифры пока не смогли прийти к решению с Apple о включении 5G на российских iPhone",
+          "url": "https://habr.com/ru/articles/1113358/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113358"
+        },
+        {
+          "title": "Разработка в эпоху ИИ: часть 2",
+          "url": "https://habr.com/ru/companies/naumen/articles/1113352/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113352"
+        }
+      ],
+      "tproger": [
+        {
+          "title": "O3DE 26.10: Qt 6, C++26 и экспериментальный Wayland после исправления сборки",
+          "url": "https://tproger.ru/news/o3de-26-10-qt-6-c-26-i-eksperimentalnyj-wayland-posle-isprav"
+        },
+        {
+          "title": "JetBrains запустила дайджест уязвимостей Kotlin и Ktor",
+          "url": "https://tproger.ru/news/jetbrains-zapustila-dajdzhest-uyazvimostej-kotlin-i-ktor"
+        },
+        {
+          "title": "Telegram тестирует ИИ-агента Dictator для macOS с локальными LLM",
+          "url": "https://tproger.ru/news/telegram-testiruet-ii-agenta-dictator-dlya-macos-s-lokalnymi-llm"
+        },
+        {
+          "title": "Сбер выпустил GigaAM-v4: на русском она ошибается реже v3 и Whisper",
+          "url": "https://tproger.ru/news/sber-vypustil-gigaam-v4-na-russkom-ona-owibaetsya-rezhe-v3-i-whis"
+        },
+        {
+          "title": "Phison показала SSD со встроенным NPU для инференса нейросетей",
+          "url": "https://tproger.ru/news/phison-pokazala-ssd-so-vstroennym-npu-dlya-inferensa-nejrosetej"
+        }
+      ]
+    },
+    "summary": "Сводка digest-20261127-1603: Самара -2.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
   }
 ]

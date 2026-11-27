@@ -1,80 +1,80 @@
 {
-  "id": "digest-20261127-0127",
-  "generated_at": "2026-11-27T01:27:19Z",
+  "id": "digest-20261127-1603",
+  "generated_at": "2026-11-27T16:03:40Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -2.6,
-    "feels_like_c": -8.0,
+    "temp_c": -2.1,
+    "feels_like_c": -7.6,
     "description": "Пасмурно",
-    "wind_ms": 16.9
+    "wind_ms": 18.4
   },
   "news": {
     "vc.ru": [
       {
-        "title": "«Сбер» представил обновлённого человекоподобного робота Грин, робота-«атлета» Юни и робота-курьера",
-        "url": "https://vc.ru/tech/3270388-sber-predstavil-robota-grin-yuni-i-kuriera-dostavki?from=rss"
+        "title": "Китаянка рассказала в соцсетях, как ей отменили собеседование из-за того, что она отказалась купить HR-менеджеру напиток",
+        "url": "https://vc.ru/hr/3282879-kitayanka-rasskazala-o-sobesedovanii-otmenennom-iz-za-otkaza-kupit-napitok?from=rss"
       },
       {
-        "title": "Минцифры предложило концепцию «российского GitHub» — он станет обязательным для разработчиков «доверенного ПО» и будет финансироваться за их счёт",
-        "url": "https://vc.ru/dev/3279768-mincifry-kontseptsia-natsionalnogo-repozitora?from=rss"
+        "title": "«Яндекс» до конца 2026 года начнёт тестировать доставку с использованием человекоподобных роботов «в четырёх локациях» — «Ъ»",
+        "url": "https://vc.ru/services/3282152-dostavka-s-pomoshchyu-chelovekopodobnykh-robotov-ot-yandeksa?from=rss"
       },
       {
-        "title": "Экономика человеческих слабостей: что изменится, если поручить покупки ИИ-агентам",
-        "url": "https://vc.ru/future/3276313-ekonomika-ii-agentov-kak-oni-izmenyat-pokupki-i-rynok?from=rss"
+        "title": "В Великобритании отменили рождественскую ярмарку, которую рекламировали с помощью ИИ-контента как «праздничную сказку» — но посетители увидели полупустой ангар с протекающей крышей",
+        "url": "https://vc.ru/offline/3282439-otmena-rozhdestvenskoy-yarmarki-v-velikobritanii?from=rss"
       },
       {
-        "title": "Крутить педали, чтобы смотреть видео: это Tovie — велотренажёр без руля и седла за $349, который должен помочь детям выплеснуть лишнюю энергию",
-        "url": "https://vc.ru/tech/3280250-tovie-velotrenazhor-dlya-detei?from=rss"
+        "title": "Google обяжет разработчиков приложений раскрывать свои адреса и номера телефонов для соблюдения законодательства ЕС",
+        "url": "https://vc.ru/legal/3282459-google-obiazet-razrabotchikov-prilozhenii-raskryvat-kontaktnye-dannye?from=rss"
       },
       {
-        "title": "Российская Neiry начала продавать услуги аэрофотосъёмки с помощью голубей-«биодронов»",
-        "url": "https://vc.ru/tech/3278920-neiry-aerofotosyemka-golubei-biodronov?from=rss"
+        "title": "День 1738: годовая инфляция в ноябре ускорилась до 7,17%",
+        "url": "https://vc.ru/money/3281924-godovaya-inflyatsiya-v-rossii-uskorilas-do-717?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Уборка диска без потери файлов: выгрузка на Яндекс.Диск, записка в папке и возврат через sudo",
-        "url": "https://habr.com/ru/articles/1112896/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112896"
+        "title": "Ratcast — продолжаем допиливать совместный стриминг без серверов и блокировок",
+        "url": "https://habr.com/ru/articles/1113374/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113374"
       },
       {
-        "title": "DroneCAN для К1946ВК035",
-        "url": "https://habr.com/ru/articles/1112894/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112894"
+        "title": "Отладка и диагностика ПО в ЗОСРВ «Нейтрино»: какие инструменты доступны разработчику?",
+        "url": "https://habr.com/ru/companies/swd_es/articles/1113368/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113368"
       },
       {
-        "title": "Эгоистичный ген — 50 лет книге. Самый известный труд Ричарда Докинза",
-        "url": "https://habr.com/ru/articles/1112886/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112886"
+        "title": "Есть один вопрос",
+        "url": "https://habr.com/ru/articles/1113366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113366"
       },
       {
-        "title": "IAF на ЭЭГ",
-        "url": "https://habr.com/ru/articles/1112878/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112878"
+        "title": "В Минцифры пока не смогли прийти к решению с Apple о включении 5G на российских iPhone",
+        "url": "https://habr.com/ru/articles/1113358/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113358"
       },
       {
-        "title": "Разгон LLM модели qwen 3.8 до 40+ токенов",
-        "url": "https://habr.com/ru/articles/1112874/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112874"
+        "title": "Разработка в эпоху ИИ: часть 2",
+        "url": "https://habr.com/ru/companies/naumen/articles/1113352/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113352"
       }
     ],
     "tproger": [
       {
-        "title": "В Antigravity CLI 1.5.18 нашли код отложенного сброса квоты",
-        "url": "https://tproger.ru/news/v-antigravity-cli-1-5-18-nawli-kod-otlozhennogo-sbrosa-kvoty"
+        "title": "O3DE 26.10: Qt 6, C++26 и экспериментальный Wayland после исправления сборки",
+        "url": "https://tproger.ru/news/o3de-26-10-qt-6-c-26-i-eksperimentalnyj-wayland-posle-isprav"
       },
       {
-        "title": "Сбер выпустил модели GigaChat 4 с открытыми весами и API",
-        "url": "https://tproger.ru/news/sber-vypustil-modeli-gigachat-4-s-otkrytymi-vesami-i-api"
+        "title": "JetBrains запустила дайджест уязвимостей Kotlin и Ktor",
+        "url": "https://tproger.ru/news/jetbrains-zapustila-dajdzhest-uyazvimostej-kotlin-i-ktor"
       },
       {
-        "title": "OpenCode запускает задачи по расписанию, а Crush закрыл утечку ключей",
-        "url": "https://tproger.ru/news/opencode-zapuskaet-zadachi-po-raspisaniyu-a-crush-zakryl-utechku-k"
+        "title": "Telegram тестирует ИИ-агента Dictator для macOS с локальными LLM",
+        "url": "https://tproger.ru/news/telegram-testiruet-ii-agenta-dictator-dlya-macos-s-lokalnymi-llm"
       },
       {
-        "title": "Как обучали GigaChat 4 и на каком железе запустить модель",
-        "url": "https://tproger.ru/articles/kak-obuchali-gigachat-4-i-na-kakom-zheleze-zapustit-model"
+        "title": "Сбер выпустил GigaAM-v4: на русском она ошибается реже v3 и Whisper",
+        "url": "https://tproger.ru/news/sber-vypustil-gigaam-v4-na-russkom-ona-owibaetsya-rezhe-v3-i-whis"
       },
       {
-        "title": "OpenRouter добавил 27 моделей, у десяти из них открыты веса",
-        "url": "https://tproger.ru/news/openrouter-dobavil-27-modelej-u-desyati-iz-nih-otkryty-vesa"
+        "title": "Phison показала SSD со встроенным NPU для инференса нейросетей",
+        "url": "https://tproger.ru/news/phison-pokazala-ssd-so-vstroennym-npu-dlya-inferensa-nejrosetej"
       }
     ]
   },
-  "summary": "Сводка digest-20261127-0127: Самара -2.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261127-1603: Самара -2.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
