@@ -1,80 +1,80 @@
 {
-  "id": "digest-20261126-1619",
-  "generated_at": "2026-11-26T16:19:29Z",
+  "id": "digest-20261127-0127",
+  "generated_at": "2026-11-27T01:27:19Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -1.6,
-    "feels_like_c": -6.7,
-    "description": "Небольшой снег",
-    "wind_ms": 15.9
+    "temp_c": -2.6,
+    "feels_like_c": -8.0,
+    "description": "Пасмурно",
+    "wind_ms": 16.9
   },
   "news": {
     "vc.ru": [
       {
-        "title": "Минцифры предложило концепцию «российского GitHub» — он станет обязательным для разработчиков «доверенного ПО» и будет финансироваться за их счёт",
-        "url": "https://vc.ru/dev/3279768-mincifry-kontseptsia-natsionalnogo-repozitora?from=rss"
+        "title": "«Сбер» представил обновлённого человекоподобного робота Грин, робота-«атлета» Юни и робота-курьера",
+        "url": "https://vc.ru/tech/3270388-sber-predstavil-robota-grin-yuni-i-kuriera-dostavki?from=rss"
       },
       {
-        "title": "Крутить педали, чтобы смотреть видео: это Tovie — велотренажёр без руля и седла за $349, который должен помочь детям выплеснуть лишнюю энергию",
-        "url": "https://vc.ru/tech/3280250-tovie-velotrenazhor-dlya-detei?from=rss"
+        "title": "Минцифры предложило концепцию «российского GitHub» — он станет обязательным для разработчиков «доверенного ПО» и будет финансироваться за их счёт",
+        "url": "https://vc.ru/dev/3279768-mincifry-kontseptsia-natsionalnogo-repozitora?from=rss"
       },
       {
         "title": "Экономика человеческих слабостей: что изменится, если поручить покупки ИИ-агентам",
         "url": "https://vc.ru/future/3276313-ekonomika-ii-agentov-kak-oni-izmenyat-pokupki-i-rynok?from=rss"
       },
       {
-        "title": "Российская Neiry начала продавать услуги аэрофотосъёмки с помощью голубей-«биодронов»",
-        "url": "https://vc.ru/tech/3278920-neiry-aerofotosyemka-golubei-biodronov?from=rss"
+        "title": "Крутить педали, чтобы смотреть видео: это Tovie — велотренажёр без руля и седла за $349, который должен помочь детям выплеснуть лишнюю энергию",
+        "url": "https://vc.ru/tech/3280250-tovie-velotrenazhor-dlya-detei?from=rss"
       },
       {
-        "title": "Разработчик популярного менеджера паролей 1Password сообщил о взломе — хакеры похитили персональные данные части пользователей, но хранилища ключей «не пострадали»",
-        "url": "https://vc.ru/services/3279523-vzlom-1password-hakery-pohitili-dannye-polzovateley?from=rss"
+        "title": "Российская Neiry начала продавать услуги аэрофотосъёмки с помощью голубей-«биодронов»",
+        "url": "https://vc.ru/tech/3278920-neiry-aerofotosyemka-golubei-biodronov?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Ушёл из жизни создатель первого прототипа компактного оптического диска Джеймс Т. Рассел",
-        "url": "https://habr.com/ru/articles/1112720/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112720"
+        "title": "Уборка диска без потери файлов: выгрузка на Яндекс.Диск, записка в папке и возврат через sudo",
+        "url": "https://habr.com/ru/articles/1112896/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112896"
       },
       {
-        "title": "[Перевод] Самозагружающийся ZIP-архив",
-        "url": "https://habr.com/ru/articles/1109904/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1109904"
+        "title": "DroneCAN для К1946ВК035",
+        "url": "https://habr.com/ru/articles/1112894/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112894"
       },
       {
-        "title": "Обзор пакета lidar obstacle detector",
-        "url": "https://habr.com/ru/articles/1112792/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112792"
+        "title": "Эгоистичный ген — 50 лет книге. Самый известный труд Ричарда Докинза",
+        "url": "https://habr.com/ru/articles/1112886/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112886"
       },
       {
-        "title": "Продукты стало делать легче ⇒ продукты стало делать сложнее",
-        "url": "https://habr.com/ru/articles/1112374/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112374"
+        "title": "IAF на ЭЭГ",
+        "url": "https://habr.com/ru/articles/1112878/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112878"
       },
       {
-        "title": "Потери бизнеса в РФ из‑за блокировки платёжной системы Google Pay оценили в 4,2 млрд рублей в месяц",
-        "url": "https://habr.com/ru/articles/1112788/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112788"
+        "title": "Разгон LLM модели qwen 3.8 до 40+ токенов",
+        "url": "https://habr.com/ru/articles/1112874/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1112874"
       }
     ],
     "tproger": [
       {
-        "title": "Как заказать песню у нейросети: ТОП-10 сервисов и цены в 2026 году",
-        "url": "https://tproger.ru/articles/kak-zakazat-pesnyu-u-nejroseti-top-10-servisov-i-ceny-v-2026-go"
+        "title": "В Antigravity CLI 1.5.18 нашли код отложенного сброса квоты",
+        "url": "https://tproger.ru/news/v-antigravity-cli-1-5-18-nawli-kod-otlozhennogo-sbrosa-kvoty"
       },
       {
-        "title": "Топ-3 критерия интересной работы: версия инженеров YADRO",
-        "url": "https://tproger.ru/articles/top-3-kriteriya-interesnoj-raboty-versiya-inzhenerov-yadro"
+        "title": "Сбер выпустил модели GigaChat 4 с открытыми весами и API",
+        "url": "https://tproger.ru/news/sber-vypustil-modeli-gigachat-4-s-otkrytymi-vesami-i-api"
       },
       {
-        "title": "ИИ-агент Google по одному промпту заявил в препринте теорему о факторизации",
-        "url": "https://tproger.ru/news/ii-agent-google-po-odnomu-promptu-zayavil-v-preprinte-teoremu-o-f"
+        "title": "OpenCode запускает задачи по расписанию, а Crush закрыл утечку ключей",
+        "url": "https://tproger.ru/news/opencode-zapuskaet-zadachi-po-raspisaniyu-a-crush-zakryl-utechku-k"
       },
       {
-        "title": "Прогон Fable 5.2 в Terminal-Bench 4.1 вышел в 47 раз дороже GPT-6.2 Sol",
-        "url": "https://tproger.ru/news/progon-fable-5-2-v-terminal-bench-4-1-vywel-v-47-raz-dorozhe-gpt"
+        "title": "Как обучали GigaChat 4 и на каком железе запустить модель",
+        "url": "https://tproger.ru/articles/kak-obuchali-gigachat-4-i-na-kakom-zheleze-zapustit-model"
       },
       {
-        "title": "Google сбросила квоты Gemini в Antigravity ко Дню благодарения",
-        "url": "https://tproger.ru/news/google-sbrosila-kvoty-gemini-v-antigravity-ko-dnyu-blagodareniya"
+        "title": "OpenRouter добавил 27 моделей, у десяти из них открыты веса",
+        "url": "https://tproger.ru/news/openrouter-dobavil-27-modelej-u-desyati-iz-nih-otkryty-vesa"
       }
     ]
   },
-  "summary": "Сводка digest-20261126-1619: Самара -1.6°C, Небольшой снег; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261127-0127: Самара -2.6°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
