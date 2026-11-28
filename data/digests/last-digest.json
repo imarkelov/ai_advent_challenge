@@ -1,12 +1,12 @@
 {
-  "id": "digest-20261127-1603",
-  "generated_at": "2026-11-27T16:03:40Z",
+  "id": "digest-20261128-0101",
+  "generated_at": "2026-11-28T01:01:46Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -2.1,
-    "feels_like_c": -7.6,
-    "description": "Пасмурно",
-    "wind_ms": 18.4
+    "temp_c": -2.6,
+    "feels_like_c": -7.1,
+    "description": "Переменная облачность",
+    "wind_ms": 11.7
   },
   "news": {
     "vc.ru": [
@@ -19,62 +19,62 @@
         "url": "https://vc.ru/services/3282152-dostavka-s-pomoshchyu-chelovekopodobnykh-robotov-ot-yandeksa?from=rss"
       },
       {
+        "title": "«СПБ Биржа» анонсировала торги криптовалютами с 1 декабря 2026 года",
+        "url": "https://vc.ru/crypto/3283547-spb-birzha-torgi-kriptovalyutami?from=rss"
+      },
+      {
+        "title": "Сотрудники Amazon более чем в 20 странах проведут забастовки в «чёрную пятницу» и «киберпонедельник»",
+        "url": "https://vc.ru/hr/3282769-zabastovki-sotrudnikov-amazon-v-stranakh-mira?from=rss"
+      },
+      {
         "title": "В Великобритании отменили рождественскую ярмарку, которую рекламировали с помощью ИИ-контента как «праздничную сказку» — но посетители увидели полупустой ангар с протекающей крышей",
         "url": "https://vc.ru/offline/3282439-otmena-rozhdestvenskoy-yarmarki-v-velikobritanii?from=rss"
-      },
-      {
-        "title": "Google обяжет разработчиков приложений раскрывать свои адреса и номера телефонов для соблюдения законодательства ЕС",
-        "url": "https://vc.ru/legal/3282459-google-obiazet-razrabotchikov-prilozhenii-raskryvat-kontaktnye-dannye?from=rss"
-      },
-      {
-        "title": "День 1738: годовая инфляция в ноябре ускорилась до 7,17%",
-        "url": "https://vc.ru/money/3281924-godovaya-inflyatsiya-v-rossii-uskorilas-do-717?from=rss"
       }
     ],
     "habr": [
       {
-        "title": "Ratcast — продолжаем допиливать совместный стриминг без серверов и блокировок",
-        "url": "https://habr.com/ru/articles/1113374/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113374"
+        "title": "Mintland — анимированные обои для Linux Mint Cinnamon",
+        "url": "https://habr.com/ru/articles/1113454/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113454"
       },
       {
-        "title": "Отладка и диагностика ПО в ЗОСРВ «Нейтрино»: какие инструменты доступны разработчику?",
-        "url": "https://habr.com/ru/companies/swd_es/articles/1113368/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113368"
+        "title": "Rockstar Games: разбор логотипа заряженного на насилие",
+        "url": "https://habr.com/ru/articles/1113452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113452"
       },
       {
-        "title": "Есть один вопрос",
-        "url": "https://habr.com/ru/articles/1113366/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113366"
+        "title": "KeenProxy 0.11.0: как мы сломали обновления, починили память и добрались до RouterOS",
+        "url": "https://habr.com/ru/articles/1113442/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113442"
       },
       {
-        "title": "В Минцифры пока не смогли прийти к решению с Apple о включении 5G на российских iPhone",
-        "url": "https://habr.com/ru/articles/1113358/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113358"
+        "title": "Ну почему ты никак не хочешь себя кодить?",
+        "url": "https://habr.com/ru/articles/1113444/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113444"
       },
       {
-        "title": "Разработка в эпоху ИИ: часть 2",
-        "url": "https://habr.com/ru/companies/naumen/articles/1113352/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113352"
+        "title": "DoS ноды или настройки K8s, которые вы могли пропустить",
+        "url": "https://habr.com/ru/articles/1113438/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113438"
       }
     ],
     "tproger": [
       {
-        "title": "O3DE 26.10: Qt 6, C++26 и экспериментальный Wayland после исправления сборки",
-        "url": "https://tproger.ru/news/o3de-26-10-qt-6-c-26-i-eksperimentalnyj-wayland-posle-isprav"
+        "title": "Liquid AI выпустила d1.3-ultra и разделила первое место с Bison 31B",
+        "url": "https://tproger.ru/news/liquid-ai-vypustila-d1-3-ultra-i-razdelila-pervoe-mesto-s-bison"
       },
       {
-        "title": "JetBrains запустила дайджест уязвимостей Kotlin и Ktor",
-        "url": "https://tproger.ru/news/jetbrains-zapustila-dajdzhest-uyazvimostej-kotlin-i-ktor"
+        "title": "Яндекс описал, что ломалось при обучении открытой модели AliceAI с нуля",
+        "url": "https://tproger.ru/news/yandeks-opisal-chto-lomalos-pri-obuchenii-otkrytoj-modeli-aliceai"
       },
       {
-        "title": "Telegram тестирует ИИ-агента Dictator для macOS с локальными LLM",
-        "url": "https://tproger.ru/news/telegram-testiruet-ii-agenta-dictator-dlya-macos-s-lokalnymi-llm"
+        "title": "Tencent открыла модели-переводчики Hy-MT3 на 102 языка с русским",
+        "url": "https://tproger.ru/news/tencent-otkryla-modeli-perevodchiki-hy-mt3-na-102-yazyka-s-russkim"
       },
       {
-        "title": "Сбер выпустил GigaAM-v4: на русском она ошибается реже v3 и Whisper",
-        "url": "https://tproger.ru/news/sber-vypustil-gigaam-v4-na-russkom-ona-owibaetsya-rezhe-v3-i-whis"
+        "title": "Beget снова регистрирует и переносит домены во всех зонах после атаки",
+        "url": "https://tproger.ru/news/beget-snova-registriruet-i-perenosit-domeny-vo-vseh-zonah-posle"
       },
       {
-        "title": "Phison показала SSD со встроенным NPU для инференса нейросетей",
-        "url": "https://tproger.ru/news/phison-pokazala-ssd-so-vstroennym-npu-dlya-inferensa-nejrosetej"
+        "title": "Slonik: в Postgres Professional дообучили Qwen писать код ядра PostgreSQL",
+        "url": "https://tproger.ru/news/slonik-v-postgres-professional-doobuchili-qwen-pisat-kod-yadra-p"
       }
     ]
   },
-  "summary": "Сводка digest-20261127-1603: Самара -2.1°C, Пасмурно; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261128-0101: Самара -2.6°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
 }
