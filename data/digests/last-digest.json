@@ -1,59 +1,52 @@
 {
-  "id": "digest-20261128-0101",
-  "generated_at": "2026-11-28T01:01:46Z",
+  "id": "digest-20261128-1458",
+  "generated_at": "2026-11-28T14:58:55Z",
   "weather": {
     "city": "Самара",
-    "temp_c": -2.6,
-    "feels_like_c": -7.1,
-    "description": "Переменная облачность",
-    "wind_ms": 11.7
+    "temp_c": -3.4,
+    "feels_like_c": -7.7,
+    "description": "Пасмурно",
+    "wind_ms": 9.0
   },
   "news": {
-    "vc.ru": [
-      {
-        "title": "Китаянка рассказала в соцсетях, как ей отменили собеседование из-за того, что она отказалась купить HR-менеджеру напиток",
-        "url": "https://vc.ru/hr/3282879-kitayanka-rasskazala-o-sobesedovanii-otmenennom-iz-za-otkaza-kupit-napitok?from=rss"
-      },
-      {
-        "title": "«Яндекс» до конца 2026 года начнёт тестировать доставку с использованием человекоподобных роботов «в четырёх локациях» — «Ъ»",
-        "url": "https://vc.ru/services/3282152-dostavka-s-pomoshchyu-chelovekopodobnykh-robotov-ot-yandeksa?from=rss"
-      },
-      {
-        "title": "«СПБ Биржа» анонсировала торги криптовалютами с 1 декабря 2026 года",
-        "url": "https://vc.ru/crypto/3283547-spb-birzha-torgi-kriptovalyutami?from=rss"
-      },
-      {
-        "title": "Сотрудники Amazon более чем в 20 странах проведут забастовки в «чёрную пятницу» и «киберпонедельник»",
-        "url": "https://vc.ru/hr/3282769-zabastovki-sotrudnikov-amazon-v-stranakh-mira?from=rss"
-      },
-      {
-        "title": "В Великобритании отменили рождественскую ярмарку, которую рекламировали с помощью ИИ-контента как «праздничную сказку» — но посетители увидели полупустой ангар с протекающей крышей",
-        "url": "https://vc.ru/offline/3282439-otmena-rozhdestvenskoy-yarmarki-v-velikobritanii?from=rss"
-      }
-    ],
+    "vc.ru": {
+      "error": "The read operation timed out"
+    },
     "habr": [
       {
-        "title": "Mintland — анимированные обои для Linux Mint Cinnamon",
-        "url": "https://habr.com/ru/articles/1113454/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113454"
+        "title": "Как делался аквариум в Pocket Cat Desktop: спрайты, слои и пиксельный шейдер воды",
+        "url": "https://habr.com/ru/articles/1113566/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113566"
       },
       {
-        "title": "Rockstar Games: разбор логотипа заряженного на насилие",
-        "url": "https://habr.com/ru/articles/1113452/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113452"
+        "title": "После хайпа ИИ-агенты оставят рутину коду",
+        "url": "https://habr.com/ru/articles/1113564/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113564"
       },
       {
-        "title": "KeenProxy 0.11.0: как мы сломали обновления, починили память и добрались до RouterOS",
-        "url": "https://habr.com/ru/articles/1113442/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113442"
+        "title": "GreenVLA 2.0. От общего предобучения к задачам на разных роботах",
+        "url": "https://habr.com/ru/companies/sberbank/articles/1113512/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113512"
       },
       {
-        "title": "Ну почему ты никак не хочешь себя кодить?",
-        "url": "https://habr.com/ru/articles/1113444/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113444"
+        "title": "Квест на 192 гигабайта RAM: как заставить Windows 11 и VirtualBox отдать всю RAM под локальный ИИ и “зоопарк” агентов",
+        "url": "https://habr.com/ru/articles/1113562/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113562"
       },
       {
-        "title": "DoS ноды или настройки K8s, которые вы могли пропустить",
-        "url": "https://habr.com/ru/articles/1113438/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113438"
+        "title": "Neo FreeRunner — оживляем и изучаем схемотехнику единственного настоящего Open-Source и Open-Hardware смартфона на Linux",
+        "url": "https://habr.com/ru/companies/timeweb/articles/1113486/?utm_source=habrahabr&utm_medium=rss&utm_campaign=1113486"
       }
     ],
     "tproger": [
+      {
+        "title": "Агенты в DeepMind сами распоряжаются частью вычислений для Gemini",
+        "url": "https://tproger.ru/news/agenty-v-deepmind-sami-rasporyazhayutsya-chastyu-vychislenij-dlya-gemin"
+      },
+      {
+        "title": "Кнут приостановил приём ошибок в книгах: с LLM отчётов стало слишком много",
+        "url": "https://tproger.ru/news/knut-priostanovil-priyom-owibok-v-knigah-s-llm-otchyotov-stalo-sli"
+      },
+      {
+        "title": "Сбер открыл FRIDA V2 для RAG-поиска по сканам и длинным документам",
+        "url": "https://tproger.ru/news/sber-otkryl-frida-v2-dlya-rag-poiska-po-skanam-i-dlinnym-dokument"
+      },
       {
         "title": "Liquid AI выпустила d1.3-ultra и разделила первое место с Bison 31B",
         "url": "https://tproger.ru/news/liquid-ai-vypustila-d1-3-ultra-i-razdelila-pervoe-mesto-s-bison"
@@ -61,20 +54,8 @@
       {
         "title": "Яндекс описал, что ломалось при обучении открытой модели AliceAI с нуля",
         "url": "https://tproger.ru/news/yandeks-opisal-chto-lomalos-pri-obuchenii-otkrytoj-modeli-aliceai"
-      },
-      {
-        "title": "Tencent открыла модели-переводчики Hy-MT3 на 102 языка с русским",
-        "url": "https://tproger.ru/news/tencent-otkryla-modeli-perevodchiki-hy-mt3-na-102-yazyka-s-russkim"
-      },
-      {
-        "title": "Beget снова регистрирует и переносит домены во всех зонах после атаки",
-        "url": "https://tproger.ru/news/beget-snova-registriruet-i-perenosit-domeny-vo-vseh-zonah-posle"
-      },
-      {
-        "title": "Slonik: в Postgres Professional дообучили Qwen писать код ядра PostgreSQL",
-        "url": "https://tproger.ru/news/slonik-v-postgres-professional-doobuchili-qwen-pisat-kod-yadra-p"
       }
     ]
   },
-  "summary": "Сводка digest-20261128-0101: Самара -2.6°C, Переменная облачность; новостей: 15 (vc.ru 5, habr 5, tproger 5)."
+  "summary": "Сводка digest-20261128-1458: Самара -3.4°C, Пасмурно; новостей: 10 (vc.ru error, habr 5, tproger 5)."
 }
